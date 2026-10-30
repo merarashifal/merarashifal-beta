@@ -1,0 +1,1841 @@
+<?php
+/**
+ * MeraRashifal Master Publication-Grade Report Builder Engine (v3.4)
+ * High Legibility Edition with Scaled-Up Typography & 2 Style Options:
+ * Option 1: "Warm Editorial Classic" (Playfair Display + Plus Jakarta Sans, High Contrast & Sturdy Serifs)
+ * Option 2: "Modern Clear Sans" (Poppins + Inter, Ultra-Legible, Open Geometry)
+ * Tailored for Indian Audience with Relatable, Clear, Warm Vedic English.
+ */
+
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+class MR_Report_Builder {
+
+    /**
+     * Get Base64 encoded logo URI for embedding directly in PDF/HTML
+     */
+    public static function get_logo_data_uri() {
+        $logo_path = MR_PLUGIN_DIR . 'assets/images/logo.png';
+        if (file_exists($logo_path)) {
+            $data = file_get_contents($logo_path);
+            return 'data:image/png;base64,' . base64_encode($data);
+        }
+        return '';
+    }
+
+    /**
+     * Generate North Indian Diamond Kundali Chart in pure crisp vector SVG (Warm Editorial Edition)
+     */
+    public static function render_north_indian_kundali_svg($size = 210, $planets_by_house = [], $lagna_sign_num = 5, $title_font = 'serif') {
+        $s = $size;
+        $half = $s / 2;
+
+        if (empty($planets_by_house)) {
+            $planets_by_house = [
+                1  => ['Ma', 'Ju'],
+                4  => ['Su', 'Me(R)'],
+                7  => ['Mo'],
+                3  => ['Ve(R)'],
+                9  => ['Sa(R)'],
+                8  => ['Ra'],
+                2  => ['Ke']
+            ];
+        }
+
+        $svg = "<svg width='{$s}' height='{$s}' viewBox='0 0 {$s} {$s}' xmlns='http://www.w3.org/2000/svg' style='background:#FFFFFF; border:1.5px solid #C2964C; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.03);'>";
+        
+        // Outer Border
+        $svg .= "<rect x='4' y='4' width='" . ($s - 8) . "' height='" . ($s - 8) . "' fill='none' stroke='#C2964C' stroke-width='1.5'/>";
+        
+        // Diagonals (Corner to Corner)
+        $svg .= "<line x1='4' y1='4' x2='" . ($s - 4) . "' y2='" . ($s - 4) . "' stroke='#D8CFBF' stroke-width='1.2'/>";
+        $svg .= "<line x1='" . ($s - 4) . "' y1='4' x2='4' y2='" . ($s - 4) . "' stroke='#D8CFBF' stroke-width='1.2'/>";
+        
+        // Inner Diamond
+        $svg .= "<polygon points='{$half},4 " . ($s - 4) . ",{$half} {$half}," . ($s - 4) . " 4,{$half}' fill='none' stroke='#C2964C' stroke-width='1.2'/>";
+        
+        // Center House 1 Subtle Warm Tint
+        $svg .= "<circle cx='{$half}' cy='{$half}' r='8' fill='#C2964C' fill-opacity='0.12'/>";
+
+        $house_coords = [
+            1  => ['num_x' => $half, 'num_y' => $half * 0.45, 'pl_x' => $half, 'pl_y' => $half * 0.75],
+            2  => ['num_x' => $half * 0.5, 'num_y' => $half * 0.22, 'pl_x' => $half * 0.45, 'pl_y' => $half * 0.45],
+            3  => ['num_x' => $half * 0.22, 'num_y' => $half * 0.5, 'pl_x' => $half * 0.45, 'pl_y' => $half * 0.75],
+            4  => ['num_x' => $half * 0.45, 'num_y' => $half, 'pl_x' => $half * 0.75, 'pl_y' => $half],
+            5  => ['num_x' => $half * 0.22, 'num_y' => $half * 1.5, 'pl_x' => $half * 0.45, 'pl_y' => $half * 1.25],
+            6  => ['num_x' => $half * 0.5, 'num_y' => $half * 1.78, 'pl_x' => $half * 0.45, 'pl_y' => $half * 1.55],
+            7  => ['num_x' => $half, 'num_y' => $half * 1.55, 'pl_x' => $half, 'pl_y' => $half * 1.25],
+            8  => ['num_x' => $half * 1.5, 'num_y' => $half * 1.78, 'pl_x' => $half * 1.55, 'pl_y' => $half * 1.55],
+            9  => ['num_x' => $half * 1.78, 'num_y' => $half * 1.5, 'pl_x' => $half * 1.55, 'pl_y' => $half * 1.25],
+            10 => ['num_x' => $half * 1.55, 'num_y' => $half, 'pl_x' => $half * 1.25, 'pl_y' => $half],
+            11 => ['num_x' => $half * 1.78, 'num_y' => $half * 0.5, 'pl_x' => $half * 1.55, 'pl_y' => $half * 0.75],
+            12 => ['num_x' => $half * 1.5, 'num_y' => $half * 0.22, 'pl_x' => $half * 1.55, 'pl_y' => $half * 0.45],
+        ];
+
+        for ($h = 1; $h <= 12; $h++) {
+            $c = $house_coords[$h];
+            $sign = (($lagna_sign_num - 1 + ($h - 1)) % 12) + 1;
+            $svg .= "<text x='{$c['num_x']}' y='{$c['num_y']}' fill='#C45738' font-size='12' font-family='{$title_font}' font-weight='800' text-anchor='middle'>{$sign}</text>";
+
+            if (!empty($planets_by_house[$h])) {
+                $pls = implode(' ', $planets_by_house[$h]);
+                $svg .= "<text x='{$c['pl_x']}' y='{$c['pl_y']}' fill='#111827' font-size='10' font-family='sans-serif' font-weight='700' text-anchor='middle'>{$pls}</text>";
+            }
+        }
+
+        $svg .= "</svg>";
+        return $svg;
+    }
+
+    /**
+     * Render Topographic Elevation Wave SVG Graph (Warm Editorial Edition)
+     */
+    public static function render_topographic_elevation_svg($w = 540, $h = 108) {
+        $svg = "<svg width='100%' height='{$h}' viewBox='0 0 {$w} {$h}' xmlns='http://www.w3.org/2000/svg' style='background:#FFFFFF; border-radius:8px; border:1px solid #ECE6DD; box-shadow:0 2px 8px rgba(0,0,0,0.02);'>";
+        $svg .= "<defs>
+            <linearGradient id='warmWaveGrad' x1='0%' y1='0%' x2='100%' y2='0%'>
+                <stop offset='0%' stop-color='#4E7D68' />
+                <stop offset='35%' stop-color='#C2964C' />
+                <stop offset='70%' stop-color='#D97736' />
+                <stop offset='100%' stop-color='#C45738' />
+            </linearGradient>
+            <linearGradient id='warmFillGrad' x1='0%' y1='0%' x2='0%' y2='100%'>
+                <stop offset='0%' stop-color='#C45738' stop-opacity='0.12' />
+                <stop offset='100%' stop-color='#FAF7F2' stop-opacity='0.0' />
+            </linearGradient>
+        </defs>";
+
+        // Grid lines
+        $svg .= "<line x1='30' y1='22' x2='510' y2='22' stroke='#F0EAE1' stroke-dasharray='4'/>";
+        $svg .= "<line x1='30' y1='52' x2='510' y2='52' stroke='#F0EAE1' stroke-dasharray='4'/>";
+        $svg .= "<line x1='30' y1='82' x2='510' y2='82' stroke='#F0EAE1' stroke-dasharray='4'/>";
+
+        // Curve Area & Line
+        $path_d = "M 40,74 Q 110,54 190,74 T 340,44 T 480,20";
+        $svg .= "<path d='{$path_d} L 480,100 L 40,100 Z' fill='url(#warmFillGrad)' />";
+        $svg .= "<path d='{$path_d}' fill='none' stroke='url(#warmWaveGrad)' stroke-width='3.2' stroke-linecap='round'/>";
+
+        // Key Points
+        $points = [
+            ['x' => 60, 'y' => 68, 'label' => '68% Energy', 'sub' => 'Week 1: Groundwork'],
+            ['x' => 190, 'y' => 74, 'label' => '59% Energy', 'sub' => 'Week 2: Patience'],
+            ['x' => 340, 'y' => 44, 'label' => '73% Energy', 'sub' => 'Week 3: Realignment'],
+            ['x' => 470, 'y' => 20, 'label' => '88% Energy', 'sub' => 'Week 4: Peak Results']
+        ];
+
+        foreach ($points as $p) {
+            $svg .= "<circle cx='{$p['x']}' cy='{$p['y']}' r='5' fill='#C45738' stroke='#FFFFFF' stroke-width='2'/>";
+            $svg .= "<text x='{$p['x']}' y='" . ($p['y'] - 8) . "' fill='#111827' font-size='10.5' font-weight='800' font-family='sans-serif' text-anchor='middle'>{$p['label']}</text>";
+            $svg .= "<text x='{$p['x']}' y='96' fill='#4B5563' font-size='9' font-weight='700' font-family='sans-serif' text-anchor='middle'>{$p['sub']}</text>";
+        }
+
+        $svg .= "</svg>";
+        return $svg;
+    }
+
+    /**
+     * Render Shadbala Bar Chart SVG (Warm Editorial Edition)
+     */
+    public static function render_shadbala_bars_svg($w = 540, $h = 94) {
+        $svg = "<svg width='100%' height='{$h}' viewBox='0 0 {$w} {$h}' xmlns='http://www.w3.org/2000/svg' style='background:#FFFFFF; border-radius:8px; border:1px solid #ECE6DD; box-shadow:0 2px 8px rgba(0,0,0,0.02);'>";
+        
+        $bars = [
+            ['name' => 'Karma (Career)',  'score' => 78, 'color' => '#C45738'],
+            ['name' => 'Dhana (Wealth)',  'score' => 68, 'color' => '#4E7D68'],
+            ['name' => 'Bhagya (Luck)',   'score' => 84, 'color' => '#C2964C'],
+            ['name' => 'Labha (Income)',  'score' => 72, 'color' => '#8E7C68'],
+            ['name' => 'Prana (Health)',  'score' => 86, 'color' => '#B85A3C']
+        ];
+
+        $bar_w = 68;
+        $spacing = 100;
+        $start_x = 32;
+
+        foreach ($bars as $i => $b) {
+            $x = $start_x + ($i * $spacing);
+            $bar_h = ($b['score'] / 100) * 48;
+            $y = 66 - $bar_h;
+
+            // Background track
+            $svg .= "<rect x='{$x}' y='18' width='{$bar_w}' height='48' rx='4' fill='#F4EFE6'/>";
+            // Active bar
+            $svg .= "<rect x='{$x}' y='{$y}' width='{$bar_w}' height='{$bar_h}' rx='4' fill='{$b['color']}'/>";
+            $svg .= "<text x='" . ($x + $bar_w/2) . "' y='" . ($y - 4) . "' fill='#111827' font-size='10.5' font-weight='800' font-family='sans-serif' text-anchor='middle'>{$b['score']}%</text>";
+            $svg .= "<text x='" . ($x + $bar_w/2) . "' y='81' fill='#4B5563' font-size='9' font-weight='700' font-family='sans-serif' text-anchor='middle'>{$b['name']}</text>";
+        }
+
+        $svg .= "</svg>";
+        return $svg;
+    }
+
+    /**
+     * Render Panchamahabhuta Radar/Pentagon Diagram in SVG (Warm Editorial Edition)
+     */
+    public static function render_panchamahabhuta_radar_svg($size = 155) {
+        $s = $size;
+        $cx = $s / 2;
+        $cy = $s / 2;
+        $r = $s * 0.38;
+
+        $svg = "<svg width='{$s}' height='{$s}' viewBox='0 0 {$s} {$s}' xmlns='http://www.w3.org/2000/svg' style='background:#FFFFFF; border-radius:8px; border:1px solid #ECE6DD; box-shadow:0 2px 8px rgba(0,0,0,0.02);'>";
+        
+        $elements = [
+            ['name' => 'Agni (Fire)',     'pct' => 0.88, 'angle' => -90],
+            ['name' => 'Prithvi (Earth)', 'pct' => 0.65, 'angle' => -18],
+            ['name' => 'Vayu (Air)',       'pct' => 0.78, 'angle' => 54],
+            ['name' => 'Jala (Water)',     'pct' => 0.60, 'angle' => 126],
+            ['name' => 'Akash (Space)',   'pct' => 0.82, 'angle' => 198]
+        ];
+
+        // Background Web rings
+        foreach ([0.33, 0.66, 1.0] as $scale) {
+            $pts = [];
+            foreach ($elements as $el) {
+                $rad = deg2rad($el['angle']);
+                $x = $cx + ($r * $scale * cos($rad));
+                $y = $cy + ($r * $scale * sin($rad));
+                $pts[] = "{$x},{$y}";
+            }
+            $svg .= "<polygon points='" . implode(' ', $pts) . "' fill='none' stroke='#ECE6DD' stroke-width='1'/>";
+        }
+
+        // Active Data Polygon
+        $data_pts = [];
+        foreach ($elements as $el) {
+            $rad = deg2rad($el['angle']);
+            $x = $cx + ($r * $el['pct'] * cos($rad));
+            $y = $cy + ($r * $el['pct'] * sin($rad));
+            $data_pts[] = "{$x},{$y}";
+        }
+
+        $svg .= "<polygon points='" . implode(' ', $data_pts) . "' fill='rgba(196,87,56,0.18)' stroke='#C45738' stroke-width='2'/>";
+
+        // Labels
+        foreach ($elements as $el) {
+            $rad = deg2rad($el['angle']);
+            $lx = $cx + (($r + 13) * cos($rad));
+            $ly = $cy + (($r + 13) * sin($rad));
+            $svg .= "<text x='{$lx}' y='{$ly}' fill='#111827' font-size='8' font-weight='800' font-family='sans-serif' text-anchor='middle' dominant-baseline='central'>{$el['name']}</text>";
+        }
+
+        $svg .= "</svg>";
+        return $svg;
+    }
+
+    /**
+     * Render an elegant on-page Symbol Guide explaining relevant emojis
+     */
+    public static function render_symbol_guide_bar($items, $title = 'Symbol Key') {
+        $html = '<div style="display:flex; flex-wrap:wrap; align-items:center; gap:6px 14px; background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:6px 12px; margin-top:8px; font-size:10.5px; color:#4B5563; line-height:1.45; z-index:2; position:relative;">';
+        $html .= '<div style="font-weight:800; color:#111827; display:flex; align-items:center; gap:4px; text-transform:uppercase; font-size:9.5px; letter-spacing:0.08em; flex-shrink:0;"><span style="color:#C45738;">✦</span> ' . esc_html($title) . ':</div>';
+        foreach ($items as $it) {
+            $html .= '<div style="display:flex; align-items:center; gap:4px;">';
+            $html .= '<span style="font-size:12px;">' . $it['icon'] . '</span>';
+            $html .= '<strong style="color:#111827;">' . esc_html($it['term']) . ':</strong> ';
+            $html .= '<span>' . esc_html($it['desc']) . '</span>';
+            $html .= '</div>';
+        }
+        $html .= '</div>';
+        return $html;
+    }
+
+    /**
+     * Render Clean Bullet-Pointed Essential Takeaway Callout Box with Larger Typography
+     */
+    public static function render_page_bottom_synthesis($bullets, $title = 'Essential Monthly Takeaways', $heading_font = 'var(--font-heading, serif)') {
+        if (is_string($bullets)) {
+            $sentences = preg_split('/(?<=[.?!])\s+(?=[A-Z])/', trim($bullets));
+            $bullets = array_filter(array_map('trim', $sentences));
+        }
+
+        $html = '
+        <div style="background: #FFFFFF; border: 1px solid #ECE6DD; border-left: 4px solid #C45738; border-radius: 8px; padding: 11px 16px; margin-top: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); z-index: 2; position: relative;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                <span style="font-family:' . $heading_font . '; font-size: 15px; font-weight: 700; color: #C45738; text-transform: uppercase; letter-spacing: 0.04em;">
+                    ✦ ' . esc_html($title) . '
+                </span>
+                <span style="font-size: 9.5px; color: #6B6864; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700;">Key Insights for Daily Life</span>
+            </div>
+            <ul style="margin: 0; padding-left: 18px; font-size: 12px; color: #111827; line-height: 1.65;">';
+
+        foreach ($bullets as $b) {
+            if (!empty($b)) {
+                $html .= '<li style="margin-bottom: 3.5px;">' . esc_html($b) . '</li>';
+            }
+        }
+
+        $html .= '
+            </ul>
+        </div>';
+        return $html;
+    }
+
+    /**
+     * Build Complete 13-Page Monthly Horoscope Report HTML
+     * Supports $typography_option:
+     * - 'option1': "Warm Editorial Classic" (Playfair Display + Plus Jakarta Sans, large readable sizes)
+     * - 'option2': "Modern Clear Sans" (Poppins + Inter, ultra-legible, bold contemporary styling)
+     */
+    public static function build_monthly_report_html($person_name, $gender, $dob, $tob, $pob, $month_year = 'November 2026', $editorial_data = [], $vedic_data = [], $typography_option = 'option1') {
+        $logo_uri = self::get_logo_data_uri();
+        $dob_clean = str_replace('/', '-', $dob);
+        $dob_dt = DateTime::createFromFormat('d-m-Y', $dob_clean);
+        $formatted_dob = $dob_dt ? $dob_dt->format('F j, Y') : (strtotime($dob_clean) ? date('F j, Y', strtotime($dob_clean)) : $dob);
+
+        if (empty($editorial_data)) {
+            $editorial_data = MR_Gemini_AI::generate_monthly_editorial($person_name, [], $month_year);
+        }
+
+        $theme       = $editorial_data['monthly_theme'] ?? 'Work with Patience in the First Half; Enjoy Major Success in the Second';
+        $synthesis   = $editorial_data['executive_synthesis'] ?? "{$month_year} is divided into two distinct halves: the first two weeks require careful planning, budget discipline, and patience with paperwork, while the second half brings fast progress, career recognition, and happy family moments.";
+        $thermal_idx = $editorial_data['thermal_index'] ?? 78;
+        $thermal_st  = $editorial_data['thermal_status'] ?? 'High Energy Phase (Agni)';
+        $pillars     = $editorial_data['four_pillars'] ?? [];
+        $topography  = $editorial_data['topographic_trajectory'] ?? [];
+        $triggers    = $editorial_data['angular_triggers'] ?? [];
+        $panchabhuta = $editorial_data['panchamahabhuta'] ?? [];
+        $dashboard   = $editorial_data['executive_dashboard'] ?? [];
+
+        // Typography Setup based on Option 1 vs Option 2
+        if ($typography_option === 'option2') {
+            // Option 2: Modern Clear Sans (Poppins + Inter)
+            $font_link = '<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">';
+            $head_font = "'Poppins', sans-serif";
+            $body_font = "'Inter', -apple-system, sans-serif";
+            $option_badge = 'Option 2 · Modern Clear Sans';
+        } else {
+            // Option 1: Warm Editorial Classic (Playfair Display + Plus Jakarta Sans)
+            $font_link = '<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;0,900;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">';
+            $head_font = "'Playfair Display', Georgia, serif";
+            $body_font = "'Plus Jakarta Sans', -apple-system, sans-serif";
+            $option_badge = 'Option 1 · Warm Editorial Classic';
+        }
+
+        ob_start();
+        ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><?php echo esc_html($person_name . ' · ' . $month_year . ' Vedic Monthly Horoscope'); ?></title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <?php echo $font_link; ?>
+    <style>
+        /* ========================================================
+           HIGH LEGIBILITY DESIGN SYSTEM (LARGER SIZES & HIGH CONTRAST)
+           ======================================================== */
+        :root {
+            --bg-page: #FAF7F2;
+            --card-bg: #FFFFFF;
+            --text-main: #111827;
+            --text-muted: #4B5563;
+            --border: #ECE6DD;
+            --border-subtle: #F2ECE3;
+            --accent-agni: #C45738;
+            --accent-sattva: #4E7D68;
+            --accent-gold: #C2964C;
+            --font-heading: <?php echo $head_font; ?>;
+            --font-body: <?php echo $body_font; ?>;
+        }
+
+        @page {
+            size: A4 portrait;
+            margin: 0;
+        }
+        *, *::before, *::after {
+            box-sizing: border-box;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+        }
+        html, body {
+            margin: 0;
+            padding: 0;
+            background: #FAF7F2;
+            color: #111827;
+            font-family: <?php echo $body_font; ?>;
+            font-size: 12.5px;
+            line-height: 1.62;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Standard A4 Container with Balanced Spacing */
+        .mr-page {
+            width: 210mm;
+            height: 297mm;
+            min-height: 297mm;
+            max-height: 297mm;
+            box-sizing: border-box;
+            position: relative;
+            page-break-after: always;
+            page-break-inside: avoid;
+            background: #FAF7F2;
+            padding: 13mm 18mm 11mm 18mm;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Subtle Double Parchment Border */
+        .mr-page::before {
+            content: "";
+            position: absolute;
+            top: 7mm;
+            left: 7mm;
+            right: 7mm;
+            bottom: 7mm;
+            border: 1px solid #ECE6DD;
+            pointer-events: none;
+            z-index: 1;
+        }
+        .mr-page::after {
+            content: "";
+            position: absolute;
+            top: 8.5mm;
+            left: 8.5mm;
+            right: 8.5mm;
+            bottom: 8.5mm;
+            border: 0.5px solid #E2DACF;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Interior Header & Footer Bar */
+        .mr-header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ECE6DD;
+            padding-bottom: 8px;
+            margin-bottom: 10px;
+            z-index: 2;
+            position: relative;
+        }
+        .mr-header-brand-wrap {
+            display: flex;
+            align-items: center;
+        }
+        .mr-header-logo-img {
+            height: 28px;
+            max-width: 150px;
+            object-fit: contain;
+            display: block;
+        }
+        .mr-header-meta {
+            font-size: 10px;
+            color: #4B5563;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            font-weight: 700;
+        }
+        .mr-footer-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #ECE6DD;
+            padding-top: 6px;
+            font-size: 9.5px;
+            color: #6B7280;
+            z-index: 2;
+            position: relative;
+            margin-top: 6px;
+        }
+        .mr-page-num {
+            font-weight: 800;
+            color: #C45738;
+            font-size: 10px;
+        }
+
+        /* Typography Hierarchy (Scaled Up for Effortless Reading) */
+        .mr-tag-pill {
+            display: inline-block;
+            font-size: 9.5px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            padding: 3px 10px;
+            border-radius: 14px;
+            background: #F4EFE6;
+            border: 1px solid #E2DACF;
+            color: #C45738;
+            margin-bottom: 4px;
+        }
+        .mr-page-h1 {
+            font-family: <?php echo $head_font; ?>;
+            font-size: 23px;
+            font-weight: 700;
+            color: #111827;
+            margin: 0 0 2px 0;
+            line-height: 1.25;
+            letter-spacing: -0.01em;
+        }
+        .mr-page-sub {
+            font-size: 12px;
+            color: #4B5563;
+            margin: 0 0 10px 0;
+            line-height: 1.45;
+            font-weight: 500;
+        }
+
+        /* Crisp Milk White Cards */
+        .mr-card {
+            background: #FFFFFF;
+            border: 1px solid #ECE6DD;
+            border-radius: 8px;
+            padding: 12px 16px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            margin-bottom: 9px;
+            position: relative;
+        }
+        .mr-card.terracotta-accent { border-left: 4px solid #C45738; }
+        .mr-card.sage-accent { border-left: 4px solid #4E7D68; }
+        .mr-card.gold-accent { border-left: 4px solid #C2964C; }
+        .mr-card.slate-accent { border-left: 4px solid #4B5563; }
+
+        .mr-card-title {
+            font-family: <?php echo $head_font; ?>;
+            font-size: 15.5px;
+            font-weight: 700;
+            color: #111827;
+            margin: 0 0 5px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .mr-thermal-bar-wrap {
+            height: 8px;
+            background: #F0EAE1;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+            margin: 6px 0;
+        }
+        .mr-thermal-bar-fill {
+            height: 100%;
+            border-radius: 8px;
+            background: linear-gradient(90deg, #4E7D68 0%, #C2964C 45%, #C45738 100%);
+        }
+
+        .mr-grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .mr-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; }
+
+        .mr-bullet-item {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 5px;
+            font-size: 11.5px;
+            color: #1F2937;
+            line-height: 1.55;
+        }
+        .mr-bullet-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: #C45738;
+            margin-top: 6px;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+
+        /* ========================================================
+           PAGE 1: WARM EDITORIAL COVER PAGE
+           ======================================================== */
+        .mr-cover-page {
+            background: #FAF7F2;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            text-align: center;
+            padding: 22mm 20mm 18mm 20mm;
+        }
+        .mr-cover-page::before {
+            border: 1.5px solid #C2964C;
+            top: 8mm; left: 8mm; right: 8mm; bottom: 8mm;
+        }
+        .mr-cover-page::after {
+            border: 0.5px solid #ECE6DD;
+            top: 9.5mm; left: 9.5mm; right: 9.5mm; bottom: 9.5mm;
+        }
+        .mr-cover-logo-wrap {
+            margin-top: 4px;
+            z-index: 2;
+        }
+        .mr-cover-logo {
+            max-width: 320px;
+            max-height: 120px;
+            object-fit: contain;
+        }
+        .mr-cover-badge {
+            font-size: 10px;
+            letter-spacing: 0.18em;
+            color: #C45738;
+            font-weight: 800;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        .mr-cover-title {
+            font-family: <?php echo $head_font; ?>;
+            font-size: 32px;
+            font-weight: 700;
+            color: #111827;
+            line-height: 1.2;
+            letter-spacing: 0.03em;
+            margin: 0 0 6px 0;
+        }
+        .mr-cover-theme {
+            font-family: <?php echo $head_font; ?>;
+            font-size: 18px;
+            font-style: italic;
+            color: #4B5563;
+            max-width: 480px;
+            margin: 0 auto 20px auto;
+            line-height: 1.5;
+        }
+        .mr-cover-native-box {
+            background: #FFFFFF;
+            border: 1.5px solid #ECE6DD;
+            border-radius: 12px;
+            padding: 18px 26px;
+            width: 100%;
+            max-width: 470px;
+            margin: 0 auto;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+            z-index: 2;
+        }
+        .mr-cover-prepared {
+            font-size: 9.5px;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: #6B7280;
+            font-weight: 700;
+            margin-bottom: 2px;
+        }
+        .mr-cover-name {
+            font-family: <?php echo $head_font; ?>;
+            font-size: 25px;
+            font-weight: 700;
+            color: #111827;
+            margin-bottom: 10px;
+        }
+        .mr-cover-meta-grid {
+            display: flex;
+            justify-content: space-around;
+            border-top: 1px solid #ECE6DD;
+            padding-top: 10px;
+            font-size: 11.5px;
+        }
+        .mr-cover-meta-item strong { display: block; font-size: 13.5px; color: #C45738; font-weight: 800; }
+        .mr-cover-meta-item span { font-size: 9.5px; color: #4B5563; text-transform: uppercase; letter-spacing: 0.05em; font-weight: 600; }
+
+        .mr-cover-dasha-strip {
+            margin-top: 10px;
+            padding-top: 8px;
+            border-top: 1px dashed #ECE6DD;
+            font-size: 11px;
+            color: #4B5563;
+            display: flex;
+            justify-content: space-around;
+        }
+        .mr-cover-dasha-strip strong { color: #111827; font-weight: 700; }
+
+        /* Offer Cards on Back Page */
+        .mr-offer-card {
+            background: #FFFFFF;
+            border: 1px solid #ECE6DD;
+            border-radius: 8px;
+            padding: 9px 13px;
+            margin-bottom: 7px;
+            display: flex;
+            align-items: center;
+            gap: 13px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+        .mr-offer-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            background: #F4EFE6;
+            border: 1px solid #E2DACF;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 17px;
+            color: #C45738;
+            flex-shrink: 0;
+        }
+        .mr-offer-info h4 {
+            margin: 0;
+            font-family: <?php echo $head_font; ?>;
+            font-size: 14.5px;
+            color: #111827;
+            font-weight: 700;
+        }
+        .mr-offer-info p {
+            margin: 2px 0 0 0;
+            font-size: 10.5px;
+            color: #4B5563;
+            line-height: 1.45;
+        }
+        .mr-offer-meta {
+            font-size: 9px;
+            font-weight: 800;
+            color: #C45738;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ========================================================
+         PAGE 1: THE WARM EDITORIAL COVER PAGE
+         ======================================================== -->
+    <div class="mr-page mr-cover-page">
+        <div class="mr-cover-logo-wrap">
+            <?php if (!empty($logo_uri)): ?>
+                <img src="<?php echo esc_attr($logo_uri); ?>" alt="MeraRashifal" class="mr-cover-logo" />
+            <?php else: ?>
+                <h2 style="font-family:<?php echo $head_font; ?>; color:#111827; font-size:28px; letter-spacing:0.1em; margin:0;">MERA RASHIFAL</h2>
+            <?php endif; ?>
+        </div>
+
+        <div style="z-index: 2;">
+            <div class="mr-cover-badge">🪐 Vedic Jyotish Personalized Monthly Horoscope</div>
+            <h1 class="mr-cover-title"><?php echo esc_html(strtoupper($month_year)); ?></h1>
+            <div class="mr-cover-theme">&ldquo;<?php echo esc_html($theme); ?>&rdquo;</div>
+
+            <div class="mr-cover-native-box">
+                <div class="mr-cover-prepared">Prepared Exclusively For</div>
+                <div class="mr-cover-name"><?php echo esc_html($person_name); ?></div>
+                <div class="mr-cover-meta-grid">
+                    <div class="mr-cover-meta-item">
+                        <strong>Simha (Leo)</strong>
+                        <span>☀️ Surya Rashi</span>
+                    </div>
+                    <div class="mr-cover-meta-item">
+                        <strong>Kumbha (Aqua)</strong>
+                        <span>🌙 Chandra Rashi</span>
+                    </div>
+                    <div class="mr-cover-meta-item">
+                        <strong>Simha (Leo)</strong>
+                        <span>🧭 Janma Lagna</span>
+                    </div>
+                </div>
+                <div class="mr-cover-dasha-strip">
+                    <div>Active Mahadasha: <strong>Guru (Jupiter)</strong></div>
+                    <div>Active Antardasha: <strong>Shani (Saturn)</strong></div>
+                    <div>Nakshatra: <strong>Magha (Ketu)</strong></div>
+                </div>
+            </div>
+        </div>
+
+        <div style="z-index:2; font-size:10px; color:#4B5563; letter-spacing:0.08em; text-transform:uppercase; line-height:1.75;">
+            <span>Birth Details: <?php echo esc_html($formatted_dob . ' · ' . $tob . ' · ' . $pob); ?></span><br>
+            <span style="font-weight:700; color:#111827;">MeraRashifal Vedic Astrological Services · Volume IV · merarashifal.com</span>
+        </div>
+    </div>
+
+
+    <!-- ========================================================
+         PAGE 2: MONTHLY ENERGY INDEX & JANAM KUNDALI
+         ======================================================== -->
+    <div class="mr-page">
+        <div>
+            <div class="mr-header-bar">
+                <div class="mr-header-brand-wrap">
+                    <img src="<?php echo esc_attr($logo_uri); ?>" alt="MeraRashifal" class="mr-header-logo-img" />
+                </div>
+                <span class="mr-header-meta"><?php echo esc_html($person_name . ' · ' . $month_year); ?></span>
+            </div>
+
+            <div class="mr-tag-pill">01 · Monthly Energy Index</div>
+            <h1 class="mr-page-h1">Monthly Overview &amp; Janam Kundali (D1 Chart)</h1>
+            <div class="mr-page-sub">Your Planetary Setup, Energy Balance &amp; Key Areas of Life This Month</div>
+
+            <!-- Side by Side: Kundali SVG & Executive Analysis -->
+            <div style="display:flex; gap:16px; align-items:center;">
+                <!-- North Indian Diamond Kundali SVG -->
+                <div style="flex-shrink:0;">
+                    <?php echo self::render_north_indian_kundali_svg(208, [], 5, $head_font); ?>
+                    <div style="text-align:center; font-size:9px; color:#4B5563; font-weight:700; margin-top:3px; text-transform:uppercase; letter-spacing:0.06em;">
+                        🪐 Lagna Kundali (D1 Birth Chart)
+                    </div>
+                </div>
+
+                <!-- Executive Card in Clear Indian English with Large Text -->
+                <div style="flex:1;">
+                    <div class="mr-card terracotta-accent" style="margin-bottom:0; padding:13px 16px;">
+                        <div class="mr-card-title">
+                            <span>Monthly Energy Level</span>
+                            <span style="font-size:12px; color:#C45738; font-weight:800;"><?php echo esc_html($thermal_idx); ?> / 100 · <?php echo esc_html($thermal_st); ?></span>
+                        </div>
+                        <p style="margin:0 0 6px 0; font-size:12px; color:#1F2937; line-height:1.62;">
+                            <?php echo esc_html($synthesis); ?>
+                        </p>
+                        <div class="mr-thermal-bar-wrap">
+                            <div class="mr-thermal-bar-fill" style="width: <?php echo esc_attr(min(100, max(10, $thermal_idx))); ?>%;"></div>
+                        </div>
+                        <div style="display:flex; justify-content:space-between; font-size:9px; color:#4B5563; text-transform:uppercase; font-weight:700; margin-bottom:6px;">
+                            <span>Rest &amp; Plan (0–40%)</span>
+                            <span>Steady Flow (41–70%)</span>
+                            <span>High Speed &amp; Action (71–100%)</span>
+                        </div>
+                        <div style="border-top:1px solid #ECE6DD; padding-top:6px; font-size:11px; color:#4B5563; line-height:1.5;">
+                            <strong style="color:#C45738;">Golden Advice for this Month:</strong> Do not rush into major decisions before November 15. Spend the first two weeks planning quietly. The second half of the month will give you high success, respect from seniors, and financial gain.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Four Pillars Grid in Relatable Language with Clear Fonts -->
+            <div class="mr-grid-4" style="margin-top:10px;">
+                <div class="mr-card terracotta-accent" style="margin-bottom:0; padding:9px 10px;">
+                    <div style="font-size:10px; color:#C45738; font-weight:800; text-transform:uppercase;">🏹 Career &amp; Job</div>
+                    <div style="font-size:17px; font-weight:800; color:#111827; margin:1px 0;"><?php echo esc_html($pillars['karma']['score'] ?? 78); ?>%</div>
+                    <div style="font-size:9px; color:#4B5563; line-height:1.35;">Good support from seniors. Work done behind the scenes brings big recognition after 15th.</div>
+                </div>
+                <div class="mr-card sage-accent" style="margin-bottom:0; padding:9px 10px;">
+                    <div style="font-size:10px; color:#4E7D68; font-weight:800; text-transform:uppercase;">💰 Money &amp; Savings</div>
+                    <div style="font-size:17px; font-weight:800; color:#111827; margin:1px 0;"><?php echo esc_html($pillars['dhana']['score'] ?? 68); ?>%</div>
+                    <div style="font-size:9px; color:#4B5563; line-height:1.35;">Regular income is steady. Avoid lending money to friends or investing in risky schemes.</div>
+                </div>
+                <div class="mr-card gold-accent" style="margin-bottom:0; padding:9px 10px;">
+                    <div style="font-size:10px; color:#C2964C; font-weight:800; text-transform:uppercase;">🪷 Love &amp; Family</div>
+                    <div style="font-size:17px; font-weight:800; color:#111827; margin:1px 0;"><?php echo esc_html($pillars['prema']['score'] ?? 64); ?>%</div>
+                    <div style="font-size:9px; color:#4B5563; line-height:1.35;">Be gentle in family discussions. Listen to your spouse/parents; avoid bringing work stress home.</div>
+                </div>
+                <div class="mr-card slate-accent" style="margin-bottom:0; padding:9px 10px;">
+                    <div style="font-size:10px; color:#4B5563; font-weight:800; text-transform:uppercase;">🌿 Health &amp; Energy</div>
+                    <div style="font-size:17px; font-weight:800; color:#111827; margin:1px 0;"><?php echo esc_html($pillars['arogya']['score'] ?? 86); ?>%</div>
+                    <div style="font-size:9px; color:#4B5563; line-height:1.35;">High physical stamina. Watch out for mild acidity or throat irritation. Take a morning walk.</div>
+                </div>
+            </div>
+
+            <!-- On-Page Symbol Guide Explaining the 4 Pillars -->
+            <?php echo self::render_symbol_guide_bar([
+                ['icon' => '🏹', 'term' => 'Career (Karma)',  'desc' => 'Job growth, business deals, office reputation & boss relations'],
+                ['icon' => '💰', 'term' => 'Money (Dhana)',   'desc' => 'Monthly cash flow, bank savings, expenses & investments'],
+                ['icon' => '🪷', 'term' => 'Family (Prema)',  'desc' => 'Relationship with spouse, parents, children & in-laws'],
+                ['icon' => '🌿', 'term' => 'Health (Arogya)', 'desc' => 'Daily stamina, mental peace, digestion & sleep quality']
+            ], 'Life Domain Guide'); ?>
+        </div>
+
+        <!-- Scannable Bullet-Pointed Takeaway in Indian Tone -->
+        <div>
+            <?php echo self::render_page_bottom_synthesis([
+                "Your Lagna (Ascendant) is backed by Mars and Jupiter, giving you strong confidence, leadership drive, and good problem-solving ability.",
+                "Mercury is in retrograde until November 14: double-check all emails, bills, contracts, and travel tickets to avoid silly mistakes.",
+                "The first two weeks are best suited for completing pending tasks, organizing your finances, and keeping a low profile at work.",
+                "From November 15 onwards, Venus and Mercury turn direct: this brings fast career progress, new business inquiries, and happy family events."
+            ], 'Essential Monthly Takeaways', $head_font); ?>
+
+            <div class="mr-footer-bar">
+                <span>MeraRashifal · Monthly Overview &amp; Janam Kundali</span>
+                <span class="mr-page-num">Page 2 of 13</span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ========================================================
+         PAGE 3: THE 4 WEEKS ROADMAP (WEEK-BY-WEEK GUIDANCE)
+         ======================================================== -->
+    <div class="mr-page">
+        <div>
+            <div class="mr-header-bar">
+                <div class="mr-header-brand-wrap">
+                    <img src="<?php echo esc_attr($logo_uri); ?>" alt="MeraRashifal" class="mr-header-logo-img" />
+                </div>
+                <span class="mr-header-meta"><?php echo esc_html($person_name . ' · ' . $month_year); ?></span>
+            </div>
+
+            <div class="mr-tag-pill">02 · Month Roadmap</div>
+            <h1 class="mr-page-h1">The 4-Week Journey (Week-by-Week Roadmap)</h1>
+            <div class="mr-page-sub">How Your Energy, Opportunities &amp; Focus Shift from Week 1 to Week 4</div>
+
+            <!-- Topographic Elevation Graph SVG -->
+            <div style="margin-bottom:10px;">
+                <?php echo self::render_topographic_elevation_svg(540, 108); ?>
+            </div>
+
+            <!-- Four Epoch Cards in 2x2 Grid with Relatable Guidance -->
+            <div class="mr-grid-2">
+                <div class="mr-card terracotta-accent" style="margin-bottom:0; padding:10px 14px;">
+                    <div class="mr-card-title">
+                        <span>🏔️ Week 1 (Days 1–7): Setting Up Goals</span>
+                        <span style="font-size:11px; color:#C45738; font-weight:800;">68% Energy</span>
+                    </div>
+                    <p style="margin:0 0 5px 0; font-size:11.5px; color:#1F2937; line-height:1.55;">
+                        High mental drive, but work around you may feel unorganized. Use this week to clean your desk, update your resume, organize paperwork, and plan your monthly targets.
+                    </p>
+                    <div style="border-top:1px solid #ECE6DD; padding-top:4px; font-size:10.5px; line-height:1.52;">
+                        <span style="color:#4E7D68; font-weight:700;">⚡ DO: Wake up early, make a to-do list, and take elders' blessings before important work.</span><br>
+                        <span style="color:#C45738; font-weight:700;">🛡️ AVOID: Arguing with senior colleagues or committing to big financial loans.</span>
+                    </div>
+                </div>
+
+                <div class="mr-card sage-accent" style="margin-bottom:0; padding:10px 14px;">
+                    <div class="mr-card-title">
+                        <span>⏳ Week 2 (Days 8–14): Patience &amp; Review</span>
+                        <span style="font-size:11px; color:#4E7D68; font-weight:800;">59% Energy</span>
+                    </div>
+                    <p style="margin:0 0 5px 0; font-size:11.5px; color:#1F2937; line-height:1.55;">
+                        Around Amavasya (New Moon), things may move a bit slowly. Delays from clients or government departments are normal right now. Do not get frustrated; hold your patience.
+                    </p>
+                    <div style="border-top:1px solid #ECE6DD; padding-top:4px; font-size:10.5px; line-height:1.52;">
+                        <span style="color:#4E7D68; font-weight:700;">⚡ DO: Recheck bank balances, clear old pending dues, and spend peaceful time at home.</span><br>
+                        <span style="color:#C45738; font-weight:700;">🛡️ AVOID: Impulsive online shopping, sudden road rage, or speaking harsh words in anger.</span>
+                    </div>
+                </div>
+
+                <div class="mr-card sage-accent" style="margin-bottom:0; padding:10px 14px;">
+                    <div class="mr-card-title">
+                        <span>🌊 Week 3 (Days 15–21): Momentum Picks Up</span>
+                        <span style="font-size:11px; color:#4E7D68; font-weight:800;">73% Energy</span>
+                    </div>
+                    <p style="margin:0 0 5px 0; font-size:11.5px; color:#1F2937; line-height:1.55;">
+                        Mercury and Venus turn direct! Stuck payments start clearing, pending approvals come through, and your communication with bosses and clients becomes very smooth and effective.
+                    </p>
+                    <div style="border-top:1px solid #ECE6DD; padding-top:4px; font-size:10.5px; line-height:1.52;">
+                        <span style="color:#4E7D68; font-weight:700;">⚡ DO: Pitch new business proposals, ask for promotion/salary review, and attend social events.</span><br>
+                        <span style="color:#C45738; font-weight:700;">🛡️ AVOID: Overpromising delivery dates to clients when your schedule is already packed.</span>
+                    </div>
+                </div>
+
+                <div class="mr-card terracotta-accent" style="margin-bottom:0; padding:10px 14px;">
+                    <div class="mr-card-title">
+                        <span>⚡ Week 4 (Days 22–30): Peak Results &amp; Win</span>
+                        <span style="font-size:11px; color:#C45738; font-weight:800;">88% Energy</span>
+                    </div>
+                    <p style="margin:0 0 5px 0; font-size:11.5px; color:#1F2937; line-height:1.55;">
+                        Purnima (Full Moon) brings maximum light into your career house. Your hard work over the last 3 weeks gets recognized. Great time for sales closures, bonuses, and family celebrations.
+                    </p>
+                    <div style="border-top:1px solid #ECE6DD; padding-top:4px; font-size:10.5px; line-height:1.52;">
+                        <span style="color:#4E7D68; font-weight:700;">⚡ DO: Finalize contracts, buy useful home assets or gold, and thank those who helped you.</span><br>
+                        <span style="color:#C45738; font-weight:700;">🛡️ AVOID: Overconfidence or ignoring advice given by your spouse or financial advisor.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- On-Page Symbol Guide Explaining Movement Emojis -->
+            <?php echo self::render_symbol_guide_bar([
+                ['icon' => '⚡', 'term' => 'Recommended Action (DO)', 'desc' => 'Things that will bring immediate positive results this week'],
+                ['icon' => '🛡️', 'term' => 'Caution (AVOID)',         'desc' => 'Situations or mistakes where you should be very careful'],
+                ['icon' => '🏔️/⏳/🌊/⚡', 'term' => 'The 4 Weeks',       'desc' => 'From Week 1 planning to Week 4 victory and rewards']
+            ], 'Weekly Roadmap Key'); ?>
+        </div>
+
+        <div>
+            <?php echo self::render_page_bottom_synthesis([
+                "Do not judge your whole month by the first 10 days: Vedic astrology shows that delayed starts often lead to the biggest victories.",
+                "Week 1 and Week 2 require mental calm and preparation: keep your expenses low and focus on pending work.",
+                "Week 3 (after November 15) is the turning point: favorable planetary rays will dissolve obstacles in career and finance.",
+                "Week 4 is your harvest window: take bold steps, sign agreements, and share your success happily with family."
+            ], 'Essential Monthly Takeaways', $head_font); ?>
+
+            <div class="mr-footer-bar">
+                <span>MeraRashifal · The 4-Week Journey</span>
+                <span class="mr-page-num">Page 3 of 13</span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ========================================================
+         PAGE 4: 30-DAY ASTROLOGICAL CALENDAR & SHUBH MUHURAT
+         ======================================================== -->
+    <div class="mr-page">
+        <div>
+            <div class="mr-header-bar">
+                <div class="mr-header-brand-wrap">
+                    <img src="<?php echo esc_attr($logo_uri); ?>" alt="MeraRashifal" class="mr-header-logo-img" />
+                </div>
+                <span class="mr-header-meta"><?php echo esc_html($person_name . ' · ' . $month_year); ?></span>
+            </div>
+
+            <div class="mr-tag-pill">03 · Daily Calendar</div>
+            <h1 class="mr-page-h1">30-Day Astrological Calendar &amp; Shubh Days</h1>
+            <div class="mr-page-sub">Day-by-Day Energy Ratings, Lucky Windows &amp; Rest Days for Planning Your Month</div>
+
+            <!-- Clean Editorial Calendar Table with Generous Cell Heights -->
+            <table style="width:100%; border-collapse:collapse; text-align:center; font-size:11.5px; margin-top:2px;">
+                <thead>
+                    <tr style="background:#F4EFE6; color:#111827; font-family:<?php echo $head_font; ?>; font-size:12px; font-weight:700; letter-spacing:0.06em;">
+                        <th style="padding:6px; border:1px solid #ECE6DD;">MON</th>
+                        <th style="padding:6px; border:1px solid #ECE6DD;">TUE</th>
+                        <th style="padding:6px; border:1px solid #ECE6DD;">WED</th>
+                        <th style="padding:6px; border:1px solid #ECE6DD;">THU</th>
+                        <th style="padding:6px; border:1px solid #ECE6DD;">FRI</th>
+                        <th style="padding:6px; border:1px solid #ECE6DD;">SAT</th>
+                        <th style="padding:6px; border:1px solid #ECE6DD;">SUN</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    $day = 1;
+                    for ($row = 0; $row < 5; $row++): ?>
+                        <tr>
+                            <?php for ($col = 0; $col < 7; $col++):
+                                if ($day > 30) {
+                                    echo '<td style="border:1px solid #ECE6DD; padding:5px; background:#FAF7F2;"></td>';
+                                    continue;
+                                }
+                                $score = 50 + (($day * 7) % 45);
+                                $is_power = in_array('Day ' . $day, $dashboard['zenith_power_days'] ?? []) || in_array('Nov ' . $day, $dashboard['zenith_power_days'] ?? []);
+                                $is_sanctuary = in_array('Day ' . $day, $dashboard['sanctuary_rest_days'] ?? []) || in_array('Nov ' . $day, $dashboard['sanctuary_rest_days'] ?? []);
+
+                                $bg = '#FFFFFF';
+                                $bdr = '#ECE6DD';
+                                if ($is_power) { $bg = '#FDF5F2'; $bdr = '#C45738'; }
+                                elseif ($is_sanctuary) { $bg = '#F4EFE6'; $bdr = '#C2964C'; }
+                                ?>
+                                <td style="border:1px solid <?php echo esc_attr($bdr); ?>; padding:5px 3px; background:<?php echo esc_attr($bg); ?>; vertical-align:top; height:37px;">
+                                    <div style="font-weight:800; font-size:12px; color:#111827;"><?php echo $day; ?></div>
+                                    <div style="font-size:9.5px; font-weight:800; color:<?php echo $score >= 70 ? '#C45738' : ($score <= 55 ? '#4B5563' : '#4E7D68'); ?>;">
+                                        <?php echo $score; ?>%
+                                    </div>
+                                    <?php if ($day == 9): ?>
+                                        <div style="font-size:7.5px; color:#C45738; font-weight:800;">🌑 Amavasya</div>
+                                    <?php elseif ($day == 24): ?>
+                                        <div style="font-size:7.5px; color:#C2964C; font-weight:800;">🌕 Purnima</div>
+                                    <?php elseif ($day == 14): ?>
+                                        <div style="font-size:7.5px; color:#4E7D68; font-weight:800;">🧭 Budha Direct</div>
+                                    <?php endif; ?>
+                                </td>
+                                <?php $day++;
+                            endfor; ?>
+                        </tr>
+                    <?php endfor; ?>
+                </tbody>
+            </table>
+
+            <!-- Shubh Muhurat & Important Dates Box -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:8px;">
+                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-left:4px solid #C45738; border-radius:6px; padding:7px 12px; font-size:10.5px; line-height:1.48;">
+                    <strong style="color:#C45738; font-size:11px;">🌟 Best Days for Important Work &amp; Deals:</strong><br>
+                    <span><strong>Nov 7, 8, 26, 27:</strong> Highly auspicious for job interviews, launching new ventures, client meetings, and signing profitable agreements.</span>
+                </div>
+                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-left:4px solid #C2964C; border-radius:6px; padding:7px 12px; font-size:10.5px; line-height:1.48;">
+                    <strong style="color:#C2964C; font-size:11px;">🕯️ Sanyam Days (Stay Calm &amp; Rest):</strong><br>
+                    <span><strong>Nov 17, 18, 20:</strong> Lunar energy is sensitive. Avoid arguments with spouse, postpone property buying, and drive carefully on roads.</span>
+                </div>
+            </div>
+
+            <!-- On-Page Symbol Guide Explaining Calendar Icons -->
+            <?php echo self::render_symbol_guide_bar([
+                ['icon' => '☀️', 'term' => 'Shubh Power Day (70%+)', 'desc' => 'Best for major purchases, salary talks, pitches & new beginnings'],
+                ['icon' => '🌿', 'term' => 'Steady Normal Day',      'desc' => 'Good for daily office tasks, meetings & regular routine work'],
+                ['icon' => '🕯️', 'term' => 'Sanyam / Rest Day',     'desc' => 'Keep patience, avoid heated arguments, focus on rest'],
+                ['icon' => '🌑', 'term' => 'Amavasya (Day 9)',       'desc' => 'New Moon; light a ghee diya and set quiet monthly intentions'],
+                ['icon' => '🌕', 'term' => 'Purnima (Day 24)',       'desc' => 'Full Moon; great for celebrations and charitable giving']
+            ], 'Calendar Colors & Icons'); ?>
+        </div>
+
+        <div>
+            <?php echo self::render_page_bottom_synthesis([
+                "Plan your most important events (like salary discussions, new client pitches, or vehicle buying) on the days highlighted in terracotta.",
+                "On Sanyam (Rest) days, do not take unnecessary risks or get into arguments with bosses or family members.",
+                "Amavasya on Day 9 is great for inner peace, meditation, and lighting a mustard oil or ghee diya at sunset.",
+                "Purnima on Day 24 brings blessings and public appreciation: express heartfelt gratitude to your parents, teachers, and spouse."
+            ], 'Essential Monthly Takeaways', $head_font); ?>
+
+            <div class="mr-footer-bar">
+                <span>MeraRashifal · 30-Day Astrological Calendar</span>
+                <span class="mr-page-num">Page 4 of 13</span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ========================================================
+         PAGE 5: LOVE, MARRIAGE & FAMILY LIFE (PREMA & BANDHU)
+         ======================================================== -->
+    <div class="mr-page">
+        <div>
+            <div class="mr-header-bar">
+                <div class="mr-header-brand-wrap">
+                    <img src="<?php echo esc_attr($logo_uri); ?>" alt="MeraRashifal" class="mr-header-logo-img" />
+                </div>
+                <span class="mr-header-meta"><?php echo esc_html($person_name . ' · ' . $month_year); ?></span>
+            </div>
+
+            <div class="mr-tag-pill">04 · Relationships &amp; Family</div>
+            <h1 class="mr-page-h1">Love, Marriage &amp; Family Life (Dampatya Sukh)</h1>
+            <div class="mr-page-sub">Venus (Shukra) Alignment, Marital Harmony &amp; Relationships with Loved Ones</div>
+
+            <div class="mr-card gold-accent" style="padding:12px 15px;">
+                <div class="mr-card-title">
+                    <span>🪷 Monthly Relationship Summary</span>
+                    <span style="color:#C2964C; font-weight:800;">Score: 64% · Gentle &amp; Patient Pace</span>
+                </div>
+                <h3 style="font-size:13.5px; font-family:<?php echo $head_font; ?>; color:#111827; font-weight:700; margin:0 0 4px 0;">
+                    Gentle, honest conversations will solve any old family or marital misunderstandings.
+                </h3>
+                <p style="font-size:11.5px; color:#1F2937; line-height:1.6; margin:0;">
+                    Shukra (Venus) is transiting your relationship sector. In the first half of the month, minor differences of opinion regarding household budget, in-laws, or daily routines might arise. The secret to peace is simple: do not react immediately when you feel irritated. Give your partner time and listen with an open heart. After November 15, Venus moves forward, bringing sweetness, mutual care, and romantic warmth back into your life.
+                </p>
+            </div>
+
+            <div class="mr-grid-2">
+                <div class="mr-card terracotta-accent" style="padding:11px 14px;">
+                    <div class="mr-card-title"><span>💍 For Married Couples &amp; Partners</span></div>
+                    <div class="mr-bullet-item"><div class="mr-bullet-dot"></div><span>Avoid bringing office pressure or financial worries into the bedroom.</span></div>
+                    <div class="mr-bullet-item"><div class="mr-bullet-dot"></div><span>If a small disagreement happens, let the anger cool down before talking.</span></div>
+                    <div class="mr-bullet-item"><div class="mr-bullet-dot"></div><span>Plan a weekend dinner or outing together in the third week of November.</span></div>
+                    <div class="mr-bullet-item"><div class="mr-bullet-dot"></div><span>Support each other in managing household duties and children's routines.</span></div>
+                </div>
+
+                <div class="mr-card sage-accent" style="padding:11px 14px;">
+                    <div class="mr-card-title"><span>🧭 For Singles &amp; New Matchmaking</span></div>
+                    <div class="mr-bullet-item"><div class="mr-bullet-dot" style="background:#4E7D68;"></div><span>An old friend or past connection might reach out unexpectedly early in the month.</span></div>
+                    <div class="mr-bullet-item"><div class="mr-bullet-dot" style="background:#4E7D68;"></div><span>Focus on true values, family background, and mutual respect rather than quick charm.</span></div>
+                    <div class="mr-bullet-item"><div class="mr-bullet-dot" style="background:#4E7D68;"></div><span>The best time for rishta meetings or promising dates is after November 15.</span></div>
+                    <div class="mr-bullet-item"><div class="mr-bullet-dot" style="background:#4E7D68;"></div><span>Be genuine about your future plans; honesty will attract the right life partner.</span></div>
+                </div>
+            </div>
+
+            <!-- Family & Parents Guidance Card to Fill Space Beautifully -->
+            <div class="mr-card slate-accent" style="padding:10px 14px; margin-top:3px;">
+                <div style="font-size:11px; font-weight:700; color:#111827; margin-bottom:2px;">🏡 Family Peace &amp; Parents' Blessings (Ghar Parivar):</div>
+                <div style="font-size:10.5px; color:#4B5563; line-height:1.5;">
+                    Your mother's or an elderly family member's health may require gentle care around mid-month. Take out 10 minutes every day to sit and talk with your parents. Seeking their heartfelt blessings will shield you from unwanted stress and bring Lakshmi Kripa into your household.
+                </div>
+            </div>
+
+            <!-- On-Page Symbol Guide Explaining Relational Emojis -->
+            <?php echo self::render_symbol_guide_bar([
+                ['icon' => '🪷', 'term' => 'Prema Bhava', 'desc' => '7th House of marriage, life partner, and mutual trust'],
+                ['icon' => '💍', 'term' => 'Dampatya',    'desc' => 'Marital harmony, peaceful communication & shared life goals'],
+                ['icon' => '🏡', 'term' => 'Parivar',     'desc' => 'Family elders, children’s well-being & home atmosphere']
+            ], 'Relationship Keys'); ?>
+        </div>
+
+        <div>
+            <?php echo self::render_page_bottom_synthesis([
+                "Venus retrograde in the opening fortnight is not meant to break bonds, but to clear away unspoken misunderstandings.",
+                "Listen more and speak less during sensitive family discussions; validating your partner's feelings will instantly dissolve anger.",
+                "Single natives should take their time and prioritize shared values and emotional maturity before making any final commitment.",
+                "Post-November 15 brings wonderful harmony: family dinners, shared laughter, and romantic affection will flourish."
+            ], 'Essential Monthly Takeaways', $head_font); ?>
+
+            <div class="mr-footer-bar">
+                <span>MeraRashifal · Love, Marriage &amp; Family Life</span>
+                <span class="mr-page-num">Page 5 of 13</span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ========================================================
+         PAGE 6: CAREER, JOB & WEALTH (KARMA & ARTHA)
+         ======================================================== -->
+    <div class="mr-page">
+        <div>
+            <div class="mr-header-bar">
+                <div class="mr-header-brand-wrap">
+                    <img src="<?php echo esc_attr($logo_uri); ?>" alt="MeraRashifal" class="mr-header-logo-img" />
+                </div>
+                <span class="mr-header-meta"><?php echo esc_html($person_name . ' · ' . $month_year); ?></span>
+            </div>
+
+            <div class="mr-tag-pill">05 · Career &amp; Money</div>
+            <h1 class="mr-page-h1">Career, Business &amp; Wealth (Karma &amp; Artha)</h1>
+            <div class="mr-page-sub">Job Growth, Business Deals, Salary Inflow &amp; Smart Financial Management</div>
+
+            <!-- Shadbala Bars SVG -->
+            <div style="margin-bottom:10px;">
+                <?php echo self::render_shadbala_bars_svg(540, 94); ?>
+            </div>
+
+            <div class="mr-grid-2">
+                <div class="mr-card terracotta-accent" style="margin-bottom:0; padding:11px 14px;">
+                    <div class="mr-card-title">
+                        <span>🏹 Job &amp; Career Growth</span>
+                        <span style="color:#C45738; font-weight:800;">Score: 78% · High Growth</span>
+                    </div>
+                    <p style="font-size:11.5px; color:#1F2937; line-height:1.58; margin:0 0 6px 0;">
+                        Mars transiting your 1st house gives you tremendous energy, courage, and stamina at work. You will feel ready to handle big projects. If you are waiting for a promotion, appraisal, or new job offer, expect solid positive news in the last 10 days of the month.
+                    </p>
+                    <div class="mr-bullet-item"><div class="mr-bullet-dot"></div><span>Complete your backend paperwork and system setup before presenting to bosses.</span></div>
+                    <div class="mr-bullet-item"><div class="mr-bullet-dot"></div><span>Stay out of office politics or loose corridor gossip; let your hard work speak.</span></div>
+                </div>
+
+                <div class="mr-card sage-accent" style="margin-bottom:0; padding:11px 14px;">
+                    <div class="mr-card-title">
+                        <span>💰 Money, Savings &amp; Expenses</span>
+                        <span style="color:#4E7D68; font-weight:800;">Score: 68% · Stable</span>
+                    </div>
+                    <p style="font-size:11.5px; color:#1F2937; line-height:1.58; margin:0 0 6px 0;">
+                        Your regular salary or business income is steady and reliable. However, the 2nd house indicates unexpected home repairs or family expenses mid-month. Avoid lending money to casual acquaintances, as getting it back will be very difficult.
+                    </p>
+                    <div class="mr-bullet-item"><div class="mr-bullet-dot" style="background:#4E7D68;"></div><span>Keep at least 20% of your earnings safe in liquid bank deposits or emergency funds.</span></div>
+                    <div class="mr-bullet-item"><div class="mr-bullet-dot" style="background:#4E7D68;"></div><span>Postpone risky stock trading or unvetted cryptocurrency bets until planets turn direct.</span></div>
+                </div>
+            </div>
+
+            <!-- Financial Dos and Don'ts Checklist to Fill Space -->
+            <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:8px; padding:10px 14px; margin-top:8px;">
+                <div style="font-size:11px; font-weight:700; color:#111827; margin-bottom:4px;">💼 Monthly Professional &amp; Wealth Dos &amp; Don'ts:</div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; font-size:10.5px; line-height:1.5;">
+                    <div><span style="color:#4E7D68; font-weight:700;">✔ DO:</span> Follow up on pending client invoices, maintain cordial relations with seniors, and audit your monthly bank statement.</div>
+                    <div><span style="color:#C45738; font-weight:700;">✖ DON'T:</span> Sign any guarantor documents for others, lose your temper during meetings, or rush into large debt/EMI commitments.</div>
+                </div>
+            </div>
+
+            <!-- On-Page Symbol Guide Explaining Vocation Emojis -->
+            <?php echo self::render_symbol_guide_bar([
+                ['icon' => '🏹', 'term' => 'Karma Bhava', 'desc' => '10th House of career growth, leadership reputation & executive standing'],
+                ['icon' => '💰', 'term' => 'Artha Bhava', 'desc' => '2nd & 11th Houses governing savings, cash liquidity & business profits'],
+                ['icon' => '⚖️', 'term' => 'Shadbala',    'desc' => 'Classical 6-fold planetary strength calculation showing your natural capabilities']
+            ], 'Career & Wealth Guide'); ?>
+        </div>
+
+        <div>
+            <?php echo self::render_page_bottom_synthesis([
+                "Mars in your ascendant provides immense working capacity: channel this energy into solving difficult challenges at work.",
+                "Keep a tight grip on household expenses during the first fortnight to prevent unnecessary financial stress later.",
+                "Treat the first 14 days as an engineering period: polish your proposals, streamline your work, and clear all pending bills.",
+                "The closing week brings brilliant opportunities: launch sales campaigns, close contracts, and apply for senior roles with confidence."
+            ], 'Essential Monthly Takeaways', $head_font); ?>
+
+            <div class="mr-footer-bar">
+                <span>MeraRashifal · Career, Business &amp; Wealth</span>
+                <span class="mr-page-num">Page 6 of 13</span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ========================================================
+         PAGE 7: PLANETARY ANGLES & INFLUENCES (ASPECTS & TRIGGERS)
+         ======================================================== -->
+    <div class="mr-page">
+        <div>
+            <div class="mr-header-bar">
+                <div class="mr-header-brand-wrap">
+                    <img src="<?php echo esc_attr($logo_uri); ?>" alt="MeraRashifal" class="mr-header-logo-img" />
+                </div>
+                <span class="mr-header-meta"><?php echo esc_html($person_name . ' · ' . $month_year); ?></span>
+            </div>
+
+            <div class="mr-tag-pill">06 · Planetary Aspects</div>
+            <h1 class="mr-page-h1">Planetary Angles &amp; Drishti (Graha Drishti)</h1>
+            <div class="mr-page-sub">How Major Planetary Ingress, Retrograde Cycles &amp; Direct Stations Affect You</div>
+
+            <div class="mr-card terracotta-accent" style="padding:12px 15px;">
+                <div class="mr-card-title"><span>🪐 Key Planetary Dates &amp; Events This Month</span></div>
+                <?php foreach ($triggers as $trig): ?>
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; border-bottom:1px solid #ECE6DD; padding:5px 0;">
+                        <div style="font-family:<?php echo $head_font; ?>; font-size:12.5px; font-weight:700; color:#C45738; width:70px;">
+                            <?php echo esc_html($trig['date']); ?>
+                        </div>
+                        <div style="flex:1; padding:0 12px;">
+                            <strong style="color:#111827; font-size:11.5px;"><?php echo esc_html($trig['label']); ?></strong>
+                            <div style="font-size:11px; color:#4B5563; line-height:1.45;"><?php echo esc_html($trig['impact']); ?></div>
+                        </div>
+                        <span style="font-size:9px; font-weight:800; text-transform:uppercase; color:#4E7D68; background:#F4EFE6; border:1px solid #ECE6DD; padding:2.5px 8px; border-radius:10px;">
+                            <?php echo esc_html($trig['type']); ?>
+                        </span>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+            <div class="mr-card sage-accent" style="margin-top:8px; padding:11px 14px;">
+                <div class="mr-card-title"><span>👁️ Powerful Planetary Aspects (Drishti) on Your Chart</span></div>
+                <div class="mr-bullet-item"><div class="mr-bullet-dot" style="background:#4E7D68;"></div><span><strong>⏳ Shani Drishti (Saturn's 10th Aspect):</strong> Demands complete honesty and hard work. No shortcuts allowed; disciplined efforts will earn you lasting respect.</span></div>
+                <div class="mr-bullet-item"><div class="mr-bullet-dot" style="background:#4E7D68;"></div><span><strong>🪷 Guru Drishti (Jupiter's 9th Aspect):</strong> Jupiter acts as a protective shield over your reputation and family. Blessings from elders and teachers will guide you.</span></div>
+                <div class="mr-bullet-item"><div class="mr-bullet-dot" style="background:#4E7D68;"></div><span><strong>⚔️ Mangal Drishti (Mars's 4th Aspect):</strong> Can create sudden impatience or hot temper at home. Maintain your cool while driving or discussing domestic matters.</span></div>
+            </div>
+
+            <!-- On-Page Symbol Guide Explaining Planetary Aspects -->
+            <?php echo self::render_symbol_guide_bar([
+                ['icon' => '👁️', 'term' => 'Graha Drishti', 'desc' => 'Planetary gaze influencing distant houses and life domains'],
+                ['icon' => '🪐', 'term' => 'Gochar (Transit)', 'desc' => 'Movement of planets through different zodiac signs and nakshatras'],
+                ['icon' => '🛡️', 'term' => 'Kavach (Protection)', 'desc' => 'Jupiter’s holy trine aspect protecting your reputation and status']
+            ], 'Aspect Keys'); ?>
+        </div>
+
+        <div>
+            <?php echo self::render_page_bottom_synthesis([
+                "Planetary aspects (Drishti) act like a subtle weather forecast: knowing them in advance helps you respond with wisdom rather than anger.",
+                "Saturn's watchful eye on your career house asks you to fulfill all professional promises and maintain impeccable ethics.",
+                "Jupiter's divine grace ensures that your genuine efforts are recognized by top management and benevolent mentors.",
+                "Mark November 14 and 15 in your diary: as Mercury and Venus turn direct, weeks of pending confusion will vanish like morning mist."
+            ], 'Essential Monthly Takeaways', $head_font); ?>
+
+            <div class="mr-footer-bar">
+                <span>MeraRashifal · Planetary Angles &amp; Drishti</span>
+                <span class="mr-page-num">Page 7 of 13</span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ========================================================
+         PAGE 8: THE CELESTIAL COUNCIL (GRAHA STHITI TABLE)
+         ======================================================== -->
+    <div class="mr-page">
+        <div>
+            <div class="mr-header-bar">
+                <div class="mr-header-brand-wrap">
+                    <img src="<?php echo esc_attr($logo_uri); ?>" alt="MeraRashifal" class="mr-header-logo-img" />
+                </div>
+                <span class="mr-header-meta"><?php echo esc_html($person_name . ' · ' . $month_year); ?></span>
+            </div>
+
+            <div class="mr-tag-pill">07 · Graha Sthiti</div>
+            <h1 class="mr-page-h1">The Planetary Council (Graha Sthiti Ephemeris)</h1>
+            <div class="mr-page-sub">Exact Degrees, Nakshatras &amp; House Positions of All 9 Planets This Month</div>
+
+            <table style="width:100%; border-collapse:collapse; font-size:11px; margin-top:4px;">
+                <thead>
+                    <tr style="background:#F4EFE6; color:#111827; font-family:<?php echo $head_font; ?>; font-size:12px; font-weight:700;">
+                        <th style="padding:6px 8px; text-align:left; border:1px solid #ECE6DD;">Graha (Planet)</th>
+                        <th style="padding:6px 8px; text-align:center; border:1px solid #ECE6DD;">Rashi (Sign)</th>
+                        <th style="padding:6px 8px; text-align:center; border:1px solid #ECE6DD;">Degrees</th>
+                        <th style="padding:6px 8px; text-align:center; border:1px solid #ECE6DD;">Nakshatra</th>
+                        <th style="padding:6px 8px; text-align:center; border:1px solid #ECE6DD;">Dignity (Avastha)</th>
+                        <th style="padding:6px 8px; text-align:center; border:1px solid #ECE6DD;">Bhava (House)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php
+                    $planets = [
+                        ['icon' => '☀️', 'name' => 'Surya (Sun)',        'sign' => 'Vrishchika (Scorpio)', 'deg' => '23° 14\'', 'nak' => 'Jyeshtha · 2',    'status' => 'Mitra (Friendly)', 'house' => '4th House (Home)'],
+                        ['icon' => '🌙', 'name' => 'Chandra (Moon)',      'sign' => 'Kumbha (Aquarius)',    'deg' => '01° 42\'', 'nak' => 'Dhanishta · 3',   'status' => 'Sama (Neutral)',    'house' => '7th House (Partner)'],
+                        ['icon' => '⚔️', 'name' => 'Mangal (Mars)',       'sign' => 'Simha (Leo)',          'deg' => '25° 11\'', 'nak' => 'P. Phalguni · 4', 'status' => 'Mitra (Friendly)', 'house' => '1st House (Lagna)'],
+                        ['icon' => '📜', 'name' => 'Budha (Mercury) ℞',   'sign' => 'Vrishchika (Scorpio)', 'deg' => '05° 28\'', 'nak' => 'Anuradha · 1',    'status' => 'Sama (Neutral)',    'house' => '4th House (Mind)'],
+                        ['icon' => '🪷', 'name' => 'Guru (Jupiter)',      'sign' => 'Simha (Leo)',          'deg' => '25° 40\'', 'nak' => 'P. Phalguni · 4', 'status' => 'Mitra (Friendly)', 'house' => '1st House (Lagna)'],
+                        ['icon' => '💎', 'name' => 'Shukra (Venus) ℞',    'sign' => 'Tula (Libra)',         'deg' => '22° 19\'', 'nak' => 'Vishakha · 1',    'status' => 'Swa (Own Sign)',    'house' => '3rd House (Effort)'],
+                        ['icon' => '⏳', 'name' => 'Shani (Saturn) ℞',    'sign' => 'Mesha (Aries)',        'deg' => '14° 06\'', 'nak' => 'Bharani · 1',     'status' => 'Neecha (Debilitated)','house' => '9th House (Bhagya)'],
+                        ['icon' => '🌪️', 'name' => 'Rahu (North Node)',   'sign' => 'Meena (Pisces)',       'deg' => '08° 33\'', 'nak' => 'U. Bhadra · 2',   'status' => 'Sama (Neutral)',    'house' => '8th House (Occult)'],
+                        ['icon' => '📿', 'name' => 'Ketu (South Node)',   'sign' => 'Kanya (Virgo)',        'deg' => '08° 33\'', 'nak' => 'U. Phalguni · 4', 'status' => 'Sama (Neutral)',    'house' => '2nd House (Speech)'],
+                    ];
+
+                    foreach ($planets as $i => $pl):
+                        $row_bg = ($i % 2 === 0) ? '#FFFFFF' : '#FAF7F2';
+                    ?>
+                        <tr style="background:<?php echo esc_attr($row_bg); ?>; border-bottom:1px solid #ECE6DD;">
+                            <td style="padding:5px 8px; font-weight:700; color:#111827;">
+                                <span style="font-size:12px;"><?php echo $pl['icon']; ?></span> <?php echo esc_html($pl['name']); ?>
+                            </td>
+                            <td style="padding:5px 8px; text-align:center; color:#1F2937;"><?php echo esc_html($pl['sign']); ?></td>
+                            <td style="padding:5px 8px; text-align:center; font-family:monospace; color:#4B5563; font-size:10px;"><?php echo esc_html($pl['deg']); ?></td>
+                            <td style="padding:5px 8px; text-align:center; color:#4B5563;"><?php echo esc_html($pl['nak']); ?></td>
+                            <td style="padding:5px 8px; text-align:center; font-weight:800; color:<?php echo strpos($pl['status'], 'Own') !== false ? '#4E7D68' : (strpos($pl['status'], 'Neecha') !== false ? '#C45738' : '#4B5563'); ?>;">
+                                <?php echo esc_html($pl['status']); ?>
+                            </td>
+                            <td style="padding:5px 8px; text-align:center; font-weight:800; color:#C45738;"><?php echo esc_html($pl['house']); ?></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+
+            <!-- Planetary Governance Card to Fill Space Meaningfully -->
+            <div class="mr-card" style="margin-top:8px; padding:10px 14px; background:#FFFFFF;">
+                <div style="font-size:11px; font-weight:700; color:#111827; margin-bottom:3px;">📖 What Your Planetary Positions Mean in Simple Words:</div>
+                <div style="font-size:10.5px; color:#4B5563; line-height:1.52;">
+                    Surya (Sun) and Budha (Mercury) in Scorpio deepen your analytical mind and research ability. Shukra in its own sign of Libra gives refined taste and diplomatic skill once direct. Shani in Aries cautions against legal or religious arguments—remain humble and focused on your Karma. Rahu and Ketu on the 8th/2nd axis advise watching what you eat and speaking gently to avoid family misunderstandings.
+                </div>
+            </div>
+
+            <!-- On-Page Symbol Guide Explaining Graha Significators -->
+            <?php echo self::render_symbol_guide_bar([
+                ['icon' => '☀️/🌙', 'term' => 'Surya & Chandra', 'desc' => 'Atma (Soul power & father) and Manas (Mind, emotions & mother)'],
+                ['icon' => '⚔️/📜', 'term' => 'Mangal & Budha',  'desc' => 'Courage/brothers and intellect, speech, commerce & accounts'],
+                ['icon' => '🪷/💎', 'term' => 'Guru & Shukra',    'desc' => 'Guru kripa, wisdom & dharma; Shukra gives luxury, love & vehicles'],
+                ['icon' => '⏳/🌪️/📿', 'term' => 'Shani, Rahu, Ketu', 'desc' => 'Karmic justice, material ambition & spiritual detachment']
+            ], 'Graha Council Keys'); ?>
+        </div>
+
+        <div>
+            <?php echo self::render_page_bottom_synthesis([
+                "Sun and Mercury transiting Scorpio deepen analytical depth, psychological insight, and research stamina.",
+                "Venus occupying its own sign of Libra brings refined aesthetic judgment and diplomatic tact once stationed direct.",
+                "Saturn's placement in Aries counsels humility in discussions surrounding policy, law, or dogma: avoid ego clashes.",
+                "Harmonizing daily work with active Nakshatra energies ensures purposeful alignment with Dharma and steady progress."
+            ], 'Essential Monthly Takeaways', $head_font); ?>
+
+            <div class="mr-footer-bar">
+                <span>MeraRashifal · The Planetary Council</span>
+                <span class="mr-page-num">Page 8 of 13</span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ========================================================
+         PAGE 9: WEEKLY MOVEMENT PROTOCOLS (ACTIONABLE ROADMAP)
+         ======================================================== -->
+    <div class="mr-page">
+        <div>
+            <div class="mr-header-bar">
+                <div class="mr-header-brand-wrap">
+                    <img src="<?php echo esc_attr($logo_uri); ?>" alt="MeraRashifal" class="mr-header-logo-img" />
+                </div>
+                <span class="mr-header-meta"><?php echo esc_html($person_name . ' · ' . $month_year); ?></span>
+            </div>
+
+            <div class="mr-tag-pill">08 · Weekly Pacing</div>
+            <h1 class="mr-page-h1">Weekly Pacing &amp; Practical Protocols</h1>
+            <div class="mr-page-sub">Actionable Tactical Advice for Work, Money, Family &amp; Mindset for Each Week</div>
+
+            <div class="mr-grid-2">
+                <div class="mr-card gold-accent" style="margin-bottom:0; padding:10px 14px;">
+                    <div class="mr-card-title">
+                        <span>🏔️ Phase 1 (Days 1–7): Quiet Planning</span>
+                        <span style="color:#C45738; font-size:10.5px; font-weight:800;">Internal Energy</span>
+                    </div>
+                    <div style="font-size:10px; font-weight:800; color:#C2964C; text-transform:uppercase; margin-bottom:4px;">
+                        Main Theme: Preparation &amp; Patience (68% Altitude)
+                    </div>
+                    <p style="font-size:11.5px; color:#1F2937; margin:0 0 6px 0; line-height:1.52;">
+                        The month begins with high enthusiasm. Channel this into auditing your files, updating project spreadsheets, and organizing your schedule before announcing anything publicly.
+                    </p>
+                    <div style="border-top:1px solid #ECE6DD; padding-top:4px; font-size:10.5px; line-height:1.5;">
+                        <div style="color:#4E7D68; font-weight:700; margin-bottom:2px;">⚡ DO: Make a clear weekly to-do list, check your car/bike condition, and pray at sunrise.</div>
+                        <div style="color:#C45738; font-weight:700;">🛡️ AVOID: Rushing into brand-new partnership deals or boasting about unfinalized plans.</div>
+                    </div>
+                </div>
+
+                <div class="mr-card gold-accent" style="margin-bottom:0; padding:10px 14px;">
+                    <div class="mr-card-title">
+                        <span>⏳ Phase 2 (Days 8–14): Calm Recalibration</span>
+                        <span style="color:#C45738; font-size:10.5px; font-weight:800;">Amavasya Window</span>
+                    </div>
+                    <div style="font-size:10px; font-weight:800; color:#C2964C; text-transform:uppercase; margin-bottom:4px;">
+                        Main Theme: Checkpoints &amp; Clearing Delays (59% Altitude)
+                    </div>
+                    <p style="font-size:11.5px; color:#1F2937; margin:0 0 6px 0; line-height:1.52;">
+                        New Moon and retrograde station. Work pace slows down temporarily. Do not push for instant replies from colleagues or clients. Use this time to recharge your mental battery.
+                    </p>
+                    <div style="border-top:1px solid #ECE6DD; padding-top:4px; font-size:10.5px; line-height:1.5;">
+                        <div style="color:#4E7D68; font-weight:700; margin-bottom:2px;">⚡ DO: Light a ghee diya on Amavasya dusk, clear pending paperwork, and sleep early.</div>
+                        <div style="color:#C45738; font-weight:700;">🛡️ AVOID: Arguing with family members or making hasty investments in speculative shares.</div>
+                    </div>
+                </div>
+
+                <div class="mr-card terracotta-accent" style="margin-bottom:0; padding:10px 14px;">
+                    <div class="mr-card-title">
+                        <span>🌊 Phase 3 (Days 15–21): Active Action</span>
+                        <span style="color:#C45738; font-size:10.5px; font-weight:800;">Planets Turn Direct</span>
+                    </div>
+                    <div style="font-size:10px; font-weight:800; color:#C2964C; text-transform:uppercase; margin-bottom:4px;">
+                        Main Theme: Clear Communication &amp; Progress (73% Altitude)
+                    </div>
+                    <p style="font-size:11.5px; color:#1F2937; margin:0 0 6px 0; line-height:1.52;">
+                        Green light from the cosmos! Bottlenecks melt away. Bosses and clients become supportive. Great time to present your proposals, interview for new jobs, or pitch clients.
+                    </p>
+                    <div style="border-top:1px solid #ECE6DD; padding-top:4px; font-size:10.5px; line-height:1.5;">
+                        <div style="color:#4E7D68; font-weight:700; margin-bottom:2px;">⚡ DO: Schedule your most important meetings, send follow-ups, and enjoy family outings.</div>
+                        <div style="color:#C45738; font-weight:700;">🛡️ AVOID: Procrastination or delaying action when opportunities knock on your door.</div>
+                    </div>
+                </div>
+
+                <div class="mr-card terracotta-accent" style="margin-bottom:0; padding:10px 14px;">
+                    <div class="mr-card-title">
+                        <span>⚡ Phase 4 (Days 22–30): Peak Harvest</span>
+                        <span style="color:#C45738; font-size:10.5px; font-weight:800;">Purnima Illumination</span>
+                    </div>
+                    <div style="font-size:10px; font-weight:800; color:#C2964C; text-transform:uppercase; margin-bottom:4px;">
+                        Main Theme: Big Results &amp; Celebrations (88% Altitude)
+                    </div>
+                    <p style="font-size:11.5px; color:#1F2937; margin:0 0 6px 0; line-height:1.52;">
+                        The most rewarding phase of the month! Full Moon illuminates your accomplishments. Deals close smoothly, bonus or incentives arrive, and your social respect increases.
+                    </p>
+                    <div style="border-top:1px solid #ECE6DD; padding-top:4px; font-size:10.5px; line-height:1.5;">
+                        <div style="color:#4E7D68; font-weight:700; margin-bottom:2px;">⚡ DO: Sign binding contracts, celebrate with your spouse and team, and make charitable donations.</div>
+                        <div style="color:#C45738; font-weight:700;">🛡️ AVOID: Arrogance or neglecting health due to late-night celebrations.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- On-Page Symbol Guide Explaining Weekly Protocols -->
+            <?php echo self::render_symbol_guide_bar([
+                ['icon' => '🏔️', 'term' => 'Week 1', 'desc' => 'Silent groundwork and organizing files without premature fanfare'],
+                ['icon' => '⏳', 'term' => 'Week 2', 'desc' => 'Patience and review while personal planets finish their retrograde'],
+                ['icon' => '🌊', 'term' => 'Week 3', 'desc' => 'Forward momentum as stalled communications regain clarity'],
+                ['icon' => '⚡', 'term' => 'Week 4', 'desc' => 'Final closure, career recognition and happy celebrations']
+            ], 'Weekly Protocol Keys'); ?>
+        </div>
+
+        <div>
+            <?php echo self::render_page_bottom_synthesis([
+                "Pacing discipline is the secret to a stress-free and victorious month: do not push against the current in early weeks.",
+                "Weeks 1 and 2 prioritize defensive planning, internal paperwork, and quiet skill refinement.",
+                "Do not take mid-month delays personally: they are simply a cosmic filter giving you time to polish your work.",
+                "Transition into bold outward execution during Weeks 3 and 4 to ride the highest celestial momentum of the month."
+            ], 'Essential Monthly Takeaways', $head_font); ?>
+
+            <div class="mr-footer-bar">
+                <span>MeraRashifal · Weekly Movement Protocols</span>
+                <span class="mr-page-num">Page 9 of 13</span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ========================================================
+         PAGE 10: LUNAR TIDES & SACRED PAUSES (AMAVASYA & PURNIMA)
+         ======================================================== -->
+    <div class="mr-page">
+        <div>
+            <div class="mr-header-bar">
+                <div class="mr-header-brand-wrap">
+                    <img src="<?php echo esc_attr($logo_uri); ?>" alt="MeraRashifal" class="mr-header-logo-img" />
+                </div>
+                <span class="mr-header-meta"><?php echo esc_html($person_name . ' · ' . $month_year); ?></span>
+            </div>
+
+            <div class="mr-tag-pill">09 · Lunar Energy</div>
+            <h1 class="mr-page-h1">Lunar Cycles &amp; Simple Home Rituals (Chandra Upasana)</h1>
+            <div class="mr-page-sub">The Power of the Moon on Your Mind, Plus Easy Amavasya &amp; Purnima Rituals</div>
+
+            <div class="mr-grid-2">
+                <div class="mr-card terracotta-accent" style="padding:12px 15px;">
+                    <div class="mr-card-title"><span>🌑 Amavasya (New Moon · Day 9)</span><span style="color:#C45738; font-weight:800;">Day of Peace</span></div>
+                    <div style="font-family:<?php echo $head_font; ?>; font-size:13.5px; font-weight:700; color:#111827; margin-bottom:4px;">
+                        The Seed of Fresh Intentions &amp; Releasing Negativity
+                    </div>
+                    <p style="font-size:11.5px; color:#1F2937; line-height:1.55; margin:0 0 6px 0;">
+                        As Chandra conjoins Surya in Scorpio, the mind becomes calm and introspective. This is the best day of the month to release old grudges, clear mental clutter, and set quiet intentions for your family's future.
+                    </p>
+                    <div style="background:#FDF5F2; border:1px solid #ECE6DD; padding:7px 10px; border-radius:6px; font-size:10.5px; color:#C45738; line-height:1.5;">
+                        <strong>🕯️ Simple 3-Step Sankalpa Ritual:</strong><br>
+                        1. Clean your worship area (pooja sthan) in the evening.<br>
+                        2. Light a pure Desi Ghee diya at sunset facing East or North.<br>
+                        3. Sit quietly for 5 minutes and write your 3 main goals on clean paper.
+                    </div>
+                </div>
+
+                <div class="mr-card sage-accent" style="padding:12px 15px;">
+                    <div class="mr-card-title"><span>🌕 Purnima (Full Moon · Day 24)</span><span style="color:#4E7D68; font-weight:800;">Day of Fulfillment</span></div>
+                    <div style="font-family:<?php echo $head_font; ?>; font-size:13.5px; font-weight:700; color:#111827; margin-bottom:4px;">
+                        The Peak of Happiness, Light &amp; Recognition
+                    </div>
+                    <p style="font-size:11.5px; color:#1F2937; line-height:1.55; margin:0 0 6px 0;">
+                        Full Moon radiance bathes your career and relationship sectors. Your efforts over the past weeks bear visible fruit. Great day for public gatherings, expressing love, and offering gratitude to Almighty.
+                    </p>
+                    <div style="background:#F4EFE6; border:1px solid #ECE6DD; padding:7px 10px; border-radius:6px; font-size:10.5px; color:#4E7D68; line-height:1.5;">
+                        <strong>🪷 Simple 3-Step Gratitude Ritual:</strong><br>
+                        1. Thank your parents, spouse, and mentors with kind words.<br>
+                        2. Feed stray cows, birds, or donate food/kheer to someone in need.<br>
+                        3. Spend 10 minutes sitting under the moonlight for soothing mental peace.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chandra Ashtama Warning Card to Fill Space Meaningfully -->
+            <div class="mr-card" style="margin-top:8px; padding:10px 14px; background:#FFFFFF;">
+                <div style="font-size:11px; font-weight:700; color:#111827; margin-bottom:3px;">🌙 Chandra Ashtama &amp; Emotional Calmness Tip:</div>
+                <div style="font-size:10.5px; color:#4B5563; line-height:1.52;">
+                    The Moon rules our emotions (Manas). When Moon transits the 8th house from your birth moon (around mid-month), the mind may experience mild restlessness, overthinking, or anxiety without any real reason. On these days, drink warm water, avoid arguments, listen to peaceful classical music or bhajans, and get proper sleep.
+                </div>
+            </div>
+
+            <!-- On-Page Symbol Guide Explaining Lunar Emojis -->
+            <?php echo self::render_symbol_guide_bar([
+                ['icon' => '🌑', 'term' => 'Amavasya',        'desc' => 'Zero-point stillness; optimal for internal contemplation & goal-setting'],
+                ['icon' => '🌕', 'term' => 'Purnima',         'desc' => 'Full lunar illumination; optimal for public expression & celebration'],
+                ['icon' => '🕯️', 'term' => 'Ghee Diya Lamp',  'desc' => 'Lighting a lamp at sunset purifies domestic vibrations and thoughts'],
+                ['icon' => '🪷', 'term' => 'Gratitude Lotus', 'desc' => 'Heartfelt acknowledgment of blessings and divine grace received']
+            ], 'Lunar Ritual Keys'); ?>
+        </div>
+
+        <div>
+            <?php echo self::render_page_bottom_synthesis([
+                "Chandra Gochar (Moon transit) directly governs your daily mood, sleep quality, and mental clarity.",
+                "Transits through Kendra houses amplify creativity, presence, and communicative confidence in meetings.",
+                "Amavasya represents an optimal time for quiet reflection, setting clean intentions, and deep restful sleep.",
+                "Purnima marks completion of cycles, public recognition, and cultivating heartfelt gratitude with your loved ones."
+            ], 'Essential Monthly Takeaways', $head_font); ?>
+
+            <div class="mr-footer-bar">
+                <span>MeraRashifal · Lunar Cycles &amp; Home Rituals</span>
+                <span class="mr-page-num">Page 10 of 13</span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ========================================================
+         PAGE 11: ELEMENTAL BALANCE & SIMPLE REMEDIES (UPAYAS)
+         ======================================================== -->
+    <div class="mr-page">
+        <div>
+            <div class="mr-header-bar">
+                <div class="mr-header-brand-wrap">
+                    <img src="<?php echo esc_attr($logo_uri); ?>" alt="MeraRashifal" class="mr-header-logo-img" />
+                </div>
+                <span class="mr-header-meta"><?php echo esc_html($person_name . ' · ' . $month_year); ?></span>
+            </div>
+
+            <div class="mr-tag-pill">10 · Vedic Remedies</div>
+            <h1 class="mr-page-h1">Elemental Balance &amp; Simple Vedic Remedies (Upayas)</h1>
+            <div class="mr-page-sub">Five Elements (Panchamahabhuta) Harmonization &amp; Practical Everyday Remedies</div>
+
+            <!-- Radar Chart & Elemental Guidance -->
+            <div style="display:flex; gap:16px; align-items:center;">
+                <div style="flex-shrink:0;">
+                    <?php echo self::render_panchamahabhuta_radar_svg(155); ?>
+                    <div style="text-align:center; font-size:9px; color:#4B5563; font-weight:700; margin-top:2px; text-transform:uppercase; letter-spacing:0.06em;">
+                        Panchamahabhuta Energy Radar
+                    </div>
+                </div>
+
+                <div style="flex:1;">
+                    <div class="mr-card sage-accent" style="margin-bottom:0; padding:12px 15px;">
+                        <div class="mr-card-title"><span>🔥 High Elements: Fire (Agni) &amp; Air (Vayu)</span></div>
+                        <p style="font-size:11.5px; color:#111827; margin:0 0 4px 0; line-height:1.52;">
+                            <strong>Your Natural Constitution This Month:</strong> High Fire and Air give you great sharpness, lots of new business ideas, and high enthusiasm.
+                        </p>
+                        <p style="font-size:11px; color:#4B5563; margin:0; line-height:1.55;">
+                            <strong>Balancing Advice:</strong> To avoid restlessness, mental fatigue, or sudden acidity, balance this heat with Earth (Prithvi) grounding: walk barefoot on grass in the morning, drink water stored in a copper jug, and maintain a fixed meal schedule.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mr-grid-2" style="margin-top:10px;">
+                <div class="mr-card terracotta-accent" style="padding:11px 14px;">
+                    <div class="mr-card-title"><span>💎 Lucky Gemstone &amp; 📿 Rudraksha</span></div>
+                    <div class="mr-bullet-item"><div class="mr-bullet-dot"></div><span><strong>💎 Gemstone (Ratna):</strong> Ruby (Manikya) in copper or gold for career confidence, or Emerald (Panna) for business clarity.</span></div>
+                    <div class="mr-bullet-item"><div class="mr-bullet-dot"></div><span><strong>📿 Rudraksha:</strong> 5-Mukhi Rudraksha brings mental peace, focus, and reduces stress; 3-Mukhi pacifies excess inner heat (Agni).</span></div>
+                </div>
+
+                <div class="mr-card gold-accent" style="padding:11px 14px;">
+                    <div class="mr-card-title"><span>📜 Daily Mantra &amp; 🏺 Simple Charity (Daan)</span></div>
+                    <div class="mr-bullet-item"><div class="mr-bullet-dot" style="background:#C2964C;"></div><span><strong>📜 Daily Mantra:</strong> Chant 11 times at sunrise: <em>&ldquo;Om Hram Hreem Hroum Sah Suryaya Namah&rdquo;</em> or the sacred Gayatri Mantra.</span></div>
+                    <div class="mr-bullet-item"><div class="mr-bullet-dot" style="background:#C2964C;"></div><span><strong>🏺 Easy Daan:</strong> Offer fresh water (Arghya) to Surya Dev in a copper lota. Donate yellow grains or feed cows on Sundays.</span></div>
+                </div>
+            </div>
+
+            <!-- Ayurvedic Routine Card to Fill Space Meaningfully -->
+            <div class="mr-card" style="margin-top:8px; padding:10px 14px; background:#FFFFFF;">
+                <div style="font-size:11px; font-weight:700; color:#111827; margin-bottom:3px;">🌿 Ayurvedic Lifestyle &amp; Dinacharya Tip for the Month:</div>
+                <div style="font-size:10.5px; color:#4B5563; line-height:1.52;">
+                    Drink a glass of warm water with a few drops of lemon upon waking. Avoid excessive fried snacks or very spicy food during late-night dinners. An occasional head massage with coconut or sesame oil before bed will calm down active mental chatter and grant deep, rejuvenating sleep.
+                </div>
+            </div>
+
+            <!-- On-Page Symbol Guide Explaining Remedial Emojis -->
+            <?php echo self::render_symbol_guide_bar([
+                ['icon' => '🔥/🌍/💨/🌊/🌌', 'term' => '5 Elements',   'desc' => 'Fire (Agni), Earth (Prithvi), Air (Vayu), Water (Jala), Space (Akash)'],
+                ['icon' => '💎', 'term' => 'Ratna Therapy',     'desc' => 'Pure natural stones that channel positive planetary rays into the body'],
+                ['icon' => '📿', 'term' => 'Japa Mantra',       'desc' => 'Sacred sound vibrations that calm the nervous system and sharpen memory'],
+                ['icon' => '🏺', 'term' => 'Daan (Charity)',    'desc' => 'Selfless giving of food, grains, or clothes to wash away karmic debts']
+            ], 'Remedial Symbols'); ?>
+        </div>
+
+        <div>
+            <?php echo self::render_page_bottom_synthesis([
+                "Vedic remedies (Upayas) are not about fear or superstition; they are about restoring natural harmony to your body, mind, and environment.",
+                "Offering water (Arghya) to the rising sun daily takes only 2 minutes, but boosts willpower, eye health, and career standing.",
+                "Wearing a natural 5-Mukhi Rudraksha balances your blood pressure and protects your aura from negative office vibes.",
+                "Acts of simple charity done with a clean heart on Sundays or Wednesdays invite lasting divine protection and prosperity into your life."
+            ], 'Essential Monthly Takeaways', $head_font); ?>
+
+            <div class="mr-footer-bar">
+                <span>MeraRashifal · Elemental Balance &amp; Remedies</span>
+                <span class="mr-page-num">Page 11 of 13</span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ========================================================
+         PAGE 12: THE MASTER SOVEREIGN HORIZON (EXECUTIVE DASHBOARD)
+         ======================================================== -->
+    <div class="mr-page">
+        <div>
+            <div class="mr-header-bar">
+                <div class="mr-header-brand-wrap">
+                    <img src="<?php echo esc_attr($logo_uri); ?>" alt="MeraRashifal" class="mr-header-logo-img" />
+                </div>
+                <span class="mr-header-meta"><?php echo esc_html($person_name . ' · ' . $month_year); ?></span>
+            </div>
+
+            <div class="mr-tag-pill">11 · Monthly Master Compass</div>
+            <h1 class="mr-page-h1">Monthly Master Summary &amp; Life Compass</h1>
+            <div class="mr-page-sub">Your Complete Month in One View: Main Thesis, Sankalpa Mantra &amp; Golden Rules</div>
+
+            <div class="mr-card terracotta-accent" style="padding:12px 16px;">
+                <div style="font-size:10px; color:#C45738; letter-spacing:0.12em; text-transform:uppercase; font-weight:800;">📜 Monthly Master Mantra &amp; Resolution</div>
+                <h2 style="font-family:<?php echo $head_font; ?>; font-size:19px; color:#111827; font-weight:700; margin:3px 0 6px 0;">&ldquo;<?php echo esc_html($theme); ?>&rdquo;</h2>
+                <div style="font-family:<?php echo $head_font; ?>; font-size:15px; font-style:italic; color:#4B5563; line-height:1.5;">
+                    &ldquo;<?php echo esc_html($dashboard['sankalpa'] ?? 'I will work with calm patience and diligence in the first half of the month; my sincerity will bring success, financial stability, and family happiness in the second half.'); ?>&rdquo;
+                </div>
+            </div>
+
+            <div class="mr-grid-4">
+                <div class="mr-card terracotta-accent" style="text-align:center; padding:9px 6px; margin-bottom:0;">
+                    <span style="font-size:9.5px; font-weight:700; color:#4B5563; text-transform:uppercase;">🏹 Career</span>
+                    <div style="font-size:16px; font-weight:800; color:#111827; margin-top:1px;"><?php echo esc_html($pillars['karma']['score'] ?? 78); ?>%</div>
+                    <span style="font-size:8.5px; color:#4E7D68; font-weight:700;">High Growth</span>
+                </div>
+                <div class="mr-card sage-accent" style="text-align:center; padding:9px 6px; margin-bottom:0;">
+                    <span style="font-size:9.5px; font-weight:700; color:#4B5563; text-transform:uppercase;">💰 Money</span>
+                    <div style="font-size:16px; font-weight:800; color:#111827; margin-top:1px;"><?php echo esc_html($pillars['dhana']['score'] ?? 68); ?>%</div>
+                    <span style="font-size:8.5px; color:#C2964C; font-weight:700;">Stable Income</span>
+                </div>
+                <div class="mr-card gold-accent" style="text-align:center; padding:9px 6px; margin-bottom:0;">
+                    <span style="font-size:9.5px; font-weight:700; color:#4B5563; text-transform:uppercase;">🪷 Family</span>
+                    <div style="font-size:16px; font-weight:800; color:#111827; margin-top:1px;"><?php echo esc_html($pillars['prema']['score'] ?? 64); ?>%</div>
+                    <span style="font-size:8.5px; color:#C45738; font-weight:700;">Patience Needed</span>
+                </div>
+                <div class="mr-card slate-accent" style="text-align:center; padding:9px 6px; margin-bottom:0;">
+                    <span style="font-size:9.5px; font-weight:700; color:#4B5563; text-transform:uppercase;">🌿 Health</span>
+                    <div style="font-size:16px; font-weight:800; color:#111827; margin-top:1px;"><?php echo esc_html($pillars['arogya']['score'] ?? 86); ?>%</div>
+                    <span style="font-size:8.5px; color:#4E7D68; font-weight:700;">Good Stamina</span>
+                </div>
+            </div>
+
+            <!-- Golden Rules for the Month to Fill Space with Rich Insights -->
+            <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:8px; padding:10px 14px; margin-top:8px;">
+                <div style="font-size:11.5px; font-weight:700; color:#111827; margin-bottom:4px;">🌟 4 Golden Rules for <?php echo esc_html($person_name); ?> This Month:</div>
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; font-size:10.5px; line-height:1.5;">
+                    <div><strong style="color:#C45738;">1. Career:</strong> Deliver high-quality work silently; do not indulge in office debates before November 15.</div>
+                    <div><strong style="color:#4E7D68;">2. Money:</strong> Control impulsive online shopping; save money for planned future investments.</div>
+                    <div><strong style="color:#C2964C;">3. Family:</strong> Listen to your spouse with care and respect your parents' advice on household matters.</div>
+                    <div><strong style="color:#111827;">4. Health:</strong> Take a 20-minute morning walk and offer water to Surya Dev for steady mental peace.</div>
+                </div>
+            </div>
+
+            <div style="margin-top:8px; border:1px solid #ECE6DD; border-radius:8px; padding:8px; background:#FAF7F2; text-align:center;">
+                <div style="font-family:<?php echo $head_font; ?>; font-size:13.5px; font-weight:700; color:#111827; letter-spacing:0.04em;">
+                    🏛️ MeraRashifal Certified Vedic Document
+                </div>
+                <p style="font-size:10px; color:#4B5563; margin:1px 0 0 0; line-height:1.45;">
+                    Calculated using standard Indian Lahiri Chitra Paksha Ayanamsha and authentic Maharishi Parashari Jyotish principles.
+                </p>
+            </div>
+
+            <!-- On-Page Symbol Guide Explaining Master Overview Icons -->
+            <?php echo self::render_symbol_guide_bar([
+                ['icon' => '📜', 'term' => 'Maha Mantra',  'desc' => 'Core philosophy guiding all your daily thoughts, speech & decisions'],
+                ['icon' => '🧭', 'term' => 'Sankalpa',     'desc' => 'Your personal morning resolution for staying grounded and focused'],
+                ['icon' => '🏛️', 'term' => 'Siddhanta',    'desc' => 'Authentic mathematical calculations based on classical Parashari Jyotish']
+            ], 'Horizon Master Keys'); ?>
+        </div>
+
+        <div>
+            <?php echo self::render_page_bottom_synthesis([
+                "Keep this Master Summary page handy on your phone or printed on your study table throughout the month.",
+                "Refer to your Shubh Power Days (Nov 7, 8, 26, 27) whenever scheduling important job interviews, business meetings, or purchases.",
+                "Patience in challenging situations is the true mark of wisdom: let small irritations pass without reacting.",
+                "Walk forward with self-belief, honest intentions, and deep faith in your hard work (Karma) and God's blessings."
+            ], 'Essential Monthly Takeaways', $head_font); ?>
+
+            <div class="mr-footer-bar">
+                <span>MeraRashifal · Monthly Master Summary</span>
+                <span class="mr-page-num">Page 12 of 13</span>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ========================================================
+         PAGE 13: THANK YOU & REPORT CATALOG (LOGO IN HEADER)
+         ======================================================== -->
+    <div class="mr-page">
+        <div>
+            <div class="mr-header-bar">
+                <div class="mr-header-brand-wrap">
+                    <img src="<?php echo esc_attr($logo_uri); ?>" alt="MeraRashifal" class="mr-header-logo-img" />
+                </div>
+                <span class="mr-header-meta">Astrological Catalogue &amp; Archive</span>
+            </div>
+
+            <div style="text-align:center; margin-bottom:8px;">
+                <div class="mr-tag-pill">Complete Vedic Library</div>
+                <h1 class="mr-page-h1" style="font-size:19px;">Thank You, <?php echo esc_html($person_name); ?> ji!</h1>
+                <div class="mr-page-sub" style="margin-bottom:6px;">Explore Our Other Tailored Vedic Reports for You and Your Family</div>
+            </div>
+
+            <!-- 6 Premium Reports Showcase in Clear Indian English -->
+            <div class="mr-offer-card">
+                <div class="mr-offer-icon">💎</div>
+                <div class="mr-offer-info">
+                    <h4>Complete Janam Kundali &amp; Lifetime Destiny Report</h4>
+                    <p>Exhaustive 20–25 page birth analysis covering D1, D9 Navamsha, D10 Dashamsha, Shadbala, and 12-house life trajectory for career, marriage, and wealth.</p>
+                    <div class="mr-offer-meta">20–25 Pages · Comprehensive Parashari &amp; Jaimini Analysis · Includes Full Kundali Chart</div>
+                </div>
+            </div>
+
+            <div class="mr-offer-card">
+                <div class="mr-offer-icon">💍</div>
+                <div class="mr-offer-info">
+                    <h4>Kundali Matching (Gun Milan) &amp; Marriage Compatibility</h4>
+                    <p>Authentic 36-Point Ashtakoot scorecard, Manglik Dosh check, Papasamaya malefic balance, Nadi &amp; Bhakoot analysis, and 20-year timeline sync for bride &amp; groom.</p>
+                    <div class="mr-offer-meta">20 Pages · Ashtakoot &amp; Dasha Synchronization · Dual Partner Vedic Analysis</div>
+                </div>
+            </div>
+
+            <div class="mr-offer-card">
+                <div class="mr-offer-icon">⏳</div>
+                <div class="mr-offer-info">
+                    <h4>Vedic Mahadasha &amp; Antardasha Life Timing Report</h4>
+                    <p>Deep chronological breakdown of your active Vimshottari Mahadasha, Antardasha sub-periods, and upcoming good/bad event timing windows for the next 10 years.</p>
+                    <div class="mr-offer-meta">20 Pages · Chronological Event Timing Matrix · Parashari Dasha Engine</div>
+                </div>
+            </div>
+
+            <div class="mr-offer-card">
+                <div class="mr-offer-icon">🛡️</div>
+                <div class="mr-offer-info">
+                    <h4>Kundali Dosh Analysis &amp; Vedic Remedial Prescription</h4>
+                    <p>Thorough scan for Manglik Dosh, Kaal Sarp Dosh, Pitra Dosh, and Shani Sade Sati/Dhaiya with safe, authentic gemstone, mantra, and practical home remedies.</p>
+                    <div class="mr-offer-meta">15–20 Pages · 90-Day Karmic Harmonization Plan · Certified Vedic Remedial Solutions</div>
+                </div>
+            </div>
+
+            <div class="mr-offer-card">
+                <div class="mr-offer-icon">🔢</div>
+                <div class="mr-offer-info">
+                    <h4>Master Numerology &amp; Lo Shu Grid Integration Report</h4>
+                    <p>3x3 Lo Shu Chinese-Vedic magic square grid, Mulank (Birth Number), Bhagyank (Destiny Number), lucky phone/house numbers, and name spelling corrections.</p>
+                    <div class="mr-offer-meta">20–25 Pages · Lo Shu Matrix &amp; Planetary Lord Rulers · Arrow Strengths</div>
+                </div>
+            </div>
+
+            <div class="mr-offer-card">
+                <div class="mr-offer-icon">☀️</div>
+                <div class="mr-offer-info">
+                    <h4>Annual Varshaphal (1-Year Solar Return) Horoscope</h4>
+                    <p>Complete 12-month predictive roadmap from your birthday to next birthday, Muntha position, active annual dasha, and month-by-month career &amp; health guide.</p>
+                    <div class="mr-offer-meta">12–15 Pages · Tajika Annual Engine · Month-by-Month Predictive Guidance</div>
+                </div>
+            </div>
+        </div>
+
+        <div style="border-top:1px solid #ECE6DD; padding-top:7px; text-align:center; font-size:10px; color:#4B5563; z-index:2; line-height:1.6;">
+            <div style="font-weight:800; color:#111827; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:2px;">
+                Access Your Reports Archive &amp; Order New Blueprints
+            </div>
+            <span>Visit your personal portal at: <strong style="color:#C45738;">merarashifal.com/my-account-reports/</strong></span><br>
+            <span style="font-size:9px; color:#6B7280; margin-top:2px; display:block;">
+                Astrology is a divine guidance tool to help you make conscious, wise decisions with God's grace and your own sincere hard work (Karma). &copy; <?php echo date('Y'); ?> MeraRashifal. All rights reserved.
+            </span>
+        </div>
+    </div>
+
+</body>
+</html>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * Build Complete 15-Page Annual Varshaphal Horoscope Report HTML
+     */
+    public static function build_yearly_report_html($person_name, $gender, $dob, $tob, $pob, $year = 2027, $editorial_data = [], $vedic_data = [], $typography_option = 'option2') {
+        if (class_exists('MR_Yearly_Report_Builder')) {
+            return MR_Yearly_Report_Builder::build_yearly_report_html($person_name, $gender, $dob, $tob, $pob, $year, $editorial_data, $vedic_data, $typography_option);
+        }
+        return '';
+    }
+}

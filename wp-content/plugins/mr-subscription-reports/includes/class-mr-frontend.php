@@ -1,0 +1,1753 @@
+<?php
+/**
+ * Frontend Controller: Pricing Page, A la Carte Catalog, Simulated PG & Progress Engine
+ */
+
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+class MR_Frontend {
+
+    public static $banner_rendered = false;
+    public static $notify_modal_rendered = false;
+
+    public static function init() {
+        add_action('wp_enqueue_scripts', [__CLASS__, 'enqueue_assets']);
+        add_shortcode('mr_pricing_plans', [__CLASS__, 'render_pricing_plans']);
+        add_shortcode('mr_reports_catalog', [__CLASS__, 'render_alacarte_catalog']);
+        add_shortcode('mr_alacarte_catalog', [__CLASS__, 'render_alacarte_catalog']);
+        add_shortcode('mr_user_dashboard', [__CLASS__, 'render_user_dashboard']);
+
+        // AJAX handlers
+        add_action('wp_ajax_mr_generate_report', [__CLASS__, 'ajax_generate_report']);
+        add_action('wp_ajax_nopriv_mr_generate_report', [__CLASS__, 'ajax_generate_report']);
+
+        add_action('wp_ajax_mr_check_report_status', [__CLASS__, 'ajax_check_report_status']);
+        add_action('wp_ajax_nopriv_mr_check_report_status', [__CLASS__, 'ajax_check_report_status']);
+
+        add_action('wp_ajax_mr_simulate_payment', [__CLASS__, 'ajax_simulate_payment']);
+        add_action('wp_ajax_nopriv_mr_simulate_payment', [__CLASS__, 'ajax_simulate_payment']);
+
+        add_action('wp_ajax_mr_city_search', [__CLASS__, 'ajax_city_search']);
+        add_action('wp_ajax_nopriv_mr_city_search', [__CLASS__, 'ajax_city_search']);
+
+        add_action('wp_ajax_mr_view_sample_report', [__CLASS__, 'ajax_view_sample_report']);
+        add_action('wp_ajax_nopriv_mr_view_sample_report', [__CLASS__, 'ajax_view_sample_report']);
+
+        // Global Progress Banner & Brand Notification Modal rendered in footer across all pages
+        add_action('wp_footer', [__CLASS__, 'render_global_progress_banner']);
+        add_action('wp_footer', [__CLASS__, 'render_brand_notification_modal']);
+    }
+
+    public static function enqueue_assets() {
+        // Enqueue FontAwesome for cosmic icons
+        wp_enqueue_style(
+            'mr-font-awesome',
+            'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
+            [],
+            '6.4.0'
+        );
+
+        $css_ver = file_exists(dirname(dirname(__FILE__)) . '/assets/css/mr-reports.css') ? filemtime(dirname(dirname(__FILE__)) . '/assets/css/mr-reports.css') : '1.2.0';
+        $js_ver  = file_exists(dirname(dirname(__FILE__)) . '/assets/js/mr-reports.js') ? filemtime(dirname(dirname(__FILE__)) . '/assets/js/mr-reports.js') : '1.2.0';
+
+        wp_enqueue_style(
+            'mr-reports-css',
+            plugins_url('assets/css/mr-reports.css', dirname(__FILE__)),
+            ['mr-font-awesome'],
+            $css_ver
+        );
+
+        wp_enqueue_script(
+            'mr-reports-js',
+            plugins_url('assets/js/mr-reports.js', dirname(__FILE__)),
+            ['jquery'],
+            $js_ver,
+            true
+        );
+
+        // Ensure rogue Google Maps places script is dequeued to prevent RefererNotAllowedMapError input locking
+        wp_dequeue_script('google-maps-places');
+
+        $user_id = get_current_user_id();
+        $account_url = class_exists('MR_Account_UI') ? MR_Account_UI::get_account_page_url() : home_url('/my-account/');
+        $user_astro_details = null;
+        if ($user_id) {
+            $user_obj = wp_get_current_user();
+            $user_astro_details = [
+                'name'   => get_user_meta($user_id, 'mr_astro_name', true) ?: $user_obj->display_name,
+                'gender' => get_user_meta($user_id, 'mr_astro_gender', true) ?: 'Male',
+                'dob'    => get_user_meta($user_id, 'mr_astro_dob', true) ?: '',
+                'tob'    => get_user_meta($user_id, 'mr_astro_tob', true) ?: '',
+                'pob'    => get_user_meta($user_id, 'mr_astro_pob', true) ?: '',
+                'lat'    => get_user_meta($user_id, 'mr_astro_lat', true) ?: '',
+                'lon'    => get_user_meta($user_id, 'mr_astro_lon', true) ?: '',
+                'tz'     => get_user_meta($user_id, 'mr_astro_tz', true) ?: '5.5',
+            ];
+        }
+
+        wp_localize_script('mr-reports-js', 'mr_reports_vars', [
+            'ajax_url' => admin_url('admin-ajax.php'),
+            'nonce'    => wp_create_nonce('mr_reports_nonce'),
+            'is_logged_in' => is_user_logged_in(),
+            'login_url' => $account_url,
+            'pricing_url' => home_url('/pricing/'),
+            'catalog_url' => home_url('/reports-catalog/'),
+            'dashboard_url' => home_url('/my-account-reports/'),
+            'account_url'   => $account_url,
+            'user_email'    => ($user_id && isset($user_obj)) ? $user_obj->user_email : '',
+            'user_astro_details' => $user_astro_details,
+        ]);
+
+    }
+
+    /**
+     * Shortcode: [mr_pricing_plans]
+     * Cosmic Glassmorphic Pricing & Subscription Packs Selection Page
+     */
+    public static function render_pricing_plans($atts) {
+        $user_id = get_current_user_id();
+        $packs = MR_Packs::get_packs();
+        $active_sub = $user_id ? MR_Tokens::get_active_subscription($user_id) : null;
+
+        ob_start();
+        ?>
+        <div class="mr-cosmic-wrapper mr-pricing-page">
+            
+            <!-- Hero Title & Controls -->
+            <div class="mr-text-center mr-space-y-6">
+                <div class="mr-hero-badge">Cosmic Memberships</div>
+                <h1 class="mr-cosmic-h1">
+                    Find the Plan That Fits Your <span class="mr-gold-gradient">Stars</span>
+                </h1>
+                <p class="mr-cosmic-sub">
+                    Choose between Vedic & Western Astrology packs with full report quotas. Multi-currency support (USD & CAD).
+                </p>
+
+                <!-- Controls Row: Currency + System Selector -->
+                <div class="mr-controls-row">
+                    <!-- Vedic vs Western Toggle -->
+                    <div class="mr-glass-toggle">
+                        <button type="button" class="mr-toggle-btn active" data-system="vedic" id="mr-btn-vedic">
+                            <i class="fa-solid fa-om"></i> Vedic Astrology Packs
+                        </button>
+                        <button type="button" class="mr-toggle-btn" data-system="western" id="mr-btn-western">
+                            <i class="fa-solid fa-star"></i> Western Astrology Packs
+                        </button>
+                    </div>
+
+                    <!-- Currency Toggle (USD vs CAD) -->
+                    <div class="mr-currency-toggle">
+                        <span class="mr-curr-label">Currency:</span>
+                        <button type="button" class="mr-curr-btn active" data-currency="USD">USD ($)</button>
+                        <button type="button" class="mr-curr-btn" data-currency="CAD">CAD ($)</button>
+                    </div>
+                </div>
+
+                <!-- 4 Billing Cycles Selector -->
+                <div class="mr-cycles-row">
+                    <button type="button" class="mr-cycle-btn" data-cycle="monthly">Monthly</button>
+                    <button type="button" class="mr-cycle-btn" data-cycle="quarterly">Quarterly <span class="mr-pill-badge">Save 10%</span></button>
+                    <button type="button" class="mr-cycle-btn" data-cycle="halfyearly">Half Yearly <span class="mr-pill-badge">Save 15%</span></button>
+                    <button type="button" class="mr-cycle-btn active" data-cycle="yearly">Yearly Pack <span class="mr-pill-badge gold">Save 20%</span></button>
+                </div>
+            </div>
+
+            <!-- Current Active Sub Alert if logged in -->
+            <?php if ($user_id && $active_sub): ?>
+                <div class="mr-glass-alert">
+                    <i class="fa-solid fa-circle-check text-amber-400"></i>
+                    <div>
+                        <strong>You currently have an active plan:</strong> <?php echo esc_html($active_sub->pack_name); ?>
+                        <span style="color:#94a3b8; font-size:13px; margin-left: 8px;">(Valid until <?php echo esc_html(date_i18n(get_option('date_format'), strtotime($active_sub->expiry_date))); ?>)</span>
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <!-- 4 Pack Showcase Grid -->
+            <div class="mr-packs-grid" id="mr-packs-grid">
+                <?php foreach ($packs as $key => $p): ?>
+                    <div class="mr-glass-card mr-pack-card" data-key="<?php echo esc_attr($key); ?>" data-system="<?php echo esc_attr($p['system']); ?>" data-cycle="<?php echo esc_attr($p['cycle']); ?>" data-name="<?php echo esc_attr($p['name']); ?>" data-usd="<?php echo esc_attr($p['price_usd']); ?>" data-cad="<?php echo esc_attr($p['price_cad']); ?>" style="<?php echo ($p['system'] === 'vedic' && $p['cycle'] === 'yearly') ? '' : 'display:none;'; ?>">
+                        
+                        <?php if (!empty($p['badge'])): ?>
+                            <div class="mr-popular-tag"><?php echo esc_html($p['badge']); ?></div>
+                        <?php endif; ?>
+
+                        <div class="mr-pack-header">
+                            <span class="mr-pack-system-badge"><?php echo esc_html(ucfirst($p['system'])); ?> Pack</span>
+                            <h3 class="mr-pack-name"><?php echo esc_html($p['name']); ?></h3>
+                            <div class="mr-pack-pricing">
+                                <span class="mr-price-amount" data-usd="$<?php echo esc_html($p['price_usd']); ?>" data-cad="$<?php echo esc_html($p['price_cad']); ?>">$<?php echo esc_html($p['price_usd']); ?></span>
+                                <span class="mr-price-curr">USD</span>
+                                <span class="mr-price-period">/ <?php echo esc_html($p['duration_label']); ?></span>
+                            </div>
+                        </div>
+
+                        <div class="mr-pack-body">
+                            <h4 class="mr-pack-included-title">Report Tokens Included:</h4>
+                            <ul class="mr-pack-quota-list">
+                                <?php foreach ($p['quotas'] as $r_slug => $quota): 
+                                    $r_obj = MR_Packs::get_report($r_slug);
+                                ?>
+                                    <li>
+                                        <i class="fa-solid fa-check text-amber-400"></i>
+                                        <span><?php echo esc_html($r_obj['name'] ?? $r_slug); ?></span>
+                                        <span class="mr-quota-badge"><?php echo esc_html($quota); ?></span>
+                                    </li>
+                                <?php endforeach; ?>
+                            </ul>
+                        </div>
+
+                        <div class="mr-pack-footer">
+                            <button type="button" class="mr-btn-glow mr-btn-buy-pack" data-pack-key="<?php echo esc_attr($key); ?>">
+                                <i class="fa-solid fa-bolt"></i> Choose Pack (Simulate PG)
+                            </button>
+                            <p class="mr-pack-subtext">Instant token activation &bull; Cancel anytime</p>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+            <!-- Full Comparison Table -->
+            <div class="mr-comparison-section">
+                <div class="mr-text-center mr-space-y-2">
+                    <h2 class="mr-cosmic-h2">Plan Comparison & Token Frequency</h2>
+                    <p class="mr-cosmic-sub">All included report quotas per billing cycle.</p>
+                </div>
+
+                <div class="mr-glass-panel mr-table-scroll">
+                    <table class="mr-cosmic-table" id="mr-comparison-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 35%;">Report Included</th>
+                                <th style="text-align: center;">Monthly Pack</th>
+                                <th style="text-align: center;">Quarterly Pack</th>
+                                <th style="text-align: center;">Half Yearly Pack</th>
+                                <th style="text-align: center; color: #fbbf24;">Yearly Pack</th>
+                            </tr>
+                        </thead>
+                        <tbody id="mr-comparison-tbody">
+                            <!-- Populated dynamically via JS based on Vedic vs Western -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+        <?php echo self::render_simulated_pg_modal(); ?>
+        <?php echo self::render_details_capture_and_banner_modal(); ?>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * Shortcode: [mr_alacarte_catalog] or [mr_reports_catalog]
+     * Single Report Selection & Sales Page
+     */
+    public static function render_alacarte_catalog($atts) {
+        if (class_exists('MR_Catalog_Manager')) {
+            return MR_Catalog_Manager::render_sales_grid($atts);
+        }
+
+        $user_id = get_current_user_id();
+        $reports = MR_Packs::get_reports();
+        $tokens = $user_id ? MR_Tokens::get_user_tokens($user_id) : [];
+        $active_sub = $user_id ? MR_Tokens::get_active_subscription($user_id) : null;
+
+        ob_start();
+        ?>
+        <div class="mr-cosmic-wrapper mr-alacarte-page">
+            
+            <!-- Hero Header -->
+            <div class="mr-text-center mr-space-y-6">
+                <div class="mr-hero-badge">Personalized Readings</div>
+                <h1 class="mr-cosmic-h1">
+                    Personalized Astrology <span class="mr-gold-gradient">Reports</span>
+                </h1>
+                <p class="mr-cosmic-sub">
+                    Order individual deep-dive PDF reports a la carte, or generate instantly using your subscription tokens.
+                </p>
+
+                <!-- Filters & Currency Toggle -->
+                <div class="mr-controls-row">
+                    <div class="mr-glass-filters">
+                        <button type="button" class="mr-filter-btn active" data-filter="all">All Reports</button>
+                        <button type="button" class="mr-filter-btn" data-filter="vedic">Vedic</button>
+                        <button type="button" class="mr-filter-btn" data-filter="western">Western</button>
+                        <button type="button" class="mr-filter-btn" data-filter="tarot">Tarot & Numerology</button>
+                    </div>
+
+                    <!-- Currency Switcher -->
+                    <div class="mr-currency-toggle">
+                        <span class="mr-curr-label">Currency:</span>
+                        <button type="button" class="mr-curr-btn active" data-currency="USD">USD ($)</button>
+                        <button type="button" class="mr-curr-btn" data-currency="CAD">CAD ($)</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Subscription Notification -->
+            <?php if ($user_id && $active_sub): ?>
+                <div class="mr-glass-alert">
+                    <i class="fa-solid fa-crown text-amber-400"></i>
+                    <div>
+                        <strong>Subscribed to <?php echo esc_html($active_sub->pack_name); ?></strong> &bull; Tokens remaining will be used automatically before a la carte charges.
+                    </div>
+                </div>
+            <?php endif; ?>
+
+            <!-- Reports Catalog Grid -->
+            <div class="mr-reports-catalog-grid">
+                <?php foreach ($reports as $slug => $r): 
+                    $rem = isset($tokens[$slug]) ? $tokens[$slug]['remaining'] : 0;
+                    $sys_filter = ($r['system'] === 'universal') ? 'tarot' : $r['system'];
+                ?>
+                    <div class="mr-glass-card mr-alacarte-card" data-slug="<?php echo esc_attr($slug); ?>" data-title="<?php echo esc_attr($r['name']); ?>" data-system="<?php echo esc_attr($sys_filter); ?>" data-usd="<?php echo esc_attr($r['price_usd']); ?>" data-cad="<?php echo esc_attr($r['price_cad']); ?>">
+                        
+                        <div class="mr-card-top">
+                            <span class="mr-cat-pill"><?php echo esc_html($r['category']); ?></span>
+                            <span class="mr-pages-pill"><i class="fa-regular fa-file-pdf"></i> <?php echo esc_html($r['pages']); ?></span>
+                        </div>
+
+                        <div class="mr-card-main">
+                            <div class="mr-card-icon-wrap">
+                                <i class="<?php echo esc_attr($r['icon']); ?>"></i>
+                            </div>
+                            <h3 class="mr-card-title"><?php echo esc_html($r['name']); ?></h3>
+                            <p class="mr-card-desc"><?php echo esc_html($r['description']); ?></p>
+
+                            <div class="mr-price-display">
+                                <span class="mr-price-val" data-usd="$<?php echo esc_html(number_format($r['price_usd'], 2)); ?>" data-cad="$<?php echo esc_html(number_format($r['price_cad'], 2)); ?>">$<?php echo esc_html(number_format($r['price_usd'], 2)); ?></span>
+                                <span class="mr-price-curr">USD</span>
+                                <span class="mr-alacarte-label">(A la Carte)</span>
+                            </div>
+                        </div>
+
+                        <div class="mr-card-bottom">
+                            <?php if ($user_id && $rem > 0): ?>
+                                <!-- User has tokens -->
+                                <div class="mr-token-tag has-token">
+                                    <i class="fa-solid fa-ticket"></i> <?php echo esc_html($rem); ?> Token<?php echo $rem === 1 ? '' : 's'; ?> Available
+                                </div>
+                                <button type="button" class="mr-btn-glow mr-btn-generate-direct" data-slug="<?php echo esc_attr($slug); ?>" data-title="<?php echo esc_attr($r['name']); ?>">
+                                    Generate with Token &rarr;
+                                </button>
+                            <?php else: ?>
+                                <!-- User must purchase a la carte or pack -->
+                                <button type="button" class="mr-btn-glow mr-btn-buy-alacarte" data-slug="<?php echo esc_attr($slug); ?>" data-title="<?php echo esc_attr($r['name']); ?>">
+                                    <i class="fa-solid fa-cart-shopping"></i> Buy A la Carte
+                                </button>
+                                <div class="mr-upsell-link">
+                                    <span>or get FREE with</span>
+                                    <a href="<?php echo esc_url(home_url('/pricing/')); ?>">
+                                        <?php echo esc_html($r['system'] === 'western' ? 'Western Pack' : 'Vedic Pack'); ?> &rarr;
+                                    </a>
+                                </div>
+                            <?php endif; ?>
+                            
+                            <!-- Sample report preview trigger -->
+                            <button type="button" class="mr-link-sample" data-title="<?php echo esc_attr($r['name']); ?>" data-slug="<?php echo esc_attr($slug); ?>">
+                                <i class="fa-regular fa-eye"></i> View Sample Reading
+                            </button>
+                        </div>
+
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+        </div>
+
+        <?php echo self::render_simulated_pg_modal(); ?>
+        <?php echo self::render_details_capture_and_banner_modal(); ?>
+        <?php echo self::render_sample_preview_modal(); ?>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * Render the Simulated Payment Gateway (PG) Modal
+     */
+    public static function render_simulated_pg_modal() {
+        ob_start();
+        ?>
+        <div id="mr-pg-modal" class="mr-modal" style="display:none;">
+            <div class="mr-modal-content mr-pg-content">
+                <span class="mr-modal-close mr-pg-close">&times;</span>
+
+                <div class="mr-pg-header">
+                    <div class="mr-pg-shield">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <div>
+                        <h3 class="mr-pg-title">Secure Payment Gateway</h3>
+                        <p class="mr-pg-mode-badge"><i class="fa-solid fa-flask"></i> Sandbox Simulation Mode</p>
+                    </div>
+                </div>
+
+                <div class="mr-order-summary-box">
+                    <div class="mr-order-row">
+                        <span class="mr-order-label">Item Selected:</span>
+                        <strong id="mr-pg-item-name" class="mr-order-val">Monthly Pack (Vedic)</strong>
+                    </div>
+                    <div class="mr-order-row">
+                        <span class="mr-order-label">Order Type:</span>
+                        <span id="mr-pg-order-type" class="mr-order-val">Subscription Pack</span>
+                    </div>
+                    <div class="mr-order-row mr-total-row">
+                        <span class="mr-order-label">Total Due:</span>
+                        <strong id="mr-pg-total-amount" class="mr-total-val">$6.99 USD</strong>
+                    </div>
+                </div>
+
+                <!-- Mock Payment Options -->
+                <div class="mr-mock-payment-options">
+                    <div class="mr-pay-opt active">
+                        <i class="fa-solid fa-credit-card"></i>
+                        <span>Card (•••• 4242)</span>
+                    </div>
+                    <div class="mr-pay-opt">
+                        <i class="fa-brands fa-paypal"></i>
+                        <span>PayPal</span>
+                    </div>
+                    <div class="mr-pay-opt">
+                        <i class="fa-brands fa-google-pay"></i>
+                        <span>GPay / Apple</span>
+                    </div>
+                </div>
+
+                <!-- Simulation Choice Controls (Matching flowchart Payment Done? Yes / No) -->
+                <div class="mr-pg-simulation-actions">
+                    <p class="mr-sim-notice">
+                        <i class="fa-solid fa-circle-info"></i> In this demonstration mode, you can test both the <strong>Success</strong> and <strong>Failure</strong> gateway flows.
+                    </p>
+
+                    <button type="button" id="mr-btn-pg-success" class="mr-btn-pg-success">
+                        <i class="fa-solid fa-lock"></i> Complete Payment (Simulate Success)
+                    </button>
+
+                    <button type="button" id="mr-btn-pg-fail" class="mr-btn-pg-fail">
+                        <i class="fa-solid fa-triangle-exclamation"></i> Simulate Payment Failure
+                    </button>
+                </div>
+
+                <!-- Failure notice placeholder -->
+                <div id="mr-pg-error-msg" class="mr-pg-error-box" style="display:none;">
+                    <i class="fa-solid fa-circle-xmark"></i>
+                    <div>
+                        <strong>Payment Declined (Simulated Error):</strong>
+                        <p>Your mock transaction was unsuccessful. As per the flowchart, you can review details and retry.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * Render the Birth Details Capture Form Modal & Sticky Bottom Progress Banner
+     */
+    public static function render_details_capture_and_banner_modal($target_report_title = '', $target_report_slug = '') {
+        $user_id = get_current_user_id();
+        $current_user = $user_id ? wp_get_current_user() : null;
+
+        $default_name   = '';
+        $default_email  = '';
+        $default_gender = 'Male';
+        $default_dob    = '';
+        $default_tob    = '';
+        $default_pob    = '';
+        $default_lat    = '';
+        $default_lng    = '';
+        $default_tz     = '5.5';
+
+        if ($user_id && $current_user) {
+            $default_name   = get_user_meta($user_id, 'mr_astro_name', true) ?: ($current_user->first_name ? trim($current_user->first_name . ' ' . $current_user->last_name) : $current_user->display_name);
+            $default_email  = !empty($current_user->user_email) ? $current_user->user_email : '';
+            $default_gender = get_user_meta($user_id, 'mr_astro_gender', true) ?: 'Male';
+            $default_dob    = get_user_meta($user_id, 'mr_astro_dob', true) ?: '';
+            $default_tob    = get_user_meta($user_id, 'mr_astro_tob', true) ?: '';
+            $default_pob    = get_user_meta($user_id, 'mr_astro_pob', true) ?: '';
+            $default_lat    = get_user_meta($user_id, 'mr_astro_lat', true) ?: '';
+            $default_lng    = get_user_meta($user_id, 'mr_astro_lon', true) ?: (get_user_meta($user_id, 'mr_astro_lng', true) ?: '');
+            $default_tz     = get_user_meta($user_id, 'mr_astro_tz', true) ?: '5.5';
+        }
+
+        $display_report_title = !empty($target_report_title) ? $target_report_title : 'Yearly Horoscope Detailed Report (2026-2027)';
+        $display_report_slug  = !empty($target_report_slug) ? $target_report_slug : 'yearly_horoscope_long';
+
+        ob_start();
+        ?>
+        <!-- Birth Details Modal (MeraRashifal Brand Design System) -->
+        <div id="mr-details-modal" class="mr-modal" style="display:none;" role="dialog" aria-modal="true">
+            <div class="mr-modal-content mr-brand-modal-content">
+                <button type="button" class="mr-modal-close mr-details-close" aria-label="Close modal">&times;</button>
+                
+                <div class="mr-modal-header" style="margin-bottom:20px; padding-right:32px;">
+                    <div class="mr-tag-eyebrow" style="margin-bottom:10px;">
+                        <i class="fa-solid fa-sun" style="color:#D9A441;"></i> Seeking Birth Details For
+                    </div>
+                    <h3 id="mr-modal-report-title" class="mr-modal-brand-title"><?php echo esc_html($display_report_title); ?></h3>
+                    <p class="mr-modal-sub">Enter birth details to compute high-accuracy planetary coordinates, divisional charts (D1 &amp; D9) &amp; predictive life cycles.</p>
+                </div>
+
+                <form id="mr-birth-details-form" enctype="multipart/form-data">
+                    <input type="hidden" id="mr_report_slug" name="report_slug" value="<?php echo esc_attr($display_report_slug); ?>">
+
+                    <!-- Inline Modal Error Alert -->
+                    <div id="mr-modal-error-box" style="display:none; background:#FFF0F0; border:1.5px solid #E63946; border-radius:12px; padding:12px 16px; margin-bottom:18px; color:#A81423; font-size:13px; font-weight:600; line-height:1.45;">
+                        <i class="fa-solid fa-triangle-exclamation" style="margin-right:6px; color:#E63946;"></i>
+                        <span class="mr-error-text"></span>
+                    </div>
+
+                    <!-- A. Standard Single Person Fields (Default for 8 Reports) -->
+                    <div id="mr-single-person-fields">
+                        <div class="mr-form-group">
+                            <label for="mr_person_name" id="mr_person_name_label">Full Name *</label>
+                            <input type="text" id="mr_person_name" name="person_name" placeholder="e.g. Rahul Sharma" value="<?php echo esc_attr($default_name); ?>" autocomplete="name">
+                        </div>
+
+                        <div class="mr-form-row">
+                            <div class="mr-form-group mr-half">
+                                <label for="mr_gender">Gender *</label>
+                                <select id="mr_gender" name="gender">
+                                    <option value="Male" <?php selected($default_gender, 'Male'); ?>>Male</option>
+                                    <option value="Female" <?php selected($default_gender, 'Female'); ?>>Female</option>
+                                    <option value="Other" <?php selected($default_gender, 'Other'); ?>>Other</option>
+                                </select>
+                            </div>
+                            <div class="mr-form-group mr-half">
+                                <label for="mr_dob">Date of Birth *</label>
+                                <input type="date" id="mr_dob" name="dob" value="<?php echo esc_attr($default_dob); ?>">
+                            </div>
+                        </div>
+
+                        <div class="mr-form-row">
+                            <div class="mr-form-group mr-half">
+                                <label for="mr_tob">Time of Birth *</label>
+                                <input type="time" id="mr_tob" name="tob" value="<?php echo esc_attr($default_tob); ?>">
+                            </div>
+                            <div class="mr-form-group mr-half mr-pob-group" style="position:relative;">
+                                <label for="mr_pob">Place of Birth *</label>
+                                <div class="mr-city-input-wrap" style="position:relative; width:100%;">
+                                    <input type="text" id="mr_pob" name="pob" class="mr-city-input" placeholder="City, State, Country..." value="<?php echo esc_attr($default_pob); ?>" autocomplete="off">
+                                    <span class="mr-city-loader" id="mr_pob_loader"><span class="mr-city-spinner-ring"></span></span>
+                                </div>
+                                <div id="mr-pob-results" class="mr-city-results" style="display:none;"></div>
+                                <input type="hidden" id="mr_pob_lat" name="pob_lat" value="<?php echo esc_attr($default_lat); ?>">
+                                <input type="hidden" id="mr_pob_lng" name="pob_lng" value="<?php echo esc_attr($default_lng); ?>">
+                                <input type="hidden" id="mr_pob_tz" name="pob_tz" value="<?php echo esc_attr($default_tz); ?>">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- B. Palm Image Upload Field (Used for Master Hast Rekha & Palmistry Report) -->
+                    <div id="mr-palm-upload-fields" style="display:none; margin-bottom:18px;">
+                        <div style="background:#FFF9F0; border:1.5px dashed #D9A441; border-radius:16px; padding:16px; text-align:center;">
+                            <label style="display:block; font-weight:700; color:#7A1F3D; margin-bottom:6px; font-size:13.5px;">
+                                <i class="fa-solid fa-hand-holding-heart" style="color:#F58220; margin-right:6px;"></i> Dominant Palm Photo (Dominant Working Hand)
+                            </label>
+                            <p style="font-size:12px; color:#6B5E57; margin:0 0 10px 0; line-height:1.4;">
+                                Photograph your palm flat under bright, even lighting with fingers slightly apart.
+                            </p>
+                            <input type="file" id="mr_palm_image" name="palm_image" accept="image/*" style="display:none;">
+                            <button type="button" class="mr-btn-hero-secondary" id="mr-btn-choose-palm" style="padding:8px 20px; font-size:13px; border-radius:9999px;">
+                                <i class="fa-solid fa-camera"></i> Select or Snap Hand Photo
+                            </button>
+                            <div id="mr-palm-file-status" style="margin-top:8px; font-size:12.5px; font-weight:600; color:#2CB67D; display:none;"></div>
+                        </div>
+                    </div>
+
+                    <!-- C. Master Kundali Matching Dual Sets: Boy & Girl Details -->
+                    <div id="mr-matching-fields" style="display:none;">
+                        <div class="mr-matching-notice" style="background:#FFF9F0; border:1.5px solid #D9A441; border-radius:14px; padding:12px 16px; margin-bottom:16px; display:flex; align-items:center; gap:12px;">
+                            <i class="fa-solid fa-venus-mars" style="color:#F58220; font-size:22px; flex-shrink:0;"></i>
+                            <div style="font-size:12.5px; color:#7A1F3D; line-height:1.45;">
+                                <strong>Dual Kundali Required:</strong> Ashtakoot Gun Milan (36 Points) and Manglik dosha balancing require birth details for both the <strong>Boy (Var)</strong> and <strong>Girl (Kanya)</strong>.
+                            </div>
+                        </div>
+
+                        <!-- Boy's Section -->
+                        <div style="background:#FBF7F0; border:1.5px solid rgba(217,164,65,0.35); border-radius:16px; padding:16px; margin-bottom:16px;">
+                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px; color:#7A1F3D; font-weight:700; font-size:14px; font-family:'Playfair Display', serif;">
+                                <i class="fa-solid fa-mars" style="color:#4B7BEC; font-size:16px;"></i> 1. Boy's Astrological Details (Var)
+                            </div>
+                            <div class="mr-form-group">
+                                <label for="mr_boy_name">Boy's Full Name *</label>
+                                <input type="text" id="mr_boy_name" name="boy_name" placeholder="e.g. Rahul Sharma" autocomplete="off">
+                            </div>
+                            <div class="mr-form-row">
+                                <div class="mr-form-group mr-half">
+                                    <label for="mr_boy_dob">Boy's Date of Birth *</label>
+                                    <input type="date" id="mr_boy_dob" name="boy_dob">
+                                </div>
+                                <div class="mr-form-group mr-half">
+                                    <label for="mr_boy_tob">Boy's Time of Birth *</label>
+                                    <input type="time" id="mr_boy_tob" name="boy_tob">
+                                </div>
+                            </div>
+                            <div class="mr-form-group mr-pob-group" style="position:relative; margin-bottom:0 !important;">
+                                <label for="mr_boy_pob">Boy's Place of Birth *</label>
+                                <div class="mr-city-input-wrap" style="position:relative; width:100%;">
+                                    <input type="text" id="mr_boy_pob" name="boy_pob" class="mr-city-input" placeholder="City, State, Country..." autocomplete="off">
+                                    <span class="mr-city-loader" id="mr_boy_pob_loader"><span class="mr-city-spinner-ring"></span></span>
+                                </div>
+                                <div id="mr-boy-pob-results" class="mr-city-results" style="display:none;"></div>
+                                <input type="hidden" id="mr_boy_pob_lat" name="boy_pob_lat">
+                                <input type="hidden" id="mr_boy_pob_lng" name="boy_pob_lng">
+                                <input type="hidden" id="mr_boy_pob_tz" name="boy_pob_tz" value="5.5">
+                            </div>
+                        </div>
+
+                        <!-- Girl's Section -->
+                        <div style="background:#FFF6F6; border:1.5px solid rgba(230,107,165,0.35); border-radius:16px; padding:16px; margin-bottom:16px;">
+                            <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px; color:#7A1F3D; font-weight:700; font-size:14px; font-family:'Playfair Display', serif;">
+                                <i class="fa-solid fa-venus" style="color:#E66BA5; font-size:16px;"></i> 2. Girl's Astrological Details (Kanya)
+                            </div>
+                            <div class="mr-form-group">
+                                <label for="mr_girl_name">Girl's Full Name *</label>
+                                <input type="text" id="mr_girl_name" name="girl_name" placeholder="e.g. Priya Verma" autocomplete="off">
+                            </div>
+                            <div class="mr-form-row">
+                                <div class="mr-form-group mr-half">
+                                    <label for="mr_girl_dob">Girl's Date of Birth *</label>
+                                    <input type="date" id="mr_girl_dob" name="girl_dob">
+                                </div>
+                                <div class="mr-form-group mr-half">
+                                    <label for="mr_girl_tob">Girl's Time of Birth *</label>
+                                    <input type="time" id="mr_girl_tob" name="girl_tob">
+                                </div>
+                            </div>
+                            <div class="mr-form-group mr-pob-group" style="position:relative; margin-bottom:0 !important;">
+                                <label for="mr_girl_pob">Girl's Place of Birth *</label>
+                                <div class="mr-city-input-wrap" style="position:relative; width:100%;">
+                                    <input type="text" id="mr_girl_pob" name="girl_pob" class="mr-city-input" placeholder="City, State, Country..." autocomplete="off">
+                                    <span class="mr-city-loader" id="mr_girl_pob_loader"><span class="mr-city-spinner-ring"></span></span>
+                                </div>
+                                <div id="mr-girl-pob-results" class="mr-city-results" style="display:none;"></div>
+                                <input type="hidden" id="mr_girl_pob_lat" name="girl_pob_lat">
+                                <input type="hidden" id="mr_girl_pob_lng" name="girl_pob_lng">
+                                <input type="hidden" id="mr_girl_pob_tz" name="girl_pob_tz" value="5.5">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Universal Email Address Input -->
+                    <div class="mr-form-group">
+                        <label for="mr_recipient_email">Email Address (to receive report PDF link) *</label>
+                        <input type="email" id="mr_recipient_email" name="recipient_email" placeholder="e.g. rahul@example.com" value="<?php echo esc_attr($default_email); ?>" required autocomplete="email">
+                        <div class="mr-input-hint" style="display:flex; align-items:flex-start; gap:6px; font-size:12px; color:#6B5E57; margin-top:5px; line-height:1.4;">
+                            <i class="fa-solid fa-envelope" style="color:#F58220; margin-top:2px; flex-shrink:0;"></i>
+                            <span>Your comprehensive PDF report link will be delivered here instantly once generated.</span>
+                        </div>
+                    </div>
+
+                    <div class="mr-form-actions" style="margin-top:22px;">
+                        <button type="submit" class="mr-btn-brand-submit" id="mr-btn-submit-report">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Confirm &amp; Generate Report &rarr;
+                        </button>
+                    </div>
+
+                    <div class="mr-modal-footer-trust">
+                        <span><i class="fa-solid fa-shield-halved"></i> 100% Confidential</span>
+                        <span>&bull;</span>
+                        <span><i class="fa-solid fa-bolt"></i> Instant Generation</span>
+                        <span>&bull;</span>
+                        <span><i class="fa-solid fa-file-pdf"></i> Vector Print Ready</span>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <?php self::$banner_rendered = true; ?>
+        <!-- Sticky Bottom Progress Banner (Compact Notification <= 728x90) -->
+        <div id="mr-progress-banner" class="mr-progress-banner" style="display:none;" role="status" aria-live="polite">
+            <div class="mr-banner-compact-inner">
+                <div class="mr-banner-icon-col">
+                    <div class="mr-banner-spinner" id="mr-banner-spinner"></div>
+                    <i class="fa-solid fa-circle-check mr-banner-check-icon" id="mr-banner-check-icon" style="display:none;"></i>
+                </div>
+                <div class="mr-banner-content-col">
+                    <div class="mr-banner-header-row">
+                        <span class="mr-banner-pill" id="mr-banner-pill">In Process</span>
+                        <span class="mr-banner-item-name" id="mr-banner-title">Astrology Report</span>
+                    </div>
+                    <div class="mr-banner-text" id="mr-banner-status">Your requested report is in process, please visit other products till then.</div>
+                    <div class="mr-banner-progress-wrap">
+                        <div class="mr-banner-bar" id="mr-banner-bar" style="width: 20%;"></div>
+                    </div>
+                </div>
+                <div class="mr-banner-action-col">
+                    <button type="button" id="mr-go-to-report-btn" class="mr-btn-go-report" disabled>
+                        <span>Go To Report</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    </button>
+                    <button type="button" id="mr-banner-close-btn" class="mr-banner-close" aria-label="Dismiss">&times;</button>
+                </div>
+            </div>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * Render Global Progress Banner across all pages in wp_footer
+     */
+    public static function render_global_progress_banner() {
+        if (self::$banner_rendered) {
+            return;
+        }
+        self::$banner_rendered = true;
+        ?>
+        <!-- Global Sticky Progress Banner (MeraRashifal Brand Design System) -->
+        <div id="mr-progress-banner" class="mr-progress-banner" style="display:none;" role="status" aria-live="polite">
+            <div class="mr-banner-compact-inner">
+                <div class="mr-banner-icon-col">
+                    <div class="mr-banner-spinner" id="mr-banner-spinner"></div>
+                    <i class="fa-solid fa-circle-check mr-banner-check-icon" id="mr-banner-check-icon" style="display:none;"></i>
+                </div>
+                <div class="mr-banner-content-col">
+                    <div class="mr-banner-header-row">
+                        <span class="mr-banner-pill" id="mr-banner-pill">In Process</span>
+                        <span class="mr-banner-item-name" id="mr-banner-title">Astrology Report</span>
+                    </div>
+                    <div class="mr-banner-text" id="mr-banner-status">Your requested report is in process, please visit other products till then.</div>
+                    <div class="mr-banner-progress-wrap">
+                        <div class="mr-banner-bar" id="mr-banner-bar" style="width: 20%;"></div>
+                    </div>
+                </div>
+                <div class="mr-banner-action-col">
+                    <button type="button" id="mr-go-to-report-btn" class="mr-btn-go-report" disabled>
+                        <span>Go To Report</span>
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                    </button>
+                    <button type="button" id="mr-banner-close-btn" class="mr-banner-close" aria-label="Dismiss">&times;</button>
+                </div>
+            </div>
+        </div>
+        <?php
+    }
+
+    /**
+     * Render MeraRashifal Universal Brand Notification & Auth Dialog in wp_footer
+     */
+    public static function render_brand_notification_modal() {
+        if (self::$notify_modal_rendered) {
+            return;
+        }
+        self::$notify_modal_rendered = true;
+        $default_auth_url = class_exists('MR_Account_UI') ? MR_Account_UI::get_account_page_url() : home_url('/my-account/');
+        ?>
+        <!-- Universal MeraRashifal Brand Notification & Alert Dialog -->
+        <div id="mr-notify-modal" class="mr-modal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="mr-notify-title">
+            <div class="mr-modal-content mr-notify-modal-box">
+                <!-- Decorative Top Shimmer Accent -->
+                <div class="mr-notify-top-accent"></div>
+                <button type="button" class="mr-modal-close mr-notify-close-btn" id="mr-notify-close" aria-label="Close">&times;</button>
+                
+                <div class="mr-notify-body">
+                    <!-- Glowing Emblem / Type Icon -->
+                    <div class="mr-notify-icon-wrap" id="mr-notify-icon-wrap">
+                        <i class="fa-solid fa-user-lock" id="mr-notify-icon"></i>
+                    </div>
+
+                    <!-- Eyebrow Pill -->
+                    <div style="text-align:center; margin-bottom: 10px;">
+                        <span class="mr-tag-eyebrow" id="mr-notify-eyebrow">
+                            <i class="fa-solid fa-sparkles" style="color:#D9A441;"></i> Account Authentication
+                        </span>
+                    </div>
+
+                    <!-- Title -->
+                    <h3 id="mr-notify-title" class="mr-modal-brand-title mr-notify-heading">Sign In Required</h3>
+
+                    <!-- Message -->
+                    <p id="mr-notify-message" class="mr-modal-sub mr-notify-desc">
+                        Please sign in with Google or your account to order personalized reports and save your cosmic dossier.
+                    </p>
+
+                    <!-- Action Buttons -->
+                    <div class="mr-notify-actions">
+                        <a href="<?php echo esc_url($default_auth_url); ?>" id="mr-notify-primary-btn" class="mr-btn-brand-submit mr-notify-btn-main">
+                            <span id="mr-notify-btn-text"><i class="fa-brands fa-google" style="margin-right:8px;"></i> Sign In with Google &rarr;</span>
+                        </a>
+                        <button type="button" id="mr-notify-secondary-btn" class="mr-notify-btn-secondary">
+                            Stay on this page
+                        </button>
+                    </div>
+
+                    <!-- Trust Seal -->
+                    <div class="mr-modal-footer-trust" id="mr-notify-trust" style="margin-top: 18px;">
+                        <span><i class="fa-solid fa-shield-halved"></i> 100% Private &amp; Secure</span>
+                        <span>&bull;</span>
+                        <span><i class="fa-solid fa-bolt"></i> Instant Access</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Universal Toast Container -->
+        <div id="mr-toast-container" class="mr-toast-container" aria-live="polite"></div>
+        <?php
+    }
+
+    /**
+     * Render Publication-Grade Sample Report Preview Modal (Non-Downloadable, Responsive Online Reader)
+     */
+    public static function render_sample_preview_modal() {
+        ob_start();
+        ?>
+        <div id="mr-sample-modal" class="mr-modal mr-sample-viewer-modal" style="display:none;">
+            <div class="mr-modal-content mr-sample-content">
+                <!-- Sticky Top Action Bar -->
+                <div class="mr-sample-topbar">
+                    <div class="mr-sample-title-group">
+                        <span class="mr-sample-badge"><i class="fa-solid fa-eye"></i> Sample Preview</span>
+                        <h3 id="mr-sample-title" class="mr-sample-heading">Astrological Reading Sample</h3>
+                    </div>
+                    <div class="mr-sample-actions-group">
+                        <button type="button" class="mr-btn-sample-order mr-sample-buy-btn" data-slug="" data-title="">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Get Your Report Now &rarr;
+                        </button>
+                        <button type="button" class="mr-sample-close-btn mr-sample-close" title="Close Preview">&times;</button>
+                    </div>
+                </div>
+
+                <!-- Main Iframe Viewer Frame with loader -->
+                <div class="mr-sample-iframe-wrapper">
+                    <div id="mr-sample-loader" class="mr-sample-loader">
+                        <i class="fa-solid fa-circle-notch fa-spin"></i>
+                        <p style="margin-top:10px; font-size:14px; color:#7A1F3D; font-weight:600;">Loading publication-grade sample report...</p>
+                    </div>
+                    <iframe id="mr-sample-iframe" src="about:blank" frameborder="0"></iframe>
+                </div>
+
+                <!-- Sticky Floating Conversion Strip at Bottom -->
+                <div class="mr-sample-floating-cta">
+                    <div class="mr-sample-floating-text">
+                        <i class="fa-solid fa-sparkles" style="color:#F58220; font-size:16px;"></i>
+                        <span>This is an authentic Vedic sample report. Your personal report will be calculated using your exact birth coordinates.</span>
+                    </div>
+                    <button type="button" class="mr-btn-sample-order mr-sample-buy-btn" data-slug="" data-title="">
+                        Order Your Report Now &rarr;
+                    </button>
+                </div>
+            </div>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * Shortcode: [mr_user_dashboard]
+     */
+    public static function render_user_dashboard($atts) {
+        $user_id = get_current_user_id();
+        if (!$user_id) {
+            return '<div class="mr-cosmic-wrapper"><div class="mr-glass-alert"><p>Please <a href="' . esc_url(wp_login_url(get_permalink())) . '" style="color:#f59e0b; text-decoration:underline;">log in</a> to view your subscription and reports.</p></div></div>';
+        }
+
+        global $wpdb;
+        $active_sub = MR_Tokens::get_active_subscription($user_id);
+        $tokens = MR_Tokens::get_user_tokens($user_id);
+
+        $table_reports = $wpdb->prefix . 'mr_generated_reports';
+        $reports = $wpdb->get_results($wpdb->prepare(
+            "SELECT * FROM $table_reports WHERE user_id = %d ORDER BY id DESC",
+            $user_id
+        ));
+
+        ob_start();
+        ?>
+        <div class="mr-cosmic-wrapper mr-dashboard-wrap">
+            <!-- Header -->
+            <div class="mr-dash-header mr-glass-card">
+                <div>
+                    <h2 class="mr-cosmic-h2">My Vedic & Western Astrological Archive</h2>
+                    <p style="color:#94a3b8; font-size:14px; margin-top:4px;">Manage your subscription tokens and view generated PDF reports.</p>
+                </div>
+                <div class="mr-dash-sub-info">
+                    <?php if ($active_sub): ?>
+                        <span class="mr-badge-active"><i class="fa-solid fa-crown"></i> <?php echo esc_html($active_sub->pack_name); ?></span>
+                        <div class="mr-sub-dates">Valid through: <strong><?php echo esc_html(date_i18n(get_option('date_format'), strtotime($active_sub->expiry_date))); ?></strong></div>
+                    <?php else: ?>
+                        <span class="mr-badge-expired">No Active Subscription</span>
+                        <a href="<?php echo esc_url(home_url('/pricing/')); ?>" class="mr-btn-glow" style="margin-top:8px; padding:6px 14px; font-size:12px; display:inline-block;">Subscribe to Pack</a>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- Token Balance Cards -->
+            <h3 class="mr-cosmic-h3" style="margin: 30px 0 15px 0;">Available Report Tokens</h3>
+            <div class="mr-token-cards-grid">
+                <?php foreach ($tokens as $slug => $t): ?>
+                    <div class="mr-glass-card mr-token-card">
+                        <div class="mr-token-card-header">
+                            <span class="mr-token-card-title"><?php echo esc_html($t['name']); ?></span>
+                        </div>
+                        <div class="mr-token-count">
+                            <span class="count <?php echo $t['remaining'] > 0 ? 'has-tokens' : 'no-tokens'; ?>"><?php echo esc_html($t['remaining']); ?></span>
+                            <span class="label">tokens left</span>
+                        </div>
+                        <div class="mr-token-meta">Total: <?php echo esc_html($t['total']); ?> | Used: <?php echo esc_html($t['used']); ?></div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+
+            <!-- Generated Reports Table -->
+            <h3 class="mr-cosmic-h3" style="margin: 40px 0 15px 0;">Previously Generated Reports</h3>
+            <?php if (empty($reports)): ?>
+                <div class="mr-glass-panel mr-empty-box">
+                    <p>You have not generated any reports yet. Visit the <a href="<?php echo esc_url(home_url('/reports-catalog/')); ?>" style="color:#f59e0b; text-decoration:underline;">Reports Catalog</a> to generate your first astrological reading!</p>
+                </div>
+            <?php else: ?>
+                <div class="mr-glass-panel mr-table-scroll">
+                    <table class="mr-cosmic-table">
+                        <thead>
+                            <tr>
+                                <th>Report Title</th>
+                                <th>Native Details</th>
+                                <th>Birth Coordinates</th>
+                                <th>Date Generated</th>
+                                <th style="text-align:center;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($reports as $r): ?>
+                                <tr>
+                                    <td><strong style="color:#fff;"><?php echo esc_html($r->report_title); ?></strong></td>
+                                    <td><?php echo esc_html($r->person_name . ' (' . $r->gender . ')'); ?></td>
+                                    <td><?php echo esc_html($r->dob . ' ' . $r->tob . ' | ' . $r->pob); ?></td>
+                                    <td><?php echo esc_html(date_i18n(get_option('date_format') . ' H:i', strtotime($r->created_at))); ?></td>
+                                    <td class="mr-col-action" style="text-align:center;">
+                                        <?php $report_link = class_exists('MR_Report_Downloader') ? MR_Report_Downloader::ensure_clean_url($r) : $r->pdf_url; ?>
+                                        <a href="<?php echo esc_url($report_link); ?>" target="_blank" class="mr-btn-view-pdf" title="Download Report PDF">
+                                            <i class="fa-solid fa-file-pdf"></i> View / Download
+                                        </a>
+                                    </td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            <?php endif; ?>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * AJAX handler: Simulate Payment Gateway Process
+     */
+    public static function ajax_simulate_payment() {
+        check_ajax_referer('mr_reports_nonce', 'nonce');
+
+        $user_id = get_current_user_id();
+        if (!$user_id) {
+            // If guest in simulation, use admin or first user
+            $user_id = 1;
+        }
+
+        $type        = sanitize_text_field($_POST['order_type'] ?? 'pack');
+        $pack_key    = sanitize_text_field($_POST['pack_key'] ?? '');
+        $report_slug = sanitize_key($_POST['report_slug'] ?? '');
+        $currency    = sanitize_text_field($_POST['currency'] ?? 'USD');
+        $status      = sanitize_text_field($_POST['sim_status'] ?? 'success');
+
+        if ($status !== 'success') {
+            wp_send_json_error([
+                'message' => 'Simulated Gateway Response: Transaction declined by card issuer.'
+            ]);
+        }
+
+        if ($type === 'pack') {
+            $pack = MR_Packs::get_pack($pack_key);
+            if (!$pack) {
+                wp_send_json_error(['message' => 'Invalid pack selected.']);
+            }
+
+            // Assign pack and credit tokens
+            $sub_id = MR_Tokens::assign_pack($user_id, $pack_key, 0);
+
+            wp_send_json_success([
+                'order_type' => 'pack',
+                'pack_name'  => $pack['name'],
+                'message'    => 'Payment Successful! Your subscription is active and report tokens have been credited.',
+                'redirect'   => home_url('/reports-catalog/'),
+            ]);
+        } else {
+            // A la Carte purchase
+            $report = MR_Packs::get_report($report_slug);
+            if (!$report) {
+                wp_send_json_error(['message' => 'Invalid report requested.']);
+            }
+
+            // Credit 1 token for this report
+            MR_Tokens::credit_single_report_token($user_id, $report_slug, 1);
+
+            wp_send_json_success([
+                'order_type'   => 'alacarte',
+                'report_slug'  => $report_slug,
+                'report_title' => $report['name'],
+                'message'      => 'Payment Successful! A la Carte report unlocked.',
+            ]);
+        }
+    }
+
+    /**
+     * AJAX handler for Instant City Search & Coordinates Autofill
+     * Highly optimized with in-memory top cities + WordPress transient caching
+     * Guarantees each query is fetched ONLY 1 time and cached for instant responses.
+     */
+    public static function ajax_city_search() {
+        $q = isset($_GET['q']) ? sanitize_text_field($_GET['q']) : (isset($_POST['query']) ? sanitize_text_field($_POST['query']) : '');
+        $q = trim(strtolower($q));
+
+        if (empty($q) || strlen($q) < 2) {
+            wp_send_json_success([]);
+        }
+
+        // 1. Check server-side transient cache (Ensures 1-time fetch across all visitors)
+        $cache_key = 'mr_city_s_' . substr(md5($q), 0, 16);
+        $cached = get_transient($cache_key);
+        if ($cached !== false && is_array($cached)) {
+            wp_send_json_success($cached);
+            return;
+        }
+
+        // 2. High-speed in-memory database of 120+ top Indian & Global cities (0ms latency)
+        $common_cities = [
+            ['name' => 'New Delhi, Delhi, India', 'lat' => 28.6139, 'lon' => 77.2090, 'tz' => 5.5],
+            ['name' => 'Delhi, India', 'lat' => 28.6139, 'lon' => 77.2090, 'tz' => 5.5],
+            ['name' => 'Mumbai, Maharashtra, India', 'lat' => 19.0760, 'lon' => 72.8777, 'tz' => 5.5],
+            ['name' => 'Bengaluru (Bangalore), Karnataka, India', 'lat' => 12.9716, 'lon' => 77.5946, 'tz' => 5.5],
+            ['name' => 'Kolkata, West Bengal, India', 'lat' => 22.5726, 'lon' => 88.3639, 'tz' => 5.5],
+            ['name' => 'Chennai, Tamil Nadu, India', 'lat' => 13.0827, 'lon' => 80.2707, 'tz' => 5.5],
+            ['name' => 'Hyderabad, Telangana, India', 'lat' => 17.3850, 'lon' => 78.4867, 'tz' => 5.5],
+            ['name' => 'Ahmedabad, Gujarat, India', 'lat' => 23.0225, 'lon' => 72.5714, 'tz' => 5.5],
+            ['name' => 'Pune, Maharashtra, India', 'lat' => 18.5204, 'lon' => 73.8567, 'tz' => 5.5],
+            ['name' => 'Jaipur, Rajasthan, India', 'lat' => 26.9124, 'lon' => 75.7873, 'tz' => 5.5],
+            ['name' => 'Lucknow, Uttar Pradesh, India', 'lat' => 26.8467, 'lon' => 80.9462, 'tz' => 5.5],
+            ['name' => 'Kanpur, Uttar Pradesh, India', 'lat' => 26.4499, 'lon' => 80.3319, 'tz' => 5.5],
+            ['name' => 'Nagpur, Maharashtra, India', 'lat' => 21.1458, 'lon' => 79.0882, 'tz' => 5.5],
+            ['name' => 'Indore, Madhya Pradesh, India', 'lat' => 22.7196, 'lon' => 75.8577, 'tz' => 5.5],
+            ['name' => 'Bhopal, Madhya Pradesh, India', 'lat' => 23.2599, 'lon' => 77.4126, 'tz' => 5.5],
+            ['name' => 'Patna, Bihar, India', 'lat' => 25.5941, 'lon' => 85.1376, 'tz' => 5.5],
+            ['name' => 'Vadodara, Gujarat, India', 'lat' => 22.3072, 'lon' => 73.1812, 'tz' => 5.5],
+            ['name' => 'Ghaziabad, Uttar Pradesh, India', 'lat' => 28.6692, 'lon' => 77.4538, 'tz' => 5.5],
+            ['name' => 'Ludhiana, Punjab, India', 'lat' => 30.9010, 'lon' => 75.8573, 'tz' => 5.5],
+            ['name' => 'Agra, Uttar Pradesh, India', 'lat' => 27.1767, 'lon' => 78.0081, 'tz' => 5.5],
+            ['name' => 'Nashik, Maharashtra, India', 'lat' => 19.9975, 'lon' => 73.7898, 'tz' => 5.5],
+            ['name' => 'Faridabad, Haryana, India', 'lat' => 28.4089, 'lon' => 77.3178, 'tz' => 5.5],
+            ['name' => 'Meerut, Uttar Pradesh, India', 'lat' => 28.9845, 'lon' => 77.7064, 'tz' => 5.5],
+            ['name' => 'Rajkot, Gujarat, India', 'lat' => 22.3039, 'lon' => 70.8022, 'tz' => 5.5],
+            ['name' => 'Varanasi (Kashi), Uttar Pradesh, India', 'lat' => 25.3176, 'lon' => 82.9739, 'tz' => 5.5],
+            ['name' => 'Srinagar, Jammu and Kashmir, India', 'lat' => 34.0837, 'lon' => 74.7973, 'tz' => 5.5],
+            ['name' => 'Amritsar, Punjab, India', 'lat' => 31.6340, 'lon' => 74.8723, 'tz' => 5.5],
+            ['name' => 'Navi Mumbai, Maharashtra, India', 'lat' => 19.0330, 'lon' => 73.0297, 'tz' => 5.5],
+            ['name' => 'Allahabad (Prayagraj), Uttar Pradesh, India', 'lat' => 25.4358, 'lon' => 81.8463, 'tz' => 5.5],
+            ['name' => 'Ranchi, Jharkhand, India', 'lat' => 23.3441, 'lon' => 85.3096, 'tz' => 5.5],
+            ['name' => 'Howrah, West Bengal, India', 'lat' => 22.5958, 'lon' => 88.2636, 'tz' => 5.5],
+            ['name' => 'Coimbatore, Tamil Nadu, India', 'lat' => 11.0168, 'lon' => 76.9558, 'tz' => 5.5],
+            ['name' => 'Jabalpur, Madhya Pradesh, India', 'lat' => 23.1815, 'lon' => 79.9864, 'tz' => 5.5],
+            ['name' => 'Gwalior, Madhya Pradesh, India', 'lat' => 26.2183, 'lon' => 78.1828, 'tz' => 5.5],
+            ['name' => 'Vijayawada, Andhra Pradesh, India', 'lat' => 16.5062, 'lon' => 80.6480, 'tz' => 5.5],
+            ['name' => 'Jodhpur, Rajasthan, India', 'lat' => 26.2389, 'lon' => 73.0243, 'tz' => 5.5],
+            ['name' => 'Madurai, Tamil Nadu, India', 'lat' => 9.9252, 'lon' => 78.1198, 'tz' => 5.5],
+            ['name' => 'Raipur, Chhattisgarh, India', 'lat' => 21.2514, 'lon' => 81.6296, 'tz' => 5.5],
+            ['name' => 'Kota, Rajasthan, India', 'lat' => 25.2138, 'lon' => 75.8648, 'tz' => 5.5],
+            ['name' => 'Chandigarh, Punjab/Haryana, India', 'lat' => 30.7333, 'lon' => 76.7794, 'tz' => 5.5],
+            ['name' => 'Guwahati, Assam, India', 'lat' => 26.1445, 'lon' => 91.7362, 'tz' => 5.5],
+            ['name' => 'Noida, Uttar Pradesh, India', 'lat' => 28.5355, 'lon' => 77.3910, 'tz' => 5.5],
+            ['name' => 'Gurugram (Gurgaon), Haryana, India', 'lat' => 28.4595, 'lon' => 77.0266, 'tz' => 5.5],
+            ['name' => 'Haridwar, Uttarakhand, India', 'lat' => 29.9457, 'lon' => 78.1642, 'tz' => 5.5],
+            ['name' => 'Rishikesh, Uttarakhand, India', 'lat' => 30.0869, 'lon' => 78.2676, 'tz' => 5.5],
+            ['name' => 'Dehradun, Uttarakhand, India', 'lat' => 30.3165, 'lon' => 78.0322, 'tz' => 5.5],
+            ['name' => 'Ayodhya, Uttar Pradesh, India', 'lat' => 26.7922, 'lon' => 82.1998, 'tz' => 5.5],
+            ['name' => 'Mathura, Uttar Pradesh, India', 'lat' => 27.4924, 'lon' => 77.6737, 'tz' => 5.5],
+            ['name' => 'Vrindavan, Uttar Pradesh, India', 'lat' => 27.5806, 'lon' => 77.7006, 'tz' => 5.5],
+            ['name' => 'Ujjain, Madhya Pradesh, India', 'lat' => 23.1765, 'lon' => 75.7885, 'tz' => 5.5],
+            ['name' => 'Tirupati, Andhra Pradesh, India', 'lat' => 13.6288, 'lon' => 79.4192, 'tz' => 5.5],
+            ['name' => 'Puri, Odisha, India', 'lat' => 19.8135, 'lon' => 85.8312, 'tz' => 5.5],
+            ['name' => 'Bhubaneswar, Odisha, India', 'lat' => 20.2961, 'lon' => 85.8245, 'tz' => 5.5],
+            ['name' => 'Cuttack, Odisha, India', 'lat' => 20.4625, 'lon' => 85.8828, 'tz' => 5.5],
+            ['name' => 'Shimla, Himachal Pradesh, India', 'lat' => 31.1048, 'lon' => 77.1734, 'tz' => 5.5],
+            ['name' => 'Udaipur, Rajasthan, India', 'lat' => 24.5854, 'lon' => 73.7125, 'tz' => 5.5],
+            ['name' => 'Ajmer, Rajasthan, India', 'lat' => 26.4499, 'lon' => 74.6399, 'tz' => 5.5],
+            ['name' => 'Bikaner, Rajasthan, India', 'lat' => 28.0229, 'lon' => 73.3119, 'tz' => 5.5],
+            ['name' => 'Alwar, Rajasthan, India', 'lat' => 27.5530, 'lon' => 76.6346, 'tz' => 5.5],
+            ['name' => 'Gorakhpur, Uttar Pradesh, India', 'lat' => 26.7606, 'lon' => 83.3732, 'tz' => 5.5],
+            ['name' => 'Bareilly, Uttar Pradesh, India', 'lat' => 28.3670, 'lon' => 79.4304, 'tz' => 5.5],
+            ['name' => 'Aligarh, Uttar Pradesh, India', 'lat' => 27.8974, 'lon' => 78.0880, 'tz' => 5.5],
+            ['name' => 'Moradabad, Uttar Pradesh, India', 'lat' => 28.8386, 'lon' => 78.7733, 'tz' => 5.5],
+            ['name' => 'Saharanpur, Uttar Pradesh, India', 'lat' => 29.9640, 'lon' => 77.5460, 'tz' => 5.5],
+            ['name' => 'Jalandhar, Punjab, India', 'lat' => 31.3260, 'lon' => 75.5762, 'tz' => 5.5],
+            ['name' => 'Patiala, Punjab, India', 'lat' => 30.3398, 'lon' => 76.3869, 'tz' => 5.5],
+            ['name' => 'Bathinda, Punjab, India', 'lat' => 30.2110, 'lon' => 74.9455, 'tz' => 5.5],
+            ['name' => 'Panipat, Haryana, India', 'lat' => 29.3909, 'lon' => 76.9635, 'tz' => 5.5],
+            ['name' => 'Karnal, Haryana, India', 'lat' => 29.6857, 'lon' => 76.9905, 'tz' => 5.5],
+            ['name' => 'Rohtak, Haryana, India', 'lat' => 28.8955, 'lon' => 76.6066, 'tz' => 5.5],
+            ['name' => 'Hisar, Haryana, India', 'lat' => 29.1492, 'lon' => 75.7217, 'tz' => 5.5],
+            ['name' => 'Jamshedpur, Jharkhand, India', 'lat' => 22.8046, 'lon' => 86.2029, 'tz' => 5.5],
+            ['name' => 'Dhanbad, Jharkhand, India', 'lat' => 23.7957, 'lon' => 86.4304, 'tz' => 5.5],
+            ['name' => 'Gaya, Bihar, India', 'lat' => 24.7914, 'lon' => 85.0002, 'tz' => 5.5],
+            ['name' => 'Muzaffarpur, Bihar, India', 'lat' => 26.1209, 'lon' => 85.3647, 'tz' => 5.5],
+            ['name' => 'Bhagalpur, Bihar, India', 'lat' => 25.2425, 'lon' => 86.9842, 'tz' => 5.5],
+            ['name' => 'Bilaspur, Chhattisgarh, India', 'lat' => 22.0797, 'lon' => 82.1409, 'tz' => 5.5],
+            ['name' => 'Bhilai, Chhattisgarh, India', 'lat' => 21.1938, 'lon' => 81.3509, 'tz' => 5.5],
+            ['name' => 'Aurangabad (Chhatrapati Sambhajinagar), Maharashtra, India', 'lat' => 19.8762, 'lon' => 75.3433, 'tz' => 5.5],
+            ['name' => 'Solapur, Maharashtra, India', 'lat' => 17.6599, 'lon' => 75.9064, 'tz' => 5.5],
+            ['name' => 'Kolhapur, Maharashtra, India', 'lat' => 16.7050, 'lon' => 74.2433, 'tz' => 5.5],
+            ['name' => 'Thane, Maharashtra, India', 'lat' => 19.2183, 'lon' => 72.9781, 'tz' => 5.5],
+            ['name' => 'Surat, Gujarat, India', 'lat' => 21.1702, 'lon' => 72.8311, 'tz' => 5.5],
+            ['name' => 'Bhavnagar, Gujarat, India', 'lat' => 21.7645, 'lon' => 72.1519, 'tz' => 5.5],
+            ['name' => 'Jamnagar, Gujarat, India', 'lat' => 22.4707, 'lon' => 70.0577, 'tz' => 5.5],
+            ['name' => 'Mysuru (Mysore), Karnataka, India', 'lat' => 12.2958, 'lon' => 76.6394, 'tz' => 5.5],
+            ['name' => 'Hubballi (Hubli), Karnataka, India', 'lat' => 15.3647, 'lon' => 75.1240, 'tz' => 5.5],
+            ['name' => 'Mangaluru (Mangalore), Karnataka, India', 'lat' => 12.9141, 'lon' => 74.8560, 'tz' => 5.5],
+            ['name' => 'Belagavi (Belgaum), Karnataka, India', 'lat' => 15.8497, 'lon' => 74.4977, 'tz' => 5.5],
+            ['name' => 'Visakhapatnam, Andhra Pradesh, India', 'lat' => 17.6868, 'lon' => 83.2185, 'tz' => 5.5],
+            ['name' => 'Guntur, Andhra Pradesh, India', 'lat' => 16.3067, 'lon' => 80.4365, 'tz' => 5.5],
+            ['name' => 'Warangal, Telangana, India', 'lat' => 17.9689, 'lon' => 79.5941, 'tz' => 5.5],
+            ['name' => 'Kochi (Cochin), Kerala, India', 'lat' => 9.9312, 'lon' => 76.2673, 'tz' => 5.5],
+            ['name' => 'Thiruvananthapuram (Trivandrum), Kerala, India', 'lat' => 8.5241, 'lon' => 76.9366, 'tz' => 5.5],
+            ['name' => 'Kozhikode (Calicut), Kerala, India', 'lat' => 11.2588, 'lon' => 75.7804, 'tz' => 5.5],
+            ['name' => 'Thrissur, Kerala, India', 'lat' => 10.5276, 'lon' => 76.2144, 'tz' => 5.5],
+            ['name' => 'Tiruchirappalli (Trichy), Tamil Nadu, India', 'lat' => 10.7905, 'lon' => 78.7047, 'tz' => 5.5],
+            ['name' => 'Salem, Tamil Nadu, India', 'lat' => 11.6643, 'lon' => 78.1460, 'tz' => 5.5],
+            ['name' => 'Siliguri, West Bengal, India', 'lat' => 26.7271, 'lon' => 88.3953, 'tz' => 5.5],
+            ['name' => 'Asansol, West Bengal, India', 'lat' => 23.6739, 'lon' => 86.9524, 'tz' => 5.5],
+            ['name' => 'London, United Kingdom', 'lat' => 51.5074, 'lon' => -0.1278, 'tz' => 1.0],
+            ['name' => 'New York, NY, USA', 'lat' => 40.7128, 'lon' => -74.0060, 'tz' => -4.0],
+            ['name' => 'Toronto, Ontario, Canada', 'lat' => 43.6532, 'lon' => -79.3832, 'tz' => -4.0],
+            ['name' => 'Vancouver, BC, Canada', 'lat' => 49.2827, 'lon' => -123.1207, 'tz' => -7.0],
+            ['name' => 'Dubai, United Arab Emirates', 'lat' => 25.2048, 'lon' => 55.2708, 'tz' => 4.0],
+            ['name' => 'Singapore', 'lat' => 1.3521, 'lon' => 103.8198, 'tz' => 8.0],
+            ['name' => 'Sydney, Australia', 'lat' => -33.8688, 'lon' => 151.2093, 'tz' => 10.0]
+        ];
+
+        $matched = [];
+        foreach ($common_cities as $c) {
+            if (stripos($c['name'], $q) !== false) {
+                $matched[] = $c;
+            }
+        }
+
+        // If fewer than 5 matches and query is at least 3 chars, query OpenStreetMap Nominatim
+        if (count($matched) < 5 && strlen($q) >= 3) {
+            $geo_url = 'https://nominatim.openstreetmap.org/search?format=json&q=' . urlencode($q) . '&limit=6';
+            $res = wp_remote_get($geo_url, [
+                'timeout' => 3,
+                'headers' => ['User-Agent' => 'MeraRashifal-CitySearch/2.0 (Astrology Portal)']
+            ]);
+
+            if (!is_wp_error($res) && wp_remote_retrieve_response_code($res) === 200) {
+                $data = json_decode(wp_remote_retrieve_body($res), true);
+                if (!empty($data) && is_array($data)) {
+                    foreach ($data as $item) {
+                        $lat = floatval($item['lat']);
+                        $lon = floatval($item['lon']);
+                        $tz = ($lon >= 68.0 && $lon <= 97.0 && $lat >= 8.0 && $lat <= 37.0) ? 5.5 : round($lon / 15.0);
+                        $matched[] = [
+                            'name' => $item['display_name'],
+                            'lat'  => round($lat, 4),
+                            'lon'  => round($lon, 4),
+                            'tz'   => $tz
+                        ];
+                    }
+                }
+            }
+        }
+
+        $final_results = array_slice($matched, 0, 8);
+
+        // Cache response in transient for 30 days (prevents duplicate external calls)
+        set_transient($cache_key, $final_results, 30 * DAY_IN_SECONDS);
+
+        wp_send_json_success($final_results);
+    }
+
+    /**
+     * AJAX Streamer: Secure Sample Report Viewer with Anti-Download & Anti-Print Protection
+     */
+    public static function ajax_view_sample_report() {
+        $slug = sanitize_key($_GET['slug'] ?? 'yearly_horoscope_vedic');
+
+        // Normalize aliases
+        $alias_map = [
+            'numerology_report'   => 'numerology',
+            'kundali_matching'    => 'kundli_matching',
+            'kundali_predictions' => 'kundli_predictions',
+            'dosh_remedies'       => 'dosh_remedial',
+            'mahadasha'           => 'mahadasha_timing',
+            'yearly_horoscope'    => 'yearly_horoscope_vedic',
+        ];
+        if (isset($alias_map[$slug])) {
+            $slug = $alias_map[$slug];
+        }
+
+        // Map report slug to sample HTML file in uploads/mr-reports/samples/
+        $sample_files = [
+            'yearly_horoscope_long'   => 'yearly-horoscope-2027-tushar-singhal-verified.html',
+            'yearly_horoscope_vedic'  => 'yearly-horoscope-2027-tushar-singhal-verified.html',
+            'kundli_predictions'      => 'sample-kundli-predictions-master-report.html',
+            'mahadasha_timing'        => 'sample-mahadasha-life-timing-master-report.html',
+            'dosh_remedial'           => 'sample-kundli-dosh-remedial-master-report.html',
+            'kundli_matching'         => 'sample-kundli-gun-milan-matching-master-report.html',
+            'numerology'              => 'sample-numerology-western-master-report.html',
+            'monthly_horoscope_vedic' => 'monthly-horoscope-november-2026-tushar-singhal.html',
+            'palmistry_report'        => 'sample-palmistry-dossier-report.html',
+        ];
+
+        $filename = $sample_files[$slug] ?? 'sample-kundli-predictions-master-report.html';
+        $upload_dir = wp_upload_dir();
+        $sample_dir = $upload_dir['basedir'] . '/mr-reports/samples';
+        $file_path  = $sample_dir . '/' . $filename;
+
+        // Fallback search if exact file doesn't exist
+        if (!file_exists($file_path)) {
+            $fallbacks = glob($sample_dir . '/*.html');
+            if (!empty($fallbacks)) {
+                $file_path = $fallbacks[0];
+            }
+        }
+
+        if (!file_exists($file_path)) {
+            wp_die('Sample report archive unavailable. Please try again shortly.', 'Sample Report', ['response' => 404]);
+        }
+
+        $html = file_get_contents($file_path);
+
+        // Security, Watermarking and Responsive Styles to inject
+        $protection_css = '<style>
+            /* Protected Sample Styling & Responsive Enhancements */
+            html, body {
+                user-select: none !important;
+                -webkit-user-select: none !important;
+                -ms-user-select: none !important;
+            }
+            body::before {
+                content: "SAMPLE PREVIEW • MERA RASHIFAL • FOR ONLINE READING ONLY • NOT FOR DOWNLOAD";
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%) rotate(-35deg);
+                font-size: 34px;
+                font-weight: 800;
+                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+                color: rgba(194, 150, 76, 0.13);
+                pointer-events: none;
+                z-index: 9999999;
+                white-space: nowrap;
+                letter-spacing: 3.5px;
+                text-transform: uppercase;
+            }
+            .mr-page {
+                position: relative !important;
+                margin: 22px auto !important;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
+                border-radius: 6px !important;
+            }
+            .mr-page::after {
+                content: "SAMPLE PREVIEW — CONFIDENTIAL SAMPLE";
+                position: absolute;
+                top: 14mm;
+                right: 18mm;
+                font-size: 9.5px;
+                font-weight: 700;
+                letter-spacing: 1.5px;
+                color: #92400E;
+                background: #FEF3C7;
+                padding: 3px 12px;
+                border-radius: 4px;
+                border: 1px solid #FCD34D;
+                pointer-events: none;
+                z-index: 9999;
+            }
+            @media print {
+                html, body {
+                    display: none !important;
+                    visibility: hidden !important;
+                    height: 0 !important;
+                    overflow: hidden !important;
+                }
+            }
+            @media (max-width: 860px) {
+                body {
+                    padding: 10px 8px !important;
+                }
+                .mr-page {
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    min-height: auto !important;
+                    max-height: none !important;
+                    height: auto !important;
+                    padding: 24px 16px !important;
+                    margin: 14px 0 !important;
+                    border-radius: 8px !important;
+                    overflow: visible !important;
+                }
+            }
+        </style>';
+
+        $protection_js = '<script>
+            // Anti-download, print & inspect listeners
+            document.addEventListener("contextmenu", function(e) { e.preventDefault(); return false; });
+            document.addEventListener("keydown", function(e) {
+                if ((e.ctrlKey || e.metaKey) && (e.key === "s" || e.key === "p" || e.key === "u" || e.key === "S" || e.key === "P" || e.key === "U")) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+                if (e.key === "PrintScreen") {
+                    e.preventDefault();
+                }
+            });
+            document.addEventListener("dragstart", function(e) { e.preventDefault(); return false; });
+        </script>';
+
+        // Inject before </head>
+        if (stripos($html, '</head>') !== false) {
+            $html = str_ireplace('</head>', $protection_css . $protection_js . '</head>', $html);
+        } else {
+            $html = $protection_css . $protection_js . $html;
+        }
+
+        // Clean output buffers
+        while (ob_get_level()) {
+            ob_end_clean();
+        }
+
+        header('Content-Type: text/html; charset=UTF-8');
+        header('X-Robots-Tag: noindex, nofollow, noarchive');
+        header('X-Content-Type-Options: nosniff');
+        header('Cache-Control: private, max-age=1800');
+        echo $html;
+        exit;
+    }
+
+    /**
+     * AJAX handler to generate report
+     */
+    public static function ajax_generate_report() {
+        check_ajax_referer('mr_reports_nonce', 'nonce');
+        @ignore_user_abort(true);
+        @set_time_limit(300);
+
+        $report_slug     = sanitize_key($_POST['report_slug'] ?? '');
+        $recipient_email = sanitize_email($_POST['recipient_email'] ?? '');
+
+        // Determine if report is free promotional offer (e.g. ₹0)
+        $is_free = false;
+        if (class_exists('MR_Report_Landing_Data')) {
+            $landing_data = MR_Report_Landing_Data::get($report_slug);
+            if (isset($landing_data['price_sale']) && floatval($landing_data['price_sale']) === 0.0) {
+                $is_free = true;
+            }
+        }
+        if (class_exists('MR_Catalog_Manager')) {
+            $all_cards = MR_Catalog_Manager::get_all_cards();
+            $card = $all_cards[$report_slug] ?? [];
+            if (!empty($card) && isset($card['price_sale']) && floatval($card['price_sale']) === 0.0) {
+                $is_free = true;
+            }
+        }
+
+        if (!$is_free) {
+            // Paid report: Enforce login and payment/token
+            if (!is_user_logged_in()) {
+                $account_url = class_exists('MR_Account_UI') ? MR_Account_UI::get_account_page_url() : home_url('/my-account/');
+                wp_send_json_error([
+                    'message'   => 'Please log in to generate your personalized report.',
+                    'code'      => 'auth_required',
+                    'login_url' => $account_url
+                ]);
+            }
+
+            $user_id = get_current_user_id();
+
+            if (!class_exists('MR_Tokens') || !MR_Tokens::has_token($user_id, $report_slug)) {
+                wp_send_json_error([
+                    'message' => 'Payment required to generate this report. No active report tokens found. Please complete payment first.',
+                    'code'    => 'payment_required'
+                ]);
+            }
+
+            // Deduct token
+            MR_Tokens::deduct_token($user_id, $report_slug);
+        } else {
+            // Free promotional report
+            $user_id = get_current_user_id() ?: 1;
+            if ($user_id && class_exists('MR_Tokens') && MR_Tokens::has_token($user_id, $report_slug)) {
+                MR_Tokens::deduct_token($user_id, $report_slug);
+            }
+        }
+
+        if ($report_slug === 'kundli_matching') {
+            $boy_name  = sanitize_text_field($_POST['boy_name'] ?? '');
+            $boy_dob   = sanitize_text_field($_POST['boy_dob'] ?? '');
+            $boy_tob   = sanitize_text_field($_POST['boy_tob'] ?? '');
+            $boy_pob   = sanitize_text_field($_POST['boy_pob'] ?? '');
+            $girl_name = sanitize_text_field($_POST['girl_name'] ?? '');
+            $girl_dob  = sanitize_text_field($_POST['girl_dob'] ?? '');
+            $girl_tob  = sanitize_text_field($_POST['girl_tob'] ?? '');
+            $girl_pob  = sanitize_text_field($_POST['girl_pob'] ?? '');
+
+            if (!$boy_name || !$boy_dob || !$boy_tob || !$boy_pob || !$girl_name || !$girl_dob || !$girl_tob || !$girl_pob) {
+                wp_send_json_error(['message' => 'Please fill in all birth details for both the Boy and Girl.']);
+            }
+            $person_name = $boy_name . ' & ' . $girl_name;
+            $gender      = 'Couple';
+            $dob         = $boy_dob;
+            $tob         = $boy_tob;
+            $pob         = $boy_pob;
+        } else {
+            $person_name     = sanitize_text_field($_POST['person_name'] ?? '');
+            $gender          = sanitize_text_field($_POST['gender'] ?? 'Male');
+            $dob             = sanitize_text_field($_POST['dob'] ?? '');
+            $tob             = sanitize_text_field($_POST['tob'] ?? '');
+            $pob             = sanitize_text_field($_POST['pob'] ?? '');
+
+            if (!$report_slug || !$person_name || !$dob || !$tob || !$pob) {
+                wp_send_json_error(['message' => 'Please fill in all required birth details.']);
+            }
+        }
+
+        if (empty($recipient_email)) {
+            $user_obj = get_userdata($user_id);
+            if ($user_obj && !empty($user_obj->user_email)) {
+                $recipient_email = $user_obj->user_email;
+            }
+        }
+
+        $report_info = MR_Packs::get_report($report_slug);
+        if (!$report_info) {
+            wp_send_json_error(['message' => 'Invalid report requested.']);
+        }
+
+        // Create target directory in uploads
+        $upload_dir = wp_upload_dir();
+        $target_dir = $upload_dir['basedir'] . '/mr-reports/' . $user_id;
+        if (!file_exists($target_dir)) {
+            wp_mkdir_p($target_dir);
+        }
+
+        $partner_name = !empty($_POST['partner_name']) ? sanitize_text_field($_POST['partner_name']) : '';
+        $base_name    = self::get_standard_report_filename($report_slug, $person_name, $partner_name, $dob);
+
+        $html_file = $target_dir . '/' . $base_name . '.html';
+        $pdf_file  = $target_dir . '/' . $base_name . '.pdf';
+        
+        $cache_buster = '?v=' . time();
+        $html_url  = $upload_dir['baseurl'] . '/mr-reports/' . $user_id . '/' . rawurlencode($base_name) . '.html' . $cache_buster;
+        $pdf_url   = $upload_dir['baseurl'] . '/mr-reports/' . $user_id . '/' . rawurlencode($base_name) . '.pdf' . $cache_buster;
+
+        // Early tracking: Insert 'processing' status to database so other pages can track it immediately
+        global $wpdb;
+        $table_reports = $wpdb->prefix . 'mr_generated_reports';
+        $download_token = class_exists('MR_Report_Downloader') ? MR_Report_Downloader::generate_token() : bin2hex(random_bytes(16));
+
+        $wpdb->insert($table_reports, [
+            'user_id'         => $user_id,
+            'download_token'  => $download_token,
+            'report_slug'     => $report_slug,
+            'report_title'    => $report_info['name'],
+            'person_name'     => $person_name,
+            'gender'          => $gender,
+            'dob'             => $dob,
+            'tob'             => $tob,
+            'pob'             => $pob,
+            'recipient_email' => $recipient_email,
+            'pdf_filename'    => $base_name . '.pdf',
+            'pdf_url'         => '',
+            'status'          => 'processing',
+            'created_at'      => current_time('mysql'),
+        ]);
+        $report_id = $wpdb->insert_id;
+
+        // 1. Resolve coordinates (Use Google Places lat/lng/tz if provided from autocomplete)
+        $pob_lat = !empty($_POST['pob_lat']) ? floatval($_POST['pob_lat']) : null;
+        $pob_lng = !empty($_POST['pob_lng']) ? floatval($_POST['pob_lng']) : null;
+        $pob_tz  = !empty($_POST['pob_tz']) ? floatval($_POST['pob_tz']) : null;
+
+        if ($pob_lat && $pob_lng) {
+            $coords = [
+                'city' => $pob,
+                'lat'  => $pob_lat,
+                'lon'  => $pob_lng,
+                'tz'   => ($pob_tz !== null) ? $pob_tz : 5.5,
+            ];
+        } else {
+            $coords = MR_Vedic_API::resolve_coordinates($pob);
+        }
+
+        // 2. Generate Editorial via Gemini AI
+        $current_month = date('F Y');
+        $astro_profile = [
+            'sun_sign'    => 'Surya Rashi',
+            'moon_sign'   => 'Chandra Rashi',
+            'rising_sign' => 'Janma Lagna',
+            'transits'    => 'Planetary transits evaluated across 12 Bhavas',
+        ];
+        $editorial = MR_Gemini_AI::generate_monthly_editorial($person_name, $astro_profile, $current_month);
+
+        // 3. Compile Master Report HTML via Dedicated Dynamic Builder
+        $html_content = '';
+        if ($report_slug === 'yearly_horoscope_long' && class_exists('MR_Long_Yearly_Report_Builder')) {
+            $html_content = MR_Long_Yearly_Report_Builder::build_yearly_report_html($person_name, $gender, $dob, $tob, $pob, 2027);
+        } elseif ($report_slug === 'yearly_horoscope_vedic' && class_exists('MR_Yearly_Report_Builder')) {
+            $html_content = MR_Yearly_Report_Builder::build_yearly_report_html($person_name, $gender, $dob, $tob, $pob, 2026);
+        } elseif ($report_slug === 'kundli_predictions' && class_exists('MR_Kundali_Report_Builder')) {
+            $html_content = MR_Kundali_Report_Builder::build_kundali_report_html($person_name, $gender, $dob, $tob, $pob);
+        } elseif ($report_slug === 'mahadasha_timing' && class_exists('MR_Dasha_Report_Builder')) {
+            $html_content = MR_Dasha_Report_Builder::build_dasha_report_html($person_name, $gender, $dob, $tob, $pob);
+        } elseif ($report_slug === 'dosh_remedial' && class_exists('MR_Dosh_Report_Builder')) {
+            $html_content = MR_Dosh_Report_Builder::build_dosh_report_html($person_name, $gender, $dob, $tob, $pob);
+        } elseif ($report_slug === 'kundli_matching' && class_exists('MR_Matching_Report_Builder')) {
+            $boy_name  = !empty($_POST['boy_name']) ? sanitize_text_field($_POST['boy_name']) : $person_name;
+            $boy_dob   = !empty($_POST['boy_dob']) ? sanitize_text_field($_POST['boy_dob']) : $dob;
+            $boy_tob   = !empty($_POST['boy_tob']) ? sanitize_text_field($_POST['boy_tob']) : $tob;
+            $boy_pob   = !empty($_POST['boy_pob']) ? sanitize_text_field($_POST['boy_pob']) : $pob;
+            $girl_name = !empty($_POST['girl_name']) ? sanitize_text_field($_POST['girl_name']) : (!empty($_POST['partner_name']) ? sanitize_text_field($_POST['partner_name']) : 'Partner');
+            $girl_dob  = !empty($_POST['girl_dob']) ? sanitize_text_field($_POST['girl_dob']) : $dob;
+            $girl_tob  = !empty($_POST['girl_tob']) ? sanitize_text_field($_POST['girl_tob']) : $tob;
+            $girl_pob  = !empty($_POST['girl_pob']) ? sanitize_text_field($_POST['girl_pob']) : $pob;
+            $html_content = MR_Matching_Report_Builder::build_matching_report_html($boy_name, $boy_dob, $boy_tob, $boy_pob, $girl_name, $girl_dob, $girl_tob, $girl_pob);
+        } elseif (($report_slug === 'numerology_report' || $report_slug === 'numerology') && class_exists('MR_Numero_Report_Builder')) {
+            $html_content = MR_Numero_Report_Builder::build_numero_report_html($person_name, $gender, $dob, $tob, $pob);
+        } elseif ($report_slug === 'palmistry_report' && class_exists('MR_Palmistry_Builder')) {
+            $html_content = MR_Palmistry_Builder::build_palmistry_report_html($person_name, $gender, $dob, $tob, $pob);
+        } elseif (class_exists('MR_Monthly_Report_Builder')) {
+            $html_content = MR_Monthly_Report_Builder::build_monthly_report_html($person_name, $gender, $dob, $tob, $pob, $current_month, $editorial);
+        } else {
+            $html_content = MR_Report_Builder::build_monthly_report_html($person_name, $gender, $dob, $tob, $pob, $current_month, $editorial);
+        }
+        file_put_contents($html_file, $html_content);
+
+        // 4. Compile Vector PDF via Unified MR_PDF_Engine (Local Chrome / Browserless.io Cloud API)
+        $final_filename = $base_name . '.html';
+
+        $render_result = MR_PDF_Engine::render_pdf($html_file, $pdf_file);
+        if ($render_result['success'] && file_exists($pdf_file) && filesize($pdf_file) > 1000) {
+            $final_filename = $base_name . '.pdf';
+        }
+
+        // Generate clean white-labeled token & download URL (Option 1: Zero WordPress / wp-content exposure)
+        $final_download_url = class_exists('MR_Report_Downloader') 
+            ? MR_Report_Downloader::get_download_url($download_token, $final_filename) 
+            : home_url('/download-report/' . $download_token . '/' . rawurlencode($final_filename));
+
+        // Update generated report record to completed
+        if ($report_id) {
+            $wpdb->update($table_reports, [
+                'download_token' => $download_token,
+                'pdf_filename'   => $final_filename,
+                'pdf_url'        => $final_download_url,
+                'status'         => 'completed',
+            ], ['id' => $report_id]);
+        }
+
+        // Send branded report ready email strictly after generation completes & file exists
+        if (!empty($recipient_email) && is_email($recipient_email) && class_exists('MR_Mailer')) {
+            $report_mail_data = [
+                'report_title' => $report_info['name'],
+                'person_name'  => $person_name,
+                'gender'       => $gender,
+                'dob'          => $dob,
+                'tob'          => $tob,
+                'pob'          => $pob,
+                'pdf_filename' => $final_filename,
+            ];
+            MR_Mailer::send_report_ready_email($recipient_email, $report_mail_data, $final_download_url);
+        }
+
+        $tokens = MR_Tokens::get_user_tokens($user_id);
+        $remaining = $tokens[$report_slug]['remaining'] ?? 0;
+
+        wp_send_json_success([
+            'report_id' => $report_id,
+            'pdf_url' => $final_download_url,
+            'report_title' => $report_info['name'],
+            'person_name' => $person_name,
+            'remaining_tokens' => $remaining,
+        ]);
+    }
+
+    /**
+     * AJAX handler to check report status across page loads
+     */
+    public static function ajax_check_report_status() {
+        check_ajax_referer('mr_reports_nonce', 'nonce');
+
+        $report_id = !empty($_POST['report_id']) ? intval($_POST['report_id']) : 0;
+        $token     = !empty($_POST['token']) ? sanitize_text_field($_POST['token']) : '';
+        $user_id   = get_current_user_id();
+
+        global $wpdb;
+        $table_reports = $wpdb->prefix . 'mr_generated_reports';
+
+        $report = null;
+        if ($report_id > 0) {
+            $report = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table_reports} WHERE id = %d LIMIT 1", $report_id));
+        } elseif (!empty($token)) {
+            $report = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$table_reports} WHERE download_token = %s LIMIT 1", $token));
+        } elseif ($user_id > 0) {
+            $report = $wpdb->get_row($wpdb->prepare(
+                "SELECT * FROM {$table_reports} WHERE user_id = %d AND created_at >= DATE_SUB(NOW(), INTERVAL 2 HOUR) ORDER BY id DESC LIMIT 1",
+                $user_id
+            ));
+        }
+
+        if (!$report) {
+            wp_send_json_error(['message' => 'No active generation found.']);
+        }
+
+        wp_send_json_success([
+            'report_id'    => $report->id,
+            'token'        => $report->download_token,
+            'report_slug'  => $report->report_slug,
+            'report_title' => $report->report_title,
+            'person_name'  => $report->person_name,
+            'status'       => ($report->status === 'completed') ? 'ready' : $report->status,
+            'pdf_url'      => $report->pdf_url,
+        ]);
+    }
+
+    /**
+     * Generate Standardized Human-Readable Report Filename matching user specification
+     *
+     * @param string $report_slug
+     * @param string $person_name
+     * @param string $partner_name
+     * @param string $dob
+     * @return string
+     */
+    public static function get_standard_report_filename($report_slug, $person_name, $partner_name = '', $dob = '') {
+        // Clean and format person name in Title Case, stripping filesystem reserved characters
+        $clean_name = trim(preg_replace('/[\/\\\\:*?"<>|]/', '', ucwords(strtolower(trim($person_name)))));
+        if (empty($clean_name)) {
+            $clean_name = 'User';
+        }
+
+        $clean_partner = trim(preg_replace('/[\/\\\\:*?"<>|]/', '', ucwords(strtolower(trim($partner_name)))));
+
+        switch ($report_slug) {
+            case 'yearly_horoscope_long':
+                // MR_YHLR
+                return "MeraRashifal Yearly Horoscope Detailed Report {$clean_name}";
+
+            case 'yearly_horoscope_vedic':
+                // MR_YHSR
+                return "MeraRashifal Yearly Horoscope Short Report {$clean_name}";
+
+            case 'kundli_predictions':
+                // MR_JKHR
+                return "MeraRashifal Master Janam Kundali Detail Report {$clean_name}";
+
+            case 'mahadasha_timing':
+                // MR_VDLT
+                return "MeraRashifal Mahadasha Life Timing Detail Report {$clean_name}";
+
+            case 'dosh_remedial':
+                // MR_KDRA
+                return "MeraRashifal Kundali Dosh Detailed Report {$clean_name}";
+
+            case 'kundli_matching':
+                // MR_KMMR
+                if (!empty($clean_partner)) {
+                    return "MeraRashifal Kundali and Gun Matching Detailed Report {$clean_name} and {$clean_partner}";
+                }
+                return "MeraRashifal Kundali and Gun Matching Detailed Report {$clean_name}";
+
+            case 'numerology':
+            case 'numerology_report':
+                // MR_NMVI
+                return "MeraRashifal Master Numerology Detailed Report {$clean_name}";
+
+            case 'monthly_horoscope_vedic':
+            case 'monthly_horoscope_western':
+                // MR_MHTS: MeraRashifal Monthly Horoscope Detailed Report <user name> - <month> - <year>
+                $month_name = date('F');
+                $year_name  = date('Y');
+                return "MeraRashifal Monthly Horoscope Detailed Report {$clean_name} - {$month_name} - {$year_name}";
+
+            default:
+                return "MeraRashifal Detailed Report {$clean_name}";
+        }
+    }
+
+    private static function build_sample_reading_html($title, $name, $gender, $dob, $tob, $pob, $system = 'vedic') {
+        $dob_clean = str_replace('/', '-', $dob);
+        $dob_dt = DateTime::createFromFormat('d-m-Y', $dob_clean);
+        $formatted_date = $dob_dt ? $dob_dt->format('F j, Y') : (strtotime($dob_clean) ? date('F j, Y', strtotime($dob_clean)) : $dob);
+        $sys_label = ($system === 'western') ? 'Western Psychological Astrology' : 'Vedic Jyotish Astrology';
+        return '<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>' . esc_html($title) . ' - ' . esc_html($name) . '</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; background: #070b19; color: #f3f4f6; margin: 0; padding: 40px; }
+        .report-box { max-width: 800px; margin: 0 auto; background: #0d132b; padding: 40px; border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        .header { text-align: center; border-bottom: 2px solid rgba(245, 158, 11, 0.3); padding-bottom: 25px; }
+        .logo-title { font-size: 26px; font-weight: bold; color: #f59e0b; margin: 0; letter-spacing: 1px; }
+        .report-sub { font-size: 19px; color: #fff; margin-top: 6px; font-weight: 600; }
+        .system-pill { display: inline-block; background: rgba(245, 158, 11, 0.15); border: 1px solid rgba(245, 158, 11, 0.4); color: #fbbf24; font-size: 12px; font-weight: bold; text-transform: uppercase; padding: 4px 10px; border-radius: 20px; margin-top: 10px; }
+        .profile-table { width: 100%; border-collapse: collapse; margin: 25px 0; background: rgba(21, 31, 66, 0.5); border-radius: 8px; overflow: hidden; }
+        .profile-table td { padding: 12px 16px; border: 1px solid rgba(245, 158, 11, 0.15); font-size: 14px; }
+        .profile-table td.label { font-weight: bold; color: #f59e0b; width: 30%; }
+        .section-title { font-size: 18px; color: #fbbf24; border-left: 4px solid #f59e0b; padding-left: 12px; margin-top: 30px; }
+        .content-box { line-height: 1.7; font-size: 14.5px; color: #cbd5e1; margin-top: 10px; background: rgba(21, 31, 66, 0.3); padding: 16px; border-radius: 8px; }
+        .footer { text-align: center; margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(245, 158, 11, 0.2); font-size: 13px; color: #64748b; }
+        @media print { body { background: #fff; color: #222; } .report-box { background: #fff; border: none; box-shadow: none; color: #222; } .content-box { background: #f9f9f9; color: #333; } }
+    </style>
+</head>
+<body>
+    <div class="report-box">
+        <div class="header">
+            <h1 class="logo-title">ZODIACBEE ASTROLOGICAL SERVICES</h1>
+            <div class="report-sub">' . esc_html($title) . '</div>
+            <div class="system-pill">' . esc_html($sys_label) . '</div>
+        </div>
+
+        <table class="profile-table">
+            <tr>
+                <td class="label">Native Name:</td>
+                <td><strong style="color:#fff;">' . esc_html($name) . '</strong> (' . esc_html($gender) . ')</td>
+                <td class="label">Date of Birth:</td>
+                <td>' . esc_html($formatted_date) . '</td>
+            </tr>
+            <tr>
+                <td class="label">Time of Birth:</td>
+                <td>' . esc_html($tob) . '</td>
+                <td class="label">Place of Birth:</td>
+                <td>' . esc_html($pob) . '</td>
+            </tr>
+        </table>
+
+        <h3 class="section-title">1. Astrological Overview & Celestial Alignments</h3>
+        <div class="content-box">
+            The planetary alignment at the moment of birth indicates strong ascendant influences with favorable harmonious aspects. The current celestial transits encourage focused progression in career pursuits and deep emotional clarity.
+        </div>
+
+        <h3 class="section-title">2. Core Strengths & Harmonic Cycles</h3>
+        <div class="content-box">
+            Benefic aspects promote mental acuity, creative ingenuity, and steady personal growth. The planetary architecture signifies periods of high productivity during solar activations.
+        </div>
+
+        <h3 class="section-title">3. Actionable Cosmic Guidance</h3>
+        <div class="content-box">
+            To align with positive cosmic frequencies, mindful morning routines, intuitive journaling, and grounding exercises are strongly advised during transition phases.
+        </div>
+
+        <div class="footer">
+            &copy; ' . date('Y') . ' ZodiacBee / MeraRashifal &bull; Verified Computational Astrology &bull; All Rights Reserved.
+        </div>
+    </div>
+</body>
+</html>';
+    }
+}

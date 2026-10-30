@@ -1,0 +1,2632 @@
+/* MeraRashifal Brand Design System Tokens */
+:root {
+    --mr-sacred-orange: #F58220;
+    --mr-deep-maroon:   #7A1F3D;
+    --mr-gold:          #D9A441;
+    --mr-cream:         #FDF8F1;
+    --mr-white:         #FFFFFF;
+    --mr-dark-brown:    #3A312D;
+    --mr-soft-green:    #2CB67D;
+    --mr-soft-blue:     #4B7BEC;
+    --mr-soft-pink:     #E66BA5;
+    --mr-purple:        #7B61FF;
+
+    --niyati-primary: #F58220;
+    --niyati-primary-dark: #7A1F3D;
+    --niyati-primary-light: #FDF8F1;
+    --niyati-bg: #FDF8F1;
+    --niyati-text: #3A312D;
+    --niyati-muted: #786C65;
+    --niyati-border: #F0DFC8;
+    --niyati-radius: 18px;
+    --niyati-shadow: 0 16px 40px -10px rgba(58, 49, 45, 0.14), 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+/* Floating Launcher Button */
+.niyati-launcher-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    height: 60px;
+    border-radius: 30px;
+    background: linear-gradient(135deg, var(--niyati-primary) 0%, var(--niyati-primary-dark) 100%);
+    color: #ffffff;
+    border: none;
+    box-shadow: 0 8px 24px rgba(217, 119, 6, 0.45);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0 22px;
+    cursor: pointer;
+    z-index: 999998;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.niyati-launcher-btn:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 12px 28px rgba(217, 119, 6, 0.55);
+}
+
+.niyati-launcher-avatar {
+    width: 38px;
+    height: 38px;
+    min-width: 38px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ffffff;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    display: block;
+    margin-left: -6px;
+}
+
+.niyati-launcher-icon {
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    animation: niyati-pulse 2.5s infinite;
+}
+
+@keyframes niyati-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15) rotate(5deg); }
+}
+
+.niyati-launcher-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: #ef4444;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 10px;
+    border: 2px solid #fff;
+}
+
+/* Proactive Chat Nudge Speech Bubble */
+.niyati-nudge-bubble {
+    position: fixed;
+    bottom: 94px;
+    right: 24px;
+    max-width: 320px;
+    background: #FFFFFF;
+    border: 1.5px solid #F58220;
+    border-radius: 16px;
+    padding: 10px 14px;
+    display: none;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 10px 25px -4px rgba(122, 31, 61, 0.16), 0 4px 10px rgba(0, 0, 0, 0.08);
+    z-index: 999997;
+    cursor: pointer;
+    box-sizing: border-box;
+    opacity: 0;
+    transform: translateY(12px) scale(0.92);
+    transition: opacity 0.28s ease, transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease;
+    user-select: none;
+}
+
+.niyati-nudge-bubble.visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    animation: niyati-nudge-pop 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.niyati-nudge-bubble:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px -4px rgba(245, 130, 32, 0.28), 0 6px 14px rgba(0, 0, 0, 0.1);
+}
+
+.niyati-nudge-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 1;
+    min-width: 0;
+}
+
+.niyati-nudge-sparkle {
+    font-size: 16px;
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.niyati-nudge-text {
+    font-size: 13px;
+    font-weight: 600;
+    color: #3A312D;
+    line-height: 1.4;
+    font-family: inherit;
+    word-break: break-word;
+}
+
+.niyati-nudge-close {
+    background: transparent;
+    border: none;
+    font-size: 18px;
+    line-height: 1;
+    color: #94a3b8;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 50%;
+    transition: color 0.15s, background 0.15s;
+    flex-shrink: 0;
+    margin-left: 2px;
+}
+
+.niyati-nudge-close:hover {
+    color: #ef4444;
+    background: #fee2e2;
+}
+
+.niyati-nudge-arrow {
+    position: absolute;
+    bottom: -7px;
+    right: 48px;
+    width: 12px;
+    height: 12px;
+    background: #FFFFFF;
+    border-right: 1.5px solid #F58220;
+    border-bottom: 1.5px solid #F58220;
+    transform: rotate(45deg);
+    pointer-events: none;
+}
+
+@keyframes niyati-nudge-pop {
+    0% {
+        opacity: 0;
+        transform: translateY(14px) scale(0.92);
+    }
+    65% {
+        transform: translateY(-3px) scale(1.02);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Chat Widget Container */
+.niyati-widget-container {
+    position: fixed;
+    bottom: 96px;
+    right: 24px;
+    width: 380px;
+    max-width: calc(100vw - 32px);
+    height: 600px;
+    max-height: calc(100vh - 120px);
+    background: #FFFBEB !important;
+    border-radius: var(--niyati-radius);
+    box-shadow: 0 16px 40px -10px rgba(179, 84, 30, 0.18), 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 1.5px solid #FED7AA !important;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    z-index: 999999;
+    font-family: 'Noto Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(20px) scale(0.96);
+    transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.niyati-widget-container.active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+}
+
+/* Chat Header */
+.niyati-header {
+    background: linear-gradient(135deg, var(--niyati-primary, #d97706) 0%, var(--niyati-primary-dark, #b45309) 100%);
+    color: #ffffff;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    position: relative;
+    z-index: 20;
+    box-sizing: border-box;
+}
+
+.niyati-header-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
+}
+
+.niyati-avatar {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    max-width: 44px;
+    border-radius: 50%;
+    position: relative;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18);
+    flex-shrink: 0;
+    background: #ffffff;
+    overflow: visible;
+}
+
+.niyati-avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+}
+
+.niyati-online-dot {
+    position: absolute;
+    bottom: -1px;
+    right: -1px;
+    width: 12px;
+    height: 12px;
+    background: #22c55e;
+    border: 2.5px solid #ffffff;
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.niyati-header-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.niyati-header-title-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.niyati-header-info h4 {
+    all: unset !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    color: #ffffff !important;
+    line-height: 1.2 !important;
+    letter-spacing: -0.01em !important;
+    font-family: inherit !important;
+}
+
+.niyati-header-badge {
+    font-size: 9.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    background: rgba(255, 255, 255, 0.22);
+    color: #ffffff;
+    padding: 1px 6px;
+    border-radius: 8px;
+    line-height: 1.3;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+}
+
+.niyati-header-sub-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11.5px;
+    color: rgba(255, 255, 255, 0.92);
+    white-space: nowrap;
+}
+
+.niyati-header-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-weight: 600;
+    font-size: 10.5px;
+    color: #bbf7d0;
+}
+
+.niyati-status-pulse {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #4ade80;
+    display: inline-block;
+    box-shadow: 0 0 0 2px rgba(74, 222, 128, 0.4);
+}
+
+.niyati-header-actions {
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    flex-shrink: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Bulletproof isolation for header action buttons (resets WordPress theme styles) */
+button.niyati-header-btn,
+.niyati-header-btn {
+    all: unset !important;
+    box-sizing: border-box !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    width: 34px !important;
+    height: 34px !important;
+    min-width: 34px !important;
+    max-width: 34px !important;
+    min-height: 34px !important;
+    max-height: 34px !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border-radius: 50% !important;
+    background: rgba(255, 255, 255, 0.22) !important;
+    border: 1px solid rgba(255, 255, 255, 0.35) !important;
+    color: #ffffff !important;
+    cursor: pointer !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.12) !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    line-height: 1 !important;
+    outline: none !important;
+}
+
+button.niyati-header-btn:hover,
+.niyati-header-btn:hover {
+    background: rgba(255, 255, 255, 0.38) !important;
+    border-color: rgba(255, 255, 255, 0.6) !important;
+    transform: scale(1.08) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2) !important;
+}
+
+button.niyati-header-btn:active,
+.niyati-header-btn:active {
+    transform: scale(0.94) !important;
+}
+
+/* Force header SVG icons and strokes to be crisp and visible */
+.niyati-header-btn svg {
+    width: 16px !important;
+    height: 16px !important;
+    min-width: 16px !important;
+    min-height: 16px !important;
+    max-width: 16px !important;
+    max-height: 16px !important;
+    display: block !important;
+    margin: auto !important;
+    stroke: #ffffff !important;
+    color: #ffffff !important;
+    stroke-width: 2.3 !important;
+    fill: none !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+    pointer-events: none !important;
+}
+
+.niyati-header-btn svg path,
+.niyati-header-btn svg line,
+.niyati-header-btn svg polyline,
+.niyati-header-btn svg rect,
+.niyati-header-btn svg circle {
+    stroke: #ffffff !important;
+    stroke-width: 2.3 !important;
+    fill: none !important;
+    stroke-linecap: round !important;
+    stroke-linejoin: round !important;
+}
+
+/* Redesigned Professional Credit & Wallet Bar */
+.niyati-credit-bar {
+    background: #FFF7ED;
+    border-bottom: 1px solid #FED7AA;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 1px 3px rgba(179, 84, 30, 0.04);
+    min-height: 42px;
+    box-sizing: border-box;
+    position: relative;
+    z-index: 10;
+}
+
+.niyati-credit-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.niyati-credit-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: #fef3c7;
+    color: var(--niyati-primary, #d97706);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 1px 2px rgba(217, 119, 6, 0.15);
+}
+
+.niyati-credit-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    line-height: 1;
+}
+
+.niyati-credit-amount {
+    font-weight: 700;
+    color: #1e293b;
+    letter-spacing: -0.01em;
+}
+
+.niyati-credit-amount.exhausted {
+    color: #dc2626;
+}
+
+.niyati-credit-free {
+    background: #f0fdf4;
+    color: #16a34a;
+    border: 1px solid #bbf7d0;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 10px;
+    line-height: 1.2;
+}
+
+.niyati-credit-validity {
+    background: #f8fafc;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 10px;
+    line-height: 1.2;
+}
+
+.niyati-credit-action {
+    display: flex;
+    align-items: center;
+}
+
+.niyati-btn-recharge {
+    background: linear-gradient(135deg, var(--niyati-primary, #d97706) 0%, var(--niyati-primary-dark, #b45309) 100%);
+    color: #ffffff;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 16px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    box-shadow: 0 2px 6px rgba(217, 119, 6, 0.25);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    font-family: inherit;
+}
+
+.niyati-btn-recharge:hover {
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: 0 4px 10px rgba(217, 119, 6, 0.35);
+    filter: brightness(1.05);
+}
+
+.niyati-btn-recharge:active {
+    transform: translateY(0) scale(0.98);
+}
+
+.niyati-btn-recharge.urgent {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.35);
+    animation: niyati-recharge-pulse 2s infinite;
+}
+
+@keyframes niyati-recharge-pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.04); }
+}
+
+.niyati-spin {
+    display: inline-block;
+    animation: niyati-spin-anim 1.5s linear infinite;
+}
+
+@keyframes niyati-spin-anim {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Backward compatibility for ribbon if referenced */
+.niyati-quota-ribbon {
+    display: none;
+}
+
+/* Fullscreen Mode Overlay */
+body.niyati-body-fullscreen-lock {
+    overflow: hidden !important;
+}
+
+.niyati-widget-container.niyati-fullscreen {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    border-radius: 0 !important;
+    border: none !important;
+    box-shadow: none !important;
+    z-index: 99999999 !important;
+    background: #f8fafc !important;
+    transform: none !important;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.niyati-widget-container.niyati-fullscreen .niyati-header {
+    padding: 14px 24px;
+}
+
+.niyati-widget-container.niyati-fullscreen .niyati-credit-bar {
+    padding: 10px 24px;
+    background: #FFF7ED;
+    border-bottom: 1px solid #FED7AA;
+}
+
+.niyati-widget-container.niyati-fullscreen .niyati-view {
+    max-width: 920px;
+    width: 100%;
+    margin: 0 auto;
+    background: #FFFBEB;
+    box-shadow: 0 0 35px rgba(179, 84, 30, 0.05);
+    border-left: 1px solid #FED7AA;
+    border-right: 1px solid #FED7AA;
+}
+
+.niyati-widget-container.niyati-fullscreen .niyati-chat-messages {
+    padding: 24px 32px;
+}
+
+.niyati-widget-container.niyati-fullscreen .niyati-msg-bubble {
+    font-size: 14px;
+    line-height: 1.65;
+    max-width: 75%;
+}
+
+.niyati-widget-container.niyati-fullscreen .niyati-input-bar {
+    padding: 16px 28px;
+    background: #FFFBEB;
+    border-top: 1px solid #FED7AA;
+}
+
+.niyati-widget-container.niyati-fullscreen .niyati-input-bar input {
+    padding: 13px 18px;
+    font-size: 14px;
+    border-radius: 24px;
+}
+
+.niyati-widget-container.niyati-fullscreen .niyati-send-btn {
+    width: 44px;
+    height: 44px;
+    font-size: 17px;
+}
+
+.niyati-widget-container.niyati-fullscreen .niyati-recharge-dialog {
+    max-width: 1040px;
+    width: 95%;
+    border-radius: 22px;
+}
+
+.niyati-widget-container.niyati-fullscreen .niyati-packs-grid {
+    display: grid !important;
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 16px !important;
+    padding: 22px 24px !important;
+    overflow: visible !important;
+}
+
+.niyati-widget-container.niyati-fullscreen .niyati-pack-card {
+    min-height: auto;
+    padding: 16px 16px 14px 16px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+/* View switcher */
+.niyati-view {
+    display: none;
+    flex: 1;
+    overflow-y: auto;
+    flex-direction: column;
+}
+
+.niyati-view.active {
+    display: flex;
+}
+
+/* ONBOARDING FORM VIEW */
+.niyati-onboarding-view {
+    padding: 20px;
+    background: #FFFBEB;
+}
+
+.niyati-onboarding-intro {
+    text-align: center;
+    margin-bottom: 18px;
+}
+
+.niyati-onboarding-intro h3 {
+    margin: 0 0 6px 0;
+    font-size: 18px;
+    color: #1e293b;
+    font-weight: 700;
+}
+
+.niyati-onboarding-intro p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--niyati-muted);
+}
+
+/* Saved Family Profiles Quick Select */
+.niyati-saved-profiles-wrap {
+    margin-bottom: 16px;
+    background: #FFF7ED;
+    border: 1px solid #FED7AA;
+    border-radius: 10px;
+    padding: 10px 12px;
+}
+
+.niyati-saved-profiles-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.niyati-saved-profiles-title {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #9a3412;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.niyati-btn-new-profile {
+    background: #ffffff;
+    border: 1px dashed #d97706;
+    color: #b45309;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+}
+
+.niyati-btn-new-profile:hover {
+    background: #fef3c7;
+    border-color: #b45309;
+    color: #92400e;
+    transform: translateY(-1px);
+}
+
+.niyati-saved-profiles-chips {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    scrollbar-width: thin;
+}
+
+.niyati-saved-profiles-chips::-webkit-scrollbar {
+    height: 4px;
+}
+
+.niyati-saved-profiles-chips::-webkit-scrollbar-thumb {
+    background: #fed7aa;
+    border-radius: 4px;
+}
+
+.niyati-profile-chip {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    padding: 6px 11px;
+    border-radius: 18px;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+    user-select: none;
+}
+
+.niyati-profile-chip:hover {
+    border-color: #d97706;
+    background: #fffbeb;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(217, 119, 6, 0.15);
+}
+
+.niyati-profile-chip.active {
+    background: #fef3c7;
+    border-color: #d97706;
+    box-shadow: 0 0 0 1.5px #d97706;
+}
+
+.niyati-chip-avatar {
+    font-size: 13px;
+    line-height: 1;
+}
+
+.niyati-chip-info {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+}
+
+.niyati-chip-name {
+    font-size: 12px;
+    font-weight: 700;
+    color: #1e293b;
+    white-space: nowrap;
+}
+
+.niyati-chip-meta {
+    font-size: 10px;
+    color: #64748b;
+    white-space: nowrap;
+    margin-top: 1px;
+}
+
+.niyati-form-group {
+    margin-bottom: 14px;
+    position: relative;
+}
+
+.niyati-form-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 4px;
+}
+
+.niyati-form-group input,
+.niyati-form-group select {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--niyati-border);
+    border-radius: 8px;
+    font-size: 13px;
+    background: #ffffff;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.niyati-form-group input:focus,
+.niyati-form-group select:focus {
+    border-color: var(--niyati-primary);
+}
+
+.niyati-city-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: #ffffff;
+    border: 1px solid var(--niyati-border);
+    border-radius: 8px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    max-height: 180px;
+    overflow-y: auto;
+    display: none;
+}
+
+.niyati-city-item {
+    padding: 8px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.niyati-city-item:hover {
+    background: var(--niyati-primary-light);
+    color: var(--niyati-primary-dark);
+}
+
+.niyati-btn-submit {
+    width: 100%;
+    background: linear-gradient(135deg, var(--niyati-primary) 0%, var(--niyati-primary-dark) 100%);
+    color: #ffffff;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    margin-top: 10px;
+}
+
+.niyati-btn-submit:hover {
+    opacity: 0.95;
+}
+
+/* CHAT CONVERSATION VIEW */
+#niyati-view-chat {
+    background: #FFFBEB !important;
+}
+
+.niyati-chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    background: #FFFBEB !important;
+}
+
+.niyati-msg {
+    display: flex;
+    gap: 10px;
+    max-width: 90%;
+    line-height: 1.45;
+    font-size: 13.5px;
+    animation: niyati-fadeIn 0.2s ease-in;
+}
+
+@keyframes niyati-fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.niyati-msg.bot {
+    align-self: flex-start;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    max-width: 92%;
+}
+
+.niyati-msg-avatar {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+    max-width: 36px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    margin-top: 1px;
+    border: 1.5px solid #d97706;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+    background: #ffffff;
+}
+
+.niyati-msg-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.niyati-msg-body {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    flex: 1;
+    min-width: 0;
+}
+
+.niyati-msg-author {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 2px;
+    padding-left: 2px;
+}
+
+.niyati-author-name {
+    font-size: 13px;
+    font-weight: 700;
+    color: #0f172a;
+    letter-spacing: -0.01em;
+}
+
+.niyati-author-badge {
+    font-size: 10px;
+    font-weight: 600;
+    background: #fef3c7;
+    color: #b45309;
+    padding: 1px 7px;
+    border-radius: 8px;
+    border: 1px solid #fde68a;
+    line-height: 1.3;
+}
+
+.niyati-msg.user {
+    align-self: flex-end;
+    flex-direction: row-reverse;
+}
+
+.niyati-msg-bubble {
+    padding: 10px 14px;
+    border-radius: 14px;
+    word-break: break-word;
+}
+
+.niyati-msg.bot .niyati-msg-bubble {
+    background: #ffffff !important;
+    color: #101820;
+    border-top-left-radius: 4px;
+    border: 1.5px solid #FED7AA !important;
+    box-shadow: 0 2px 6px rgba(179, 84, 30, 0.06) !important;
+}
+
+.niyati-msg.bot .niyati-msg-bubble strong {
+    color: #0f172a;
+}
+
+.niyati-msg.user .niyati-msg-bubble {
+    background: var(--niyati-primary);
+    color: #ffffff;
+    border-bottom-right-radius: 4px;
+}
+
+.niyati-msg.bot .niyati-msg-bubble.niyati-msg-bubble-followup {
+    margin-top: 2px;
+    border-top-left-radius: 14px;
+}
+
+/* Unified Chat Window Suggestions: Rendered inline in the single message stream without separate borders or split window */
+.niyati-suggestions-wrap {
+    padding: 4px 0 10px 0 !important;
+    background: transparent !important;
+    border: none !important;
+    border-top: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 8px !important;
+    max-height: none !important;
+    overflow: visible !important;
+    box-sizing: border-box !important;
+    width: 100% !important;
+    margin: 4px 0 0 0 !important;
+    animation: niyati-fadeIn 0.25s ease-in;
+}
+
+.niyati-suggestions-wrap::-webkit-scrollbar {
+    display: none !important;
+}
+.niyati-suggestions-wrap::-webkit-scrollbar-thumb {
+    display: none !important;
+}
+
+button.niyati-chip,
+.niyati-chip {
+    all: unset !important;
+    box-sizing: border-box !important;
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    width: 100% !important;
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+    color: #ffffff !important;
+    padding: 10px 14px !important;
+    border-radius: 12px !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    line-height: 1.4 !important;
+    text-align: left !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+    box-shadow: 0 2px 6px rgba(234, 88, 12, 0.22) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    font-family: inherit !important;
+}
+
+button.niyati-chip:hover,
+.niyati-chip:hover {
+    background: linear-gradient(135deg, #fb923c 0%, #f97316 100%) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 4px 10px rgba(234, 88, 12, 0.32) !important;
+    color: #ffffff !important;
+}
+
+button.niyati-chip:active,
+.niyati-chip:active {
+    transform: translateY(0) scale(0.99) !important;
+}
+
+.niyati-chip-text {
+    flex: 1;
+    color: #ffffff !important;
+}
+
+.niyati-chip-arrow {
+    font-size: 16px;
+    line-height: 1;
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 700;
+}
+
+/* Typing Indicator */
+.niyati-typing {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: #FFFBEB !important;
+    border: 1px solid #fde68a !important;
+    border-radius: 14px;
+    align-self: flex-start;
+    font-size: 12.5px;
+    color: #92400e;
+    box-shadow: 0 1px 3px rgba(217, 119, 6, 0.08);
+}
+
+.niyati-typing-text {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #92400e;
+    line-height: 1.35;
+    transition: opacity 0.2s ease-in-out;
+}
+
+.niyati-typing-dots {
+    display: inline-flex;
+    gap: 3px;
+    margin-left: 4px;
+}
+
+.niyati-typing-dots span {
+    width: 6px;
+    height: 6px;
+    background: var(--niyati-primary);
+    border-radius: 50%;
+    animation: niyati-blink 1.4s infinite both;
+}
+
+.niyati-typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.niyati-typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes niyati-blink {
+    0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); }
+    40% { opacity: 1; transform: scale(1.1); }
+}
+
+/* Chat Input Bar */
+.niyati-input-bar {
+    padding: 12px 14px;
+    background: #FFF7ED;
+    border-top: 1px solid #FED7AA !important;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.niyati-input-bar input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid var(--niyati-border);
+    border-radius: 20px;
+    font-size: 13px;
+    outline: none;
+}
+
+.niyati-input-bar input:focus {
+    border-color: var(--niyati-primary);
+}
+
+.niyati-send-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: var(--niyati-primary);
+    color: #ffffff;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.2s;
+    flex-shrink: 0;
+}
+
+.niyati-send-btn:disabled {
+    background: #cbd5e1;
+    cursor: not-allowed;
+}
+
+/* Quota Exceeded Card */
+.niyati-limit-box {
+    margin: 12px 0;
+    padding: 14px;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 12px;
+    text-align: center;
+    color: #92400e;
+    font-size: 13px;
+}
+
+.niyati-limit-box strong {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+/* Mobile responsive: Phones & Mobile viewports (< 768px) */
+@media (max-width: 767px) {
+    /* Hide Fullscreen button on mobile devices (fullscreen is only for desktop & tablet) */
+    #niyati-btn-fullscreen,
+    button#niyati-btn-fullscreen {
+        display: none !important;
+    }
+
+    .niyati-widget-container {
+        bottom: 0 !important;
+        right: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        max-width: 100vw !important;
+        height: 100vh !important;
+        height: 100dvh !important;
+        max-height: 100vh !important;
+        max-height: 100dvh !important;
+        border-radius: 0 !important;
+        border: none !important;
+    }
+    /* Mobile Floating Launcher: Circular Avatar + Credit Badge on Top (Safely clears bottom menu) */
+    .niyati-launcher-btn {
+        bottom: 78px !important;
+        right: 16px !important;
+        width: 52px !important;
+        height: 52px !important;
+        min-width: 52px !important;
+        min-height: 52px !important;
+        max-width: 52px !important;
+        max-height: 52px !important;
+        border-radius: 50% !important;
+        padding: 0 !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-shadow: 0 4px 18px rgba(245, 130, 32, 0.45), 0 2px 6px rgba(0, 0, 0, 0.18) !important;
+        border: 2px solid #FFFFFF !important;
+        z-index: 999998 !important;
+    }
+
+    .niyati-launcher-avatar {
+        width: 44px !important;
+        height: 44px !important;
+        min-width: 44px !important;
+        min-height: 44px !important;
+        margin: 0 !important;
+        border-radius: 50% !important;
+        border: none !important;
+        box-shadow: none !important;
+        display: block !important;
+    }
+
+    .niyati-launcher-label {
+        display: none !important;
+    }
+
+    .niyati-launcher-badge {
+        position: absolute !important;
+        top: -8px !important;
+        left: 50% !important;
+        right: auto !important;
+        transform: translateX(-50%) !important;
+        font-size: 8.5px !important;
+        font-weight: 800 !important;
+        padding: 1.5px 6px !important;
+        border-radius: 10px !important;
+        border: 1.5px solid #ffffff !important;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25) !important;
+        white-space: nowrap !important;
+        line-height: 1.2 !important;
+        z-index: 10 !important;
+        pointer-events: none !important;
+    }
+
+    /* Mobile Nudge Speech Bubble: compact half size, positioned right above circular avatar */
+    .niyati-nudge-bubble {
+        bottom: 136px !important;
+        right: 12px !important;
+        width: 175px !important;
+        max-width: 180px !important;
+        padding: 7px 10px !important;
+        border-radius: 12px !important;
+        gap: 6px !important;
+        box-shadow: 0 6px 18px -2px rgba(122, 31, 61, 0.16), 0 2px 6px rgba(0, 0, 0, 0.08) !important;
+    }
+
+    .niyati-nudge-content {
+        gap: 5px !important;
+        align-items: flex-start !important;
+    }
+
+    .niyati-nudge-sparkle {
+        font-size: 13px !important;
+        line-height: 1.2 !important;
+    }
+
+    .niyati-nudge-text {
+        font-size: 11px !important;
+        line-height: 1.3 !important;
+        font-weight: 600 !important;
+    }
+
+    .niyati-nudge-close {
+        font-size: 14px !important;
+        padding: 0 2px !important;
+        margin-left: 0 !important;
+        align-self: flex-start !important;
+    }
+
+    .niyati-nudge-arrow {
+        right: 22px !important;
+        bottom: -5px !important;
+        width: 9px !important;
+        height: 9px !important;
+    }
+
+    .niyati-recharge-modal {
+        padding: 0 !important;
+    }
+    .niyati-recharge-dialog {
+        width: 100% !important;
+        max-width: 100% !important;
+        height: 100% !important;
+        max-height: 100% !important;
+        max-height: 100dvh !important;
+        border-radius: 0 !important;
+        border: none !important;
+    }
+    .niyati-packs-grid {
+        flex: 1 1 auto;
+        padding: 12px 14px 20px 14px;
+        gap: 10px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .niyati-pack-card {
+        padding: 12px 14px 10px 14px;
+        border-radius: 14px;
+    }
+    .niyati-btn-buy {
+        min-height: 38px;
+        font-size: 12.5px;
+    }
+}
+
+/* RECHARGE & CREDIT PACKS STYLES */
+.niyati-btn-recharge-pill {
+    background: #ffffff;
+    color: var(--niyati-primary-dark);
+    border: 1px solid var(--niyati-primary);
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-left: 8px;
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.niyati-btn-recharge-pill:hover {
+    background: var(--niyati-primary);
+    color: #ffffff;
+}
+
+/* /* ==========================================================================
+   MERARASHIFAL BRAND DESIGN SYSTEM - RECHARGE MODAL & PACK CARDS
+   ========================================================================== */
+.niyati-recharge-modal {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    box-sizing: border-box;
+}
+
+.niyati-recharge-modal.active {
+    display: flex !important;
+}
+
+.niyati-recharge-backdrop {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(58, 49, 45, 0.65);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 1;
+    animation: niyati-fadeIn 0.2s ease-out;
+}
+
+.niyati-recharge-dialog {
+    position: relative;
+    z-index: 2;
+    background: #FDF8F1 !important;
+    border-radius: 18px;
+    box-shadow: 0 16px 48px rgba(58, 49, 45, 0.2), 0 0 0 1px #F0DFCE;
+    border: 1px solid #EBD5BE !important;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 356px;
+    max-height: calc(100% - 12px);
+    overflow: hidden;
+    animation: niyati-scaleIn 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    box-sizing: border-box;
+}
+
+@keyframes niyati-scaleIn {
+    from { opacity: 0; transform: scale(0.97); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+.niyati-recharge-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 14px;
+    border-bottom: 1px solid #F0DFCE;
+    background: #FFFFFF;
+}
+
+.niyati-recharge-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+}
+
+.niyati-recharge-icon {
+    width: 30px;
+    height: 30px;
+    min-width: 30px;
+    border-radius: 8px;
+    background: #FFF8EE;
+    border: 1px solid #EBD5BE;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.niyati-spin-loader-icon {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    animation: niyati-spin-anim 12s linear infinite;
+    display: block;
+}
+
+.niyati-recharge-titles {
+    min-width: 0;
+}
+
+.niyati-recharge-titles h3 {
+    margin: 0 !important;
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    color: #7A1F3D !important;
+    line-height: 1.2 !important;
+    font-family: 'Playfair Display', Georgia, serif;
+    letter-spacing: -0.01em;
+}
+
+.niyati-recharge-subtitle {
+    margin: 1px 0 0 0 !important;
+    font-size: 10px !important;
+    color: #8C786D !important;
+    font-weight: 500 !important;
+    line-height: 1.2 !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.niyati-recharge-close {
+    background: #FDF5ED;
+    border: 1px solid #EBD7C4;
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    font-size: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #7A1F3D;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    margin-left: 6px;
+}
+
+.niyati-recharge-close:hover {
+    background: #F58220;
+    color: #FFFFFF;
+    border-color: #F58220;
+    transform: scale(1.08);
+}
+
+.niyati-packs-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 12px;
+    overflow-y: auto;
+    box-sizing: border-box;
+    background: #FDF8F1;
+}
+
+.niyati-packs-grid::-webkit-scrollbar {
+    width: 4px;
+}
+.niyati-packs-grid::-webkit-scrollbar-thumb {
+    background: #E8D5C4;
+    border-radius: 4px;
+}
+
+/* Compact, Ultra-Sleek Pack Cards */
+.niyati-pack-card {
+    background: #FFFFFF !important;
+    border: 1px solid #EFE4D8 !important;
+    border-radius: 14px;
+    padding: 10px 12px 9px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(58, 49, 45, 0.04);
+    box-sizing: border-box;
+    position: relative;
+}
+
+.niyati-pack-card:hover {
+    border-color: #D9A441 !important;
+    transform: translateY(-1.5px);
+    box-shadow: 0 6px 18px rgba(217, 164, 65, 0.16);
+}
+
+.niyati-pack-card.featured {
+    border: 1.5px solid #D9A441 !important;
+    background: linear-gradient(180deg, #FFFFFF 0%, #FFFDF8 100%) !important;
+    box-shadow: 0 4px 14px rgba(217, 164, 65, 0.14);
+}
+
+.niyati-pack-card.featured:hover {
+    border-color: #F58220 !important;
+    box-shadow: 0 8px 22px rgba(245, 130, 32, 0.2);
+}
+
+/* Top Row: Title + Tag on Left, Price + Discount on Right */
+.niyati-pack-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 6px;
+}
+
+.niyati-pack-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.niyati-pack-tag {
+    display: inline-block;
+    align-self: flex-start;
+    font-size: 8.5px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 1.5px 6px;
+    border-radius: 4px;
+    background: #7A1F3D;
+    color: #FFFFFF;
+    line-height: 1.2;
+}
+
+.niyati-pack-tag.featured-tag {
+    background: linear-gradient(135deg, #F58220 0%, #D9A441 100%);
+    box-shadow: 0 1px 4px rgba(245, 130, 32, 0.3);
+}
+
+.niyati-pack-name {
+    margin: 0 !important;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 13.5px !important;
+    font-weight: 700 !important;
+    color: #7A1F3D !important;
+    line-height: 1.25;
+    letter-spacing: -0.01em;
+}
+
+.niyati-en-name {
+    font-weight: 700;
+}
+
+.niyati-hi-name {
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 11px;
+    color: #8C786D;
+    font-weight: 500;
+    margin-left: 3px;
+}
+
+.niyati-pack-pricing {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0;
+    flex-shrink: 0;
+}
+
+.niyati-price-current {
+    display: flex;
+    align-items: baseline;
+    line-height: 1;
+}
+
+.niyati-curr {
+    font-size: 12px;
+    font-weight: 700;
+    color: #7A1F3D;
+    margin-right: 1px;
+}
+
+.niyati-amt {
+    font-size: 18px;
+    font-weight: 800;
+    color: #7A1F3D;
+    letter-spacing: -0.02em;
+}
+
+.niyati-price-prev {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 1px;
+}
+
+.niyati-mrp {
+    font-size: 10.5px;
+    color: #A3968C;
+    text-decoration: line-through;
+}
+
+.niyati-pack-discount-pill {
+    font-size: 9px !important;
+    font-weight: 800 !important;
+    color: #2CB67D !important;
+    background: #EAF8F1 !important;
+    border: 1px solid #BCECD5 !important;
+    padding: 1px 4px !important;
+    border-radius: 4px !important;
+    line-height: 1.1;
+}
+
+/* Value Strip: 60 Questions Total • 40 Base + 20 Free */
+.niyati-pack-value-strip {
+    background: #FDF8F2;
+    border: 1px solid #F1E4D6;
+    border-radius: 8px;
+    padding: 4px 8px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+    box-sizing: border-box;
+}
+
+.niyati-strip-main {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+}
+
+.niyati-strip-num {
+    font-size: 14px;
+    font-weight: 800;
+    color: #F58220;
+    line-height: 1;
+}
+
+.niyati-strip-label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #7A1F3D;
+}
+
+.niyati-strip-bonus {
+    font-size: 10px;
+    color: #2CB67D;
+    background: #FFFFFF;
+    border: 1px solid #E0EEDF;
+    border-radius: 5px;
+    padding: 1.5px 6px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* Micro Perks Row */
+.niyati-pack-meta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 10px;
+    color: #786C65;
+    font-weight: 500;
+    padding: 0 1px;
+}
+
+.niyati-meta-rate {
+    font-weight: 700;
+    color: #7A1F3D;
+}
+
+.niyati-meta-sep {
+    color: #D6C8BC;
+}
+
+.niyati-meta-perk {
+    color: #6E5F57;
+}
+
+/* Sleek Primary CTA Button */
+.niyati-btn-buy {
+    width: 100%;
+    background: linear-gradient(135deg, #F58220 0%, #DF6F11 100%) !important;
+    color: #FFFFFF !important;
+    border: none !important;
+    padding: 7px 12px;
+    border-radius: 9px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 2px 8px rgba(245, 130, 32, 0.28);
+    box-sizing: border-box;
+    margin-top: 1px;
+}
+
+.niyati-btn-buy:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(245, 130, 32, 0.42);
+    filter: brightness(1.04);
+}
+
+.niyati-btn-buy.featured-btn {
+    background: linear-gradient(135deg, #F58220 0%, #C95E0A 100%) !important;
+    box-shadow: 0 3px 10px rgba(245, 130, 32, 0.35);
+}
+
+.niyati-buy-arrow {
+    font-size: 13px;
+    line-height: 1;
+    transition: transform 0.2s;
+}
+
+.niyati-btn-buy:hover .niyati-buy-arrow {
+    transform: translateX(2.5px);
+}
+
+.niyati-btn-buy:disabled {
+    opacity: 0.7;
+    cursor: wait;
+}
+
+/* Footer & Trust Badges */
+.niyati-recharge-footer {
+    padding: 8px 12px;
+    background: #FFFFFF;
+    border-top: 1px solid #F0DFCE;
+}
+
+.niyati-trust-badges {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.niyati-trust-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    color: #6E5F57;
+    font-weight: 600;
+}
+
+.niyati-recharge-success-banner {
+    background: #EAF8F1;
+    border: 1px solid #BCECD5;
+    color: #15803D;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+    margin: 8px 0;
+    animation: niyati-fadeIn 0.3s;
+}
+
+/* Contextual Auto-Hyperlinks (Anti-Spam Subtle Links) */
+.niyati-auto-link {
+    color: var(--niyati-primary-dark, #b45309);
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-style: dotted;
+    text-underline-offset: 3px;
+    text-decoration-color: var(--niyati-primary, #d97706);
+    padding: 0 3px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    display: inline;
+    word-break: break-word;
+}
+
+.niyati-auto-link:hover {
+    color: #ffffff !important;
+    background: var(--niyati-primary, #d97706);
+    text-decoration: none;
+}
+
+.niyati-auto-link .niyati-link-icon {
+    font-size: 11px;
+    font-weight: 700;
+    margin-left: 2px;
+    display: inline-block;
+    line-height: 1;
+}
+
+/* Prominent Navigation Action Buttons for Reports & Tools */
+.niyati-auto-link.niyati-action-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    margin: 8px 0 4px 0 !important;
+    padding: 9px 16px !important;
+    background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
+    color: #ffffff !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
+    text-decoration: none !important;
+    border-radius: 10px !important;
+    box-shadow: 0 3px 8px rgba(234, 88, 12, 0.28) !important;
+    border: 1px solid rgba(255, 255, 255, 0.25) !important;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+    line-height: 1.3 !important;
+}
+
+.niyati-auto-link.niyati-action-btn:hover {
+    background: linear-gradient(135deg, #fb923c 0%, #f97316 100%) !important;
+    color: #ffffff !important;
+    transform: translateY(-1.5px) !important;
+    box-shadow: 0 5px 14px rgba(234, 88, 12, 0.38) !important;
+    text-decoration: none !important;
+}
+
+.niyati-auto-link.niyati-action-btn:active {
+    transform: translateY(0) scale(0.99) !important;
+}
+
+.niyati-auto-link.niyati-action-btn .niyati-link-icon {
+    font-size: 13px !important;
+    margin-left: 4px !important;
+    transition: transform 0.2s ease !important;
+}
+
+.niyati-auto-link.niyati-action-btn:hover .niyati-link-icon {
+    transform: translate(2px, -2px) !important;
+}
+
+/* Chatbot Initializing Disabled State & Toast */
+.niyati-launcher-disabled {
+    opacity: 0.9;
+    cursor: wait !important;
+}
+
+.niyati-init-toast {
+    position: fixed;
+    bottom: 95px;
+    right: 25px;
+    background: #1e293b;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 18px;
+    border-radius: 24px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    z-index: 9999999;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(10px);
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.niyati-init-toast.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.niyati-chat-disabled .niyati-input-container {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+.niyati-chat-disabled #niyati-user-input {
+    cursor: wait !important;
+    background: #f8fafc;
+}
+
+/* LOGIN PROMPT MODAL & ONBOARDING NOTICE */
+.niyati-login-notice {
+    background: #fffbeb;
+    border: 1px solid #fef3c7;
+    color: #92400e;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 12px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    line-height: 1.4;
+}
+
+.niyati-login-modal {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(4px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 999999;
+    padding: 20px;
+    animation: niyati-fadeIn 0.2s ease-in;
+}
+
+.niyati-login-modal.active {
+    display: flex;
+}
+
+.niyati-login-card {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 26px 22px;
+    max-width: 360px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.22);
+    border: 1px solid #e2e8f0;
+}
+
+.niyati-login-icon {
+    width: 52px;
+    height: 52px;
+    background: #fef3c7;
+    color: #d97706;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 12px auto;
+    font-size: 24px;
+}
+
+.niyati-login-title {
+    font-size: 16.5px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 8px 0;
+}
+
+.niyati-login-desc {
+    font-size: 13px;
+    color: #475569;
+    line-height: 1.5;
+    margin: 0 0 20px 0;
+}
+
+.niyati-login-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.niyati-btn-login-cta {
+    background: linear-gradient(135deg, var(--niyati-primary, #d97706) 0%, var(--niyati-primary-dark, #b45309) 100%);
+    color: #ffffff !important;
+    text-decoration: none;
+    padding: 12px 18px;
+    border-radius: 12px;
+    font-size: 13.5px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+    box-shadow: 0 4px 12px rgba(217, 119, 6, 0.28);
+}
+
+.niyati-btn-login-cta:hover {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(217, 119, 6, 0.35);
+}
+
+.niyati-btn-login-cancel {
+    background: #f1f5f9;
+    color: #64748b;
+    border: none;
+    padding: 9px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.niyati-btn-login-cancel:hover {
+    background: #e2e8f0;
+    color: #334155;
+}
+
+/* ==========================================================================
+   Ask Niyati - Dedicated Full-Width SEO Landing Page & Layout Styles
+   Adhering strictly to the MeraRashifal Brand Design System:
+   - Primary: Sacred Orange #F58220 / Deep Maroon #7A1F3D
+   - Accent: Gold #D9A441 / Soft Green #2CB67D
+   - Background: Cream #FFFBEB / White #FFFFFF
+   - Text: Dark Brown #3A312D / Dark Slate #1E293B
+   ========================================================================== */
+
+.niyati-landing-container {
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 30px 20px 80px 20px;
+    font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: #3A312D;
+    line-height: 1.6;
+    box-sizing: border-box;
+}
+
+/* Parameter 14: HTML Visual Breadcrumbs */
+.niyati-visual-breadcrumbs {
+    margin-bottom: 28px;
+    padding: 10px 16px;
+    background: #FFF7ED;
+    border: 1px solid #FED7AA;
+    border-radius: 12px;
+    font-size: 13px;
+}
+
+.niyati-visual-breadcrumbs ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+}
+
+.niyati-visual-breadcrumbs li {
+    display: inline-flex;
+    align-items: center;
+    color: #786C65;
+}
+
+.niyati-visual-breadcrumbs a {
+    color: #B45309;
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.15s ease;
+}
+
+.niyati-visual-breadcrumbs a:hover {
+    color: #F58220;
+    text-decoration: underline;
+}
+
+.niyati-visual-breadcrumbs .niyati-bc-sep {
+    color: #D9A441;
+    font-size: 14px;
+    font-weight: bold;
+}
+
+.niyati-visual-breadcrumbs li[aria-current="page"] {
+    color: #7A1F3D;
+    font-weight: 600;
+}
+
+/* Parameter 21: Hero Section & H1 Hierarchy */
+.niyati-landing-hero {
+    text-align: center;
+    max-width: 860px;
+    margin: 0 auto 36px auto;
+}
+
+.niyati-hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #FEF3C7;
+    border: 1px solid #FCD34D;
+    color: #92400E;
+    font-size: 12.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    padding: 5px 14px;
+    border-radius: 20px;
+    margin-bottom: 16px;
+}
+
+.niyati-hero-h1 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 38px;
+    font-weight: 800;
+    color: #7A1F3D;
+    line-height: 1.25;
+    margin: 0 0 16px 0;
+    letter-spacing: -0.5px;
+}
+
+.niyati-hero-lead {
+    font-size: 16px;
+    color: #554840;
+    line-height: 1.7;
+    margin: 0 auto;
+}
+
+/* Consultation Starter Card */
+.niyati-consultation-section {
+    margin-bottom: 60px;
+}
+
+.niyati-consult-card {
+    background: #FFFFFF;
+    border: 1.5px solid #FED7AA;
+    border-radius: 22px;
+    padding: 32px 36px;
+    display: flex;
+    align-items: center;
+    gap: 32px;
+    box-shadow: 0 16px 40px -10px rgba(180, 83, 9, 0.12), 0 4px 12px rgba(0, 0, 0, 0.04);
+    position: relative;
+    overflow: hidden;
+}
+
+.niyati-consult-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #F58220 0%, #D9A441 50%, #7A1F3D 100%);
+}
+
+.niyati-consult-avatar-wrap {
+    position: relative;
+    flex-shrink: 0;
+}
+
+.niyati-consult-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3.5px solid #F58220;
+    box-shadow: 0 8px 24px rgba(245, 130, 32, 0.28);
+    display: block;
+}
+
+.niyati-avatar-status {
+    position: absolute;
+    bottom: 6px;
+    right: 8px;
+    width: 20px;
+    height: 20px;
+    background: #22C55E;
+    border: 3px solid #FFFFFF;
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    animation: niyati-status-pulse 2s infinite;
+}
+
+@keyframes niyati-status-pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.15); opacity: 0.85; }
+}
+
+.niyati-consult-content {
+    flex: 1;
+}
+
+.niyati-consult-h2 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 26px;
+    font-weight: 700;
+    color: #7A1F3D;
+    margin: 0 0 8px 0;
+}
+
+.niyati-consult-sub {
+    font-size: 14.5px;
+    color: #554840;
+    margin: 0 0 20px 0;
+    line-height: 1.6;
+}
+
+.niyati-btn-hero-consult {
+    background: linear-gradient(135deg, #F58220 0%, #B45309 100%);
+    color: #ffffff !important;
+    border: none;
+    padding: 14px 28px;
+    border-radius: 30px;
+    font-size: 15.5px;
+    font-weight: 700;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 8px 22px rgba(245, 130, 32, 0.35);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.niyati-btn-hero-consult:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: 0 12px 28px rgba(245, 130, 32, 0.45);
+    filter: brightness(1.05);
+}
+
+.niyati-cta-arrow {
+    font-size: 18px;
+    transition: transform 0.2s ease;
+}
+
+.niyati-btn-hero-consult:hover .niyati-cta-arrow {
+    transform: translateX(4px);
+}
+
+/* Prompt Chips */
+.niyati-prompt-suggestions {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.niyati-prompt-label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: #786C65;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.niyati-prompt-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.niyati-p-chip {
+    background: #FFFFFF;
+    border: 1px solid #FED7AA;
+    color: #7A1F3D;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.niyati-p-chip:hover {
+    background: #FEF3C7;
+    border-color: #F58220;
+    color: #B45309;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(245, 130, 32, 0.15);
+}
+
+/* Section Header Shared */
+.niyati-section-header {
+    text-align: center;
+    max-width: 760px;
+    margin: 0 auto 36px auto;
+}
+
+.niyati-section-tag {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #F58220;
+    display: block;
+    margin-bottom: 6px;
+}
+
+.niyati-section-h2 {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 30px;
+    font-weight: 700;
+    color: #7A1F3D;
+    margin: 0 0 10px 0;
+}
+
+.niyati-section-desc {
+    font-size: 14.5px;
+    color: #554840;
+    margin: 0;
+    line-height: 1.6;
+}
+
+/* Features Section */
+.niyati-features-section {
+    margin-bottom: 60px;
+}
+
+.niyati-features-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.niyati-feature-card {
+    background: #FFFFFF;
+    border: 1px solid #FED7AA;
+    border-radius: 16px;
+    padding: 24px 20px;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+}
+
+.niyati-feature-card:hover {
+    transform: translateY(-4px);
+    border-color: #F58220;
+    box-shadow: 0 12px 28px rgba(245, 130, 32, 0.15);
+}
+
+.niyati-feature-icon {
+    font-size: 32px;
+    margin-bottom: 14px;
+}
+
+.niyati-feature-h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #7A1F3D;
+    margin: 0 0 8px 0;
+}
+
+.niyati-feature-card p {
+    font-size: 13px;
+    color: #554840;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Pricing Grid */
+.niyati-pricing-section {
+    margin-bottom: 60px;
+}
+
+.niyati-pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.niyati-price-card {
+    background: #FFFFFF;
+    border: 1.5px solid #FED7AA;
+    border-radius: 20px;
+    padding: 30px 24px 26px 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+}
+
+.niyati-price-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 16px 36px rgba(180, 83, 9, 0.16);
+}
+
+.niyati-price-card.featured {
+    border: 2px solid #F58220;
+    background: #FFFDF9;
+    box-shadow: 0 12px 32px rgba(245, 130, 32, 0.2);
+}
+
+.niyati-card-badge {
+    position: absolute;
+    top: -12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #F58220 0%, #B45309 100%);
+    color: #FFFFFF;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 4px 14px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(245, 130, 32, 0.35);
+    white-space: nowrap;
+}
+
+.niyati-card-h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #7A1F3D;
+    margin: 8px 0 12px 0;
+    text-align: center;
+}
+
+.niyati-price-display {
+    text-align: center;
+    margin-bottom: 12px;
+}
+
+.niyati-price-display .niyati-curr {
+    font-size: 20px;
+    font-weight: 700;
+    color: #7A1F3D;
+    vertical-align: top;
+    margin-right: 2px;
+}
+
+.niyati-price-display .niyati-amount {
+    font-size: 42px;
+    font-weight: 800;
+    color: #7A1F3D;
+    line-height: 1;
+}
+
+.niyati-price-display .niyati-prev-price {
+    font-size: 16px;
+    color: #94A3B8;
+    text-decoration: line-through;
+    margin-left: 8px;
+}
+
+.niyati-card-credits {
+    text-align: center;
+    background: #FFF7ED;
+    border: 1px solid #FED7AA;
+    border-radius: 10px;
+    padding: 8px;
+    margin-bottom: 18px;
+}
+
+.niyati-credits-num {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    color: #B45309;
+}
+
+.niyati-credits-bonus {
+    display: block;
+    font-size: 11.5px;
+    color: #16A34A;
+    font-weight: 600;
+    margin-top: 2px;
+}
+
+.niyati-card-perks {
+    list-style: none;
+    margin: 0 0 24px 0;
+    padding: 0;
+    font-size: 13px;
+    color: #554840;
+}
+
+.niyati-card-perks li {
+    padding: 6px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.niyati-card-perks li span {
+    color: #16A34A;
+    font-weight: bold;
+}
+
+.niyati-btn-card-buy {
+    width: 100%;
+    background: #FFFFFF;
+    border: 1.5px solid #F58220;
+    color: #B45309;
+    padding: 12px;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.niyati-btn-card-buy:hover,
+.niyati-btn-card-buy.featured-buy {
+    background: linear-gradient(135deg, #F58220 0%, #B45309 100%);
+    color: #FFFFFF !important;
+    border-color: transparent;
+    box-shadow: 0 6px 18px rgba(245, 130, 32, 0.35);
+}
+
+/* FAQ Accordion */
+.niyati-faq-section {
+    margin-bottom: 40px;
+}
+
+.niyati-faq-accordion {
+    max-width: 860px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.niyati-faq-item {
+    background: #FFFFFF;
+    border: 1px solid #FED7AA;
+    border-radius: 14px;
+    overflow: hidden;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.niyati-faq-item.active {
+    border-color: #F58220;
+    box-shadow: 0 4px 14px rgba(245, 130, 32, 0.12);
+}
+
+.niyati-faq-question {
+    width: 100%;
+    background: transparent;
+    border: none;
+    padding: 18px 22px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+}
+
+.niyati-faq-h3 {
+    font-size: 15.5px;
+    font-weight: 600;
+    color: #7A1F3D;
+    margin: 0;
+    flex: 1;
+    padding-right: 14px;
+}
+
+.niyati-faq-icon {
+    font-size: 18px;
+    color: #F58220;
+    transition: transform 0.25s ease;
+}
+
+.niyati-faq-item.active .niyati-faq-icon {
+    transform: rotate(180deg);
+}
+
+.niyati-faq-answer {
+    padding: 0 22px 18px 22px;
+    font-size: 14px;
+    color: #554840;
+    line-height: 1.7;
+}
+
+.niyati-faq-answer p {
+    margin: 0;
+}
+
+/* Responsive adjustments */
+@media (max-width: 992px) {
+    .niyati-features-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .niyati-pricing-grid {
+        grid-template-columns: 1fr;
+        max-width: 440px;
+        margin: 0 auto;
+    }
+}
+
+@media (max-width: 768px) {
+    .niyati-hero-h1 {
+        font-size: 28px;
+    }
+    .niyati-section-h2 {
+        font-size: 24px;
+    }
+    .niyati-consult-card {
+        flex-direction: column;
+        text-align: center;
+        padding: 24px 20px;
+    }
+    .niyati-features-grid {
+        grid-template-columns: 1fr;
+    }
+    .niyati-prompt-chips {
+        justify-content: center;
+    }
+}
+

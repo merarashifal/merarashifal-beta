@@ -1,0 +1,814 @@
+# <!=Copyright (C) 2022 kamleshyadav
+# This file is distributed under the Themeforest Split Licence.=!>
+msgid ""
+msgstr ""
+"Project-Id-Version: _s 1.0.6\n"
+"Report-Msgid-Bugs-To: https://themeforest.net/user/kamleshyadav"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2022-09-26 T21:03:15+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.4.0\n"
+"X-Domain: _s\n"
+
+
+#: comments.php:33
+#, php-format
+msgid "One thought on &ldquo;%1$s&rdquo;"
+msgstr ""
+
+#: comments.php:68
+msgid "Comments are closed."
+msgstr ""
+
+#: comments.php:80
+msgid "Your Name"
+msgstr ""
+
+#: comments.php:86
+msgid "Your Email"
+msgstr ""
+
+#: comments.php:95
+msgid "Your Comment"
+msgstr ""
+
+#: functions.php:54
+msgid "Header Menu"
+msgstr ""
+
+#: functions.php:55
+msgid "Footer Menu"
+msgstr ""
+
+#: functions.php:142
+msgid "Contact form"
+msgstr ""
+
+#: functions.php:179
+msgid "Right Sidebar"
+msgstr ""
+
+#: functions.php:181 woocommerce/astrologer-woocommerce.php:138
+#: woocommerce/astrologer-woocommerce.php:149
+msgid "Add Right widgets here."
+msgstr ""
+
+#: functions.php:190
+msgid "Left Sidebar"
+msgstr ""
+
+#: functions.php:192
+msgid "Add Left widgets here."
+msgstr ""
+
+#: functions.php:200
+msgid "Footer 1"
+msgstr ""
+
+#: functions.php:202
+msgid "Add Footer Col One Widgets Here."
+msgstr ""
+
+#: functions.php:210
+msgid "Footer 2"
+msgstr ""
+
+#: functions.php:212
+msgid "Add Footer Col Two Widgets Here."
+msgstr ""
+
+#: functions.php:220
+msgid "Footer 3"
+msgstr ""
+
+#: functions.php:222
+msgid "Add Footer Col Three Widgets Here."
+msgstr ""
+
+#: functions.php:230
+msgid "Footer 4"
+msgstr ""
+
+#: functions.php:232
+msgid "Add Footer Col Four Widgets Here."
+msgstr ""
+
+#: inc/template-tags.php:65
+#, php-format
+msgid "Edit <span class=\"screen-reader-text\"> %s</span>"
+msgstr ""
+
+#: inc/template-tags.php:134
+msgid " "
+msgstr ""
+
+#: inc/template-tags.php:137
+#, php-format
+msgid "Posted in %1$s"
+msgstr ""
+
+#: inc/template-tags.php:144
+#, php-format
+msgid "Tagged %1$s"
+msgstr ""
+
+#: searchform.php:4
+msgid "Search for:"
+msgstr ""
+
+#: template-parts/content-full.php:17 template-parts/content-page.php:24
+#: template-parts/content-single.php:74 template-parts/content.php:72
+msgid "Pages:"
+msgstr ""
+
+#: template-parts/content-full.php:29 template-parts/content-page.php:37
+#, php-format
+msgid "Edit <span class=\"screen-reader-text\">%s</span>"
+msgstr ""
+
+#: template-parts/content-none.php:13
+msgid "Nothing Found"
+msgstr ""
+
+#: template-parts/content-none.php:22
+#, php-format
+msgid ""
+"Ready to publish your first post? <a href=\"%1$s\">Get started here</a>."
+msgstr ""
+
+#: template-parts/content-none.php:35
+msgid ""
+"Sorry, but nothing matched your search terms. Please try again with some "
+"different keywords."
+msgstr ""
+
+#: template-parts/content-none.php:42
+msgid ""
+"It seems we can&rsquo;t find what you&rsquo;re looking for. Perhaps "
+"searching can help."
+msgstr ""
+
+#: template-parts/content-search.php:28 template-parts/content-single.php:37
+#: template-parts/content.php:36
+msgid "By "
+msgstr ""
+
+#: template-parts/content-search.php:40 template-parts/content-single.php:49
+msgid " Comment"
+msgstr ""
+
+#: template-parts/content-search.php:43 template-parts/content-single.php:52
+msgid " Comments"
+msgstr ""
+
+#: template-parts/content-search.php:55 template-parts/content.php:80
+msgid "Read More"
+msgstr ""
+
+#: template-parts/content-single.php:63
+#, php-format
+msgid "Continue reading<span class=\"screen-reader-text\"> \"%s\"</span>"
+msgstr ""
+
+#: template-parts/content-single.php:95
+msgid "about admin"
+msgstr ""
+
+#: template-parts/content.php:48
+msgid " Comment "
+msgstr ""
+
+#: template-parts/content.php:51
+msgid " Comments "
+msgstr ""
+
+#: template-parts/content.php:62
+#, php-format
+msgid "Continue reading<span class=\"screen-reader-text\"> \"%s \"</span>"
+msgstr ""
+
+#: vendor/astrologer-function.php:58
+msgid "Add a menu"
+msgstr ""
+
+#: vendor/astrologer-function.php:135
+msgid ""
+"First, activate redux plugin and than activate astrologer demo importer "
+"plugin"
+msgstr ""
+
+#: vendor/footers/astrologer-footer-defult.php:13
+msgid "al-foooter-spacer"
+msgstr ""
+
+#: vendor/footers/astrologer-footer-defult.php:75
+#, php-format
+msgid "Theme: %1$s by %2$s."
+msgstr ""
+
+#: vendor/header/astrologer-header-defulte.php:31
+#: vendor/header/astrologer-header-defulte.php:41
+#: vendor/header/astrologer-header-style1.php:218
+#: vendor/header/astrologer-header-style2.php:211
+#: vendor/header/astrologer-header-style3.php:64
+msgid "logo"
+msgstr ""
+
+#: vendor/header/astrologer-header-style1.php:71
+#: vendor/header/astrologer-header-style2.php:89
+msgid "phone"
+msgstr ""
+
+#: vendor/header/astrologer-header-style1.php:85
+#: vendor/header/astrologer-header-style2.php:103
+msgid "email"
+msgstr ""
+
+#: vendor/header/astrologer-header-style1.php:99
+#: vendor/header/astrologer-header-style2.php:117
+msgid "clock"
+msgstr ""
+
+#: vendor/header/astrologer-header-style1.php:129
+#: vendor/header/astrologer-header-style2.php:332
+msgid "Logout"
+msgstr ""
+
+#: vendor/header/astrologer-header-style1.php:151
+#: vendor/header/astrologer-header-style1.php:174
+#: vendor/header/astrologer-header-style2.php:271
+#: vendor/header/astrologer-header-style2.php:294
+msgid "cart"
+msgstr ""
+
+#: vendor/header/astrologer-header-style1.php:158
+#: vendor/header/astrologer-header-style1.php:181
+#: vendor/header/astrologer-header-style2.php:278
+#: vendor/header/astrologer-header-style2.php:301
+#, php-format
+msgid "%s"
+msgstr ""
+
+#: vendor/header/astrologer-header-style3.php:107
+msgid "Contact Us"
+msgstr ""
+
+#: vendor/lib/astrologer-breadcrumbs.php:20
+msgid "Blog"
+msgstr ""
+
+#: vendor/lib/astrologer-breadcrumbs.php:28
+msgid "Product Details"
+msgstr ""
+
+#: vendor/lib/astrologer-breadcrumbs.php:35
+msgid "Shop"
+msgstr ""
+
+#: vendor/lib/astrologer-breadcrumbs.php:49
+#, php-format
+msgid "Search Results for: %s"
+msgstr ""
+
+#: vendor/lib/astrologer-breadcrumbs.php:52
+msgid "404 Not Found"
+msgstr ""
+
+#: vendor/lib/astrologer-breadcrumbs.php:59
+#: vendor/lib/astrologer-breadcrumbs.php:64
+#: vendor/lib/astrologer-breadcrumbs.php:69
+#: vendor/lib/astrologer-breadcrumbs.php:74
+#: vendor/lib/astrologer-breadcrumbs.php:79
+#: vendor/lib/astrologer-breadcrumbs.php:84
+#: vendor/lib/astrologer-breadcrumbs.php:88
+#: vendor/lib/astrologer-breadcrumbs.php:96
+#: vendor/lib/astrologer-breadcrumbs.php:104
+#: vendor/lib/astrologer-breadcrumbs.php:110
+#: vendor/lib/astrologer-breadcrumbs.php:116
+#: vendor/lib/astrologer-breadcrumbs.php:120
+msgid "Home"
+msgstr ""
+
+#: vendor/lib/astrologer-comment.php:47
+msgid "Your comment is awaiting moderation."
+msgstr ""
+
+#: vendor/lib/astrologer-comment.php:51
+#, php-format
+msgid "<cite class=\"fn\">%s</cite>"
+msgstr ""
+
+#: vendor/lib/astrologer-comment.php:58
+#, php-format
+msgid "%1$s at %2$s"
+msgstr ""
+
+#: vendor/lib/astrologer-comment.php:68
+msgid "(Edit)"
+msgstr ""
+
+#: vendor/lib/astrologer-comment.php:83
+msgid "Reply"
+msgstr ""
+
+#: vendor/lib/astrologer-core-lib.php:142
+msgid "It looks like nothing was found at this location."
+msgstr ""
+
+#: vendor/lib/astrologer-core-lib.php:192
+msgid "on"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:334
+msgid "Install Required Plugins"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:335
+msgid "Install Plugins"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:337
+#, php-format
+msgid "Installing Plugin: %s"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:339
+#, php-format
+msgid "Updating Plugin: %s"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:340
+msgid "Something went wrong with the plugin API."
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:392
+msgid "Return to Required Plugins Installer"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:393
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:912
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:2618
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:3667
+msgid "Return to the Dashboard"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:394
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:3244
+msgid "Plugin activated successfully."
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:395
+msgid "The following plugin was activated successfully:"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:397
+#, php-format
+msgid "No action taken. Plugin %1$s was already active."
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:399
+#, php-format
+msgid ""
+"Plugin not activated. A higher version of %s is needed for this theme. "
+"Please update the plugin."
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:401
+#, php-format
+msgid "All plugins installed and activated successfully. %1$s"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:402
+msgid "Dismiss this notice"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:403
+msgid ""
+"There are one or more required or recommended plugins to install, update or "
+"activate."
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:404
+msgid "Please contact the administrator of this site for help."
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:607
+msgid "This plugin needs to be updated to be compatible with your theme."
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:608
+msgid "Update Required"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:1019
+msgid ""
+"The remote plugin package does not contain a folder with the desired slug "
+"and renaming did not work."
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:1019
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:1022
+msgid ""
+"Please contact the plugin provider and ask them to package their plugin "
+"according to the WordPress guidelines."
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:1022
+msgid ""
+"The remote plugin package consists of more than one file, but the files are "
+"not packaged in a folder."
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:2067
+#, php-format
+msgid "TGMPA v%s"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:2358
+msgid "Required"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:2361
+msgid "Recommended"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:2377
+msgid "WordPress Repository"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:2380
+msgid "External Source"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:2383
+msgid "Pre-Packaged"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:2400
+msgid "Not Installed"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:2404
+msgid "Installed But Not Activated"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:2406
+msgid "Active"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:2412
+msgid "Required Update not Available"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:2415
+msgid "Requires Update"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:2418
+msgid "Update recommended"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:2575
+msgid "Installed version:"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:2583
+msgid "Minimum required version:"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:2595
+msgid "Available version:"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:2618
+msgid "No plugins to install, update or activate."
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:2632
+msgid "Plugin"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:2633
+msgid "Source"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:2634
+msgid "Type"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:2638
+msgid "Version"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:2639
+msgid "Status"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:2688
+#, php-format
+msgid "Install %2$s"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:2693
+#, php-format
+msgid "Update %2$s"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:2699
+#, php-format
+msgid "Activate %2$s"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:2769
+msgid "Upgrade message from the plugin author:"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:2802
+msgid "Install"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:2808
+msgid "Update"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:2811
+msgid "Activate"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:2842
+msgid "No plugins were selected to be installed. No action taken."
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:2844
+msgid "No plugins were selected to be updated. No action taken."
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:2885
+msgid "No plugins are available to be installed at this time."
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:2887
+msgid "No plugins are available to be updated at this time."
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:2993
+msgid "No plugins were selected to be activated. No action taken."
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:3019
+msgid "No plugins are available to be activated at this time."
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:3243
+msgid "Plugin activation failed."
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:3583
+#, php-format
+msgid "Updating Plugin %1$s (%2$d/%3$d)"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:3586
+#, php-format
+msgid "An error occurred while installing %1$s: <strong>%2$s</strong>."
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:3588
+#, php-format
+msgid "The installation of %1$s failed."
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:3592
+msgid ""
+"The installation and activation process is starting. This process may take a "
+"while on some hosts, so please be patient."
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:3594
+#, php-format
+msgid "%1$s installed and activated successfully."
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:3594
+msgid "Show Details"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:3594
+msgid "Hide Details"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:3595
+msgid "All installations and activations have been completed."
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:3597
+#, php-format
+msgid "Installing and Activating Plugin %1$s (%2$d/%3$d)"
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:3600
+msgid ""
+"The installation process is starting. This process may take a while on some "
+"hosts, so please be patient."
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:3605
+msgid "All installations have been completed."
+msgstr ""
+
+#: vendor/theme-plugins/astrologer-class-tgm-plugin-activation.php:3607
+#, php-format
+msgid "Installing Plugin %1$s (%2$d/%3$d)"
+msgstr ""
+
+#: woocommerce/astrologer-woocommerce.php:90
+msgid "Search"
+msgstr ""
+
+#: woocommerce/astrologer-woocommerce.php:104
+msgid "product"
+msgstr ""
+
+#: woocommerce/astrologer-woocommerce.php:136
+msgid "WooCommerce Right Sidebar"
+msgstr ""
+
+#: woocommerce/astrologer-woocommerce.php:147
+msgid "WooCommerce Left Sidebar"
+msgstr ""
+
+#: woocommerce/astrologer-woocommerce.php:182
+#: woocommerce/content-product.php:56 woocommerce/content-single-product.php:44
+msgid "New"
+msgstr ""
+
+#: woocommerce/astrologer-woocommerce.php:185
+msgid "Sale!"
+msgstr ""
+
+#: woocommerce/astrologer-woocommerce.php:188
+#: woocommerce/astrologer-woocommerce.php:192
+#: woocommerce/content-product.php:76
+#: woocommerce/single-product/related.php:104
+msgid "product-img"
+msgstr ""
+
+#: woocommerce/astrologer-woocommerce.php:199
+#: woocommerce/content-product.php:83
+#: woocommerce/single-product/related.php:114
+msgid "Add to wishlist"
+msgstr ""
+
+#: woocommerce/astrologer-woocommerce.php:206
+#: woocommerce/astrologer-woocommerce.php:210
+#: woocommerce/content-product.php:94
+#: woocommerce/single-product/related.php:125
+msgid "Add To Cart"
+msgstr ""
+
+#: woocommerce/astrologer-woocommerce.php:215
+#: woocommerce/content-product.php:99
+#: woocommerce/single-product/related.php:133
+msgid "View"
+msgstr ""
+
+#: woocommerce/astrologer-woocommerce.php:252
+#, php-format
+msgid "Rated %s out of 5"
+msgstr ""
+
+#: woocommerce/astrologer-woocommerce.php:254
+msgid "Not yet rated"
+msgstr ""
+
+#: woocommerce/astrologer-woocommerce.php:259
+msgid "out of 5"
+msgstr ""
+
+#: woocommerce/cart/cart.php:30
+msgid "Product"
+msgstr ""
+
+#: woocommerce/cart/cart.php:31
+msgid "Price"
+msgstr ""
+
+#: woocommerce/cart/cart.php:32 woocommerce/global/quantity-input.php:29
+#: woocommerce/global/quantity-input.php:35
+msgid "Quantity"
+msgstr ""
+
+#: woocommerce/cart/cart.php:33
+msgid "Subtotal"
+msgstr ""
+
+#: woocommerce/cart/cart.php:56
+msgid "Remove this item"
+msgstr ""
+
+#: woocommerce/cart/cart.php:92
+msgid "Available on backorder"
+msgstr ""
+
+#: woocommerce/cart/cart.php:143
+msgid "Coupon:"
+msgstr ""
+
+#: woocommerce/cart/cart.php:143
+msgid "Apply"
+msgstr ""
+
+#: woocommerce/cart/cart.php:148
+msgid "Update cart"
+msgstr ""
+
+#: woocommerce/content-product.php:90
+#: woocommerce/single-product/related.php:121
+msgid "Cart"
+msgstr ""
+
+#: woocommerce/global/quantity-input.php:29
+#, php-format
+msgid "%s quantity"
+msgstr ""
+
+#: woocommerce/global/quantity-input.php:36
+msgid "Decrease"
+msgstr ""
+
+#: woocommerce/global/quantity-input.php:55
+msgid "Increase"
+msgstr ""
+
+#: woocommerce/myaccount/form-login.php:73
+msgid "Login"
+msgstr ""
+
+#: woocommerce/myaccount/form-login.php:78
+msgid "Username or email address"
+msgstr ""
+
+#: woocommerce/myaccount/form-login.php:82
+#: woocommerce/myaccount/form-login.php:133
+msgid "Password"
+msgstr ""
+
+#: woocommerce/myaccount/form-login.php:91
+msgid "Remember me"
+msgstr ""
+
+#: woocommerce/myaccount/form-login.php:95
+msgid "Lost your password ?"
+msgstr ""
+
+#: woocommerce/myaccount/form-login.php:100
+msgid "Log in"
+msgstr ""
+
+#: woocommerce/myaccount/form-login.php:113
+#: woocommerce/myaccount/form-login.php:147
+msgid "Register"
+msgstr ""
+
+#: woocommerce/myaccount/form-login.php:119
+msgid "Username"
+msgstr ""
+
+#: woocommerce/myaccount/form-login.php:126
+msgid "Email address"
+msgstr ""
+
+#: woocommerce/myaccount/form-login.php:126
+msgid "*"
+msgstr ""
+
+#: woocommerce/myaccount/form-login.php:139
+msgid "A password will be sent to your email address."
+msgstr ""
+
+#: woocommerce/single-product/add-to-cart/variable.php:32
+msgid "This product is currently out of stock and unavailable."
+msgstr ""
+
+#: woocommerce/single-product/add-to-cart/variable.php:48
+msgid "Clear"
+msgstr ""
+
+#: woocommerce/single-product/meta.php:29
+msgid "SKU:"
+msgstr ""
+
+#: woocommerce/single-product/meta.php:35
+msgid "N/A"
+msgstr ""
+
+#: woocommerce/single-product/related.php:61
+msgid "Best Seller"
+msgstr ""
+
+#: woocommerce/single-product/related.php:68
+msgid "Exclusive products have just arrived. Check them out"
+msgstr ""

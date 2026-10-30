@@ -1,0 +1,943 @@
+/*--------------------- Copyright (c) 2021 ----------------------- 
+[Master Stylesheet] 
+Project: Astrology
+Version: 1.0.1 
+Author: PixelNX
+ ------------------------------------------------------------------- 
+    Light Demo CSS
+-------------------------------------------------------------------*/
+
+ :root {
+     
+    --primary-color: #797979;
+    --secondary-color: #f4a636;
+    --dark-color1: #111111;
+    --dark-color2: #17384e;
+    --al-main-bg: #ffffff;
+    --al-alternate-bg: #f6fbff;
+    --al-alternate-bg: #f9f5ec;
+    --al-dark: #fff9f5;
+    --al-dark2: #f3f1f1;
+    --al-dark3: #ffffff;
+    --al-font-color: #777777;
+    --al-title-color: #232323;
+    --al-offf-white: rgb(255 255 255 / 6%);
+    --al-primary-color: #ff7010;
+    --al-primary-light: #ff8c33;
+    --al-border-color: #efefef;
+    --al-input-border: #e4e4e4;
+    --al-input-bg: #ffffff;
+    --al-footer-bg: #242b3d;
+    --al-placeholder: #c3c3c3;
+    --al-submenu-bg: #f7ece5;
+    --al-sub-menu-bg: #ffddc7;
+    --al-shadow: 0 0 30px rgb(0 0 0 / 4%);
+    --al-page-title-bg: #090319;
+    --al-footer-bg: #222222;
+    --al-placeholder: #bdb9b9;
+}
+
+body.woocommerce span.onsale, span.onsale {
+    background: var(--al-primary-color);
+}
+.al-infoicon,
+.al-top-header .al-cart{
+    background-color: var(--al-primary-color);
+}
+
+.al-main-nav-wrapper .al-top-header:before {
+    background: var(--al-border-color);
+}
+
+/*.widget ul li:before,*/
+/*.widget ol li:before {*/
+/*    background: url(../images/arrow1-dark.png) no-repeat center;*/
+/*    background-size: 10px;*/
+/*}*/
+
+/*.widget ul li:hover:before,*/
+/*.widget ol li:hover:before {*/
+/*    background: url(../images/arrow1-hover.png) no-repeat center;*/
+/*    background-size: 10px;*/
+/*}*/
+
+.widget ul li a,
+.widget ol li a,
+.widget ul li:before,
+.widget ol li:before,
+.widget ul li a,
+.widget ol li a,
+.widget ul li,
+.widget ol li:before,
+.widget ul li>a,
+.widget ol li>a,
+.wp-block-latest-comments__comment-author,
+.wp-block-latest-comments__comment-author:visited,
+.wp-block-latest-posts.wp-block-latest-posts__list li a,
+.wp-block-latest-posts.wp-block-latest-posts__list li a:visited {
+    color: var(--al-font-color);
+}
+
+.as-choose-ul li {
+    color: var(--al-white);
+}
+
+.nice-select:after {
+    border-bottom: 2px solid #232323;
+    border-right: 2px solid #232323;
+}
+
+.al-newsletter-box .al-btn:hover,
+.al-btn:hover, 
+.al-btn:focus, 
+.woocommerce #respond input#submit:hover,
+.woocommerce a.button:hover,
+.woocommerce button.button:hover,
+.woocommerce input.button:hover{
+    -webkit-box-shadow: inset 0 0 0 4em var(--al-btn-hover-bg) !important;
+    -moz-box-shadow: inset 0 0 0 4em var(--al-btn-hover-bg) !important;
+    box-shadow: inset 0 0 0 4em var(--al-btn-hover-bg) !important;
+}
+
+.woocommerce #respond input#submit:focus, .woocommerce a.button:focus, .woocommerce button.button:focus, .woocommerce input.button:focus {
+   -webkit-box-shadow: inset 0 0 0 4em var(--al-btn-hover-bg) !important;
+    -moz-box-shadow: inset 0 0 0 4em var(--al-btn-hover-bg) !important;
+    box-shadow: inset 0 0 0 4em var(--al-btn-hover-bg) !important;
+}
+
+.al-breadcrumb-container h1 {
+    color: var(--al-white);
+}
+.al-link:hover{
+    color: var(--al-title-color) !important;
+}
+
+.al-link:hover:after {
+    background: var(--al-title-color);
+}
+
+.al-bullets .swiper-pagination-bullet {
+    background-color: #eaeaea;
+}
+
+strong {
+    color: var(--al-title-color);
+}
+
+/* Footer CSS Start */
+.al-footer-wrapper .widget-title, .al-footer-wrapper, .al-footer-wrapper a, .al-footer-wrapper .al-widget-post-title {
+    color: var(--al-white);
+}
+
+.al-footer-wrapper a:hover,
+.al-footer-wrapper .al-widget-post-title:hover {
+    color: var(--al-primary-color);
+}
+
+body .al-footer-widget .menu li:hover a span svg, body .al-footer-widget .menu li:hover a span svg path {
+    fill:  var(--al-primary-color);
+}
+
+.al-footer-wrapper .al-newsletter-wrapper .al-heading {
+    color: var(--al-white);
+}
+
+.al-footer-wrapper .al-newsletter-wrapper {
+    border-color: #313131;
+}
+
+.al-newsletter-box input.form-control {
+    background: rgb(255 255 255 / 8%);
+}
+
+.al-product-hover ul li:nth-child(2) a:before, .al-product-hover ul li:nth-child(2) a:after {
+    border-color: rgb(255 255 255 / 28%);
+}
+
+.as-service-box:hover .al-link{
+    color: var(--al-white) !important;
+}
+
+.as-service-box:hover .al-link:after,
+.as-service-box:hover .al-link:before {
+    background: var(--al-white);
+}
+
+.as-service-box span svg {
+    fill: var(--al-primary-color);
+}
+
+.as-service-box span svg {
+    fill: var(--al-primary-color);
+}
+
+.as-service-box:hover span svg {
+    fill: var(--al-white);
+}
+
+.al-blog-date:hover {
+    background: #222222;
+}
+
+.al-blog-date:hover:before {
+    border-right-color: #222222;
+}
+
+.al-blog-date:hover:after {
+    border-left-color: #222222;
+}
+
+.al-customer-box:before {
+    opacity: .06;
+}
+
+.al-swiper-nav>div svg {
+    fill: var(--al-font-color);
+}
+
+.al-swiper-nav>div:before,
+.al-swiper-nav>div:after {
+    content: unset;
+}
+
+.al-service-box .al-icon:after {
+    border: 1px dashed var(--al-border-color);
+}
+
+.al-service-box .al-icon {
+    background-color: var(--al-primary-color);
+}
+
+.al-sign-box {
+    background-color: #ffebde;
+}
+
+.al-sign-box:before {
+    border-right: 20px solid #ffebde;
+}
+
+.al-sign-box:after {
+    border-left: 20px solid #ffebde;
+}
+
+.al-sign-box .al-sign {
+    background-color: var(--al-primary-light);
+}
+
+.al-sign-box .al-sign:after {
+    border-left: 18px solid var(--al-primary-light);
+}
+
+.al-sign-box .al-sign:before {
+    border-right: 18px solid var(--al-primary-light);
+}
+
+.al-sign-box:hover h5,
+.al-sign-box:hover p {
+    color: var(--al-white);
+}
+
+.al-sign-box:hover p {
+    transition: unset;
+}
+
+.al-sign-ul .al-sign-box a,
+.al-sign-ul .al-sign-box a:hover {
+    -webkit-transition: unset;
+    -moz-transition: unset;
+    -ms-transition: unset;
+    -o-transition: unset;
+    transition: unset;
+}
+
+.al-cartnumber {
+    background-color: var(--al-white);
+    color: var(--al-primary-color);
+}
+
+.al-header-style1.al-header-style2 .al-cartnumber {
+    background-color: var(--al-primary-color);
+    color:  var(--al-white);
+}
+
+.al-overview-date:hover {
+    background: black;
+    color: var(--al-white);
+}
+
+.al-overview-date:hover:before {
+    border-right-color: black;
+}
+
+.al-overview-date:hover:after {
+    border-left-color: black;
+}
+
+.al-faq-wrapper .card {
+    background-color: var(--al-white);
+    overflow: hidden;
+}
+
+.al-faq-wrapper .card .card-header {
+    background: var(--al-white);
+    border: 0;
+}
+
+.al-faq-wrapper .card {
+    border: 1px solid var(--al-border-color);
+}
+
+.al-product-thumb .al-sub-heading a {
+    color: var(--al-title-color);
+}
+
+.al-product-thumb .al-sub-heading a:hover {
+    color:  var(--al-primary-color);
+}
+
+body .woocommerce-notices-wrapper .button.al-btn {
+    -webkit-box-shadow: none !important;
+    -moz-box-shadow: none !important;
+    box-shadow: none !important;
+}
+
+.al-swiper-nav>div {
+    background: var(--al-title-color);
+}
+
+.al-swiper-nav>div.al-nav-prev:before, .al-swiper-nav>div.al-nav-next:before {
+    border-right: 15px solid var(--al-title-color);
+}
+
+.al-swiper-nav>div.al-nav-prev:after, .al-swiper-nav>div.al-nav-next:after {
+    border-left: 15px solid var(--al-title-color);
+}
+
+.al-swiper-nav>div b {
+    color: var(--al-white);
+}
+
+.al-swiper-nav>div svg {
+    fill: var(--al-white);
+}
+
+.al-search-form {
+    background: rgb(0 0 0 / 85%);
+}
+
+input[type="text"]:focus, input[type="email"]:focus,
+input[type="url"]:focus, input[type="password"]:focus,
+input[type="search"]:focus, input[type="number"]:focus,
+input[type="tel"]:focus, input[type="range"]:focus,
+input[type="date"]:focus, input[type="month"]:focus,
+input[type="week"]:focus, input[type="time"]:focus,
+input[type="datetime"]:focus, input[type="datetime-local"]:focus,
+input[type="color"]:focus, textarea:focus, .form-control:focus {
+    border-color: var(--al-primary-color);
+    color: var(--al-font-color);
+}
+
+.al-about-slider::after {
+    background-color: #f6f6f6;
+}
+
+.al-contact-expert.al-contat-about {
+    background-color: var(--al-primary-color);
+}
+
+.al-contact-expert.al-contat-about .al-icon:before {
+    border-color: var(--al-white);
+}
+
+.al-contact-expert.al-contat-about .al-icon {
+    background-color: var(--al-white);
+}
+
+.al-contact-expert.al-contat-about .cls-1 {
+    fill: var(--al-primary-color);
+}
+
+.al-contact-expert.al-contat-about .al-orange, .al-contact-expert.al-contat-about h5 {
+    color: var(--al-white);
+}
+
+.al-service-box {
+    background-color: var(--al-white);
+    box-shadow: var(--al-shadow);
+}
+
+.al-white-title, .title-white .al-heading {
+    color: var(--al-white);
+}
+
+.al-white-title:after, .title-white .al-heading:after {
+    border-bottom-color: var(--al-white);
+}
+
+.woocommerce a.remove {
+    background: var(--al-primary-color);
+}
+
+#scroll:hover svg, #scroll:hover svg path {
+    fill: var(--al-primary-color);
+}
+
+.al-overview-inner {
+    background-color: #ffebdd;
+    box-shadow: var(--al-shadow);
+}
+
+.woocommerce div.product .woocommerce-tabs ul.tabs li a:hover {
+    color: var(--al-primary-color);
+}
+
+.al-forms {
+    background: #f7f2ff;
+}
+
+.al-menu-toggle:before {
+    background: var(--al-primary-color);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0);
+}
+
+/*wallet page css*/
+
+#wps_wallet_transfer_form label{
+    color:#111111;
+}
+.wps_view_withdrawal span{
+    color:#111111;
+}
+/*#wps_wallet_transfer_form input[type=email], #wps_wallet_transfer_form input[type=text], #wps_wallet_transfer_form input[type=number], #wps_wallet_transfer_form textarea{*/
+/*    border-radius:0px;*/
+/*}*/
+
+@media screen and (max-width: 1199.98px) {
+    .al-search-btn {
+        background: var(--al-primary-color);
+    }
+    .al-main-navigation .menu li.menu-item-has-children:before {
+        color: var(--al-primary-color);
+    }
+}
+
+
+/* UNit Testing Design */
+
+.widget.widget_tag_cloud .tagcloud a, .wp-block-tag-cloud .tag-cloud-link, .woocommerce.widget_product_tag_cloud .tagcloud .tag-cloud-link {
+    color: var(--al-title-color);
+    background: #f7ebe4;
+}
+
+blockquote {
+    background-color: var(--al-primary-color);
+}
+
+.pagination .nav-links>*:not(.dots), body.woocommerce nav.woocommerce-pagination ul.page-numbers li>* {
+    background: var(--al-alternate-bg);
+    color: var(--al-font-color);
+}
+
+.pagination .nav-links>*:hover, .pagination .nav-links .current {
+    background: var(--al-primary-color);
+    color: var(--al-white);
+}
+
+/*.al-footer-wrapper .widget ul li:before, .al-footer-wrapper .widget ol li:before {*/
+/*    background: url(../images/arrow1.png) no-repeat center;*/
+/*    background-size: 10px;*/
+/*}*/
+
+/*.al-footer-wrapper .widget ul li:hover:before, .al-footer-wrapper .widget ol li:hover:before {*/
+/*    background: url(../images/arrow1-hover.png) no-repeat center;*/
+/*    background-size: 10px;*/
+/*}*/
+
+.al-footer-wrapper .widget.widget_rss ul li a,
+.al-footer-wrapper .widget.widget_rss .widget-title  a {
+    color: var(--al-white);
+}
+
+.al-footer-wrapper .widget.widget_rss ul li a:hover,
+.al-footer-wrapper .widget.widget_rss .widget-title a:hover {
+    color: var(--al-primary-color);
+}
+
+.al-footer-wrapper .widget.widget_text .textwidget strong {
+    color: var(--al-white);
+}
+
+.al-footer-wrapper .widget.widget_tag_cloud .tagcloud a, 
+.al-footer-wrapper .wp-block-tag-cloud .tag-cloud-link,
+.al-footer-wrapper .woocommerce.widget_product_tag_cloud .tagcloud .tag-cloud-link {
+    color: var(--al-white);
+    background: rgb(255 255 255 / 11%);
+}
+
+.al-footer-wrapper table td, .al-footer-wrapper table th {
+    border-color: rgb(255 255 255 / 10%);
+}
+
+.al-recent-post-widgets ul li:last-child {
+    margin: 0 0 0px;
+}
+
+body .nice-select .list li.selected, body .nice-select .list li.selected:focus,
+body .nice-select .list li.selected:hover, body .nice-select .list li.option:focus,
+body .nice-select .list li.option:hover {
+    background: #f5f5f5 !important;
+}
+
+.nice-select .list {
+    background: #fafafa;
+}
+
+#yith-quick-view-modal .yith-wcqv-main {
+    background: #ffffff;
+}
+
+.al_product_filters .nice-select:after {
+    border-bottom: 2px solid var(--al-font-color);
+    border-right: 2px solid var(--al-font-color);
+}
+
+.wp-block-table.is-style-stripes tbody tr:nth-child(odd) td {
+    color: var(--al-font-color);
+}
+
+.wp-block-table .has-fixed-layout {
+    background: #edf3f7;
+}
+pre {
+    background: var(--al-primary-color);
+}
+.comments-area>ol.comment-list>li blockquote {
+    background: var(--al-primary-light);
+    border-color: var(--al-primary-color);
+}
+
+.al-service-box {
+    box-shadow: 0px 0px 30px 0px rgb(0 0 0 / 6%);
+}
+
+.wp-block-button.is-style-outline .wp-block-button__link, .wp-block-button.is-style-outline .wp-block-button__link:hover {
+    -webkit-box-shadow: none !important;
+    -moz-box-shadow: none !important;
+    box-shadow: none !important;
+}
+.astrologer-demo .al-main-nav-wrapper {
+    border-left: 1px solid #efefef;
+}
+.al-main-navigation .menu>li .sub-menu >li {
+    border-bottom: 1px solid #dfdfdf;
+}
+
+.al-main-navigation .menu>li .sub-menu >li:last-of-type {
+    border: 0;
+}
+
+body .widget_recent_comments li a {
+    color: var(--al-primary-color);
+}
+
+.page-links .page-number span.current, .page-links .page-number a:hover {
+    background: var(--al-primary-color);
+    color: var(--al-white);
+}
+
+body pre code {
+    color: var(--al-white);
+}
+
+blockquote code {
+    color: black;
+}
+
+.al-footer-wrapper .search-submit.al-btn:hover {
+    -webkit-box-shadow: inset 0 0 0 4em var(--al-btn-hover-bg) !important;
+    -moz-box-shadow: inset 0 0 0 4em var(--al-btn-hover-bg) !important;
+    box-shadow: inset 0 0 0 4em var(--al-btn-hover-bg) !important;
+}
+
+.al-footer-wrapper table th {
+    color: var(--al-white);
+}
+
+
+.al-footer-wrapper .wp-block-categories li,
+.al-footer-wrapper .wp-block-archives li, 
+.al-footer-wrapper .widget_nav_menu ul li,
+.al-footer-wrapper .widget_pages ul li, 
+.al-footer-wrapper .widget_archive ul li, 
+.al-footer-wrapper .widget_categories ul li {
+    border-color: rgb(255 255 255 / 8%);
+}
+
+.al-footer-wrapper .widget.widget_rss ul li cite {
+    color: var(--al-white);
+}
+
+.al-footer-widgets .widget ul.list, .al-footer-widgets .widget ul.list li {
+    color: var(--al-font-color);
+}
+
+.al-footer-wrapper .wp-calendar-table caption {
+    color: var(--al-white);
+}
+
+.widget_recent_comments li a,
+.widget.widget_recent_comments ul li.recentcomments,
+.widget.widget_recent_comments ul li.recentcomments a, 
+.widget_recent_comments li .url,
+.widget_recent_comments li .comment-author-link {
+    color: var(--al-font-color);
+}
+
+.al-footer-widgets .widget_recent_comments li a,
+.al-footer-widgets .widget.widget_recent_comments ul li.recentcomments,
+.al-footer-widgets .widget.widget_recent_comments ul li.recentcomments a, 
+.al-footer-widgets .widget_recent_comments li .url,
+.al-footer-widgets .widget_recent_comments li .comment-author-link {
+    color: var(--al-white);
+}
+
+.al-footer-widgets .widget_recent_comments li a:hover,
+.al-footer-widgets .widget.widget_recent_comments ul li.recentcomments a:hover {
+    color: var(--al-primary-color);
+}
+
+code, blockquote code {
+    color: var(--al-white);
+    background: var(--al-title-color);
+}
+
+.al-blog-columns .comments-area>ol.comment-list table td, .al-blog-columns .comments-area>ol.comment-list table th {
+    border-color: #f1d2bd;
+}
+
+.cart-collaterals .cart_totals table th {
+    color: var(--al-white);
+    background: var(--al-primary-color);
+}
+
+
+.woocommerce-checkout .woocommerce table.shop_table tfoot th {
+    color: var(--al-primary-color);
+    background: transparent;
+}
+
+
+.select2-container--default .select2-selection--single .select2-selection__arrow b {
+    border-bottom: 2px solid var(--al-title-color);
+    border-right: 2px solid var(--al-title-color);
+}
+
+.select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow b {
+    border-color: var(--al-title-color);
+}
+
+/* Widgets */
+
+.al-footer-wrapper .widget .widget-list-count {
+    background: #2a2b2c;
+}
+
+.woocommerce .woocommerce-widget-layered-nav-list .woocommerce-widget-layered-nav-list__item span.count,
+.widget-list-count {
+    background: var(--al-primary-color);
+}
+
+.al-sidebar-wrapper .widget {
+    background: #f9f8f4;
+}
+
+body:not(.astrologer-demo) .al-footer-wrapper .al-footer-widgets {
+ 
+}
+
+.as-sign-box, .as-service-box {
+    background-color: var(--al-white);
+}
+
+.astrol_team_social a {
+    color: var(--al-primary-color);
+}
+.astrol_team_info h4, .astrol_team_info a, .astrol_team_identity h4, .astrol_team_identity p {
+    color: var(--al-white);
+}
+.search-form label input.search-field {
+    border-radius: var(--al-btn-radius) 0 0 var(--al-btn-radius);
+}
+.search-form .search-submit {
+    border-radius: 0 var(--al-btn-radius) var(--al-btn-radius) 0 !important;
+}
+.al-sign-box, 
+.al-overview-inner {
+    background-color: var(--al-alternate-bg);
+}
+.al-sign-box:before {
+    border-right: 20px solid var(--al-alternate-bg);
+}
+.al-sign-box:after {
+    border-left: 20px solid var(--al-alternate-bg);
+}
+.astrol_team_inner .astrol_btn, .mep-default-sidrbar-events-schedule h3 i {
+    color: var(--al-white);
+}
+.mep-event-cat-controls button.mep-cat-control, .pagination-sec a {
+    background: #f5f5f5;
+    color: #000;
+    transition:all 0.3s;
+}
+.mep-event-cat-controls button.mep-cat-control:hover, .pagination-sec a:hover {
+    background: var(--al-primary-color);
+    color: var(--al-white);
+}
+.mep_event_grid_item h3.mep_list_date span.amount, .mep_event_list_item .mep_list_date .amount {
+    background: var(--al-primary-color);
+    color: #fff;
+}
+.al-testimonial-wrapper .al-team-content .al-team-updt-info a p, .al-prfile-right-contnt p, .al-about-astrologer p {
+    color: #000;
+}
+.hl-appointment-booking, .hl-appointment-booking thead tr, .al-prfle-parent{
+    background: #fff9f9;
+}
+.hl-appointment-booking .fc-header-title h2, .hl-appointment-booking table .fc-button-wrap{
+    color: #3f515a;
+}
+.hl-appointment-booking .fc-border-separate td.fc-past, .hl-appointment-booking .fc-border-separate td {
+    background: #f1f1f1;
+    color: #000;
+}
+.hl-appointment-booking .fc-border-separate td.fc-today {
+    color: #fff;
+}
+.hl-appointment-booking .fc-border-separate td.fc-today {
+    border: 1px solid #ff7010;
+    background: #ff7010;
+}
+.hl-appointment-booking .fc-event-title {
+    background: #fff9f9;
+    color: #000;
+    border: 1px solid #fff9f9;
+    border-left: 2px solid #ff7010;
+}
+.equinox .calendar-header {
+    background-color: #fff9f9 !important;
+}
+.equinox .calendar-header .month-label {
+    color: #3f515a;
+}
+.equinox .month-weeks {
+    border: 1px solid var(--al-border-color)!important;
+    background-color: #fff9f9!important;
+}
+.equinox .week-header .day {
+    background-color: #f5f5f5!important;
+    color: #000 !important;
+}
+.equinox .date.current-date {
+    background-color: var(--al-primary-color)!important;
+}
+.equinox .date.current-date .date-label {
+    color: #fff!important;
+}
+.mep-events-wrapper, .mep_related_product_area {
+    background: #fff9f9;
+}
+.default_theme .mep-default-sidrbar-price-seat, .mep-default-sidrbar-address, .mep-default-sidrbar-events-schedule, .mep-default-sidrbar-social {
+    background: #f1f1f1;
+}
+.mep-default-sidrbar-meta p {
+    color: var(--al-primary-color);
+}
+.astrol_team_inner .astrol_btn, .mep-default-sidrbar-events-schedule h3 i {
+    color: var(--al-primary-color);
+}
+.section-heading h2, .mep-default-sidrbar-events-schedule h3, .mep-default-sidrbar-social .mep-event-meta {
+    color: var(--al-primary-color);
+}
+table.table.table-bordered.mep_event_add_cart_table {
+    background: #f1f1f1;
+}
+.mep-events-wrapper table td {
+    color: #000;
+}
+.mep-default-theme div.mep-default-feature-date, .mep-default-theme div.mep-default-feature-time, .mep-default-theme div.mep-default-feature-location {
+    background: #f1f1f1;
+}
+.mep-default-title h2{
+    color:#3f515a;
+}
+div.df-dtl h3, div.df-dtl p {
+    color: #444;
+}
+.modal-body {
+    background: #fff;
+}
+.hl-event-booking-form ul li input {
+    background: #fff9f9;
+    color: #444;
+}
+.hl-radio-btn label::before {
+    background-color: #f1f1f1;
+    border: 1px solid #f1f1f1;
+}
+.modal-body .hl-payment-astro ul li:nth-child(even) {
+    background: #fff3f3;
+}
+.modal-content {
+    background-color: #fff;
+}
+input#razorpay_submit {
+    margin: 0px auto;
+}
+.hl-payment-header h2 {
+    color: #000;
+}
+.hl-payment-astro ul li:nth-child(even) {
+    background: #fff9f9;
+}
+.hl-spacer-bottom {
+    padding-bottom: 80px;
+    box-shadow: 0 0 25px 0 rgb(0 0 0 / 10%);
+    margin-top: 80px;
+}
+.mep_event_grid_item h3.mep_list_date, .mep_event_list_item h3.mep_list_date {
+    color: #000;
+}
+input:-webkit-autofill,
+input:-webkit-autofill:hover, 
+input:-webkit-autofill:focus, 
+input:-webkit-autofill:active{
+    -webkit-box-shadow: 0 0 0 30px #fff9f9 inset !important;
+    -webkit-border-color:transparent!important;
+    -webkit-text-fill-color: #444!important;
+    
+}
+
+/* 6 - jan fixes */
+.al-tab {
+    text-align: center;
+    margin-bottom: 30px;
+    background-color: #ffffff;
+    max-width: 100%;
+    padding: 15px 0px 15px 0px;
+    border-radius: 10px;
+    margin: 0px auto 30px;
+    border: 1px solid #dde3e7;
+     box-shadow: -2px 0px 28px 0px rgb(0 0 0 / 5%);
+}
+
+.table {
+    background-color: #ffffff;
+    border-radius: 10px;
+    padding: 15px;
+    border: none;
+    
+}
+.astro-table
+{
+     box-shadow: -2px 0px 28px 0px rgb(0 0 0 / 5%);
+}
+table.table.table-bordered.mb-0 tbody tr td {
+    color: #111111;
+}
+h2.widget-title {
+    margin-bottom: 25px !important;
+}
+.al-blog-details {
+    padding-bottom: 14px;
+}
+.astrol-horoscope-section
+{
+background: #f9f6f0;
+}
+.astrol-result-list li b {
+    color: #000000ba;
+}
+.astro-horoscope-wrapper .nav .nav-item .astrol-icon
+{
+    background-color: #222222;
+}
+.astro-horoscope-wrapper .nav .nav-item .astrol-icon:before {
+    left: auto;
+    right: 100%;
+    border-left: none;
+    border-right: 15px solid #222222;
+}
+.astro-horoscope-wrapper .nav .nav-item .astrol-icon:after, .astro-horoscope-wrapper .nav .nav-item .astrol-icon:before {
+    content: '';
+    position: absolute;
+    left: 100%;
+    top: 0;
+    bottom: 0;
+    border-top: 35px solid transparent;
+    border-bottom: 35px solid transparent;
+    border-left: 15px solid #222222;
+}
+.astro-horoscope-wrapper .nav .nav-item .astrol-icon:before {
+    left: auto;
+    right: 100%;
+    border-left: none;
+    border-right: 18px solid #222222;
+}
+.al-date {
+    font-size: 20px;
+    font-weight: 700;
+}
+.al-inner-img span {
+    font-size: 20px;
+    font-weight: 600;
+}
+table.table.table-bordered.mb-0 tbody tr td:nth-child(2)
+{
+    border-left: 1px solid #dde3e7;
+}
+table.table.table-bordered.mb-0 tbody tr td:nth-child(1) {
+    width: 50%;
+}
+.astro-table .table-responsive {
+    border-radius: 10px;
+    border: 1px solid #dde3e7;
+}
+.astro-horoscope-wrapper .nav .nav-item button .astrol-nav {
+    color: #222222;
+}
+ul.pagination li .page-numbers {
+    background: #f9f5ec;
+    color: #777777;
+}
+ul.pagination li span.page-numbers.current {
+    background: var(--al-primary-color);
+    color: #fff;
+}
+.al-header-style-one {
+    background: #fff;
+}
+.mep-events-wrapper {
+    background: #f9f8f4 !important;
+}
+.mep-default-title h2 {
+    color: #3f515a !important;
+}
+div.mep-default-feature-content p {
+    color: #3A3A3A !important; 
+}
+.mep-default-theme div.mep-default-feature-date, .mep-default-theme div.mep-default-feature-time, .mep-default-theme div.mep-default-feature-location {
+    background: #ff7010 !important;
+}
+.mep-default-sidebar .df-sidebar-part {
+    background: #f1f1f1 !important;
+}
+.mep-default-sidrbar-meta p, .mep-default-sidrbar-meta p a, .mep-default-sidrbar-events-schedule h3 {
+    color: #444 !important;
+    font-family: 'Philosopher', sans-serif;
+}
+table.table.table-bordered.mep_event_add_cart_table {
+    background: #f9f8f4 !important;
+}

@@ -1,0 +1,17 @@
+# WordPress environment configuration files
+wp-config.php
+.htaccess
+
+# Large temporary generated test files & scripts in root
+/*.pdf
+/*.html
+/monthly-horoscope-tushar-singhal-page1.png
+scratch/
+scratch_update_p16.py
+test_bold_matching.php
+find_snippet.php
+print_snippet_87.php
+
+# Large uploads and logs
+wp-content/uploads/
+*.log

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="800" viewBox="0 0 800 800">
+  <circle cx="400" cy="400" r="380" fill="#fff9f2"/>
+  <g>
+    <circle cx="400" cy="400" r="150" fill="url(#grad1)" stroke="orange" stroke-width="5"/>
+    <defs>
+      <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="0%">
+        <stop offset="0%" style="stop-color:#ff9900;stop-opacity:1" />
+        <stop offset="100%" style="stop-color:#ff0000;stop-opacity:1" />
+      </linearGradient>
+    </defs>
+    <circle cx="400" cy="400" r="60" fill="url(#grad1)"/>
+    <g id="rays">
+      <polygon points="400,220 420,300 380,300" fill="url(#grad1)" />
+    </g>
+  </g>
+  <text x="200" y="650" font-size="90" font-family="serif" fill="#811c56">Mera</text>
+  <text x="200" y="740" font-size="110" font-family="serif" fill="#811c56">Rashifal</text>
+</svg>
