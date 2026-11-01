@@ -448,9 +448,15 @@
                              (typeof mr_razorpay_vars !== 'undefined' && mr_razorpay_vars.is_logged_in);
 
             if (!isFree && !isLoggedIn) {
+                var returnUrl = window.location.href;
+                document.cookie = "mr_login_return_url=" + encodeURIComponent(returnUrl) + "; path=/; max-age=1800; SameSite=Lax";
+
                 var loginUrl = (typeof mr_reports_vars !== 'undefined' && mr_reports_vars.login_url) ||
                                (typeof mr_razorpay_vars !== 'undefined' && mr_razorpay_vars.login_url) ||
                                '/wp-login.php';
+                if (loginUrl.indexOf('redirect=') === -1 && loginUrl.indexOf('redirect_to=') === -1) {
+                    loginUrl += (loginUrl.indexOf('?') > -1 ? '&' : '?') + 'redirect_to=' + encodeURIComponent(returnUrl);
+                }
                 if (window.mrNotify && typeof window.mrNotify.auth === 'function') {
                     window.mrNotify.auth({
                         loginUrl: loginUrl,
@@ -472,7 +478,7 @@
             $('#mr-modal-error-box').hide().find('.mr-error-text').text('');
             $('#mr-birth-details-form input, #mr-birth-details-form select').removeClass('mr-input-error');
 
-            if (slug === 'kundli_matching') {
+            if (slug === 'kundli_matching' || slug === 'kundali-and-gun-matching-report') {
                 $('#mr-matching-fields').show();
                 $('#mr-single-person-fields').hide();
                 $('#mr-palm-upload-fields').hide();
@@ -485,7 +491,7 @@
                     initCityInput('#mr_boy_pob', '#mr-boy-pob-results', '#mr_boy_pob_lat', '#mr_boy_pob_lng', '#mr_boy_pob_tz');
                     initCityInput('#mr_girl_pob', '#mr-girl-pob-results', '#mr_girl_pob_lat', '#mr_girl_pob_lng', '#mr_girl_pob_tz');
                 }, 150);
-            } else if (slug === 'palmistry_report') {
+            } else if (slug === 'palmistry_report' || slug === 'palm-reading-report') {
                 $('#mr-matching-fields').hide();
                 $('#mr-single-person-fields').show();
                 $('#mr-palm-upload-fields').show();

@@ -2280,6 +2280,23 @@ class MR_Report_Landing {
 
         (function($) {
             $(document).ready(function() {
+                // Direct Generation button (for users who already purchased or hold tokens)
+                $(document).on('click', '.mr-btn-generate-direct', function(e) {
+                    e.preventDefault();
+                    var slug = $(this).data('slug') || (window.mrCurrentReportContext && window.mrCurrentReportContext.slug) || '';
+                    var title = $(this).data('title') || (window.mrCurrentReportContext && window.mrCurrentReportContext.title) || '';
+                    if (typeof window.openDetailsModal === 'function') {
+                        window.openDetailsModal(slug, title);
+                    } else {
+                        var modal = $('#mr-details-modal');
+                        if (modal.length) {
+                            if (slug) $('#mr_report_slug').val(slug);
+                            if (title) $('#mr-modal-report-title').text('Generate ' + title);
+                            modal.addClass('is-open').fadeIn(150);
+                        }
+                    }
+                });
+
                 // Interactive FAQ Accordion
                 $('.mr-faq-q').on('click', function() {
                     var item = $(this).closest('.mr-faq-item');

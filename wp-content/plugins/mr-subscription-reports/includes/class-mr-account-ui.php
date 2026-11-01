@@ -349,7 +349,7 @@ class MR_Account_UI {
             'account_url'  => $account_url,
             'loader_url'   => $loader_url,
             'login_url'    => wp_login_url($account_url),
-            'logout_url'   => wp_logout_url(home_url()),
+            'logout_url'   => wp_logout_url($account_url),
             'user_id'      => $user_id,
         ]);
     }
@@ -388,7 +388,7 @@ class MR_Account_UI {
             $current_user = wp_get_current_user();
             $first_name = !empty($current_user->user_firstname) ? $current_user->user_firstname : explode(' ', $current_user->display_name)[0];
             $avatar_url = get_avatar_url($current_user->ID, ['size' => 48]);
-            $logout_url = wp_logout_url(home_url());
+            $logout_url = wp_logout_url(self::get_account_page_url());
 
             $account_item = '
             <li id="menu-item-mr-account" class="menu-item menu-item-has-children mr-nav-account-item">
@@ -434,22 +434,40 @@ class MR_Account_UI {
 
     /**
      * Get Direct Google OAuth Login Action URL
-     * Bypasses WordPress login form completely
+     * Bypasses WordPress login form completely while preserving target return URL
      */
-    public static function get_login_action_url() {
+    public static function get_login_action_url($redirect_to = '') {
         $account_url = self::get_account_page_url();
+        if (empty($redirect_to)) {
+            if (!empty($_GET['redirect_to'])) {
+                $redirect_to = esc_url_raw($_GET['redirect_to']);
+            } elseif (!empty($_GET['redirect'])) {
+                $redirect_to = esc_url_raw($_GET['redirect']);
+            } elseif (!empty($_COOKIE['mr_login_return_url'])) {
+                $redirect_to = esc_url_raw($_COOKIE['mr_login_return_url']);
+            } elseif (!is_admin() && !empty($_SERVER['REQUEST_URI'])) {
+                $curr = home_url($_SERVER['REQUEST_URI']);
+                $clean_curr = trim(parse_url($curr, PHP_URL_PATH) ?? '', '/');
+                $clean_acc  = trim(parse_url($account_url, PHP_URL_PATH) ?? '', '/');
+                if ($clean_curr !== $clean_acc && stripos($clean_curr, 'wp-login') === false && stripos($clean_curr, 'wp-admin') === false) {
+                    $redirect_to = $curr;
+                }
+            }
+        }
+        $target = !empty($redirect_to) ? $redirect_to : $account_url;
+
         if (class_exists('NextendSocialLogin') && NextendSocialLogin::isProviderEnabled('google')) {
             return add_query_arg([
                 'loginSocial' => 'google',
-                'redirect'    => urlencode($account_url)
+                'redirect'    => urlencode($target)
             ], site_url('wp-login.php', 'login'));
         }
-        return $account_url;
+        return !empty($redirect_to) && $redirect_to !== $account_url ? add_query_arg('redirect_to', urlencode($redirect_to), $account_url) : $account_url;
     }
 
     /**
      * Filter wp_login_url() for frontend customer flows
-     * Redirects frontend customers to Google OAuth, while preserving standard login for /wp-admin
+     * Redirects frontend customers to Google OAuth with return destination, while preserving standard login for /wp-admin
      */
     public static function filter_login_url($login_url, $redirect = '', $force_reauth = false) {
         // 1. If this login request is for WordPress Admin (/wp-admin/), DO NOT intercept!
@@ -463,7 +481,7 @@ class MR_Account_UI {
 
         // 2. Only for frontend / customer redirect targets:
         $account_url = self::get_account_page_url();
-        $target = !empty($redirect) ? $redirect : $account_url;
+        $target = !empty($redirect) ? $redirect : (!empty($_GET['redirect_to']) ? esc_url_raw($_GET['redirect_to']) : (!empty($_GET['redirect']) ? esc_url_raw($_GET['redirect']) : (!empty($_COOKIE['mr_login_return_url']) ? esc_url_raw($_COOKIE['mr_login_return_url']) : $account_url)));
 
         if (class_exists('NextendSocialLogin') && NextendSocialLogin::isProviderEnabled('google')) {
             return add_query_arg([
@@ -471,7 +489,7 @@ class MR_Account_UI {
                 'redirect'    => urlencode($target)
             ], site_url('wp-login.php', 'login'));
         }
-        return $account_url;
+        return !empty($target) && $target !== $account_url ? add_query_arg('redirect_to', urlencode($target), $account_url) : $account_url;
     }
 
     /**
@@ -484,11 +502,16 @@ class MR_Account_UI {
             return;
         }
 
-        // 2. Check if current request is inside WP Admin environment
+        // 2. Allow logout action through unimpeded
+        if (isset($_REQUEST['action']) && $_REQUEST['action'] === 'logout') {
+            return;
+        }
+
+        // 3. Check if current request is inside WP Admin environment
         $is_in_admin = is_admin();
         if (!$is_in_admin && isset($_SERVER['REQUEST_URI'])) {
             $uri_path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-            if ($uri_path && (strpos($uri_path, '/wp-admin') !== false || strpos($uri_path, '/wp-login.php') !== false)) {
+            if ($uri_path && strpos($uri_path, '/wp-admin') !== false) {
                 $is_in_admin = true;
             }
         }
@@ -504,13 +527,46 @@ class MR_Account_UI {
     }
 
     /**
-     * Filter login redirect: ensure customers always land on /my-account/ and never into wp-admin
+     * Filter login redirect: ensure customers land back on the exact page they came from (reports, pricing, catalog)
+     * and only land on /my-account/ if no specific service was requested.
      */
     public static function filter_login_redirect($redirect_to, $requested_redirect_to, $user) {
         if (is_a($user, 'WP_User')) {
-            if (!user_can($user, 'manage_options') && !user_can($user, 'edit_posts')) {
-                return self::get_account_page_url();
+            // Staff / Administrators -> follow normal admin redirect
+            if (user_can($user, 'manage_options') || user_can($user, 'edit_posts')) {
+                return $redirect_to;
             }
+
+            // Customer / Subscriber flow:
+            // Check if user came from a specific service page (report, pricing, catalog, etc.)
+            $target = '';
+            if (!empty($requested_redirect_to) && stripos($requested_redirect_to, 'wp-admin') === false && stripos($requested_redirect_to, 'wp-login') === false) {
+                $target = $requested_redirect_to;
+            } elseif (!empty($_REQUEST['redirect_to']) && stripos($_REQUEST['redirect_to'], 'wp-admin') === false) {
+                $target = esc_url_raw($_REQUEST['redirect_to']);
+            } elseif (!empty($_REQUEST['redirect']) && stripos($_REQUEST['redirect'], 'wp-admin') === false) {
+                $target = esc_url_raw($_REQUEST['redirect']);
+            } elseif (!empty($_COOKIE['mr_login_return_url'])) {
+                $target = esc_url_raw($_COOKIE['mr_login_return_url']);
+            } elseif (!empty($redirect_to) && stripos($redirect_to, 'wp-admin') === false && stripos($redirect_to, 'wp-login') === false) {
+                $target = $redirect_to;
+            }
+
+            if (!empty($target)) {
+                $account_url = self::get_account_page_url();
+                $clean_target  = trim(parse_url($target, PHP_URL_PATH) ?? '', '/');
+                $clean_account = trim(parse_url($account_url, PHP_URL_PATH) ?? '', '/');
+
+                // If target is NOT the account page, redirect customer directly back to their service page!
+                if (!empty($clean_target) && $clean_target !== $clean_account) {
+                    if (isset($_COOKIE['mr_login_return_url']) && !headers_sent()) {
+                        setcookie('mr_login_return_url', '', time() - 3600, '/');
+                    }
+                    return $target;
+                }
+            }
+
+            return self::get_account_page_url();
         }
         return $redirect_to;
     }
@@ -538,17 +594,19 @@ class MR_Account_UI {
             return;
         }
 
-        // 2. If user is ALREADY LOGGED IN as a customer/subscriber, never let them see wp-login.php or route into wp-admin
+        // 2. CRITICAL: Allow standard WordPress actions (logout, postpass, lostpassword, resetpass, rp, etc.)
+        // Must be checked BEFORE any logged-in check because the user is still authenticated when clicking "Log Out"
+        $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
+        if (in_array($action, ['logout', 'postpass', 'lostpassword', 'retrievepassword', 'resetpass', 'rp', 'confirmaction'], true)) {
+            return;
+        }
+
+        // 3. If user is ALREADY LOGGED IN as a customer/subscriber, never let them see wp-login.php or route into wp-admin
         if (is_user_logged_in()) {
             if (!current_user_can('manage_options') && !current_user_can('edit_posts')) {
                 wp_safe_redirect(self::get_account_page_url());
                 exit;
             }
-        }
-
-        // 3. Allow standard WordPress actions (logout, postpass, lostpassword, resetpass, rp, etc.)
-        if (isset($_GET['action']) && in_array($_GET['action'], ['logout', 'postpass', 'lostpassword', 'retrievepassword', 'resetpass', 'rp', 'confirmaction'])) {
-            return;
         }
 
         // 4. Allow form submission (POST) so admin can log in with username and password
@@ -613,10 +671,11 @@ class MR_Account_UI {
     }
 
     /**
-     * Handle user logout cleanly: redirect to home without showing login page
+     * Handle user logout cleanly: redirect to requested target or account sign-in page without showing WP login page
      */
     public static function on_user_logout() {
-        wp_safe_redirect(home_url('/'));
+        $redirect = !empty($_REQUEST['redirect_to']) ? $_REQUEST['redirect_to'] : self::get_account_page_url();
+        wp_safe_redirect($redirect);
         exit;
     }
 
@@ -626,8 +685,32 @@ class MR_Account_UI {
      * [mr_user_account] / [mr_account]
      */
     public static function render_account_page($atts = []) {
+        nocache_headers();
         if (!is_user_logged_in()) {
             return self::render_logged_out_view();
+        }
+
+        // If user just completed login and came with a redirect_to or a return cookie, bounce them back to their service page!
+        $return_url = '';
+        if (!empty($_GET['redirect_to'])) {
+            $return_url = esc_url_raw($_GET['redirect_to']);
+        } elseif (!empty($_GET['redirect'])) {
+            $return_url = esc_url_raw($_GET['redirect']);
+        } elseif (!empty($_COOKIE['mr_login_return_url'])) {
+            $return_url = esc_url_raw($_COOKIE['mr_login_return_url']);
+        }
+
+        if (!empty($return_url)) {
+            $account_url = self::get_account_page_url();
+            $clean_ret = trim(parse_url($return_url, PHP_URL_PATH) ?? '', '/');
+            $clean_acc = trim(parse_url($account_url, PHP_URL_PATH) ?? '', '/');
+            if (!empty($clean_ret) && $clean_ret !== $clean_acc && stripos($clean_ret, 'wp-login') === false && stripos($clean_ret, 'wp-admin') === false) {
+                if (isset($_COOKIE['mr_login_return_url']) && !headers_sent()) {
+                    setcookie('mr_login_return_url', '', time() - 3600, '/');
+                }
+                wp_safe_redirect($return_url);
+                exit;
+            }
         }
 
         $user_id = get_current_user_id();
@@ -682,7 +765,7 @@ class MR_Account_UI {
         // Active Subscription check
         $active_sub = class_exists('MR_Tokens') ? MR_Tokens::get_active_subscription($user_id) : null;
         $avatar_url = get_avatar_url($user_id, ['size' => 72]);
-        $logout_url = wp_logout_url(home_url());
+        $logout_url = wp_logout_url(self::get_account_page_url());
         $loader_url = content_url('/uploads/2025/11/loader.webp');
 
         ob_start();
@@ -1258,7 +1341,11 @@ class MR_Account_UI {
      * - Minimal flat SVG vector icons (strictly no cartoon emojis)
      */
     public static function render_logged_out_view() {
-        $login_url   = self::get_login_action_url();
+        $redirect_to = !empty($_GET['redirect_to']) ? esc_url_raw($_GET['redirect_to']) : (!empty($_GET['redirect']) ? esc_url_raw($_GET['redirect']) : '');
+        if (empty($redirect_to) && !empty($_COOKIE['mr_login_return_url'])) {
+            $redirect_to = esc_url_raw($_COOKIE['mr_login_return_url']);
+        }
+        $login_url   = self::get_login_action_url($redirect_to);
         $loader_url  = content_url('/uploads/2025/11/loader.webp');
         $img_base    = defined('MR_PLUGIN_URL') ? MR_PLUGIN_URL . 'assets/images/reports/' : content_url('/plugins/mr-subscription-reports/assets/images/reports/');
         $tnc_url     = home_url('/terms-and-conditions/');

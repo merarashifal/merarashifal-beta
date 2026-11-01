@@ -133,33 +133,66 @@ class MR_Tokens {
     }
 
     /**
-     * Check if user has at least 1 token for a given report
+     * Get aliases for a report slug to ensure cross-system compatibility
+     */
+    public static function get_slug_aliases($slug) {
+        $map = [
+            'numerology'                       => ['numerology', 'numerology_report', 'numerology-report'],
+            'numerology_report'                => ['numerology', 'numerology_report', 'numerology-report'],
+            'numerology-report'                => ['numerology', 'numerology_report', 'numerology-report'],
+            'palmistry_report'                 => ['palmistry_report', 'palm-reading-report'],
+            'palm-reading-report'              => ['palmistry_report', 'palm-reading-report'],
+            'kundli_matching'                  => ['kundli_matching', 'kundali-and-gun-matching-report'],
+            'kundali-and-gun-matching-report'  => ['kundli_matching', 'kundali-and-gun-matching-report'],
+            'kundli_predictions'               => ['kundli_predictions', 'janam-kundali-master-report'],
+            'janam-kundali-master-report'      => ['kundli_predictions', 'janam-kundali-master-report'],
+            'mahadasha_timing'                 => ['mahadasha_timing', 'dasha-timing-report'],
+            'dasha-timing-report'              => ['mahadasha_timing', 'dasha-timing-report'],
+            'dosh_remedial'                    => ['dosh_remedial', 'kundali-dosh-report'],
+            'kundali-dosh-report'              => ['dosh_remedial', 'kundali-dosh-report'],
+            'yearly_horoscope_long'            => ['yearly_horoscope_long', 'yearly-horoscope-report', 'landingpage'],
+            'yearly-horoscope-report'          => ['yearly_horoscope_long', 'yearly-horoscope-report', 'landingpage'],
+            'yearly_horoscope_vedic'           => ['yearly_horoscope_vedic', 'yearly-horoscope-snapshot-report'],
+            'yearly-horoscope-snapshot-report' => ['yearly_horoscope_vedic', 'yearly-horoscope-snapshot-report'],
+            'monthly_horoscope_vedic'          => ['monthly_horoscope_vedic', 'monthly-horoscope-report'],
+            'monthly-horoscope-report'         => ['monthly_horoscope_vedic', 'monthly-horoscope-report'],
+        ];
+        return $map[$slug] ?? [$slug];
+    }
+
+    /**
+     * Check if user has at least 1 token for a given report (supporting slug aliases)
      */
     public static function has_token($user_id, $report_slug) {
         global $wpdb;
         $table_tokens = $wpdb->prefix . 'mr_user_tokens';
+        $aliases = self::get_slug_aliases($report_slug);
+        $placeholders = implode(',', array_fill(0, count($aliases), '%s'));
 
-        $remaining = (int)$wpdb->get_var($wpdb->prepare(
-            "SELECT tokens_remaining FROM $table_tokens WHERE user_id = %d AND report_slug = %s",
-            $user_id,
-            $report_slug
-        ));
+        $query = $wpdb->prepare(
+            "SELECT SUM(tokens_remaining) FROM $table_tokens WHERE user_id = %d AND report_slug IN ($placeholders)",
+            array_merge([$user_id], $aliases)
+        );
 
+        $remaining = (int)$wpdb->get_var($query);
         return $remaining > 0;
     }
 
     /**
-     * Deduct 1 token for a report
+     * Deduct 1 token for a report (supporting slug aliases)
      */
     public static function deduct_token($user_id, $report_slug) {
         global $wpdb;
         $table_tokens = $wpdb->prefix . 'mr_user_tokens';
+        $aliases = self::get_slug_aliases($report_slug);
+        $placeholders = implode(',', array_fill(0, count($aliases), '%s'));
 
-        $row = $wpdb->get_row($wpdb->prepare(
-            "SELECT id, tokens_used, tokens_remaining FROM $table_tokens WHERE user_id = %d AND report_slug = %s",
-            $user_id,
-            $report_slug
-        ));
+        $query = $wpdb->prepare(
+            "SELECT id, tokens_used, tokens_remaining FROM $table_tokens WHERE user_id = %d AND report_slug IN ($placeholders) AND tokens_remaining > 0 ORDER BY id ASC LIMIT 1",
+            array_merge([$user_id], $aliases)
+        );
+
+        $row = $wpdb->get_row($query);
 
         if (!$row || (int)$row->tokens_remaining <= 0) {
             return false;

@@ -35,14 +35,61 @@ class MR_Report_Landing_Data {
         $map = self::get_slug_map();
         $key = $map[$key_or_slug] ?? $key_or_slug;
         $all = self::get_all();
-        return $all[$key] ?? $all['yearly_horoscope_long'];
+        $data = $all[$key] ?? $all['yearly_horoscope_long'];
+
+        return self::apply_live_catalog_sync($data, $key);
+    }
+
+    /**
+     * Synchronize live pricing, discounts, and testimonials from Catalog Manager
+     */
+    public static function apply_live_catalog_sync($data, $key = '') {
+        $slug = $data['report_slug'] ?? $key;
+
+        if (class_exists('MR_Catalog_Manager')) {
+            $cards = MR_Catalog_Manager::get_all_cards();
+            $card = $cards[$slug] ?? ($cards[$key] ?? []);
+            if (empty($card) && ($slug === 'numerology' || $key === 'numerology')) {
+                $card = $cards['numerology'] ?? ($cards['numerology_report'] ?? []);
+            }
+
+            if (!empty($card)) {
+                if (isset($card['price_sale'])) {
+                    $data['price_sale'] = floatval($card['price_sale']);
+                }
+                if (isset($card['price_regular'])) {
+                    $data['price_regular'] = floatval($card['price_regular']);
+                }
+                if (!empty($card['discount_text'])) {
+                    $data['discount_text'] = $card['discount_text'];
+                }
+                if (!empty($card['testimonials']) && is_array($card['testimonials'])) {
+                    $data['testimonials'] = $card['testimonials'];
+                }
+            }
+        }
+
+        // Secondary sync with mr_report_pricing_config
+        $pricing_config = get_option('mr_report_pricing_config', []);
+        $cfg = $pricing_config[$slug] ?? ($pricing_config[$key] ?? []);
+        if (empty($cfg) && ($slug === 'numerology' || $key === 'numerology')) {
+            $cfg = $pricing_config['numerology_report'] ?? ($pricing_config['numerology'] ?? []);
+        }
+        if (!empty($cfg) && isset($cfg['sale_price'])) {
+            $data['price_sale'] = floatval($cfg['sale_price']);
+            if (isset($cfg['list_price'])) {
+                $data['price_regular'] = floatval($cfg['list_price']);
+            }
+        }
+
+        return $data;
     }
 
     /**
      * All 9 Reports Configuration
      */
     public static function get_all() {
-        return [
+        $reports = [
             // =========================================================
             // 1. YEARLY HOROSCOPE DETAILED REPORT
             // =========================================================
@@ -864,5 +911,11 @@ class MR_Report_Landing_Data {
                 ],
             ],
         ];
+
+        foreach ($reports as $k => $d) {
+            $reports[$k] = self::apply_live_catalog_sync($d, $k);
+        }
+
+        return $reports;
     }
 }

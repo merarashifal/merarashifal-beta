@@ -72,6 +72,8 @@ class MR_Frontend {
 
         $user_id = get_current_user_id();
         $account_url = class_exists('MR_Account_UI') ? MR_Account_UI::get_account_page_url() : home_url('/my-account/');
+        $current_url = !is_admin() && !empty($_SERVER['REQUEST_URI']) ? home_url($_SERVER['REQUEST_URI']) : $account_url;
+        $login_url   = class_exists('MR_Account_UI') ? MR_Account_UI::get_login_action_url($current_url) : add_query_arg('redirect_to', urlencode($current_url), $account_url);
         $user_astro_details = null;
         if ($user_id) {
             $user_obj = wp_get_current_user();
@@ -91,7 +93,7 @@ class MR_Frontend {
             'ajax_url' => admin_url('admin-ajax.php'),
             'nonce'    => wp_create_nonce('mr_reports_nonce'),
             'is_logged_in' => is_user_logged_in(),
-            'login_url' => $account_url,
+            'login_url' => $login_url,
             'pricing_url' => home_url('/pricing/'),
             'catalog_url' => home_url('/reports-catalog/'),
             'dashboard_url' => home_url('/my-account-reports/'),

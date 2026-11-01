@@ -1031,17 +1031,15 @@ class MR_Catalog_Manager {
                                 </div>
                             </div>
 
-                            <!-- Action Buttons -->
+                            <!-- Action Buttons: Enforce single-report flow (Redirect to individual report page) -->
                             <div class="mr-sales-actions">
-                                <?php if ($user_id && $rem > 0): ?>
-                                    <button type="button" class="mr-sales-btn-primary mr-btn-generate-direct" data-slug="<?php echo esc_attr($slug); ?>" data-title="<?php echo esc_attr($card['name']); ?>">
+                                <a href="<?php echo esc_url($report_page_url); ?>" class="mr-sales-btn-primary" style="text-decoration:none; display:block; text-align:center;">
+                                    <?php if ($user_id && $rem > 0): ?>
+                                        <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Report (<?php echo (int)$rem; ?> Available) &rarr;
+                                    <?php else: ?>
                                         <?php echo esc_html($card['button_text']); ?>
-                                    </button>
-                                <?php else: ?>
-                                    <a href="<?php echo esc_url($report_page_url); ?>" class="mr-sales-btn-primary" style="text-decoration:none; display:block; text-align:center;">
-                                        <?php echo esc_html($card['button_text']); ?>
-                                    </a>
-                                <?php endif; ?>
+                                    <?php endif; ?>
+                                </a>
 
                                 <!-- Sample Preview Link -->
                                 <button type="button" class="mr-sales-preview-link mr-link-sample" data-title="<?php echo esc_attr($card['name']); ?>" data-slug="<?php echo esc_attr($slug); ?>">
