@@ -49,6 +49,8 @@ require_once MR_PLUGIN_DIR . 'includes/class-mr-report-embed.php';
 require_once MR_PLUGIN_DIR . 'includes/class-mr-report-landing-data.php';
 require_once MR_PLUGIN_DIR . 'includes/class-mr-bundles.php';
 require_once MR_PLUGIN_DIR . 'includes/class-mr-bundles-admin.php';
+require_once MR_PLUGIN_DIR . 'includes/class-mr-invoice.php';
+require_once MR_PLUGIN_DIR . 'includes/class-mr-checkout.php';
 require_once MR_PLUGIN_DIR . 'includes/class-mr-report-landing.php';
 
 // Plugin Activation: Create Database Tables
@@ -73,6 +75,8 @@ add_action('plugins_loaded', function() {
     MR_Mailer::init();
     MR_Report_Embed::init();
     MR_Report_Landing::init();
+    MR_Invoice::init();
+    MR_Checkout::init();
 });
 
 

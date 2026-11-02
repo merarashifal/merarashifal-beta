@@ -315,6 +315,11 @@ class MR_Passbook_UI {
                                     </td>
                                     <td>
                                         <span class="mr-txn-id"><?php echo esc_html($t['internal_txn_id']); ?></span>
+                                        <?php if (!empty($t['invoice_number'])): ?>
+                                            <div style="font-size:11.5px; font-weight:700; color:#7A1F3D; margin-top:3px;">
+                                                <i class="fa-solid fa-file-invoice"></i> <?php echo esc_html($t['invoice_number']); ?>
+                                            </div>
+                                        <?php endif; ?>
                                         <?php if (!empty($t['gateway_payment_id'])): ?>
                                             <div class="mr-gateway-id"><i class="fa-solid fa-shield-halved" style="font-size:9px;"></i> <?php echo esc_html($t['gateway_payment_id']); ?></div>
                                         <?php endif; ?>
@@ -363,12 +368,20 @@ class MR_Passbook_UI {
                                             <span style="display:inline-block; font-size:11px; color:#7c3aed; background:#f5f3ff; border:1px solid #ddd6fe; padding:4px 8px; border-radius:6px; font-weight:600;">
                                                 <i class="fa-solid fa-building-columns"></i> Sent to Bank
                                             </span>
-                                        <?php elseif ($t['status'] === 'success' && $t['channel'] === 'report'): ?>
-                                            <a href="<?php echo esc_url(home_url('/reports')); ?>" class="mr-btn-action">Generate Report</a>
-                                        <?php elseif ($t['status'] === 'success' && $t['channel'] === 'subscription'): ?>
-                                            <a href="<?php echo esc_url(home_url('/reports')); ?>" class="mr-btn-action" style="background:#0f172a;">View Pack</a>
-                                        <?php elseif ($t['status'] === 'success' && $t['channel'] === 'chat_credit'): ?>
-                                            <button onclick="if(window.document.getElementById('niyati-launcher')){window.document.getElementById('niyati-launcher').click();}" class="mr-btn-action" style="background:#7E22CE; border:none; cursor:pointer;">💬 Open Chat</button>
+                                        <?php elseif ($t['status'] === 'success'): ?>
+                                            <div style="display:flex; flex-direction:column; gap:5px; align-items:flex-start;">
+                                                <?php if ($t['channel'] === 'report'): ?>
+                                                    <a href="<?php echo esc_url(home_url('/reports')); ?>" class="mr-btn-action" style="white-space:nowrap;">Generate Report</a>
+                                                <?php elseif ($t['channel'] === 'subscription'): ?>
+                                                    <a href="<?php echo esc_url(home_url('/reports')); ?>" class="mr-btn-action" style="background:#0f172a; white-space:nowrap;">View Pack</a>
+                                                <?php elseif ($t['channel'] === 'chat_credit'): ?>
+                                                    <button onclick="if(window.document.getElementById('niyati-launcher')){window.document.getElementById('niyati-launcher').click();}" class="mr-btn-action" style="background:#7E22CE; border:none; cursor:pointer; white-space:nowrap;">💬 Open Chat</button>
+                                                <?php endif; ?>
+
+                                                <a href="<?php echo esc_url(home_url('/invoice/?id=' . urlencode($t['internal_txn_id']))); ?>" target="_blank" class="mr-btn-action" style="background:#7A1F3D; padding:4px 9px; font-size:11px; border-radius:6px; white-space:nowrap; text-decoration:none;" title="Download PDF Retail Invoice">
+                                                    <i class="fa-solid fa-file-invoice"></i> Invoice (PDF)
+                                                </a>
+                                            </div>
                                         <?php else: ?>
                                             <span style="font-size:12px; color:#94a3b8;">--</span>
                                         <?php endif; ?>

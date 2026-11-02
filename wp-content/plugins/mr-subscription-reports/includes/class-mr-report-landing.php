@@ -2672,6 +2672,8 @@ class MR_Report_Landing {
                                .data('bundle-reports', reports)
                                .data('title', title);
                         heroBtn.attr('data-price', price);
+                        heroBtn.attr('data-bundle-tier', tier);
+                        heroBtn.attr('data-order-type', (tier === 'single' ? 'alacarte' : 'bundle'));
                         $('#mr-hero-bundle-btn-text').html(btnLabel);
                     }
 
@@ -2686,6 +2688,8 @@ class MR_Report_Landing {
                                  .data('bundle-reports', reports)
                                  .data('title', title);
                         stickyBtn.attr('data-price', price);
+                        stickyBtn.attr('data-bundle-tier', tier);
+                        stickyBtn.attr('data-order-type', (tier === 'single' ? 'alacarte' : 'bundle'));
                         var stickyText = (tier === 'trio') 
                             ? 'Order Best Buy Suite &bull; ₹' + Number(price).toLocaleString() + ' &rarr;' 
                             : ((tier === 'duo') 
@@ -2694,6 +2698,18 @@ class MR_Report_Landing {
                         stickyBtn.html('<i class="fa-solid fa-wand-magic-sparkles"></i> ' + stickyText);
                         $('#mr-landing-sticky-bar .mr-sticky-price').text('₹' + Number(price).toLocaleString());
                     }
+                });
+
+                // Order & Bundle Checkout Redirect Handler
+                $(document).on('click', '.mr-btn-buy-alacarte, .mr-btn-bundle-order, .mr-fbt-cta-btn', function(e) {
+                    if ($(this).is('a')) return;
+                    e.preventDefault();
+                    var btn = $(this);
+                    var slug = btn.data('slug') || btn.attr('data-slug') || '<?php echo esc_js($report_slug); ?>';
+                    var tier = btn.data('bundle-tier') || btn.attr('data-bundle-tier') || 'single';
+                    var checkoutUrl = '<?php echo esc_js(home_url('/checkout/')); ?>';
+                    var sep = (checkoutUrl.indexOf('?') !== -1) ? '&' : '?';
+                    window.location.href = checkoutUrl + sep + 'report=' + encodeURIComponent(slug) + '&tier=' + encodeURIComponent(tier);
                 });
                 // Direct Generation button (for users who already purchased or hold tokens)
                 $(document).on('click', '.mr-btn-generate-direct', function(e) {

@@ -95,6 +95,7 @@ class MR_Frontend {
             'is_logged_in' => is_user_logged_in(),
             'login_url' => $login_url,
             'pricing_url' => home_url('/pricing/'),
+            'checkout_url' => home_url('/checkout/'),
             'catalog_url' => home_url('/reports-catalog/'),
             'dashboard_url' => home_url('/my-account-reports/'),
             'account_url'   => $account_url,

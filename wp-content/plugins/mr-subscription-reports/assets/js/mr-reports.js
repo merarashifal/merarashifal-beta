@@ -332,7 +332,7 @@
             pgModal.fadeIn(200);
         });
 
-        // 6. Open Simulated Payment Gateway (PG) for A la Carte or Bundles
+        // 6. Open Checkout or Free Report Form for A la Carte or Bundles
         $(document).on('click', '.mr-btn-buy-alacarte, .mr-btn-bundle-order', function(e) {
             e.preventDefault();
             var btn  = $(this);
@@ -340,47 +340,16 @@
 
             var orderType = btn.data('order-type') || (btn.hasClass('mr-btn-bundle-order') ? 'bundle' : 'alacarte');
             activeOrderType = orderType;
-            activeReportSlug = card.data('slug') || btn.data('slug');
+            activeReportSlug = card.data('slug') || btn.data('slug') || (window.mrCurrentReportContext && window.mrCurrentReportContext.slug) || '';
             activeBundleTier = btn.data('bundle-tier') || (orderType === 'bundle' ? 'trio' : 'single');
             activeChatCredits = parseInt(btn.data('chat-credits') || 0, 10);
             activeItemName = btn.data('bundle-title') || card.data('title') || btn.data('title') || 'Astrological Report';
 
-            var rpts = btn.data('bundle-reports');
-            if (typeof rpts === 'string') {
-                try { activeBundleReports = JSON.parse(rpts); } catch(e) { activeBundleReports = [activeReportSlug]; }
-            } else if (Array.isArray(rpts)) {
-                activeBundleReports = rpts;
-            } else {
-                activeBundleReports = [activeReportSlug];
-            }
-            
             var inrPrice = btn.data('price');
             if (inrPrice === undefined && card.length) {
                 inrPrice = card.data('price');
             }
             activeInrAmount = parseFloat(inrPrice) || 0;
-
-            // Require login before proceeding to payment or details
-            var isLoggedIn = (typeof mr_reports_vars !== 'undefined' && mr_reports_vars.is_logged_in) ||
-                             (typeof mr_razorpay_vars !== 'undefined' && mr_razorpay_vars.is_logged_in);
-
-            if (!isLoggedIn) {
-                var returnUrl = window.location.href;
-                document.cookie = "mr_login_return_url=" + encodeURIComponent(returnUrl) + "; path=/; max-age=86400; SameSite=Lax";
-                var baseAccount = (typeof mr_reports_vars !== 'undefined' && mr_reports_vars.account_url) || '/my-account/';
-                var sep = (baseAccount.indexOf('?') !== -1) ? '&' : '?';
-                var loginUrl = baseAccount + sep + 'redirect_to=' + encodeURIComponent(returnUrl);
-
-                if (window.mrNotify && typeof window.mrNotify.auth === 'function') {
-                    window.mrNotify.auth({
-                        primaryUrl: loginUrl,
-                        message: 'Please sign in to order your personalized ' + (activeItemName ? activeItemName.replace(/^Generate\s+/i, '') : 'report') + ' or subscription pack.'
-                    });
-                } else {
-                    window.location.href = loginUrl;
-                }
-                return;
-            }
 
             // If free report (₹0), bypass payment and open details form immediately
             if (inrPrice !== undefined && parseFloat(inrPrice) === 0) {
@@ -388,24 +357,12 @@
                 return;
             }
 
-            if (inrPrice !== undefined) {
-                activeItemPrice = '₹' + inrPrice;
-                var orderLabel = (activeOrderType === 'bundle') 
-                    ? 'Report Bundle & AI Chat Package (INR)' 
-                    : 'A la Carte Single Report (INR)';
-                $('#mr-pg-order-type').text(orderLabel);
-            } else {
-                var price = (currentCurrency === 'CAD') ? card.data('cad') : card.data('usd');
-                activeItemPrice = '$' + parseFloat(price).toFixed(2) + ' ' + currentCurrency;
-                $('#mr-pg-order-type').text('A la Carte Single Report (' + currentCurrency + ')');
-            }
-
-            $('#mr-pg-item-name').text(activeItemName);
-            $('#mr-pg-total-amount').text(activeItemPrice);
-            $('#mr-pg-error-msg').hide();
-
-            pgModal.fadeIn(200);
-        });
+            // Redirect to Dedicated Retail Checkout Page for Customer Billing & Invoice
+            var checkoutBase = (typeof mr_reports_vars !== 'undefined' && mr_reports_vars.checkout_url) 
+                ? mr_reports_vars.checkout_url 
+                : '/checkout/';
+            var sep = (checkoutBase.indexOf('?') !== -1) ? '&' : '?';
+            window.location.href = checkoutBase + sep + 'report=' + encodeURIComponent(activeReportSlug) + '&tier=' + encodeURIComponent(activeBundleTier);
         });
 
         // 7. Modal Close handlers
