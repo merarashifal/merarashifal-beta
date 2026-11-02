@@ -850,7 +850,7 @@ class MR_Report_Landing_Data {
                 'stats'            => [
                     'stat1_val' => '26 Pages', 'stat1_lbl' => 'MASTER DOSSIER',
                     'stat2_val' => '7 Mounts', 'stat2_lbl' => 'ENERGY ELEVATIONS',
-                    'stat3_val' => 'Gemini AI', 'stat3_lbl' => 'SAMUDRIK SYNTHESIS',
+                    'stat3_val' => 'Vedic AI', 'stat3_lbl' => 'SAMUDRIK SYNTHESIS',
                     'stat4_val' => '4.9 / 5.0', 'stat4_lbl' => 'SEEKER RATING',
                 ],
                 'modules'          => [
@@ -896,7 +896,7 @@ class MR_Report_Landing_Data {
                 'why_different'    => [
                     ['icon' => 'fa-solid fa-camera', 'title' => 'Dual Experience: Free Scanner + Deep Dossier', 'desc' => 'Upload your palm directly to get an immediate free 6-point snapshot, or unlock the exhaustive 26-page master dossier.'],
                     ['icon' => 'fa-solid fa-palette', 'title' => 'Vector Infographics & Rich Visuals', 'desc' => 'Features hand topography maps, kinetic vitality waves, velocity heatmaps, and asset allocation donuts.'],
-                    ['icon' => 'fa-solid fa-brain', 'title' => 'Samudrik Shastra Meets AI', 'desc' => 'Combines authentic ancient palmistry scriptures with Google Gemini 3.5 Flash intelligence for unparalleled depth.'],
+                    ['icon' => 'fa-solid fa-brain', 'title' => 'Samudrik Shastra Meets AI', 'desc' => 'Combines authentic ancient palmistry scriptures with advanced Vedic AI intelligence for unparalleled depth.'],
                 ],
                 'testimonials'     => [
                     ['quote' => 'The palm topography map and the analysis of my descending head line were astonishingly accurate. The level of detail in 26 pages is extraordinary.', 'name' => 'Rajeev Mathur', 'loc' => 'New Delhi, India', 'rating' => 5],

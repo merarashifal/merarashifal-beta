@@ -544,6 +544,15 @@ class MR_Report_Landing {
         $user_id              = get_current_user_id();
         $has_token            = ($user_id && class_exists('MR_Tokens')) ? MR_Tokens::has_token($user_id, $report_slug) : false;
 
+        // Dynamic Bundle Configuration
+        $bundle_cfg         = class_exists('MR_Bundles') ? MR_Bundles::get_bundle_for_report($report_slug) : null;
+        $global_bundle_opts = class_exists('MR_Bundles') ? MR_Bundles::get_global_settings() : ['enabled' => true];
+        $bundles_active     = ($bundle_cfg && !empty($bundle_cfg['bundle_enabled']) && !empty($global_bundle_opts['enabled']));
+
+        $tier_single = $bundles_active ? ($bundle_cfg['tier_single'] ?? []) : [];
+        $tier_duo    = $bundles_active ? ($bundle_cfg['tier_duo'] ?? []) : [];
+        $tier_trio   = $bundles_active ? ($bundle_cfg['tier_trio'] ?? []) : [];
+
         // Fetch other sister reports for cross-promotion
         $all_reports = MR_Report_Landing_Data::get_all();
         $related_reports = [];
@@ -807,6 +816,186 @@ class MR_Report_Landing {
                 font-weight: 700;
                 padding: 4px 12px;
                 border-radius: 9999px;
+            }
+
+            /* Interactive Bundle Selector (MeraRashifal Brand Edition) */
+            .mr-bundle-box {
+                background: #FFFDF9;
+                border: 1.5px solid rgba(217, 164, 65, 0.45);
+                border-radius: 18px;
+                padding: 18px 20px 20px 20px;
+                margin: 22px 0 16px 0;
+                box-shadow: 0 8px 24px rgba(122, 31, 61, 0.05);
+            }
+            .mr-bundle-heading {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 14px;
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .mr-bundle-heading-title {
+                font-size: 13.5px;
+                font-weight: 700;
+                color: #7A1F3D;
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+            .mr-bundle-save-pill {
+                background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+                color: #FFFFFF;
+                font-size: 11px;
+                font-weight: 700;
+                padding: 3px 10px;
+                border-radius: 9999px;
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+            }
+            .mr-bundle-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 12px;
+            }
+            @media (max-width: 900px) {
+                .mr-bundle-grid {
+                    grid-template-columns: 1fr;
+                    gap: 10px;
+                }
+            }
+            .mr-bundle-item {
+                background: #FFFFFF;
+                border: 2px solid #EADCCB;
+                border-radius: 14px;
+                padding: 14px 14px 12px 14px;
+                cursor: pointer;
+                position: relative;
+                transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+                user-select: none;
+            }
+            .mr-bundle-item:hover {
+                border-color: #D9A441;
+                transform: translateY(-2px);
+                box-shadow: 0 6px 18px rgba(217, 164, 65, 0.18);
+            }
+            .mr-bundle-item.active {
+                border-color: #7A1F3D !important;
+                background: #FFF9F2 !important;
+                box-shadow: 0 8px 25px rgba(122, 31, 61, 0.12), 0 0 0 2px #7A1F3D;
+            }
+            .mr-bundle-item.mr-bundle-best-buy {
+                border-color: #D9A441;
+            }
+            .mr-bundle-item.mr-bundle-best-buy.active {
+                border-color: #F58220 !important;
+                box-shadow: 0 8px 25px rgba(245, 130, 32, 0.22), 0 0 0 2px #F58220;
+            }
+            .mr-bundle-ribbon {
+                position: absolute;
+                top: -10px;
+                right: 12px;
+                background: linear-gradient(135deg, #F58220 0%, #D9A441 100%);
+                color: #FFFFFF;
+                font-size: 10px;
+                font-weight: 800;
+                padding: 2px 8px;
+                border-radius: 9999px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                box-shadow: 0 2px 6px rgba(245, 130, 32, 0.3);
+                white-space: nowrap;
+            }
+            .mr-bundle-top-row {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 4px;
+            }
+            .mr-bundle-radio {
+                width: 17px;
+                height: 17px;
+                border-radius: 50%;
+                border: 2px solid #C4B5A5;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                flex-shrink: 0;
+                transition: all 0.2s ease;
+            }
+            .mr-bundle-item.active .mr-bundle-radio {
+                border-color: #7A1F3D;
+                background: #7A1F3D;
+            }
+            .mr-bundle-item.active .mr-bundle-radio::after {
+                content: '';
+                width: 5px;
+                height: 5px;
+                border-radius: 50%;
+                background: #FFFFFF;
+            }
+            .mr-bundle-name {
+                font-size: 12.5px;
+                font-weight: 700;
+                color: #3A312D;
+                line-height: 1.3;
+            }
+            .mr-bundle-item.active .mr-bundle-name {
+                color: #7A1F3D;
+            }
+            .mr-bundle-price-row {
+                display: flex;
+                align-items: baseline;
+                gap: 6px;
+                margin: 5px 0 3px 0;
+            }
+            .mr-bundle-sale {
+                font-size: 22px;
+                font-weight: 800;
+                font-family: 'Poppins', sans-serif;
+                color: #7A1F3D;
+                line-height: 1;
+            }
+            .mr-bundle-strike {
+                font-size: 12px;
+                color: #8C7E77;
+                text-decoration: line-through;
+            }
+            .mr-bundle-desc {
+                font-size: 11px;
+                color: #6B5E57;
+                line-height: 1.4;
+                margin-top: 3px;
+            }
+            .mr-bundle-chat-tag {
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+                font-size: 10.5px;
+                font-weight: 700;
+                color: #0284C7;
+                background: #E0F2FE;
+                padding: 2px 7px;
+                border-radius: 5px;
+                margin-top: 5px;
+                width: fit-content;
+            }
+            .mr-bundle-tag-neutral {
+                font-size: 10px;
+                font-weight: 600;
+                color: #64748B;
+                background: #F1F5F9;
+                padding: 1px 6px;
+                border-radius: 4px;
+                margin-top: 5px;
+                display: inline-block;
+                width: fit-content;
             }
 
             /* Trust Row */
@@ -1884,18 +2073,155 @@ class MR_Report_Landing {
                             <?php echo wp_kses_post($data['hero_sub']); ?>
                         </p>
 
-                        <!-- Price display -->
-                        <div class="mr-hero-price-wrap">
-                            <span class="mr-hero-price">₹<?php echo esc_html($report_price); ?></span>
-                            <span class="mr-hero-old-price">₹<?php echo esc_html($report_regular_price); ?></span>
-                            <span class="mr-hero-discount-pill"><?php echo esc_html($data['discount_text']); ?></span>
-                        </div>
+                        <!-- Dynamic Bundle Package Selector or Standard Price -->
+                        <?php if ($bundles_active && !$has_token): 
+                            $trio_paired = !empty($tier_trio['paired_reports']) ? (array)$tier_trio['paired_reports'] : [];
+                            $duo_paired  = !empty($tier_duo['paired_reports']) ? (array)$tier_duo['paired_reports'] : [];
+                            $trio_reports = array_merge([$report_slug], $trio_paired);
+                            $duo_reports  = array_merge([$report_slug], $duo_paired);
+                            $single_reports = [$report_slug];
+
+                            $trio_price = !empty($tier_trio['price_sale']) ? floatval($tier_trio['price_sale']) : 599;
+                            $trio_reg   = !empty($tier_trio['price_regular']) ? floatval($tier_trio['price_regular']) : 2097;
+                            $trio_cred  = isset($tier_trio['chat_credits']) ? intval($tier_trio['chat_credits']) : 30;
+                            $trio_title = !empty($tier_trio['title']) ? $tier_trio['title'] : 'Cosmic Trinity (Pack of 3 + AI Chat)';
+
+                            $duo_price  = !empty($tier_duo['price_sale']) ? floatval($tier_duo['price_sale']) : 449;
+                            $duo_reg    = !empty($tier_duo['price_regular']) ? floatval($tier_duo['price_regular']) : 1198;
+                            $duo_cred   = isset($tier_duo['chat_credits']) ? intval($tier_duo['chat_credits']) : 15;
+                            $duo_title  = !empty($tier_duo['title']) ? $tier_duo['title'] : 'Smart Duo (Pack of 2)';
+
+                            $single_price = !empty($tier_single['price_sale']) ? floatval($tier_single['price_sale']) : floatval($data['price_sale']);
+                            $single_reg   = !empty($tier_single['price_regular']) ? floatval($tier_single['price_regular']) : floatval($data['price_regular']);
+                            $single_title = !empty($tier_single['title']) ? $tier_single['title'] : 'Single Report';
+                            $single_cred  = isset($tier_single['chat_credits']) ? intval($tier_single['chat_credits']) : 0;
+                        ?>
+                            <!-- Interactive 3-Tier Bundle Selector Widget -->
+                            <div class="mr-bundle-box" id="mr-bundle-selector-wrap">
+                                <div class="mr-bundle-heading">
+                                    <span class="mr-bundle-heading-title">
+                                        <i class="fa-solid fa-gift" style="color:#D9A441;"></i> Select Your Astrological Package:
+                                    </span>
+                                    <span class="mr-bundle-save-pill">
+                                        <i class="fa-solid fa-bolt"></i> Best Value Guaranteed
+                                    </span>
+                                </div>
+
+                                <div class="mr-bundle-grid" id="mr-bundle-cards-grid">
+                                    <!-- Tier 1: Single Report -->
+                                    <div class="mr-bundle-item" 
+                                         data-tier="single" 
+                                         data-price="<?php echo esc_attr($single_price); ?>" 
+                                         data-regular="<?php echo esc_attr($single_reg); ?>" 
+                                         data-credits="<?php echo esc_attr($single_cred); ?>" 
+                                         data-reports="<?php echo esc_attr(wp_json_encode($single_reports)); ?>" 
+                                         data-title="<?php echo esc_attr($single_title); ?>" 
+                                         data-btn-label="Get Single Report Now &bull; ₹<?php echo number_format($single_price); ?> &rarr;">
+                                        <div class="mr-bundle-top-row">
+                                            <span class="mr-bundle-radio"></span>
+                                            <span class="mr-bundle-name"><?php echo esc_html($single_title); ?></span>
+                                        </div>
+                                        <div class="mr-bundle-price-row">
+                                            <span class="mr-bundle-sale">₹<?php echo number_format($single_price); ?></span>
+                                            <?php if ($single_reg > $single_price): ?>
+                                                <span class="mr-bundle-strike">₹<?php echo number_format($single_reg); ?></span>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div class="mr-bundle-desc">1 In-Depth Dossier (<?php echo esc_html($report_pages); ?>)</div>
+                                        <?php if (!empty($tier_single['badge'])): ?>
+                                            <span class="mr-bundle-tag-neutral"><?php echo esc_html($tier_single['badge']); ?></span>
+                                        <?php endif; ?>
+                                    </div>
+
+                                    <!-- Tier 2: Smart Duo (Pack of 2) -->
+                                    <?php if (!empty($tier_duo['enabled'])): ?>
+                                    <div class="mr-bundle-item" 
+                                         data-tier="duo" 
+                                         data-price="<?php echo esc_attr($duo_price); ?>" 
+                                         data-regular="<?php echo esc_attr($duo_reg); ?>" 
+                                         data-credits="<?php echo esc_attr($duo_cred); ?>" 
+                                         data-reports="<?php echo esc_attr(wp_json_encode($duo_reports)); ?>" 
+                                         data-title="<?php echo esc_attr($duo_title); ?>" 
+                                         data-btn-label="Get Smart Duo (2 Reports + <?php echo esc_attr($duo_cred); ?> AI Questions) &bull; ₹<?php echo number_format($duo_price); ?> &rarr;">
+                                        <?php if (!empty($tier_duo['badge'])): ?>
+                                            <span class="mr-bundle-ribbon" style="background:#ea580c;"><?php echo esc_html($tier_duo['badge']); ?></span>
+                                        <?php endif; ?>
+                                        <div class="mr-bundle-top-row">
+                                            <span class="mr-bundle-radio"></span>
+                                            <span class="mr-bundle-name"><?php echo esc_html($duo_title); ?></span>
+                                        </div>
+                                        <div class="mr-bundle-price-row">
+                                            <span class="mr-bundle-sale">₹<?php echo number_format($duo_price); ?></span>
+                                            <?php if ($duo_reg > $duo_price): ?>
+                                                <span class="mr-bundle-strike">₹<?php echo number_format($duo_reg); ?></span>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div class="mr-bundle-desc">2 Sacred Reports (45+ Pages Total)</div>
+                                        <?php if (!empty($duo_cred)): ?>
+                                            <div class="mr-bundle-chat-tag">
+                                                <i class="fa-solid fa-comments"></i> +<?php echo esc_html($duo_cred); ?> Niyati AI Questions
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                    <?php endif; ?>
+
+                                    <!-- Tier 3: Cosmic Trinity (Pack of 3 + AI Chat) - BEST BUY (Active by default) -->
+                                    <?php if (!empty($tier_trio['enabled'])): ?>
+                                    <div class="mr-bundle-item mr-bundle-best-buy active" 
+                                         data-tier="trio" 
+                                         data-price="<?php echo esc_attr($trio_price); ?>" 
+                                         data-regular="<?php echo esc_attr($trio_reg); ?>" 
+                                         data-credits="<?php echo esc_attr($trio_cred); ?>" 
+                                         data-reports="<?php echo esc_attr(wp_json_encode($trio_reports)); ?>" 
+                                         data-title="<?php echo esc_attr($trio_title); ?>" 
+                                         data-btn-label="Get Best Buy VIP Suite (3 Reports + <?php echo esc_attr($trio_cred); ?> AI Chat) &bull; ₹<?php echo number_format($trio_price); ?> &rarr;">
+                                        <span class="mr-bundle-ribbon"><i class="fa-solid fa-crown" style="font-size:9px;"></i> <?php echo esc_html($tier_trio['badge'] ?? 'BEST BUY'); ?></span>
+                                        <div class="mr-bundle-top-row">
+                                            <span class="mr-bundle-radio"></span>
+                                            <span class="mr-bundle-name"><?php echo esc_html($trio_title); ?></span>
+                                        </div>
+                                        <div class="mr-bundle-price-row">
+                                            <span class="mr-bundle-sale" style="color:#F58220;">₹<?php echo number_format($trio_price); ?></span>
+                                            <?php if ($trio_reg > $trio_price): ?>
+                                                <span class="mr-bundle-strike">₹<?php echo number_format($trio_reg); ?></span>
+                                            <?php endif; ?>
+                                        </div>
+                                        <div class="mr-bundle-desc">3 Complete Sacred Reports (65+ Pages Total)</div>
+                                        <?php if (!empty($trio_cred)): ?>
+                                            <div class="mr-bundle-chat-tag" style="background:#FEF3C7; color:#B45309;">
+                                                <i class="fa-solid fa-wand-magic-sparkles"></i> +<?php echo esc_html($trio_cred); ?> Niyati AI Questions
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        <?php else: ?>
+                            <!-- Price display (Standard fallback) -->
+                            <div class="mr-hero-price-wrap">
+                                <span class="mr-hero-price">₹<?php echo esc_html($report_price); ?></span>
+                                <span class="mr-hero-old-price">₹<?php echo esc_html($report_regular_price); ?></span>
+                                <span class="mr-hero-discount-pill"><?php echo esc_html($data['discount_text']); ?></span>
+                            </div>
+                        <?php endif; ?>
 
                         <!-- Dual Action Buttons -->
                         <div style="display:flex; gap:14px; flex-wrap:wrap; margin-top:22px;">
                             <?php if ($has_token): ?>
                                 <button type="button" class="mr-btn-hero-primary mr-btn-generate-direct" data-slug="<?php echo esc_attr($report_slug); ?>" data-title="<?php echo esc_attr($report_title); ?>" data-price="<?php echo esc_attr($data['price_sale']); ?>">
                                     <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Report (1 Token Available) &rarr;
+                                </button>
+                            <?php elseif ($bundles_active && !empty($tier_trio['enabled'])): ?>
+                                <button type="button" class="mr-btn-hero-primary mr-btn-buy-alacarte mr-btn-bundle-order" id="mr-hero-bundle-btn" 
+                                        data-slug="<?php echo esc_attr($report_slug); ?>" 
+                                        data-order-type="bundle" 
+                                        data-bundle-tier="trio" 
+                                        data-price="<?php echo esc_attr($trio_price); ?>" 
+                                        data-bundle-title="<?php echo esc_attr($trio_title); ?>" 
+                                        data-chat-credits="<?php echo esc_attr($trio_cred); ?>" 
+                                        data-bundle-reports="<?php echo esc_attr(wp_json_encode($trio_reports)); ?>" 
+                                        data-title="<?php echo esc_attr($trio_title); ?>">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> <span id="mr-hero-bundle-btn-text">Get Best Buy VIP Suite (3 Reports + <?php echo esc_html($trio_cred); ?> AI Chat) &bull; ₹<?php echo number_format($trio_price); ?> &rarr;</span>
                                 </button>
                             <?php else: ?>
                                 <button type="button" class="mr-btn-hero-primary mr-btn-buy-alacarte" data-slug="<?php echo esc_attr($report_slug); ?>" data-title="<?php echo esc_attr($report_title); ?>" data-price="<?php echo esc_attr($data['price_sale']); ?>">
@@ -2103,6 +2429,37 @@ class MR_Report_Landing {
                             <p class="mr-landing-sub" style="margin:0 auto; color:#554841;">Enhance your astrological clarity with our hand-crafted, publication-grade sister dossiers.</p>
                         </div>
 
+                        <!-- 1-Click Best Buy Bundle Deal Box -->
+                        <?php if ($bundles_active && !empty($tier_trio['enabled']) && !$has_token): ?>
+                            <div style="background: linear-gradient(135deg, #FFF9F0 0%, #FFF2DF 100%); border: 2px dashed #D9A441; border-radius: 18px; padding: 20px 28px; margin: 26px auto 32px auto; max-width: 860px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; box-shadow: 0 8px 24px rgba(217, 164, 65, 0.15);">
+                                <div style="text-align: left; max-width: 540px;">
+                                    <span style="background: linear-gradient(135deg, #F58220 0%, #E6680D 100%); color: #fff; font-size: 11px; font-weight: 800; padding: 3px 12px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.5px;">
+                                        <i class="fa-solid fa-crown"></i> <?php echo esc_html($tier_trio['badge'] ?? 'BEST BUY VIP BUNDLE'); ?>
+                                    </span>
+                                    <h3 style="margin: 8px 0 4px 0; font-size: 18px; font-weight: 800; color: #7A1F3D;">
+                                        <?php echo esc_html($trio_title); ?>
+                                    </h3>
+                                    <p style="margin: 0; font-size: 13px; color: #554841; line-height: 1.45;">
+                                        Unlock this report + 2 sister dossiers + <strong><?php echo esc_html($trio_cred); ?> Niyati AI Questions</strong> for only <strong>₹<?php echo number_format($trio_price); ?></strong> (Save over 70%).
+                                    </p>
+                                </div>
+                                <div>
+                                    <button type="button" class="mr-fbt-cta-btn mr-btn-bundle-order"
+                                            data-slug="<?php echo esc_attr($report_slug); ?>"
+                                            data-order-type="bundle"
+                                            data-bundle-tier="trio"
+                                            data-price="<?php echo esc_attr($trio_price); ?>"
+                                            data-bundle-title="<?php echo esc_attr($trio_title); ?>"
+                                            data-chat-credits="<?php echo esc_attr($trio_cred); ?>"
+                                            data-bundle-reports="<?php echo esc_attr(wp_json_encode($trio_reports)); ?>"
+                                            data-title="<?php echo esc_attr($trio_title); ?>"
+                                            style="padding: 13px 28px !important; font-size: 14px !important; box-shadow: 0 6px 20px rgba(245, 130, 32, 0.4) !important; cursor:pointer;">
+                                        <i class="fa-solid fa-wand-magic-sparkles"></i> Order Bundle (₹<?php echo number_format($trio_price); ?>) &rarr;
+                                    </button>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+
                         <div class="mr-fbt-grid">
                             <?php 
                             foreach ($related_reports as $rel): 
@@ -2253,6 +2610,18 @@ class MR_Report_Landing {
                         <button type="button" class="mr-btn-hero-primary mr-btn-generate-direct mr-sticky-cta-btn" data-slug="<?php echo esc_attr($report_slug); ?>" data-title="<?php echo esc_attr($report_title); ?>" data-price="<?php echo esc_attr($data['price_sale']); ?>">
                             <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Report (1 Token Available) &rarr;
                         </button>
+                    <?php elseif ($bundles_active && !empty($tier_trio['enabled'])): ?>
+                        <button type="button" class="mr-btn-hero-primary mr-btn-buy-alacarte mr-btn-bundle-order mr-sticky-cta-btn" 
+                                data-slug="<?php echo esc_attr($report_slug); ?>" 
+                                data-order-type="bundle" 
+                                data-bundle-tier="trio" 
+                                data-price="<?php echo esc_attr($trio_price); ?>" 
+                                data-bundle-title="<?php echo esc_attr($trio_title); ?>" 
+                                data-chat-credits="<?php echo esc_attr($trio_cred); ?>" 
+                                data-bundle-reports="<?php echo esc_attr(wp_json_encode($trio_reports)); ?>" 
+                                data-title="<?php echo esc_attr($trio_title); ?>">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Order Best Buy Suite &bull; ₹<?php echo number_format($trio_price); ?> &rarr;
+                        </button>
                     <?php else: ?>
                         <button type="button" class="mr-btn-hero-primary mr-btn-buy-alacarte mr-sticky-cta-btn" data-slug="<?php echo esc_attr($report_slug); ?>" data-title="<?php echo esc_attr($report_title); ?>" data-price="<?php echo esc_attr($data['price_sale']); ?>">
                             <i class="fa-solid fa-wand-magic-sparkles"></i> Order Report &bull; ₹<?php echo esc_html($report_price); ?> &rarr;
@@ -2260,7 +2629,7 @@ class MR_Report_Landing {
                     <?php endif; ?>
                 </div>
                 <div class="mr-sticky-price-wrap">
-                    <span class="mr-sticky-price">₹<?php echo esc_html($report_price); ?></span>
+                    <span class="mr-sticky-price">₹<?php echo esc_html($bundles_active && !empty($tier_trio['enabled']) && !$has_token ? number_format($trio_price) : $report_price); ?></span>
                     <span class="mr-sticky-badge"><i class="fa-solid fa-bolt"></i> Instant Delivery</span>
                 </div>
             </div>
@@ -2280,6 +2649,52 @@ class MR_Report_Landing {
 
         (function($) {
             $(document).ready(function() {
+                // Interactive Bundle Card Selection Handler
+                $(document).on('click', '.mr-bundle-item', function() {
+                    var item = $(this);
+                    $('.mr-bundle-item').removeClass('active');
+                    item.addClass('active');
+
+                    var tier     = item.data('tier');
+                    var price    = item.data('price');
+                    var credits  = item.data('credits');
+                    var title    = item.data('title');
+                    var reports  = item.data('reports');
+                    var btnLabel = item.data('btn-label');
+
+                    var heroBtn = $('#mr-hero-bundle-btn');
+                    if (heroBtn.length) {
+                        heroBtn.data('order-type', (tier === 'single' ? 'alacarte' : 'bundle'))
+                               .data('bundle-tier', tier)
+                               .data('price', price)
+                               .data('bundle-title', title)
+                               .data('chat-credits', credits)
+                               .data('bundle-reports', reports)
+                               .data('title', title);
+                        heroBtn.attr('data-price', price);
+                        $('#mr-hero-bundle-btn-text').html(btnLabel);
+                    }
+
+                    // Sync sticky bar
+                    var stickyBtn = $('#mr-landing-sticky-bar .mr-sticky-cta-btn');
+                    if (stickyBtn.length) {
+                        stickyBtn.data('order-type', (tier === 'single' ? 'alacarte' : 'bundle'))
+                                 .data('bundle-tier', tier)
+                                 .data('price', price)
+                                 .data('bundle-title', title)
+                                 .data('chat-credits', credits)
+                                 .data('bundle-reports', reports)
+                                 .data('title', title);
+                        stickyBtn.attr('data-price', price);
+                        var stickyText = (tier === 'trio') 
+                            ? 'Order Best Buy Suite &bull; ₹' + Number(price).toLocaleString() + ' &rarr;' 
+                            : ((tier === 'duo') 
+                                ? 'Order Duo Pack &bull; ₹' + Number(price).toLocaleString() + ' &rarr;' 
+                                : 'Order Report &bull; ₹' + Number(price).toLocaleString() + ' &rarr;');
+                        stickyBtn.html('<i class="fa-solid fa-wand-magic-sparkles"></i> ' + stickyText);
+                        $('#mr-landing-sticky-bar .mr-sticky-price').text('₹' + Number(price).toLocaleString());
+                    }
+                });
                 // Direct Generation button (for users who already purchased or hold tokens)
                 $(document).on('click', '.mr-btn-generate-direct', function(e) {
                     e.preventDefault();

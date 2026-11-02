@@ -11,11 +11,15 @@
         var currentSystem   = 'vedic';
         var currentCycle    = 'yearly';
 
-        var activeOrderType   = ''; // 'pack' or 'alacarte'
+        var activeOrderType   = ''; // 'pack', 'alacarte', or 'bundle'
         var activePackKey     = '';
         var activeReportSlug  = '';
         var activeItemName    = '';
         var activeItemPrice   = '';
+        var activeBundleTier  = '';
+        var activeBundleReports = [];
+        var activeChatCredits = 0;
+        var activeInrAmount   = 0;
 
         // Elements
         var pgModal        = $('#mr-pg-modal');
@@ -114,19 +118,30 @@
 
             auth: function(opts) {
                 opts = opts || {};
-                var accountUrl = (typeof mr_reports_vars !== 'undefined' && (mr_reports_vars.account_url || mr_reports_vars.login_url)) ||
-                                 (typeof mr_razorpay_vars !== 'undefined' && (mr_razorpay_vars.account_url || mr_razorpay_vars.login_url)) ||
-                                 '/my-account/';
+                var baseAccountUrl = (typeof mr_reports_vars !== 'undefined' && mr_reports_vars.account_url) ||
+                                     (typeof mr_razorpay_vars !== 'undefined' && mr_razorpay_vars.account_url) ||
+                                     '/my-account/';
 
-                // In any case, sign-in always takes user to the /my-account page
-                var targetUrl = accountUrl;
+                // Record current origin URL in cookie for post-login auto return
+                var returnUrl = window.location.href;
+                document.cookie = "mr_login_return_url=" + encodeURIComponent(returnUrl) + "; path=/; max-age=86400; SameSite=Lax";
+
+                // Ensure redirect_to is attached to the /my-account/ URL
+                var targetUrl = opts.primaryUrl || opts.loginUrl;
+                if (!targetUrl || targetUrl === '#' || targetUrl === '/my-account/' || targetUrl === baseAccountUrl) {
+                    var sep = (baseAccountUrl.indexOf('?') !== -1) ? '&' : '?';
+                    targetUrl = baseAccountUrl + sep + 'redirect_to=' + encodeURIComponent(returnUrl);
+                } else if (targetUrl.indexOf('redirect_to=') === -1 && targetUrl.indexOf('redirect=') === -1) {
+                    var sep = (targetUrl.indexOf('?') !== -1) ? '&' : '?';
+                    targetUrl = targetUrl + sep + 'redirect_to=' + encodeURIComponent(returnUrl);
+                }
 
                 this.show({
                     type: 'auth',
                     eyebrow: opts.eyebrow || 'Account Authentication',
                     title: opts.title || 'Sign In to Continue',
                     message: opts.message || 'Sign in to your sacred MeraRashifal account to order personalized Vedic reports or value packs.',
-                    primaryText: opts.primaryText || '<i class="fa-brands fa-google" style="margin-right:8px;"></i> Sign In with Google &rarr;',
+                    primaryText: opts.primaryText || '<i class="fa-brands fa-google" style="margin-right:8px;"></i> Continue with Google &rarr;',
                     primaryUrl: targetUrl,
                     secondaryText: 'Stay on this page'
                 });
@@ -317,36 +332,48 @@
             pgModal.fadeIn(200);
         });
 
-        // 6. Open Simulated Payment Gateway (PG) for A la Carte
-        $(document).on('click', '.mr-btn-buy-alacarte', function(e) {
+        // 6. Open Simulated Payment Gateway (PG) for A la Carte or Bundles
+        $(document).on('click', '.mr-btn-buy-alacarte, .mr-btn-bundle-order', function(e) {
             e.preventDefault();
-            var card = $(this).closest('.mr-alacarte-card, .mr-sales-card');
-            activeOrderType = 'alacarte';
-            activeReportSlug = card.data('slug') || $(this).data('slug');
-            activeItemName = card.data('title') || $(this).data('title');
+            var btn  = $(this);
+            var card = btn.closest('.mr-alacarte-card, .mr-sales-card');
+
+            var orderType = btn.data('order-type') || (btn.hasClass('mr-btn-bundle-order') ? 'bundle' : 'alacarte');
+            activeOrderType = orderType;
+            activeReportSlug = card.data('slug') || btn.data('slug');
+            activeBundleTier = btn.data('bundle-tier') || (orderType === 'bundle' ? 'trio' : 'single');
+            activeChatCredits = parseInt(btn.data('chat-credits') || 0, 10);
+            activeItemName = btn.data('bundle-title') || card.data('title') || btn.data('title') || 'Astrological Report';
+
+            var rpts = btn.data('bundle-reports');
+            if (typeof rpts === 'string') {
+                try { activeBundleReports = JSON.parse(rpts); } catch(e) { activeBundleReports = [activeReportSlug]; }
+            } else if (Array.isArray(rpts)) {
+                activeBundleReports = rpts;
+            } else {
+                activeBundleReports = [activeReportSlug];
+            }
             
-            var inrPrice = $(this).data('price');
+            var inrPrice = btn.data('price');
             if (inrPrice === undefined && card.length) {
                 inrPrice = card.data('price');
             }
-
-            // If free report (₹0), bypass payment and open details form immediately
-            if (inrPrice !== undefined && parseFloat(inrPrice) === 0) {
-                openDetailsModal(activeReportSlug, activeItemName);
-                return;
-            }
+            activeInrAmount = parseFloat(inrPrice) || 0;
 
             // Require login before proceeding to payment or details
             var isLoggedIn = (typeof mr_reports_vars !== 'undefined' && mr_reports_vars.is_logged_in) ||
                              (typeof mr_razorpay_vars !== 'undefined' && mr_razorpay_vars.is_logged_in);
 
             if (!isLoggedIn) {
-                var loginUrl = (typeof mr_reports_vars !== 'undefined' && mr_reports_vars.login_url) ||
-                               (typeof mr_razorpay_vars !== 'undefined' && mr_razorpay_vars.login_url) ||
-                               '/wp-login.php';
+                var returnUrl = window.location.href;
+                document.cookie = "mr_login_return_url=" + encodeURIComponent(returnUrl) + "; path=/; max-age=86400; SameSite=Lax";
+                var baseAccount = (typeof mr_reports_vars !== 'undefined' && mr_reports_vars.account_url) || '/my-account/';
+                var sep = (baseAccount.indexOf('?') !== -1) ? '&' : '?';
+                var loginUrl = baseAccount + sep + 'redirect_to=' + encodeURIComponent(returnUrl);
+
                 if (window.mrNotify && typeof window.mrNotify.auth === 'function') {
                     window.mrNotify.auth({
-                        loginUrl: loginUrl,
+                        primaryUrl: loginUrl,
                         message: 'Please sign in to order your personalized ' + (activeItemName ? activeItemName.replace(/^Generate\s+/i, '') : 'report') + ' or subscription pack.'
                     });
                 } else {
@@ -355,9 +382,18 @@
                 return;
             }
 
+            // If free report (₹0), bypass payment and open details form immediately
+            if (inrPrice !== undefined && parseFloat(inrPrice) === 0) {
+                openDetailsModal(activeReportSlug, activeItemName);
+                return;
+            }
+
             if (inrPrice !== undefined) {
                 activeItemPrice = '₹' + inrPrice;
-                $('#mr-pg-order-type').text('A la Carte Single Report (INR)');
+                var orderLabel = (activeOrderType === 'bundle') 
+                    ? 'Report Bundle & AI Chat Package (INR)' 
+                    : 'A la Carte Single Report (INR)';
+                $('#mr-pg-order-type').text(orderLabel);
             } else {
                 var price = (currentCurrency === 'CAD') ? card.data('cad') : card.data('usd');
                 activeItemPrice = '$' + parseFloat(price).toFixed(2) + ' ' + currentCurrency;
@@ -369,6 +405,7 @@
             $('#mr-pg-error-msg').hide();
 
             pgModal.fadeIn(200);
+        });
         });
 
         // 7. Modal Close handlers
@@ -390,18 +427,28 @@
             var btn = $(this);
             btn.prop('disabled', true).html('<i class="fa-solid fa-spinner fa-spin"></i> Processing Payment...');
 
+            var postData = {
+                action: 'mr_simulate_payment',
+                nonce: mr_reports_vars.nonce,
+                order_type: activeOrderType,
+                pack_key: activePackKey,
+                report_slug: activeReportSlug,
+                currency: currentCurrency,
+                sim_status: 'success'
+            };
+
+            if (activeOrderType === 'bundle') {
+                postData.bundle_tier    = activeBundleTier;
+                postData.bundle_reports = activeBundleReports;
+                postData.chat_credits   = activeChatCredits;
+                postData.bundle_title   = activeItemName;
+                postData.amount         = activeInrAmount;
+            }
+
             $.ajax({
                 url: mr_reports_vars.ajax_url,
                 type: 'POST',
-                data: {
-                    action: 'mr_simulate_payment',
-                    nonce: mr_reports_vars.nonce,
-                    order_type: activeOrderType,
-                    pack_key: activePackKey,
-                    report_slug: activeReportSlug,
-                    currency: currentCurrency,
-                    sim_status: 'success'
-                },
+                data: postData,
                 dataType: 'json',
                 success: function(res) {
                     btn.prop('disabled', false).html('<i class="fa-solid fa-lock"></i> Complete Payment (Simulate Success)');
@@ -413,6 +460,12 @@
                                 window.mrNotify.toast('Payment Successful! ' + res.data.message, 'success');
                             }
                             window.location.href = res.data.redirect || mr_reports_vars.catalog_url;
+                        } else if (activeOrderType === 'bundle') {
+                            if (window.mrNotify && typeof window.mrNotify.toast === 'function') {
+                                window.mrNotify.toast(res.data.message || 'Bundle unlocked! Complete your birth details below.', 'success');
+                            }
+                            // Open Birth Details Modal immediately for primary report
+                            openDetailsModal(activeReportSlug, activeItemName);
                         } else {
                             // A la Carte: Open Birth Details Modal immediately!
                             openDetailsModal(activeReportSlug, activeItemName);
@@ -447,19 +500,16 @@
             var isLoggedIn = (typeof mr_reports_vars !== 'undefined' && mr_reports_vars.is_logged_in) ||
                              (typeof mr_razorpay_vars !== 'undefined' && mr_razorpay_vars.is_logged_in);
 
-            if (!isFree && !isLoggedIn) {
+            if (!isLoggedIn) {
                 var returnUrl = window.location.href;
-                document.cookie = "mr_login_return_url=" + encodeURIComponent(returnUrl) + "; path=/; max-age=1800; SameSite=Lax";
+                document.cookie = "mr_login_return_url=" + encodeURIComponent(returnUrl) + "; path=/; max-age=86400; SameSite=Lax";
+                var baseAccount = (typeof mr_reports_vars !== 'undefined' && mr_reports_vars.account_url) || '/my-account/';
+                var sep = (baseAccount.indexOf('?') !== -1) ? '&' : '?';
+                var loginUrl = baseAccount + sep + 'redirect_to=' + encodeURIComponent(returnUrl);
 
-                var loginUrl = (typeof mr_reports_vars !== 'undefined' && mr_reports_vars.login_url) ||
-                               (typeof mr_razorpay_vars !== 'undefined' && mr_razorpay_vars.login_url) ||
-                               '/wp-login.php';
-                if (loginUrl.indexOf('redirect=') === -1 && loginUrl.indexOf('redirect_to=') === -1) {
-                    loginUrl += (loginUrl.indexOf('?') > -1 ? '&' : '?') + 'redirect_to=' + encodeURIComponent(returnUrl);
-                }
                 if (window.mrNotify && typeof window.mrNotify.auth === 'function') {
                     window.mrNotify.auth({
-                        loginUrl: loginUrl,
+                        primaryUrl: loginUrl,
                         message: 'Please sign in to order or generate your personalized ' + (title ? title.replace(/^Generate\s+/i, '') : 'report') + '.'
                     });
                 } else {
@@ -829,17 +879,19 @@
                 return;
             }
 
-            var isFree = (slug === 'yearly_horoscope_vedic' || slug === 'yearly_horoscope_snapshot');
             var isLoggedIn = (typeof mr_reports_vars !== 'undefined' && mr_reports_vars.is_logged_in) ||
                              (typeof mr_razorpay_vars !== 'undefined' && mr_razorpay_vars.is_logged_in);
 
-            if (!isFree && !isLoggedIn) {
-                var loginUrl = (typeof mr_reports_vars !== 'undefined' && mr_reports_vars.login_url) ||
-                               (typeof mr_razorpay_vars !== 'undefined' && mr_razorpay_vars.login_url) ||
-                               '/wp-login.php';
-                if (window.mrNotify) {
+            if (!isLoggedIn) {
+                var returnUrl = window.location.href;
+                document.cookie = "mr_login_return_url=" + encodeURIComponent(returnUrl) + "; path=/; max-age=86400; SameSite=Lax";
+                var baseAccount = (typeof mr_reports_vars !== 'undefined' && mr_reports_vars.account_url) || '/my-account/';
+                var sep = (baseAccount.indexOf('?') !== -1) ? '&' : '?';
+                var loginUrl = baseAccount + sep + 'redirect_to=' + encodeURIComponent(returnUrl);
+
+                if (window.mrNotify && typeof window.mrNotify.auth === 'function') {
                     window.mrNotify.auth({
-                        loginUrl: loginUrl,
+                        primaryUrl: loginUrl,
                         message: 'Sign in to your sacred MeraRashifal account to explore and generate your personalized Vedic reports and unlock life-changing cosmic insights.'
                     });
                 } else {
@@ -953,6 +1005,16 @@
                     errors.push("Place of birth is required.");
                     $('#mr_pob').addClass('mr-input-error');
                     if (!firstErrorField) firstErrorField = $('#mr_pob');
+                }
+            }
+
+            // Validate Palm Photo for Palmistry Report
+            if (reportSlug === 'palmistry_report') {
+                var palmFileInput = document.getElementById('mr_palm_image');
+                if (!palmFileInput || !palmFileInput.files || palmFileInput.files.length === 0) {
+                    errors.push("Please select or snap a photo of your palm to proceed with Hast Rekha analysis.");
+                    $('#mr-palm-upload-fields').find('> div').css('border-color', '#ef4444');
+                    if (!firstErrorField) firstErrorField = $('#mr-btn-choose-palm');
                 }
             }
 
@@ -1073,6 +1135,24 @@
                                     window.location.href = response.data.login_url;
                                 }
                             }, 400);
+                        } else if (response.data && (response.data.code === 'invalid_palm_image' || response.data.code === 'missing_palm_image')) {
+                            progressBanner.slideUp(150);
+                            openDetailsModal(reportSlug, activeItemName || 'Master Hast Rekha & Palmistry Report');
+                            $('#mr-modal-error-box').slideDown(150).find('.mr-error-text').text(errMessage);
+                            $('#mr-palm-upload-fields').find('> div').css('border-color', '#ef4444');
+                            var modalContent = $('#mr-details-modal .mr-modal-content');
+                            if (modalContent.length) {
+                                modalContent.animate({
+                                    scrollTop: $('#mr-palm-upload-fields').offset().top - modalContent.offset().top + modalContent.scrollTop() - 70
+                                }, 250);
+                            }
+                            if (window.mrNotify) {
+                                window.mrNotify.alert(
+                                    errMessage,
+                                    'Palm Verification Notice',
+                                    'warning'
+                                );
+                            }
                         } else if (response.data && response.data.code === 'payment_required') {
                             setTimeout(function() {
                                 if (window.mrNotify) {

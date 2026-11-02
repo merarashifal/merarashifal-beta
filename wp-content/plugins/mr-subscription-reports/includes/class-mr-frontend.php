@@ -73,7 +73,7 @@ class MR_Frontend {
         $user_id = get_current_user_id();
         $account_url = class_exists('MR_Account_UI') ? MR_Account_UI::get_account_page_url() : home_url('/my-account/');
         $current_url = !is_admin() && !empty($_SERVER['REQUEST_URI']) ? home_url($_SERVER['REQUEST_URI']) : $account_url;
-        $login_url   = class_exists('MR_Account_UI') ? MR_Account_UI::get_login_action_url($current_url) : add_query_arg('redirect_to', urlencode($current_url), $account_url);
+        $login_url   = add_query_arg('redirect_to', $current_url, $account_url);
         $user_astro_details = null;
         if ($user_id) {
             $user_obj = wp_get_current_user();
@@ -980,6 +980,52 @@ class MR_Frontend {
                 'message'    => 'Payment Successful! Your subscription is active and report tokens have been credited.',
                 'redirect'   => home_url('/reports-catalog/'),
             ]);
+        } elseif ($type === 'bundle') {
+            // Bundle purchase (Pack of 2 or Pack of 3 with bonus chat credits)
+            $bundle_reports = !empty($_POST['bundle_reports']) ? (array)$_POST['bundle_reports'] : [$report_slug];
+            $bundle_title   = sanitize_text_field($_POST['bundle_title'] ?? 'Report Bundle');
+            $chat_credits   = intval($_POST['chat_credits'] ?? 0);
+            $amount_paid    = floatval($_POST['amount'] ?? 0);
+            $bundle_tier    = sanitize_key($_POST['bundle_tier'] ?? 'trio');
+            $credited_names = [];
+
+            foreach ($bundle_reports as $r_slug) {
+                $r_slug = sanitize_key($r_slug);
+                if (class_exists('MR_Bundles')) {
+                    $r_slug = MR_Bundles::normalize_slug($r_slug);
+                }
+                MR_Tokens::credit_single_report_token($user_id, $r_slug, 1);
+                $r_name = class_exists('MR_Bundles') ? MR_Bundles::get_report_name($r_slug) : $r_slug;
+                $credited_names[] = $r_name;
+            }
+
+            // Grant bonus Niyati AI Chat credits if wallet plugin is active
+            if ($chat_credits > 0 && class_exists('Niyati_Wallet')) {
+                $visitor_id = !empty($_COOKIE['niyati_visitor_id']) ? sanitize_text_field($_COOKIE['niyati_visitor_id']) : ('user_' . $user_id);
+                $txn_id     = 'MR_BNDL_' . strtoupper(bin2hex(random_bytes(6)));
+                Niyati_Wallet::add_credits(
+                    $visitor_id,
+                    $user_id,
+                    $chat_credits,
+                    $amount_paid,
+                    $txn_id,
+                    'bundle_' . $bundle_tier,
+                    'razorpay',
+                    'Report Bundle Package: ' . $bundle_title,
+                    0, // lifetime
+                    ['bundle_title' => $bundle_title, 'reports' => $bundle_reports]
+                );
+            }
+
+            wp_send_json_success([
+                'order_type'     => 'bundle',
+                'bundle_tier'    => $bundle_tier,
+                'report_slug'    => $report_slug,
+                'bundle_title'   => $bundle_title,
+                'bundle_reports' => $bundle_reports,
+                'chat_credits'   => $chat_credits,
+                'message'        => 'Payment Successful! All ' . count($credited_names) . ' reports and ' . $chat_credits . ' AI Chat credits have been credited to your account.',
+            ]);
         } else {
             // A la Carte purchase
             $report = MR_Packs::get_report($report_slug);
@@ -1377,15 +1423,9 @@ class MR_Frontend {
                     'code'    => 'payment_required'
                 ]);
             }
-
-            // Deduct token
-            MR_Tokens::deduct_token($user_id, $report_slug);
         } else {
             // Free promotional report
             $user_id = get_current_user_id() ?: 1;
-            if ($user_id && class_exists('MR_Tokens') && MR_Tokens::has_token($user_id, $report_slug)) {
-                MR_Tokens::deduct_token($user_id, $report_slug);
-            }
         }
 
         if ($report_slug === 'kundli_matching') {
@@ -1416,6 +1456,46 @@ class MR_Frontend {
             if (!$report_slug || !$person_name || !$dob || !$tob || !$pob) {
                 wp_send_json_error(['message' => 'Please fill in all required birth details.']);
             }
+        }
+
+        // Validate Palm Image before token deduction for Palmistry Report
+        $validated_palm_file = null;
+        if ($report_slug === 'palmistry_report') {
+            if (empty($_FILES['palm_image']['tmp_name']) || !is_uploaded_file($_FILES['palm_image']['tmp_name'])) {
+                wp_send_json_error([
+                    'message' => 'Please upload or photograph your palm to proceed with Hast Rekha analysis.',
+                    'code'    => 'missing_palm_image'
+                ]);
+            }
+
+            if (class_exists('MR_Palmistry_Builder')) {
+                $palm_val = MR_Palmistry_Builder::validate_palm_image($_FILES['palm_image']['tmp_name']);
+                if (empty($palm_val['is_valid_palm'])) {
+                    $rejection_reason = !empty($palm_val['rejection_reason'])
+                        ? $palm_val['rejection_reason']
+                        : 'The uploaded image could not be verified as a clear open palm. Please upload a clear photo of your open palm facing the camera in good lighting.';
+                    wp_send_json_error([
+                        'message' => $rejection_reason,
+                        'code'    => 'invalid_palm_image'
+                    ]);
+                }
+            }
+
+            // Save uploaded palm image to cache
+            $cache_dir = WP_CONTENT_DIR . '/uploads/palm-cache';
+            if (!file_exists($cache_dir)) {
+                wp_mkdir_p($cache_dir);
+            }
+            $hash = md5_file($_FILES['palm_image']['tmp_name']);
+            $validated_palm_file = $cache_dir . '/mr_palm_' . $hash . '.jpg';
+            move_uploaded_file($_FILES['palm_image']['tmp_name'], $validated_palm_file);
+        }
+
+        // Deduct token only after all details & palm validation have passed
+        if (!$is_free) {
+            MR_Tokens::deduct_token($user_id, $report_slug);
+        } elseif ($user_id && class_exists('MR_Tokens') && MR_Tokens::has_token($user_id, $report_slug)) {
+            MR_Tokens::deduct_token($user_id, $report_slug);
         }
 
         if (empty($recipient_email)) {
@@ -1521,7 +1601,21 @@ class MR_Frontend {
         } elseif (($report_slug === 'numerology_report' || $report_slug === 'numerology') && class_exists('MR_Numero_Report_Builder')) {
             $html_content = MR_Numero_Report_Builder::build_numero_report_html($person_name, $gender, $dob, $tob, $pob);
         } elseif ($report_slug === 'palmistry_report' && class_exists('MR_Palmistry_Builder')) {
-            $html_content = MR_Palmistry_Builder::build_palmistry_report_html($person_name, $gender, $dob, $tob, $pob);
+            $palm_data = null;
+            if (!empty($validated_palm_file) && file_exists($validated_palm_file)) {
+                $palm_age = 45;
+                if (!empty($dob)) {
+                    $btime = strtotime(str_replace('/', '-', $dob));
+                    if ($btime) {
+                        $palm_age = max(18, min(95, (int)date('Y') - (int)date('Y', $btime)));
+                    }
+                }
+                $palm_res = MR_Palmistry_Builder::call_gemini_palm_analysis($validated_palm_file, $palm_age, $gender, 'Right', 'paid');
+                if (!empty($palm_res['success'])) {
+                    $palm_data = $palm_res;
+                }
+            }
+            $html_content = MR_Palmistry_Builder::build_palmistry_report_html($person_name, $gender, $dob, $tob, $pob, $palm_data);
         } elseif (class_exists('MR_Monthly_Report_Builder')) {
             $html_content = MR_Monthly_Report_Builder::build_monthly_report_html($person_name, $gender, $dob, $tob, $pob, $current_month, $editorial);
         } else {

@@ -21,7 +21,6 @@ if (!$live_panchang) {
 <head>
     <meta charset="<?php bloginfo('charset'); ?>"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title><?php wp_title('|', true, 'right'); bloginfo('name'); ?> - Authentic Vedic Astrology, Daily Panchang &amp; Kundali Portal</title>
     
     <!-- Material Symbols Outlined -->
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
@@ -422,6 +421,10 @@ if (!$live_panchang) {
 
 <!-- 3. HERO DASHBOARD (CORE DAILY ENGAGEMENT) -->
 <main class="max-w-7xl mx-auto px-4 lg:px-12 pt-6 pb-16 space-y-8">
+  <div class="mb-4">
+    <h1 class="text-2xl sm:text-3xl font-headline-lg font-bold text-primary tracking-tight">Authentic Vedic Astrology, Daily Panchang &amp; Kundali Portal</h1>
+    <p class="text-xs sm:text-sm text-on-surface-variant mt-1">Real-time Swiss Ephemeris calculations, Aaj Ka Rashifal, Kundli Milan &amp; Sacred Jyotish Guidance</p>
+  </div>
 <!-- A. 1-Tap Zodiac Sign Selector (Top Strip) -->
 <section class="bg-surface-container-lowest p-3.5 lg:p-5 rounded-2xl border border-outline-variant/30 shadow-xs">
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-3 px-0.5">

@@ -34,6 +34,15 @@ class MR_Account_UI {
         add_action('login_init', [__CLASS__, 'prevent_wp_login_display'], 1);
         add_action('wp_logout', [__CLASS__, 'on_user_logout']);
 
+        // Nextend Social Login redirect filters to preserve and prioritize customer origin service page
+        add_filter('google_login_redirect_url', [__CLASS__, 'filter_nsl_redirect'], 99, 2);
+        add_filter('google_register_redirect_url', [__CLASS__, 'filter_nsl_redirect'], 99, 2);
+        add_filter('nsl_googledefault_last_location_redirect', [__CLASS__, 'filter_nsl_redirect'], 99, 2);
+        add_filter('nsl_google_last_location_redirect', [__CLASS__, 'filter_nsl_redirect'], 99, 2);
+
+        // Immediate bounce from /my-account/ if user is already logged in with return target
+        add_action('template_redirect', [__CLASS__, 'check_login_return_redirect'], 1);
+
         // Eliminate WordPress Admin Bar for non-admin customers
         add_filter('show_admin_bar', [__CLASS__, 'filter_show_admin_bar']);
 
@@ -419,11 +428,17 @@ class MR_Account_UI {
                 </ul>
             </li>';
         } else {
-            // Logged out shortcut icon
-            $login_url = self::get_login_action_url();
+            // Logged out shortcut: redirect to /my-account/ preserving customer origin destination
+            $curr = !is_admin() && !empty($_SERVER['REQUEST_URI']) ? home_url($_SERVER['REQUEST_URI']) : $account_url;
+            $clean_curr = trim(parse_url($curr, PHP_URL_PATH) ?? '', '/');
+            $clean_acc  = trim(parse_url($account_url, PHP_URL_PATH) ?? '', '/');
+            $signin_url = ($clean_curr !== $clean_acc && stripos($clean_curr, 'wp-login') === false && stripos($clean_curr, 'wp-admin') === false)
+                ? add_query_arg('redirect_to', $curr, $account_url)
+                : $account_url;
+
             $account_item = '
             <li id="menu-item-mr-account" class="menu-item mr-nav-account-item mr-nav-logged-out">
-                <a href="' . esc_url($login_url) . '" class="menu-link mr-nav-account-link" title="Sign In / Astro Account">
+                <a href="' . esc_url($signin_url) . '" class="menu-link mr-nav-account-link" title="Sign In / Astro Account">
                     <span class="mr-nav-account-label">Sign In</span>
                 </a>
             </li>';
@@ -459,10 +474,10 @@ class MR_Account_UI {
         if (class_exists('NextendSocialLogin') && NextendSocialLogin::isProviderEnabled('google')) {
             return add_query_arg([
                 'loginSocial' => 'google',
-                'redirect'    => urlencode($target)
+                'redirect'    => $target
             ], site_url('wp-login.php', 'login'));
         }
-        return !empty($redirect_to) && $redirect_to !== $account_url ? add_query_arg('redirect_to', urlencode($redirect_to), $account_url) : $account_url;
+        return !empty($redirect_to) && $redirect_to !== $account_url ? add_query_arg('redirect_to', $redirect_to, $account_url) : $account_url;
     }
 
     /**
@@ -486,10 +501,10 @@ class MR_Account_UI {
         if (class_exists('NextendSocialLogin') && NextendSocialLogin::isProviderEnabled('google')) {
             return add_query_arg([
                 'loginSocial' => 'google',
-                'redirect'    => urlencode($target)
+                'redirect'    => $target
             ], site_url('wp-login.php', 'login'));
         }
-        return !empty($target) && $target !== $account_url ? add_query_arg('redirect_to', urlencode($target), $account_url) : $account_url;
+        return !empty($target) && $target !== $account_url ? add_query_arg('redirect_to', $target, $account_url) : $account_url;
     }
 
     /**
@@ -553,12 +568,15 @@ class MR_Account_UI {
             }
 
             if (!empty($target)) {
+                if (strpos($target, '%') !== false) {
+                    $target = rawurldecode($target);
+                }
                 $account_url = self::get_account_page_url();
                 $clean_target  = trim(parse_url($target, PHP_URL_PATH) ?? '', '/');
                 $clean_account = trim(parse_url($account_url, PHP_URL_PATH) ?? '', '/');
 
                 // If target is NOT the account page, redirect customer directly back to their service page!
-                if (!empty($clean_target) && $clean_target !== $clean_account) {
+                if (!empty($clean_target) && $clean_target !== $clean_account && stripos($clean_target, 'wp-login') === false && stripos($clean_target, 'wp-admin') === false) {
                     if (isset($_COOKIE['mr_login_return_url']) && !headers_sent()) {
                         setcookie('mr_login_return_url', '', time() - 3600, '/');
                     }
@@ -569,6 +587,76 @@ class MR_Account_UI {
             return self::get_account_page_url();
         }
         return $redirect_to;
+    }
+
+    /**
+     * Filter Nextend Social Login redirect URLs to prioritize customer origin service page
+     */
+    public static function filter_nsl_redirect($redirect, $provider = null) {
+        $target = '';
+        if (!empty($_GET['redirect_to'])) {
+            $target = esc_url_raw($_GET['redirect_to']);
+        } elseif (!empty($_GET['redirect'])) {
+            $target = esc_url_raw($_GET['redirect']);
+        } elseif (!empty($_COOKIE['mr_login_return_url'])) {
+            $target = esc_url_raw($_COOKIE['mr_login_return_url']);
+        }
+
+        if (!empty($target)) {
+            if (strpos($target, '%') !== false) {
+                $target = rawurldecode($target);
+            }
+            $account_url = self::get_account_page_url();
+            $clean_target  = trim(parse_url($target, PHP_URL_PATH) ?? '', '/');
+            $clean_account = trim(parse_url($account_url, PHP_URL_PATH) ?? '', '/');
+            if (!empty($clean_target) && $clean_target !== $clean_account && stripos($clean_target, 'wp-login') === false && stripos($clean_target, 'wp-admin') === false) {
+                if (isset($_COOKIE['mr_login_return_url']) && !headers_sent()) {
+                    setcookie('mr_login_return_url', '', time() - 3600, '/');
+                }
+                return $target;
+            }
+        }
+        return $redirect;
+    }
+
+    /**
+     * Immediately bounce logged-in users from /my-account/ back to their originating service page
+     */
+    public static function check_login_return_redirect() {
+        if (!is_user_logged_in() || is_admin()) {
+            return;
+        }
+
+        // Only act if on /my-account/
+        if (!self::is_account_page()) {
+            return;
+        }
+
+        $return_url = '';
+        if (!empty($_GET['redirect_to'])) {
+            $return_url = esc_url_raw($_GET['redirect_to']);
+        } elseif (!empty($_GET['redirect'])) {
+            $return_url = esc_url_raw($_GET['redirect']);
+        } elseif (!empty($_COOKIE['mr_login_return_url'])) {
+            $return_url = esc_url_raw($_COOKIE['mr_login_return_url']);
+        }
+
+        if (!empty($return_url)) {
+            if (strpos($return_url, '%') !== false) {
+                $return_url = rawurldecode($return_url);
+            }
+            $account_url = self::get_account_page_url();
+            $clean_ret = trim(parse_url($return_url, PHP_URL_PATH) ?? '', '/');
+            $clean_acc = trim(parse_url($account_url, PHP_URL_PATH) ?? '', '/');
+
+            if (!empty($clean_ret) && $clean_ret !== $clean_acc && stripos($clean_ret, 'wp-login') === false && stripos($clean_ret, 'wp-admin') === false) {
+                if (isset($_COOKIE['mr_login_return_url']) && !headers_sent()) {
+                    setcookie('mr_login_return_url', '', time() - 3600, '/');
+                }
+                wp_safe_redirect($return_url);
+                exit;
+            }
+        }
     }
 
     /**
@@ -658,7 +746,7 @@ class MR_Account_UI {
         if (class_exists('NextendSocialLogin') && NextendSocialLogin::isProviderEnabled('google')) {
             $google_oauth_url = add_query_arg([
                 'loginSocial' => 'google',
-                'redirect'    => urlencode($redirect_to)
+                'redirect'    => $redirect_to
             ], site_url('wp-login.php', 'login'));
 
             wp_redirect($google_oauth_url);

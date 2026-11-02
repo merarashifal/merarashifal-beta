@@ -647,7 +647,7 @@ class Niyati_SEO {
                     <span class="niyati-hero-sparkle">✨</span>
                     <span>24/7 Vedic Astrologer Online</span>
                 </div>
-                <h1 class="niyati-hero-h1">Ask Niyati: Your Personal 24/7 Vedic AI Astrologer</h1>
+                <h2 class="niyati-hero-h1">Ask Niyati: Your Personal 24/7 Vedic AI Astrologer</h2>
                 <p class="niyati-hero-lead">
                     Experience deep, authentic Vedic astrology consultations powered by Swiss Ephemeris astronomical calculations and Parashari planetary principles. Decode your Janam Kundli, active Mahadasha cycles, auspicious timing, and classical satvik remedies in real time.
                 </p>

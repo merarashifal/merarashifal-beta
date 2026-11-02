@@ -20,7 +20,7 @@ class MR_Palmistry_Builder {
     const REPORT_SLUG = 'palmistry_report';
     const INTERNAL_CODE = 'MR_PLMR';
     const GEMINI_MODEL = 'gemini-3.5-flash';
-    const FALLBACK_MODEL = 'gemini-flash-latest';
+    const FALLBACK_MODEL = 'gemini-3.8-flash';
 
     public static function init() {
         // Register shortcodes
@@ -55,10 +55,174 @@ class MR_Palmistry_Builder {
      * Retrieve Gemini API Key
      */
     public static function get_api_key() {
-        if (class_exists('MR_Gemini_AI')) {
-            return MR_Gemini_AI::get_api_key();
+        $ppb_key = get_option('ppb_gemini_api_key');
+        if (!empty($ppb_key)) {
+            return $ppb_key;
         }
-        return get_option('mr_gemini_api_key', 'AIzaSyDzS22g365n4yrHAPRTuRfViNS3avj3QF0');
+        if (class_exists('MR_Gemini_AI')) {
+            $ai_key = MR_Gemini_AI::get_api_key();
+            if (!empty($ai_key)) {
+                return $ai_key;
+            }
+        }
+        return get_option('mr_gemini_api_key', '');
+    }
+
+    /**
+     * Validate whether an uploaded image contains a real, open human palm suitable for Hast Rekha analysis.
+     *
+     * @param string $image_path Path to uploaded image file
+     * @return array [
+     *   'is_valid_palm'    => bool,
+     *   'hand_detected'    => bool,
+     *   'palm_open'        => bool,
+     *   'clarity_quality'  => string ('excellent'|'good'|'fair'|'blurry'|'unrecognizable'),
+     *   'rejection_reason' => string
+     * ]
+     */
+    public static function validate_palm_image($image_path) {
+        $api_key = self::get_api_key();
+        if (empty($api_key)) {
+            return [
+                'is_valid_palm'    => false,
+                'rejection_reason' => 'Vedic AI image validation service is temporarily unavailable. Please try again shortly.'
+            ];
+        }
+
+        if (!file_exists($image_path) || filesize($image_path) === 0) {
+            return [
+                'is_valid_palm'    => false,
+                'rejection_reason' => 'Uploaded image file could not be read or is empty. Please select a valid photo of your palm.'
+            ];
+        }
+
+        $img_info = @getimagesize($image_path);
+        if (!$img_info) {
+            return [
+                'is_valid_palm'    => false,
+                'rejection_reason' => 'The uploaded file is not a valid image format. Please upload a clear JPG, PNG, or WebP photo.'
+            ];
+        }
+
+        $mime_type = $img_info['mime'] ?? 'image/jpeg';
+        $image_bytes = file_get_contents($image_path);
+
+        // Pre-compress/resize if large to ensure swift API response
+        if (function_exists('imagecreatefromstring') && filesize($image_path) > 350000) {
+            $src_img = @imagecreatefromstring($image_bytes);
+            if ($src_img) {
+                $orig_w = imagesx($src_img);
+                $orig_h = imagesy($src_img);
+                $max_dim = 1000;
+                if ($orig_w > $max_dim || $orig_h > $max_dim) {
+                    if ($orig_w >= $orig_h) {
+                        $new_w = $max_dim;
+                        $new_h = (int)($orig_h * ($max_dim / $orig_w));
+                    } else {
+                        $new_h = $max_dim;
+                        $new_w = (int)($orig_w * ($max_dim / $orig_h));
+                    }
+                    $resized = imagecreatetruecolor($new_w, $new_h);
+                    imagecopyresampled($resized, $src_img, 0, 0, 0, 0, $new_w, $new_h, $orig_w, $orig_h);
+                    ob_start();
+                    imagejpeg($resized, null, 80);
+                    $image_bytes = ob_get_clean();
+                    $mime_type = 'image/jpeg';
+                    imagedestroy($resized);
+                }
+                imagedestroy($src_img);
+            }
+        }
+
+        $b64 = base64_encode($image_bytes);
+
+        $prompt = "You are a strict, professional image quality verification classifier for an Indian Vedic Palmistry (Hast Rekha) system.\n"
+            . "Your sole job is to evaluate if the uploaded photograph is an authentic, clear, open human palm suitable for reading major palm lines (Heart line, Head line, Life line, Fate line).\n\n"
+            . "CRITICAL VERIFICATION RULES:\n"
+            . "1. It MUST be an actual human palm / hand (NOT an animal paw, NOT a cartoon/drawing/meme/artwork, NOT a landscape/scenery, NOT a selfie/face/body, NOT a document/text, NOT food, NOT random household objects, NOT a blank/solid color).\n"
+            . "2. The INNER PALM must be open and facing the camera (NOT a clenched fist, NOT the back/knuckles of the hand, NOT obscured by gloves, thick bandages, or fingers closed tightly together hiding the palm mount lines).\n"
+            . "3. The photo MUST be clear, properly lit, and in focus so that major creases/lines on the palm can be visually discerned (NOT pitch dark, NOT completely overexposed/washed out, NOT heavily blurred or unreadable).\n\n"
+            . "If ANY of the above 3 rules are violated, you MUST set \"is_valid_palm\": false and provide a friendly, helpful, actionable \"rejection_reason\" explaining exactly what was detected and how the user can take a better photo (e.g. 'No human hand was detected in the photo. Please upload a clear photo of your open palm facing the camera.').\n"
+            . "If and only if the image passes all 3 rules, set \"is_valid_palm\": true.\n\n"
+            . "Respond STRICTLY with a valid JSON object matching this schema:\n"
+            . "{\n"
+            . "  \"is_valid_palm\": false,\n"
+            . "  \"confidence_score\": 0.0,\n"
+            . "  \"hand_detected\": false,\n"
+            . "  \"palm_open\": false,\n"
+            . "  \"clarity_quality\": \"excellent|good|fair|blurry|unrecognizable\",\n"
+            . "  \"rejection_reason\": \"Specific explanation here if rejected, or empty string if valid\"\n"
+            . "}";
+
+        $models = [self::GEMINI_MODEL, self::FALLBACK_MODEL];
+        foreach ($models as $model) {
+            $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key=" . urlencode($api_key);
+            $payload = [
+                'contents' => [
+                    [
+                        'parts' => [
+                            ['text' => $prompt],
+                            [
+                                'inline_data' => [
+                                    'mime_type' => $mime_type,
+                                    'data'      => $b64
+                                ]
+                            ]
+                        ]
+                    ]
+                ],
+                'generationConfig' => [
+                    'responseMimeType' => 'application/json',
+                    'temperature'      => 0.1
+                ]
+            ];
+
+            $response = wp_remote_post($url, [
+                'headers'   => ['Content-Type' => 'application/json'],
+                'body'      => json_encode($payload),
+                'timeout'   => 25,
+                'sslverify' => false
+            ]);
+
+            if (is_wp_error($response)) {
+                continue;
+            }
+
+            $code = wp_remote_retrieve_response_code($response);
+            if ($code !== 200) {
+                continue;
+            }
+
+            $body = wp_remote_retrieve_body($response);
+            $json = json_decode($body, true);
+            $raw_text = $json['candidates'][0]['content']['parts'][0]['text'] ?? '';
+            if (empty($raw_text)) {
+                continue;
+            }
+
+            $raw_text = trim($raw_text);
+            if (strpos($raw_text, '```json') !== false) {
+                $raw_text = preg_replace('/^```(?:json)?\s*/i', '', $raw_text);
+                $raw_text = preg_replace('/\s*```$/', '', $raw_text);
+            }
+
+            $parsed = json_decode($raw_text, true);
+            if (is_array($parsed) && isset($parsed['is_valid_palm'])) {
+                $is_valid = !empty($parsed['is_valid_palm']);
+                return [
+                    'is_valid_palm'    => $is_valid,
+                    'hand_detected'    => !empty($parsed['hand_detected']),
+                    'palm_open'        => !empty($parsed['palm_open']),
+                    'clarity_quality'  => $parsed['clarity_quality'] ?? ($is_valid ? 'good' : 'unrecognizable'),
+                    'rejection_reason' => !$is_valid ? ($parsed['rejection_reason'] ?: 'Please upload a clear photograph of an open human palm in good lighting.') : ''
+                ];
+            }
+        }
+
+        return [
+            'is_valid_palm'    => false,
+            'rejection_reason' => 'Unable to verify palm image clarity at this moment. Please ensure the photo is clear and try again.'
+        ];
     }
 
     // ========================================================
@@ -201,7 +365,7 @@ class MR_Palmistry_Builder {
     public static function call_gemini_palm_analysis($image_path, $age = 45, $gender = 'Male', $hand = 'Right', $mode = 'free') {
         $api_key = self::get_api_key();
         if (empty($api_key)) {
-            return ['success' => false, 'error' => 'Gemini API key is not configured.'];
+            return ['success' => false, 'error' => 'Vedic Palmistry AI intelligence is temporarily unavailable. Please try again shortly.'];
         }
 
         if (!file_exists($image_path) || filesize($image_path) === 0) {
@@ -289,7 +453,7 @@ class MR_Palmistry_Builder {
                 . "  ]"
                 . "}";
 
-        $models = [self::GEMINI_MODEL, self::FALLBACK_MODEL, 'gemini-3-flash-preview'];
+        $models = [self::GEMINI_MODEL, self::FALLBACK_MODEL];
 
         foreach ($models as $model) {
             $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key=" . urlencode($api_key);
@@ -339,7 +503,7 @@ class MR_Palmistry_Builder {
             }
         }
 
-        return ['success' => false, 'error' => 'Gemini AI synthesis could not complete. Please try another photo with clear lighting.'];
+        return ['success' => false, 'error' => 'The uploaded photograph could not be verified as a clear open palm. Please review the photo guidelines below and upload a clear picture of your open hand.'];
     }
 
     /**
@@ -347,6 +511,17 @@ class MR_Palmistry_Builder {
      */
     public static function ajax_analyze_free() {
         check_ajax_referer('mr_palm_nonce', 'security');
+
+        if (!is_user_logged_in()) {
+            $account_url  = class_exists('MR_Account_UI') ? MR_Account_UI::get_account_page_url() : home_url('/my-account/');
+            $current_page = wp_get_referer() ?: home_url('/reports/palm-reading-report/');
+            $login_url    = add_query_arg('redirect_to', $current_page, $account_url);
+            wp_send_json_error([
+                'code'      => 'auth_required',
+                'message'   => 'Please sign in to your MeraRashifal account to perform the free palmistry analysis.',
+                'login_url' => $login_url
+            ]);
+        }
 
         if (empty($_FILES['palm_image']['tmp_name'])) {
             wp_send_json_error(['message' => 'Please upload a photo of your palm.']);
@@ -358,6 +533,20 @@ class MR_Palmistry_Builder {
         $name = isset($_POST['name']) ? sanitize_text_field($_POST['name']) : 'Seeker';
 
         $tmp_file = $_FILES['palm_image']['tmp_name'];
+
+        // Step 1: Pre-validate image authenticity, hand presence, and line clarity
+        $val = self::validate_palm_image($tmp_file);
+        if (empty($val['is_valid_palm'])) {
+            $err_msg = !empty($val['rejection_reason'])
+                ? $val['rejection_reason']
+                : 'The uploaded image could not be verified as a clear open palm. Please review the photo guidelines below and upload a clear picture of your open hand.';
+            wp_send_json_error([
+                'message' => $err_msg,
+                'code'    => 'invalid_palm'
+            ]);
+        }
+
+        // Step 2: Proceed with detailed palm analysis
         $res = self::call_gemini_palm_analysis($tmp_file, $age, $gender, $hand, 'free');
 
         if (!$res['success']) {
@@ -427,6 +616,11 @@ class MR_Palmistry_Builder {
         $sale = floatval($pricing['sale_price'] ?? 299);
         $list = floatval($pricing['list_price'] ?? 1499);
         $disc = ($list > $sale && $list > 0) ? round((($list - $sale) / $list) * 100) : 80;
+
+        $is_logged_in = is_user_logged_in();
+        $account_url  = class_exists('MR_Account_UI') ? MR_Account_UI::get_account_page_url() : home_url('/my-account/');
+        $current_url  = !empty($_SERVER['REQUEST_URI']) ? home_url($_SERVER['REQUEST_URI']) : home_url('/reports/palm-reading-report/');
+        $login_url    = add_query_arg('redirect_to', $current_url, $account_url);
 
         ob_start();
         ?>
@@ -526,14 +720,134 @@ class MR_Palmistry_Builder {
                 transition: all 0.25s ease; border: none; cursor: pointer;
             }
             .mr-btn-buy-dossier:hover { background: linear-gradient(135deg, #FFA500 0%, #FF8C00 100%); transform: translateY(-2px); box-shadow: 0 6px 24px rgba(255, 140, 0, 0.55); }
+
+            /* Professional Palm Photo Error & Guidance Card */
+            .mr-palm-error-box {
+                background: #FFF5F5;
+                border: 1.5px solid #FCA5A5;
+                border-radius: 16px;
+                padding: 22px 20px;
+                margin-bottom: 24px;
+                box-shadow: 0 4px 18px rgba(239, 68, 68, 0.08);
+                animation: mrFadeIn 0.3s ease;
+                text-align: left;
+            }
+            .mr-palm-error-header {
+                display: flex;
+                align-items: flex-start;
+                gap: 14px;
+                margin-bottom: 16px;
+            }
+            .mr-palm-error-icon-wrap {
+                width: 44px;
+                height: 44px;
+                background: #FEE2E2;
+                color: #DC2626;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 20px;
+                flex-shrink: 0;
+            }
+            .mr-palm-error-text-wrap {
+                flex: 1;
+            }
+            .mr-palm-error-title {
+                font-size: 17px;
+                font-weight: 800;
+                color: #991B1B;
+                margin: 0 0 6px 0;
+                font-family: 'Playfair Display', serif, system-ui;
+            }
+            .mr-palm-error-msg {
+                font-size: 13.5px;
+                color: #7F1D1D;
+                line-height: 1.55;
+                margin: 0;
+            }
+            .mr-palm-guidance-card {
+                background: #FFFFFF;
+                border: 1px solid #FECACA;
+                border-radius: 12px;
+                padding: 16px 18px;
+                margin-bottom: 16px;
+            }
+            .mr-palm-guidance-title {
+                font-size: 13px;
+                font-weight: 700;
+                color: #991B1B;
+                margin-bottom: 12px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+            .mr-palm-guidance-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+                gap: 12px;
+            }
+            .mr-palm-guide-box {
+                background: #FFF9F0;
+                border: 1px solid #FED7AA;
+                border-radius: 10px;
+                padding: 12px 14px;
+            }
+            .mr-palm-guide-badge {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 11px;
+                font-weight: 700;
+                color: #C2410C;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                margin-bottom: 6px;
+            }
+            .mr-palm-guide-box h5 {
+                font-size: 13.5px;
+                font-weight: 700;
+                color: #0F172A;
+                margin: 0 0 4px 0;
+            }
+            .mr-palm-guide-box p {
+                font-size: 12px;
+                color: #64748B;
+                line-height: 1.45;
+                margin: 0;
+            }
+            .mr-palm-error-actions {
+                text-align: center;
+            }
+            .mr-palm-btn-reupload {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                background: linear-gradient(135deg, #F58220 0%, #D9A441 100%);
+                color: #FFFFFF;
+                font-size: 14px;
+                font-weight: 700;
+                padding: 11px 24px;
+                border: none;
+                border-radius: 50px;
+                cursor: pointer;
+                box-shadow: 0 4px 12px rgba(245, 130, 32, 0.3);
+                transition: all 0.2s ease;
+            }
+            .mr-palm-btn-reupload:hover {
+                transform: translateY(-1px);
+                box-shadow: 0 6px 16px rgba(245, 130, 32, 0.4);
+            }
             </style>
 
             <?php if ($atts['show_header'] !== 'no'): ?>
             <div class="mr-palm-header">
                 <span class="mr-palm-badge"><i class="fa-solid fa-hand"></i> Vedic Samudrik Shastra</span>
-                <h1 class="mr-palm-h1">AI Palmistry &amp; <span class="mr-palm-saffron">Hast Rekha Scan</span></h1>
+                <h2 class="mr-palm-h1">AI Palmistry &amp; <span class="mr-palm-saffron">Hast Rekha Scan</span></h2>
                 <p class="mr-palm-sub">
-                    Upload or snap a photo of your palm. Our Gemini-powered Vedic intelligence analyzes your core lines, mounts, and authority indicators in seconds.
+                    Upload or snap a photo of your palm. Our Vedic intelligence analyzes your core lines, mounts, and authority indicators in seconds.
                 </p>
             </div>
             <?php endif; ?>
@@ -541,6 +855,48 @@ class MR_Palmistry_Builder {
             <div class="mr-palm-card">
                 <form id="mr-palm-form" enctype="multipart/form-data">
                     <?php wp_nonce_field('mr_palm_nonce', 'mr_palm_nonce_field'); ?>
+
+                    <!-- Error & Step-by-Step Guidance Box (Hidden by default, shown if image is rejected) -->
+                    <div id="mr-palm-error-box" class="mr-palm-error-box" style="display:none;">
+                        <div class="mr-palm-error-header">
+                            <div class="mr-palm-error-icon-wrap">
+                                <i class="fa-solid fa-triangle-exclamation"></i>
+                            </div>
+                            <div class="mr-palm-error-text-wrap">
+                                <h4 class="mr-palm-error-title">Photo Not Suitable for Palm Reading</h4>
+                                <p id="mr-palm-error-message" class="mr-palm-error-msg"></p>
+                            </div>
+                        </div>
+
+                        <div class="mr-palm-guidance-card">
+                            <div class="mr-palm-guidance-title">
+                                <i class="fa-solid fa-circle-info"></i> How your palm photo needs to be:
+                            </div>
+                            <div class="mr-palm-guidance-grid">
+                                <div class="mr-palm-guide-box">
+                                    <div class="mr-palm-guide-badge"><i class="fa-solid fa-hand"></i> Step 1</div>
+                                    <h5>Hold Palm Flat &amp; Open</h5>
+                                    <p>Face your inner palm flat toward the camera with fingers slightly relaxed. Do not make a fist or show the back of your hand.</p>
+                                </div>
+                                <div class="mr-palm-guide-box">
+                                    <div class="mr-palm-guide-badge"><i class="fa-solid fa-sun"></i> Step 2</div>
+                                    <h5>Bright, Even Lighting</h5>
+                                    <p>Photograph in natural daylight or flashlight. Avoid heavy shadows, darkness, or glare over the major palm lines.</p>
+                                </div>
+                                <div class="mr-palm-guide-box">
+                                    <div class="mr-palm-guide-badge"><i class="fa-solid fa-crop-simple"></i> Step 3</div>
+                                    <h5>Full Frame (Wrist to Tips)</h5>
+                                    <p>Include the base of your wrist up to all fingertips in clear focus so line contours and mounts can be accurately identified.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mr-palm-error-actions">
+                            <button type="button" class="mr-palm-btn-reupload" id="mr-btn-reupload">
+                                <i class="fa-solid fa-camera"></i> Select or Snap a New Palm Photo
+                            </button>
+                        </div>
+                    </div>
 
                     <div class="mr-palm-dropzone" id="mr-dropzone">
                         <input type="file" id="mr-palm-file-input" name="palm_image" accept="image/jpeg,image/png,image/webp" capture="environment" style="display:none;" required>
@@ -687,20 +1043,92 @@ class MR_Palmistry_Builder {
                 var form = $('#mr-palm-form');
                 var scanner = $('#mr-palm-scanner');
                 var results = $('#mr-palm-results');
+                var errorBox = $('#mr-palm-error-box');
+                var errorMsg = $('#mr-palm-error-message');
 
-                $('#mr-browse-btn').on('click', function(e){ e.preventDefault(); fileInput.trigger('click'); });
-                dropzone.on('dragover', function(e){ e.preventDefault(); $(this).addClass('dragover'); })
-                        .on('dragleave drop', function(e){
-                            e.preventDefault(); $(this).removeClass('dragover');
-                            if (e.type === 'drop') {
-                                var files = e.originalEvent.dataTransfer.files;
-                                if (files && files.length > 0) { fileInput[0].files = files; showPreview(files[0]); }
-                            }
+                function showPalmError(msg) {
+                    var text = msg || 'The uploaded photograph could not be verified as a clear open palm. Please review the photo guidelines below and upload a clear picture of your open hand.';
+                    errorMsg.text(text);
+                    errorBox.slideDown(250);
+                    dropzone.css({
+                        'border-color': '#EF4444',
+                        'background': '#FEF2F2'
+                    });
+                    fileInput.val('');
+                    previewImg.attr('src', '');
+                    previewWrap.hide();
+                    promptWrap.show();
+                    form.show();
+                    $('html, body').animate({ scrollTop: errorBox.offset().top - 90 }, 350);
+                }
+
+                function clearPalmError() {
+                    errorBox.slideUp(150);
+                    dropzone.css({
+                        'border-color': '#cbd5e1',
+                        'background': '#f8fafc'
+                    });
+                }
+
+                var isUserLoggedIn   = <?php echo $is_logged_in ? 'true' : 'false'; ?>;
+                var loginRedirectUrl = <?php echo json_encode($login_url); ?>;
+
+                function promptLogin(e) {
+                    if (e && e.preventDefault) {
+                        e.preventDefault();
+                    }
+                    // Persist current origin URL in cookie for post-login auto return
+                    document.cookie = "mr_login_return_url=" + encodeURIComponent(window.location.href) + "; path=/; max-age=86400; SameSite=Lax";
+                    if (window.mrNotify && typeof window.mrNotify.auth === 'function') {
+                        window.mrNotify.auth({
+                            title: 'Sign In to Scan Palm',
+                            message: 'Please sign in to your MeraRashifal account to receive your free Vedic palm analysis and save your Samudrik profile.',
+                            primaryText: '<i class="fa-brands fa-google" style="margin-right:8px;"></i> Continue with Google &rarr;',
+                            primaryUrl: loginRedirectUrl
                         });
+                    } else {
+                        window.location.href = loginRedirectUrl;
+                    }
+                    return false;
+                }
 
-                fileInput.on('change', function(){ if (this.files && this.files[0]) { showPreview(this.files[0]); } });
+                $('#mr-browse-btn, #mr-btn-reupload').on('click', function(e){
+                    if (!isUserLoggedIn) {
+                        return promptLogin(e);
+                    }
+                    e.preventDefault();
+                    fileInput.trigger('click');
+                });
+
+                dropzone.on('dragover', function(e){
+                    e.preventDefault();
+                    $(this).addClass('dragover');
+                }).on('dragleave drop', function(e){
+                    e.preventDefault();
+                    $(this).removeClass('dragover');
+                    if (e.type === 'drop') {
+                        if (!isUserLoggedIn) {
+                            return promptLogin(e);
+                        }
+                        var files = e.originalEvent.dataTransfer.files;
+                        if (files && files.length > 0) {
+                            fileInput[0].files = files;
+                            showPreview(files[0]);
+                        }
+                    }
+                }).on('click', function(e){
+                    if (!isUserLoggedIn) {
+                        return promptLogin(e);
+                    }
+                });
+
+                fileInput.on('change', function(){
+                    clearPalmError();
+                    if (this.files && this.files[0]) { showPreview(this.files[0]); }
+                });
 
                 function showPreview(file) {
+                    clearPalmError();
                     var reader = new FileReader();
                     reader.onload = function(e){ previewImg.attr('src', e.target.result); promptWrap.hide(); previewWrap.show(); };
                     reader.readAsDataURL(file);
@@ -708,19 +1136,25 @@ class MR_Palmistry_Builder {
 
                 $('#mr-change-btn').on('click', function(e){
                     e.preventDefault(); fileInput.val(''); previewImg.attr('src', ''); previewWrap.hide(); promptWrap.show();
+                    clearPalmError();
                 });
 
                 $('#mr-scan-another-btn').on('click', function(e){
                     e.preventDefault(); results.hide(); form.show(); fileInput.val(''); previewImg.attr('src', ''); previewWrap.hide(); promptWrap.show();
+                    clearPalmError();
                     $('html, body').animate({ scrollTop: form.offset().top - 80 }, 400);
                 });
 
                 form.on('submit', function(e){
                     e.preventDefault();
+                    if (!isUserLoggedIn) {
+                        return promptLogin(e);
+                    }
                     if (!fileInput[0].files || !fileInput[0].files[0]) {
-                        alert('Please upload or snap a photo of your palm first.');
+                        showPalmError('Please select or snap a photo of your palm first.');
                         return;
                     }
+                    clearPalmError();
                     form.hide(); scanner.show();
                     var steps = [
                         'Inspecting palm mounts & topography...',
@@ -744,6 +1178,7 @@ class MR_Palmistry_Builder {
                         success: function(resp){
                             clearInterval(stepTimer); scanner.hide();
                             if (resp && resp.success) {
+                                clearPalmError();
                                 var r = resp.data.reading;
                                 $('#mr-res-title').html('🖐️ ' + resp.data.name + '’s Palm Reading');
                                 $('#mr-res-summary').text(r.summary || '');
@@ -756,19 +1191,27 @@ class MR_Palmistry_Builder {
                                 results.show();
                                 $('html, body').animate({ scrollTop: results.offset().top - 80 }, 400);
                             } else {
-                                form.show();
-                                alert(resp.data && resp.data.message ? resp.data.message : 'Analysis failed. Please try again.');
+                                if (resp && resp.data && resp.data.code === 'auth_required') {
+                                    return promptLogin();
+                                }
+                                var err = (resp && resp.data && resp.data.message)
+                                    ? resp.data.message
+                                    : 'The uploaded photograph could not be verified as a clear open palm. Please review the photo guidelines below and try again.';
+                                showPalmError(err);
                             }
                         },
                         error: function(){
-                            clearInterval(stepTimer); scanner.hide(); form.show();
-                            alert('Network error while analyzing image. Please check your connection and retry.');
+                            clearInterval(stepTimer); scanner.hide();
+                            showPalmError('Network connection issue while verifying palm photograph. Please check your internet connection and try again.');
                         }
                     });
                 });
 
                 $('#mr-btn-order-dossier').on('click', function(e){
                     e.preventDefault();
+                    if (!isUserLoggedIn) {
+                        return promptLogin(e);
+                    }
                     var slug = $(this).data('slug');
                     var title = $(this).data('title');
                     if (typeof window.MR_open_payment_modal === 'function') {
@@ -814,9 +1257,21 @@ class MR_Palmistry_Builder {
         $age = max(18, min(95, $age));
 
         // Master Palmistry Editorial Data seamlessly tailored to the 26-page structure
-        $palm_theme = "Strategic Authority, Mount Topography, and Karmic Milestones in 2027";
+        $palm_theme = "Strategic Authority, Mount Topography, and Karmic Milestones in " . $year;
         $palm_motto = "Master your inner prana, honor the downward slope of intuitive wisdom, and consolidate lasting earned authority.";
         $palm_synthesis = "Your hand’s strongest signal is the long, downward-sloping head line toward Chandra: seasoned experience has deepened your strategic judgment, but work concerns often extend beyond professional hours. The broad palm, substantial Venus mount, and finer central fate line reflect an earned provider whose elevation unfolds through sustained institutional usefulness rather than speculative windfalls. In classical Hast Rekha and Samudrik Shastra, this hand commands earned authority. The reading centres on career consolidation, disciplined capital reserves, and protecting emotional warmth in your family life.";
+
+        if (!empty($palm_data) && is_array($palm_data)) {
+            if (!empty($palm_data['summary'])) {
+                $palm_synthesis = $palm_data['summary'];
+            }
+            if (!empty($palm_data['dominant_mount'])) {
+                $palm_theme = "Strategic Authority, Dominant " . esc_html($palm_data['dominant_mount']) . " & Karmic Milestones in " . $year;
+            }
+            if (!empty($palm_data['hand_type'])) {
+                $palm_motto = "Samudrik Profile: " . esc_html($palm_data['hand_type']) . ". Master your inner prana and consolidate lasting earned authority.";
+            }
+        }
 
         $editorial_data = [
             'annual_theme'           => $palm_theme,
