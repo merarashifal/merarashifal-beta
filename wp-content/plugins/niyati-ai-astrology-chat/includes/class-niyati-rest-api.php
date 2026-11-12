@@ -98,6 +98,20 @@ class Niyati_REST_API {
             'callback'            => [__CLASS__, 'handle_reset_chat'],
             'permission_callback' => '__return_true',
         ]);
+
+        // Get Past Chat Consultations History
+        register_rest_route(self::NAMESPACE, '/chat-history', [
+            'methods'             => 'GET',
+            'callback'            => [__CLASS__, 'handle_get_chat_history'],
+            'permission_callback' => '__return_true',
+        ]);
+
+        // Get Specific Past Consultation Transcript
+        register_rest_route(self::NAMESPACE, '/chat-archive-session', [
+            'methods'             => 'GET',
+            'callback'            => [__CLASS__, 'handle_get_archive_session'],
+            'permission_callback' => '__return_true',
+        ]);
     }
 
     /**
@@ -239,6 +253,7 @@ class Niyati_REST_API {
             'chat_history'       => $chat_history,
             'saved_profiles'     => $saved_profiles,
             'active_chart_token' => $active_chart_token,
+            'checkout_url'       => class_exists('MR_Checkout') ? MR_Checkout::get_checkout_url() : home_url('/checkout/'),
         ]);
     }
 
@@ -270,7 +285,15 @@ class Niyati_REST_API {
         }
 
         $name = sanitize_text_field($params['name'] ?? 'Friend');
+        $gender = sanitize_key($params['gender'] ?? 'male');
+        if (!in_array($gender, ['male', 'female'], true)) {
+            $gender = 'male';
+        }
         $dob  = sanitize_text_field($params['dob'] ?? '');
+        // Standardize DOB to ISO format (YYYY-MM-DD)
+        if (preg_match('/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/', trim($dob), $m)) {
+            $dob = sprintf('%04d-%02d-%02d', (int)$m[3], (int)$m[2], (int)$m[1]);
+        }
         $tob  = sanitize_text_field($params['tob'] ?? '12:00');
         $lat  = floatval($params['lat'] ?? 28.6139);
         $lon  = floatval($params['lon'] ?? 77.2090);
@@ -283,14 +306,15 @@ class Niyati_REST_API {
         }
 
         $birth_input = [
-            'name' => $name,
-            'dob'  => $dob,
-            'tob'  => $tob,
-            'pob'  => $pob,
-            'lat'  => $lat,
-            'lon'  => $lon,
-            'tz'   => $tz,
-            'lang' => $lang,
+            'name'   => $name,
+            'gender' => $gender,
+            'dob'    => $dob,
+            'tob'    => $tob,
+            'pob'    => $pob,
+            'lat'    => $lat,
+            'lon'    => $lon,
+            'tz'     => $tz,
+            'lang'   => $lang,
         ];
 
         $profile = null;
@@ -303,15 +327,21 @@ class Niyati_REST_API {
             if ($saved && is_array($saved)) {
                 $profile = $saved;
                 $profile['name'] = $name;
+                $profile['gender'] = $gender;
             }
         }
 
         // 2. If not already saved in user's family Kundli file, call VedicAstroAPI once & save to disk
         if (!$profile) {
             $profile = Niyati_Vedic_API::get_kundli_profile($birth_input);
+            if (is_array($profile)) {
+                $profile['gender'] = $gender;
+            }
             if (class_exists('Niyati_Storage') && $user_id > 0 && !empty($profile)) {
                 Niyati_Storage::save_kundli_profile($user_id, $birth_input, $profile);
             }
+        } else {
+            $profile['gender'] = $gender;
         }
 
         // Generate session chart token (cached for 30 days)
@@ -341,23 +371,39 @@ class Niyati_REST_API {
             }
         }
 
+        $formatted_dasha = self::format_dasha_display($dasha, $lang);
+        $base_url = rtrim(home_url(), '/');
+        $dasha_url = $base_url . '/reports/dasha-timing-report/';
+
         if ($lang === 'hi') {
+            $dasha_line = $formatted_dasha ? "🪐 **वर्तमान महादशा:** {$formatted_dasha} की महादशा\n" : "";
+            $dasha_cta  = $formatted_dasha ? "\n👉 [विस्तृत महादशा फल एवं समय रिपोर्ट देखें]({$dasha_url})\n" : "";
+
             $greeting = "नमस्ते **{$name} जी**! मैं **{$bot_name}** हूँ, आपकी जन्म पत्रिका का विश्लेषण पूर्ण हो गया है।\n\n"
                       . "✨ **लग्न:** {$asc}\n"
                       . "🌙 **चंद्र राशि:** {$rashi}\n"
-                      . ($dasha ? "🪐 **वर्तमान महादशा:** {$dasha} की महादशा सक्रिय है।\n\n" : "\n")
+                      . $dasha_line
+                      . $dasha_cta . "\n"
                       . "मैं आपकी कुंडली के आधार पर किस विषय (करियर, विवाह, स्वास्थ्य या आर्थिक स्थिति) पर आपका मार्गदर्शन करूँ?";
         } elseif ($lang === 'hinglish') {
+            $dasha_line = $formatted_dasha ? "🪐 **Current Dasha:** {$formatted_dasha} ki dasha\n" : "";
+            $dasha_cta  = $formatted_dasha ? "\n👉 [Check Detailed Dasha Timing Report]({$dasha_url})\n" : "";
+
             $greeting = "Namaste **{$name} ji**! Main **{$bot_name}** hoon, aapki kundli study kar li gayi hai.\n\n"
                       . "✨ **Lagna (Ascendant):** {$asc}\n"
                       . "🌙 **Moon Sign (Rashi):** {$rashi}\n"
-                      . ($dasha ? "🪐 **Current Mahadasha:** {$dasha} ki dasha chal rahi hai.\n\n" : "\n")
+                      . $dasha_line
+                      . $dasha_cta . "\n"
                       . "Aap career, shaadi, finance ya dasha se jude kisi bhi sawaal ke baare mein pooch sakte hain.";
         } else {
+            $dasha_line = $formatted_dasha ? "🪐 **Current Planetary Period:** {$formatted_dasha} Mahadasha\n" : "";
+            $dasha_cta  = $formatted_dasha ? "\n👉 [Check Dasha Timing & Predictions Report]({$dasha_url})\n" : "";
+
             $greeting = "{$time_greeting_en}, **{$name}**! Namaste, I am **{$bot_name}**, your personal Vedic Astrologer. I have analyzed your birth chart.\n\n"
                       . "✨ **Ascendant (Lagna):** {$asc}\n"
                       . "🌙 **Moon Sign (Rashi):** {$rashi}\n"
-                      . ($dasha ? "🪐 **Current Planetary Period:** {$dasha} Mahadasha is active.\n\n" : "\n")
+                      . $dasha_line
+                      . $dasha_cta . "\n"
                       . "What question is closest to your heart today? You can ask me about your career, marriage, finances, or life path.";
         }
 
@@ -376,6 +422,8 @@ class Niyati_REST_API {
             'greeting'    => $greeting,
             'profile'     => [
                 'name'      => $profile['name'],
+                'gender'    => $gender,
+                'dob'       => $dob,
                 'ascendant' => $profile['ascendant'],
                 'moon_sign' => $profile['moon_sign'],
                 'dasha'     => $profile['current_dasha'] ?? null,
@@ -631,6 +679,63 @@ class Niyati_REST_API {
         return rest_ensure_response([
             'success' => true,
             'message' => 'Chat session archived and reset.'
+        ]);
+    }
+
+    /**
+     * Get list of user's past archived chat consultations
+     */
+    public static function handle_get_chat_history($request) {
+        $user_id = get_current_user_id();
+        if ($user_id <= 0) {
+            return rest_ensure_response([
+                'success'   => false,
+                'logged_in' => false,
+                'message'   => 'Please log in to view your past consultations.',
+                'archives'  => []
+            ]);
+        }
+
+        $archives = [];
+        if (class_exists('Niyati_Storage')) {
+            $archives = Niyati_Storage::get_user_archives_list($user_id);
+        }
+
+        return rest_ensure_response([
+            'success'   => true,
+            'logged_in' => true,
+            'user_id'   => $user_id,
+            'archives'  => $archives,
+            'count'     => count($archives)
+        ]);
+    }
+
+    /**
+     * Get full transcript of a specific past consultation archive
+     */
+    public static function handle_get_archive_session($request) {
+        $user_id = get_current_user_id();
+        if ($user_id <= 0) {
+            return new WP_Error('not_logged_in', 'Please log in to view consultation archives.', ['status' => 401]);
+        }
+
+        $session_id = sanitize_text_field($request->get_param('session_id') ?? '');
+        if (empty($session_id)) {
+            return new WP_Error('missing_session_id', 'Session ID is required.', ['status' => 400]);
+        }
+
+        if (!class_exists('Niyati_Storage')) {
+            return new WP_Error('storage_unavailable', 'Storage service unavailable.', ['status' => 500]);
+        }
+
+        $session = Niyati_Storage::get_archive_transcript($user_id, $session_id);
+        if (!$session) {
+            return new WP_Error('not_found', 'Consultation transcript not found or access denied.', ['status' => 404]);
+        }
+
+        return rest_ensure_response([
+            'success' => true,
+            'session' => $session
         ]);
     }
 
@@ -1144,5 +1249,42 @@ class Niyati_REST_API {
             return "\n\n*(Note: Site directory aur report navigation complimentary hai. Iske liye koi chat credit deduct nahi kiya gaya hai.)*";
         }
         return "\n\n*(Note: Site directory navigation is complimentary. No chat credit was deducted.)*";
+    }
+
+    /**
+     * Format raw Dasha string (e.g. "Me>Me>Me") into user-friendly astrological name
+     */
+    public static function format_dasha_display($dasha_raw, $lang = 'en') {
+        if (empty($dasha_raw)) {
+            return '';
+        }
+
+        $planet_names = [
+            'en' => [
+                'Su' => 'Sun', 'Mo' => 'Moon', 'Ma' => 'Mars', 'Ra' => 'Rahu',
+                'Ju' => 'Jupiter', 'Sa' => 'Saturn', 'Me' => 'Mercury', 'Ke' => 'Ketu', 'Ve' => 'Venus'
+            ],
+            'hi' => [
+                'Su' => 'सूर्य', 'Mo' => 'चंद्र', 'Ma' => 'मंगल', 'Ra' => 'राहु',
+                'Ju' => 'गुरु (बृहस्पति)', 'Sa' => 'शनि', 'Me' => 'बुध', 'Ke' => 'केतु', 'Ve' => 'शुक्र'
+            ],
+            'hinglish' => [
+                'Su' => 'Surya (Sun)', 'Mo' => 'Chandra (Moon)', 'Ma' => 'Mangal (Mars)', 'Ra' => 'Rahu',
+                'Ju' => 'Guru (Jupiter)', 'Sa' => 'Shani (Saturn)', 'Me' => 'Budh (Mercury)', 'Ke' => 'Ketu', 'Ve' => 'Shukra (Venus)'
+            ]
+        ];
+
+        $parts = explode('>', $dasha_raw);
+        $parts = array_map('trim', $parts);
+        $primary_abbr = $parts[0] ?? '';
+
+        $lang_key = in_array($lang, ['hi', 'hinglish'], true) ? $lang : 'en';
+        $primary_name = $planet_names[$lang_key][$primary_abbr] ?? ($planet_names['en'][$primary_abbr] ?? $primary_abbr);
+
+        if (count($parts) > 1) {
+            return "{$primary_name} ({$dasha_raw})";
+        }
+
+        return $primary_name ?: $dasha_raw;
     }
 }

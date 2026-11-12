@@ -137,11 +137,13 @@ class MR_Tokens {
      */
     public static function get_slug_aliases($slug) {
         $map = [
-            'numerology'                       => ['numerology', 'numerology_report', 'numerology-report'],
-            'numerology_report'                => ['numerology', 'numerology_report', 'numerology-report'],
-            'numerology-report'                => ['numerology', 'numerology_report', 'numerology-report'],
-            'palmistry_report'                 => ['palmistry_report', 'palm-reading-report'],
-            'palm-reading-report'              => ['palmistry_report', 'palm-reading-report'],
+            'numerology'                       => ['numerology', 'numerology_report', 'numerology-report', 'numero_report'],
+            'numerology_report'                => ['numerology', 'numerology_report', 'numerology-report', 'numero_report'],
+            'numerology-report'                => ['numerology', 'numerology_report', 'numerology-report', 'numero_report'],
+            'numero_report'                    => ['numerology', 'numerology_report', 'numerology-report', 'numero_report'],
+            'palmistry_report'                 => ['palmistry_report', 'palm-reading-report', 'palm_reading'],
+            'palm-reading-report'              => ['palmistry_report', 'palm-reading-report', 'palm_reading'],
+            'palm_reading'                     => ['palmistry_report', 'palm-reading-report', 'palm_reading'],
             'kundli_matching'                  => ['kundli_matching', 'kundali-and-gun-matching-report'],
             'kundali-and-gun-matching-report'  => ['kundli_matching', 'kundali-and-gun-matching-report'],
             'kundli_predictions'               => ['kundli_predictions', 'janam-kundali-master-report'],
@@ -152,10 +154,13 @@ class MR_Tokens {
             'kundali-dosh-report'              => ['dosh_remedial', 'kundali-dosh-report'],
             'yearly_horoscope_long'            => ['yearly_horoscope_long', 'yearly-horoscope-report', 'landingpage'],
             'yearly-horoscope-report'          => ['yearly_horoscope_long', 'yearly-horoscope-report', 'landingpage'],
-            'yearly_horoscope_vedic'           => ['yearly_horoscope_vedic', 'yearly-horoscope-snapshot-report'],
-            'yearly-horoscope-snapshot-report' => ['yearly_horoscope_vedic', 'yearly-horoscope-snapshot-report'],
-            'monthly_horoscope_vedic'          => ['monthly_horoscope_vedic', 'monthly-horoscope-report'],
-            'monthly-horoscope-report'         => ['monthly_horoscope_vedic', 'monthly-horoscope-report'],
+            'landingpage'                      => ['yearly_horoscope_long', 'yearly-horoscope-report', 'landingpage'],
+            'yearly_horoscope_vedic'           => ['yearly_horoscope_vedic', 'yearly-horoscope-snapshot-report', 'yearly_horoscope'],
+            'yearly-horoscope-snapshot-report' => ['yearly_horoscope_vedic', 'yearly-horoscope-snapshot-report', 'yearly_horoscope'],
+            'yearly_horoscope'                 => ['yearly_horoscope_vedic', 'yearly-horoscope-snapshot-report', 'yearly_horoscope'],
+            'monthly_horoscope_vedic'          => ['monthly_horoscope_vedic', 'monthly-horoscope-report', 'monthly_horoscope'],
+            'monthly-horoscope-report'         => ['monthly_horoscope_vedic', 'monthly-horoscope-report', 'monthly_horoscope'],
+            'monthly_horoscope'                => ['monthly_horoscope_vedic', 'monthly-horoscope-report', 'monthly_horoscope'],
         ];
         return $map[$slug] ?? [$slug];
     }

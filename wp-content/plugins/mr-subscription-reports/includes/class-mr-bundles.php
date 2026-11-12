@@ -15,6 +15,163 @@ class MR_Bundles {
 
     const OPTION_KEY = 'mr_report_bundles_config';
     const GLOBAL_OPTION_KEY = 'mr_report_bundles_global';
+    const CHAT_CREDIT_RATE = 1.0; // ₹1 per AI chat question credit
+
+    /**
+     * Sourced Standalone Price Master: Fetches current standalone Sale Price and Listing MRP from Sales Cards Manager
+     */
+    public static function get_standalone_pricing($slug) {
+        $slug = self::normalize_slug($slug);
+        $all_reports = self::get_available_reports();
+        $meta = $all_reports[$slug] ?? [];
+
+        $name = $meta['name'] ?? ucwords(str_replace('_', ' ', $slug));
+        $sale = floatval($meta['def_price'] ?? 299);
+        $reg  = floatval($meta['def_reg'] ?? 599);
+
+        if (class_exists('MR_Catalog_Manager')) {
+            $cards = MR_Catalog_Manager::get_all_cards();
+            $card = $cards[$slug] ?? [];
+            if (empty($card) && ($slug === 'numerology' || $slug === 'numerology_report')) {
+                $card = $cards['numerology'] ?? ($cards['numerology_report'] ?? []);
+            }
+            if (!empty($card)) {
+                if (isset($card['price_sale'])) {
+                    $sale = floatval($card['price_sale']);
+                }
+                if (isset($card['price_regular'])) {
+                    $reg = floatval($card['price_regular']);
+                }
+                if (!empty($card['name'])) {
+                    $name = $card['name'];
+                }
+            }
+        }
+
+        return [
+            'slug'          => $slug,
+            'name'          => $name,
+            'price_sale'    => $sale,
+            'price_regular' => $reg,
+        ];
+    }
+
+    /**
+     * Clean price formatter (preserves decimals if fractional, e.g. 193.5 or 200)
+     */
+    public static function format_price($price) {
+        $float = floatval($price);
+        if (floor($float) == $float) {
+            return number_format($float, 0);
+        }
+        return rtrim(rtrim(number_format($float, 2, '.', ''), '0'), '.');
+    }
+
+    /**
+     * Dynamic Bundle Tier Pricing Calculator
+     *
+     * Formula per user specification:
+     * Combined Regular / Listing Price = Sum(Standalone Listing Price) + (Chat Credits * ₹1)
+     * Combined Regular Sale Price    = Sum(Standalone Sale Price) + (Chat Credits * ₹1)
+     * Bundle Sale Price              = Combined Regular Sale Price * (1 - Discount % / 100)
+     * Savings                        = Combined Regular / Listing Price - Bundle Sale Price
+     * Overall Discount %             = (Savings / Combined Regular / Listing Price) * 100
+     */
+    public static function calculate_tier_pricing($report_slugs, $chat_credits = 0, $discount_pct = 0) {
+        if (!is_array($report_slugs)) {
+            $report_slugs = !empty($report_slugs) ? [$report_slugs] : [];
+        }
+        $chat_credits  = max(0, intval($chat_credits));
+        $discount_pct  = max(0, min(99, floatval($discount_pct)));
+        $credits_value = round($chat_credits * self::CHAT_CREDIT_RATE, 2);
+
+        $sum_sale    = 0.0;
+        $sum_regular = 0.0;
+        $breakdown   = [];
+
+        foreach ($report_slugs as $slug) {
+            if (empty($slug)) continue;
+            $p = self::get_standalone_pricing($slug);
+            $sum_sale    += $p['price_sale'];
+            $sum_regular += $p['price_regular'];
+            $breakdown[]  = $p;
+        }
+
+        $combined_sale    = round($sum_sale + $credits_value, 2);
+        $combined_regular = round($sum_regular + $credits_value, 2);
+
+        // Apply configured bundle discount % on combined sale price
+        $bundle_sale = round($combined_sale * (1 - ($discount_pct / 100)), 2);
+        $savings     = max(0, round($combined_regular - $bundle_sale, 2));
+        $overall_discount_pct = ($combined_regular > 0) ? round(($savings / $combined_regular) * 100) : 0;
+
+        return [
+            'sum_sale'             => $sum_sale,
+            'sum_regular'          => $sum_regular,
+            'chat_credits'         => $chat_credits,
+            'credits_value'        => $credits_value,
+            'combined_sale'        => $combined_sale,
+            'combined_regular'     => $combined_regular,
+            'discount_pct'         => $discount_pct,
+            'price_sale'           => $bundle_sale,
+            'price_regular'        => $combined_regular,
+            'savings'              => $savings,
+            'overall_discount_pct' => $overall_discount_pct,
+            'breakdown'            => $breakdown,
+        ];
+    }
+
+    /**
+     * Dynamically synchronize tier pricing with current Sales Cards Manager standalone prices
+     */
+    public static function apply_live_pricing_sync($cfg, $report_slug) {
+        $slug = self::normalize_slug($report_slug);
+
+        // 1. Single Report Tier Sync (Exact standalone master prices from Sales Cards Manager)
+        $single_credits = isset($cfg['tier_single']['chat_credits']) ? intval($cfg['tier_single']['chat_credits']) : 0;
+        $single_calc    = self::calculate_tier_pricing([$slug], 0, 0);
+        $cfg['tier_single']['price_sale']           = $single_calc['sum_sale'];
+        $cfg['tier_single']['price_regular']        = $single_calc['sum_regular'];
+        $cfg['tier_single']['discount_pct']         = 0;
+        $cfg['tier_single']['chat_credits']         = $single_credits;
+        $cfg['tier_single']['overall_discount_pct'] = ($single_calc['sum_regular'] > 0) ? round((($single_calc['sum_regular'] - $single_calc['sum_sale']) / $single_calc['sum_regular']) * 100) : 0;
+
+        // 2. Duo Report Tier Sync
+        $duo_paired  = !empty($cfg['tier_duo']['paired_reports']) ? (array)$cfg['tier_duo']['paired_reports'] : [];
+        $duo_credits = isset($cfg['tier_duo']['chat_credits']) ? intval($cfg['tier_duo']['chat_credits']) : 15;
+        $duo_disc    = isset($cfg['tier_duo']['discount_pct']) ? floatval($cfg['tier_duo']['discount_pct']) : 10;
+        $duo_all     = array_values(array_filter(array_merge([$slug], $duo_paired)));
+        $duo_calc    = self::calculate_tier_pricing($duo_all, $duo_credits, $duo_disc);
+
+        $cfg['tier_duo']['price_sale']           = $duo_calc['price_sale'];
+        $cfg['tier_duo']['price_regular']        = $duo_calc['price_regular'];
+        $cfg['tier_duo']['discount_pct']         = $duo_disc;
+        $cfg['tier_duo']['savings']              = $duo_calc['savings'];
+        $cfg['tier_duo']['overall_discount_pct'] = $duo_calc['overall_discount_pct'];
+        $cfg['tier_duo']['combined_sale']        = $duo_calc['combined_sale'];
+
+        // 3. Trio Report Tier Sync
+        $trio_paired  = !empty($cfg['tier_trio']['paired_reports']) ? (array)$cfg['tier_trio']['paired_reports'] : [];
+        $trio_credits = isset($cfg['tier_trio']['chat_credits']) ? intval($cfg['tier_trio']['chat_credits']) : 30;
+        $trio_disc    = isset($cfg['tier_trio']['discount_pct']) ? floatval($cfg['tier_trio']['discount_pct']) : 15;
+        $trio_all     = array_values(array_filter(array_merge([$slug], $trio_paired)));
+        $trio_calc    = self::calculate_tier_pricing($trio_all, $trio_credits, $trio_disc);
+
+        $cfg['tier_trio']['price_sale']           = $trio_calc['price_sale'];
+        $cfg['tier_trio']['price_regular']        = $trio_calc['price_regular'];
+        $cfg['tier_trio']['discount_pct']         = $trio_disc;
+        $cfg['tier_trio']['savings']              = $trio_calc['savings'];
+        $cfg['tier_trio']['overall_discount_pct'] = $trio_calc['overall_discount_pct'];
+        $cfg['tier_trio']['combined_sale']        = $trio_calc['combined_sale'];
+
+        // If badge text is generic or has a legacy discount, update badge text with fresh overall discount
+        $badge = $cfg['tier_trio']['badge'] ?? '';
+        if (empty($badge) || preg_match('/BEST BUY\s*-\s*SAVE\s*\d+%/i', $badge)) {
+            $cfg['tier_trio']['badge'] = 'BEST BUY - SAVE ' . $trio_calc['overall_discount_pct'] . '%';
+        }
+
+        return $cfg;
+    }
 
     /**
      * Master report directory with titles and aliases for pairing dropdowns
@@ -110,7 +267,7 @@ class MR_Bundles {
      */
     public static function normalize_slug($slug) {
         $slug = sanitize_key($slug);
-        if ($slug === 'numerology_report' || $slug === 'numerology-report') {
+        if ($slug === 'numerology_report' || $slug === 'numerology-report' || $slug === 'numero_report') {
             return 'numerology';
         }
         if ($slug === 'palm-reading-report') {
@@ -241,49 +398,66 @@ class MR_Bundles {
             'trio_title'  => 'Complete Astrological Suite (3 Reports + AI Chat)',
         ];
 
-        $single_sale = floatval($base_meta['def_price']);
-        $single_reg  = floatval($base_meta['def_reg']);
+        $base_meta   = self::get_standalone_pricing($slug);
+        $single_sale = floatval($base_meta['price_sale']);
+        $single_reg  = floatval($base_meta['price_regular']);
+
+        $duo_paired_arr  = [$pair['duo_paired']];
+        $duo_calc        = self::calculate_tier_pricing(array_merge([$slug], $duo_paired_arr), 15, 10);
+
+        $trio_paired_arr = (array)$pair['trio_paired'];
+        $trio_calc       = self::calculate_tier_pricing(array_merge([$slug], $trio_paired_arr), 30, 15);
 
         return [
             'report_slug'    => $slug,
             'bundle_enabled' => true,
             'tier_single'    => [
-                'enabled'       => true,
-                'title'         => 'Single Report',
-                'subtitle'      => 'Complete ' . esc_html($base_meta['name']),
-                'price_regular' => $single_reg,
-                'price_sale'    => $single_sale,
-                'badge'         => 'Standard',
-                'chat_credits'  => 0,
+                'enabled'              => true,
+                'title'                => 'Single Report',
+                'subtitle'             => 'Complete ' . esc_html($base_meta['name']),
+                'price_regular'        => $single_reg,
+                'price_sale'           => $single_sale,
+                'badge'                => 'Standard',
+                'chat_credits'         => 0,
+                'discount_pct'         => 0,
+                'overall_discount_pct' => ($single_reg > 0) ? round((($single_reg - $single_sale) / $single_reg) * 100) : 0,
             ],
             'tier_duo'       => [
-                'enabled'        => true,
-                'title'          => $pair['duo_title'],
-                'subtitle'       => '2 In-Depth Dossiers + 15 AI Follow-up Questions',
-                'paired_reports' => [$pair['duo_paired']],
-                'price_regular'  => 1198,
-                'price_sale'     => 449,
-                'badge'          => 'POPULAR',
-                'chat_credits'   => 15,
-                'highlights'     => '2 Publication-Grade PDF Reports &bull; 15 Niyati AI Chat Credits Included',
+                'enabled'              => true,
+                'title'                => $pair['duo_title'],
+                'subtitle'             => '2 In-Depth Dossiers + 15 AI Follow-up Questions',
+                'paired_reports'       => $duo_paired_arr,
+                'discount_pct'         => 10,
+                'price_regular'        => $duo_calc['price_regular'],
+                'price_sale'           => $duo_calc['price_sale'],
+                'savings'              => $duo_calc['savings'],
+                'overall_discount_pct' => $duo_calc['overall_discount_pct'],
+                'combined_sale'        => $duo_calc['combined_sale'],
+                'badge'                => 'POPULAR',
+                'chat_credits'         => 15,
+                'highlights'           => '2 Publication-Grade PDF Reports &bull; 15 Niyati AI Chat Credits Included',
             ],
             'tier_trio'      => [
-                'enabled'        => true,
-                'title'          => $pair['trio_title'],
-                'subtitle'       => '3 Complete Master Reports + 30 AI Chat Credits',
-                'is_best_buy'    => true,
-                'paired_reports' => $pair['trio_paired'],
-                'price_regular'  => 2097,
-                'price_sale'     => 599,
-                'badge'          => 'BEST BUY - SAVE 71%',
-                'chat_credits'   => 30,
-                'highlights'     => '3 Complete Sacred Reports (65+ Pages Total) &bull; 30 Niyati AI Interactive Consultations &bull; Highest Value',
+                'enabled'              => true,
+                'title'                => $pair['trio_title'],
+                'subtitle'             => '3 Complete Master Reports + 30 AI Chat Credits',
+                'is_best_buy'          => true,
+                'paired_reports'       => $trio_paired_arr,
+                'discount_pct'         => 15,
+                'price_regular'        => $trio_calc['price_regular'],
+                'price_sale'           => $trio_calc['price_sale'],
+                'savings'              => $trio_calc['savings'],
+                'overall_discount_pct' => $trio_calc['overall_discount_pct'],
+                'combined_sale'        => $trio_calc['combined_sale'],
+                'badge'                => 'BEST BUY - SAVE ' . $trio_calc['overall_discount_pct'] . '%',
+                'chat_credits'         => 30,
+                'highlights'           => '3 Complete Sacred Reports (65+ Pages Total) &bull; 30 Niyati AI Interactive Consultations &bull; Highest Value',
             ]
         ];
     }
 
     /**
-     * Get all bundle configs from database, merging with defaults
+     * Get all bundle configs from database, dynamically synced with Sales Cards Manager
      */
     public static function get_all_bundles() {
         $saved = get_option(self::OPTION_KEY, []);
@@ -293,22 +467,31 @@ class MR_Bundles {
         foreach ($all_reports as $slug => $meta) {
             $def = self::get_default_config_for($slug);
             if (!empty($saved[$slug]) && is_array($saved[$slug])) {
-                $configs[$slug] = array_replace_recursive($def, $saved[$slug]);
+                $merged = array_replace_recursive($def, $saved[$slug]);
             } else {
-                $configs[$slug] = $def;
+                $merged = $def;
             }
+            $configs[$slug] = self::apply_live_pricing_sync($merged, $slug);
         }
 
         return $configs;
     }
 
     /**
-     * Get specific bundle configuration for a report
+     * Get specific bundle configuration for a report (always dynamically live-synced)
      */
     public static function get_bundle_for_report($report_slug) {
-        $slug = self::normalize_slug($report_slug);
-        $all = self::get_all_bundles();
-        return $all[$slug] ?? self::get_default_config_for($slug);
+        $slug  = self::normalize_slug($report_slug);
+        $saved = get_option(self::OPTION_KEY, []);
+        $def   = self::get_default_config_for($slug);
+
+        if (!empty($saved[$slug]) && is_array($saved[$slug])) {
+            $merged = array_replace_recursive($def, $saved[$slug]);
+        } else {
+            $merged = $def;
+        }
+
+        return self::apply_live_pricing_sync($merged, $slug);
     }
 
     /**

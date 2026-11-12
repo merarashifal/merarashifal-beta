@@ -24,6 +24,9 @@
             lblTob: 'Time of Birth (Time):',
             lblPob: 'Place of Birth:',
             placeholderPob: 'e.g. New Delhi, Mumbai, New York...',
+            lblGender: 'Gender:',
+            optMale: 'Male (पुरुष)',
+            optFemale: 'Female (महिला)',
             lblLang: 'Preferred Language:',
             btnCompute: '✨ Analyze Chart & Start Chat',
             btnComputing: '⏳ Calculating planetary positions...',
@@ -46,7 +49,20 @@
             loginRequiredMsg: 'Please log in to your account first to generate your birth chart and access Niyati consultations.',
             btnLogin: '🔑 Log In to Continue',
             btnCancel: 'Cancel',
-            loginNotice: '🔒 Please log in to your account to start your consultation.'
+            loginNotice: '🔒 Please log in to your account to start your consultation.',
+            historyBtn: 'Past Consultations',
+            historyTitle: 'Past Consultations',
+            historyCurrentChat: 'Current Chat',
+            historyBackToList: 'All Consultations',
+            historyEmptyTitle: 'No Past Consultations Yet',
+            historyEmptySub: 'Your astrological consultations with Niyati will be securely archived here so you can review them anytime.',
+            historyLoginTitle: 'Log In to View Past Consultations',
+            historyLoginSub: 'Sign in to your account to access your saved astrological sessions across all your devices.',
+            historyReadOnlyBanner: 'Past Consultation Transcript (Read-Only)',
+            historyReturnBtn: '← Return to Active Chat',
+            historyNewChatBtn: '+ New Chat',
+            historyQuestions: 'Questions',
+            confirmNewChat: 'Do you want to archive your current chat and start a new consultation?'
         },
         hi: {
             launcherText: 'नियति से पूछें',
@@ -62,6 +78,9 @@
             lblTob: 'जन्म समय (Time):',
             lblPob: 'जन्म स्थान (Place of Birth):',
             placeholderPob: 'उदा. नई दिल्ली, मुंबई, मेरठ...',
+            lblGender: 'लिंग (Gender):',
+            optMale: 'पुरुष (Male)',
+            optFemale: 'महिला (Female)',
             lblLang: 'पसंदीदा भाषा (Language):',
             btnCompute: '✨ कुंडली देखें और बात शुरू करें',
             btnComputing: '⏳ वैदिक ग्रहों की गणना हो रही है...',
@@ -84,7 +103,20 @@
             loginRequiredMsg: 'अपनी जन्म कुंडली तैयार करने और नियति AI से परामर्श प्राप्त करने के लिए कृपया पहले अपने खाते में लॉगिन करें।',
             btnLogin: '🔑 आगे बढ़ने के लिए लॉगिन करें',
             btnCancel: 'रद्द करें',
-            loginNotice: '🔒 परामर्श शुरू करने के लिए कृपया पहले अपने खाते में लॉगिन करें।'
+            loginNotice: '🔒 परामर्श शुरू करने के लिए कृपया पहले अपने खाते में लॉगिन करें।',
+            historyBtn: 'पिछली बातचीत / परामर्श',
+            historyTitle: 'पिछली बातचीत',
+            historyCurrentChat: 'सक्रिय चैट',
+            historyBackToList: 'सभी बातचीत',
+            historyEmptyTitle: 'अभी कोई पिछली बातचीत नहीं है',
+            historyEmptySub: 'नियति के साथ आपका ज्योतिष परामर्श यहां सुरक्षित संग्रहीत रहेगा ताकि आप इसे कभी भी पढ़ सकें।',
+            historyLoginTitle: 'पिछली बातचीत देखने के लिए लॉगिन करें',
+            historyLoginSub: 'अपने सभी परामर्शों को सुरक्षित देखने के लिए कृपया अपने खाते में लॉगिन करें।',
+            historyReadOnlyBanner: 'पिछली बातचीत (केवल पढ़ने के लिए)',
+            historyReturnBtn: '← सक्रिय चैट पर वापस जाएं',
+            historyNewChatBtn: '+ नई बातचीत',
+            historyQuestions: 'प्रश्न',
+            confirmNewChat: 'क्या आप इस वर्तमान बातचीत को सुरक्षित रखकर नई बातचीत शुरू करना चाहते हैं?'
         },
         hinglish: {
             launcherText: 'Ask Niyati',
@@ -100,6 +132,9 @@
             lblTob: 'Birth Time:',
             lblPob: 'Birth Place:',
             placeholderPob: 'e.g. New Delhi, Mumbai, Lucknow...',
+            lblGender: 'Gender:',
+            optMale: 'Male (Purush)',
+            optFemale: 'Female (Mahila)',
             lblLang: 'Preferred Language:',
             btnCompute: '✨ Kundli Dekhein & Chat Shuru Karein',
             btnComputing: '⏳ Planetary positions calculate ho rahi hain...',
@@ -122,7 +157,20 @@
             loginRequiredMsg: 'Apni birth chart calculate karne aur Niyati se guidance paane ke liye please pehle login karein.',
             btnLogin: '🔑 Login to Continue',
             btnCancel: 'Cancel',
-            loginNotice: '🔒 Consultation shuru karne ke liye pehle login karein.'
+            loginNotice: '🔒 Consultation shuru karne ke liye pehle login karein.',
+            historyBtn: 'Past Consultations',
+            historyTitle: 'Past Consultations',
+            historyCurrentChat: 'Active Chat',
+            historyBackToList: 'All Consultations',
+            historyEmptyTitle: 'Abhi koi past consultation nahi hai',
+            historyEmptySub: 'Niyati ke sath aapke astrological consultations yahan securely save rahenge taaki aap kabhi bhi dekh sakein.',
+            historyLoginTitle: 'Past consultations dekhne ke liye login karein',
+            historyLoginSub: 'Apne sabhi saved consultations ko dekhne ke liye please apne account mein login karein.',
+            historyReadOnlyBanner: 'Past Consultation Transcript (Read-Only)',
+            historyReturnBtn: '← Active Chat par wapas jayein',
+            historyNewChatBtn: '+ New Chat',
+            historyQuestions: 'Questions',
+            confirmNewChat: 'Kya aap current chat ko archive karke nayi consultation start karna chahte hain?'
         }
     };
 
@@ -202,6 +250,41 @@
         return state.nonce || (window.niyatiConfig && window.niyatiConfig.nonce) || '';
     }
 
+    function formatDobForInput(dobStr) {
+        if (!dobStr || typeof dobStr !== 'string') return '';
+        dobStr = dobStr.trim();
+        if (/^\d{4}-\d{2}-\d{2}$/.test(dobStr)) {
+            return dobStr;
+        }
+        var m = dobStr.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/);
+        if (m) {
+            var day = m[1].length === 1 ? '0' + m[1] : m[1];
+            var month = m[2].length === 1 ? '0' + m[2] : m[2];
+            var year = m[3];
+            return year + '-' + month + '-' + day;
+        }
+        var m2 = dobStr.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+        if (m2) {
+            var y = m2[1];
+            var mo = m2[2].length === 1 ? '0' + m2[2] : m2[2];
+            var d = m2[3].length === 1 ? '0' + m2[3] : m2[3];
+            return y + '-' + mo + '-' + d;
+        }
+        return dobStr;
+    }
+
+    function formatDobForDisplay(dobStr) {
+        if (!dobStr || typeof dobStr !== 'string') return '';
+        dobStr = dobStr.trim();
+        var m = dobStr.match(/^(\d{4})[\/\-](\d{1,2})[\/\-](\d{1,2})$/);
+        if (m) {
+            var d = m[3].length === 1 ? '0' + m[3] : m[3];
+            var mo = m[2].length === 1 ? '0' + m[2] : m[2];
+            return d + '/' + mo + '/' + m[1];
+        }
+        return dobStr;
+    }
+
     // DOM Elements
     var el = {};
     var toastTimeout = null;
@@ -275,12 +358,13 @@
                     var tempObj = JSON.parse(savedTemp);
                     if (tempObj) {
                         if (tempObj.name && el.inputName) el.inputName.value = tempObj.name;
-                        if (tempObj.dob && el.inputDob) el.inputDob.value = tempObj.dob;
+                        if (tempObj.dob && el.inputDob) el.inputDob.value = formatDobForInput(tempObj.dob);
                         if (tempObj.tob && el.inputTob) el.inputTob.value = tempObj.tob;
                         if (tempObj.pob && el.inputPob) el.inputPob.value = tempObj.pob;
                         if (tempObj.lat && el.inputLat) el.inputLat.value = tempObj.lat;
                         if (tempObj.lon && el.inputLon) el.inputLon.value = tempObj.lon;
                         if (tempObj.tz && el.inputTz) el.inputTz.value = tempObj.tz;
+                        if (tempObj.gender && el.inputGender) el.inputGender.value = tempObj.gender;
                         if (tempObj.lang && el.inputLang) el.inputLang.value = tempObj.lang;
                     }
                 }
@@ -299,6 +383,37 @@
         } else {
             showView('onboarding');
         }
+
+        // Auto-open chat if returning from checkout or explicitly requested
+        function checkAutoOpen() {
+            var shouldOpen = (
+                window.location.hash === '#open-niyati' ||
+                window.location.hash === '#niyati-chat' ||
+                window.location.search.indexOf('open_chat=1') !== -1 ||
+                (function () {
+                    try {
+                        return sessionStorage.getItem('niyati_auto_open') === '1';
+                    } catch (e) {
+                        return false;
+                    }
+                })()
+            );
+
+            if (shouldOpen) {
+                try {
+                    sessionStorage.removeItem('niyati_auto_open');
+                } catch (e) {}
+
+                if (state.isInitialized) {
+                    window.openNiyatiChat();
+                } else {
+                    state.pendingAutoOpen = true;
+                }
+            }
+        }
+
+        checkAutoOpen();
+        window.addEventListener('hashchange', checkAutoOpen);
     }
 
     function createWidgetDOM() {
@@ -343,6 +458,9 @@
                         </div>
                     </div>
                     <div class="niyati-header-actions">
+                        <button type="button" id="niyati-btn-history" class="niyati-header-btn" title="Past Consultations" aria-label="Past Consultations">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                        </button>
                         <button type="button" id="niyati-btn-reset" class="niyati-header-btn" title="Reset Kundli" aria-label="Reset Kundli">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
                         </button>
@@ -412,13 +530,22 @@
                             <input type="hidden" id="niyati-input-tz" value="5.5">
                         </div>
 
-                        <div class="niyati-form-group">
-                            <label id="niyati-lbl-lang">Preferred Language:</label>
-                            <select id="niyati-input-lang">
-                                <option value="en" selected>English</option>
-                                <option value="hi">हिंदी (Hindi)</option>
-                                <option value="hinglish">Hinglish</option>
-                            </select>
+                        <div style="display:flex; gap:10px;">
+                            <div class="niyati-form-group" style="flex:1;">
+                                <label id="niyati-lbl-gender">Gender:</label>
+                                <select id="niyati-input-gender">
+                                    <option value="male" selected>Male (पुरुष)</option>
+                                    <option value="female">Female (महिला)</option>
+                                </select>
+                            </div>
+                            <div class="niyati-form-group" style="flex:1;">
+                                <label id="niyati-lbl-lang">Preferred Language:</label>
+                                <select id="niyati-input-lang">
+                                    <option value="en" selected>English</option>
+                                    <option value="hi">हिंदी (Hindi)</option>
+                                    <option value="hinglish">Hinglish</option>
+                                </select>
+                            </div>
                         </div>
 
                         <div id="niyati-login-notice" class="niyati-login-notice" style="display:none;">
@@ -442,6 +569,67 @@
                     <div class="niyati-input-bar">
                         <input type="text" id="niyati-user-input" placeholder="Ask Niyati a question..." autocomplete="off">
                         <button id="niyati-btn-send" class="niyati-send-btn" title="Send">➤</button>
+                    </div>
+                </div>
+
+                <!-- PAST CONSULTATIONS DRAWER -->
+                <div id="niyati-history-drawer" class="niyati-history-drawer" style="display:none;" aria-hidden="true">
+                    <!-- History Drawer Header -->
+                    <div class="niyati-history-header">
+                        <div class="niyati-history-header-left">
+                            <button type="button" id="niyati-history-back" class="niyati-history-back-btn" title="Back to Current Chat">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+                                <span id="niyati-history-back-text">Current Chat</span>
+                            </button>
+                        </div>
+                        <div class="niyati-history-header-title" id="niyati-history-title">Past Consultations</div>
+                        <div class="niyati-history-header-right">
+                            <button type="button" id="niyati-history-close" class="niyati-header-btn" title="Close History">✕</button>
+                        </div>
+                    </div>
+
+                    <!-- History Sessions List View -->
+                    <div id="niyati-history-list-view" class="niyati-history-content">
+                        <div class="niyati-history-subhead">
+                            <span id="niyati-history-count-text">Saved Consultations</span>
+                            <button type="button" id="niyati-btn-new-chat" class="niyati-btn-new-consultation">+ New Chat</button>
+                        </div>
+                        <div id="niyati-history-items" class="niyati-history-items"></div>
+                        <div id="niyati-history-empty" class="niyati-history-empty" style="display:none;">
+                            <div class="niyati-history-empty-icon">📜</div>
+                            <h4 id="niyati-history-empty-title">No Past Consultations Yet</h4>
+                            <p id="niyati-history-empty-sub">Your astrological consultations with Niyati will be securely archived here so you can review them anytime.</p>
+                        </div>
+                        <div id="niyati-history-login-prompt" class="niyati-history-login-prompt" style="display:none;">
+                            <div class="niyati-history-empty-icon">🔒</div>
+                            <h4 id="niyati-history-login-title">Log In to View Past Consultations</h4>
+                            <p id="niyati-history-login-sub">Sign in to your account to access your saved astrological sessions across all your devices.</p>
+                            <button type="button" id="niyati-btn-history-login" class="niyati-btn-submit" style="max-width:240px; margin: 15px auto 0;">🔑 Log In</button>
+                        </div>
+                    </div>
+
+                    <!-- Transcript View -->
+                    <div id="niyati-history-transcript-view" class="niyati-history-content" style="display:none;">
+                        <div class="niyati-transcript-bar">
+                            <button type="button" id="niyati-transcript-back-list" class="niyati-transcript-nav-btn">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                                <span id="niyati-transcript-back-text">All Consultations</span>
+                            </button>
+                            <div class="niyati-transcript-meta-badges">
+                                <span id="niyati-transcript-profile-badge" class="niyati-chip-profile" style="display:none;"></span>
+                                <span id="niyati-transcript-date-badge" class="niyati-transcript-date"></span>
+                            </div>
+                        </div>
+                        <div class="niyati-transcript-banner">
+                            <span class="niyati-banner-icon">📜</span>
+                            <span id="niyati-transcript-notice">Past Consultation Transcript (Read-Only)</span>
+                        </div>
+                        <div id="niyati-transcript-messages" class="niyati-chat-messages niyati-transcript-messages"></div>
+                        <div class="niyati-transcript-footer">
+                            <button type="button" id="niyati-btn-transcript-return" class="niyati-btn-transcript-return">
+                                ← Return to Active Chat
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -524,6 +712,8 @@
         el.inputLat = document.getElementById('niyati-input-lat');
         el.inputLon = document.getElementById('niyati-input-lon');
         el.inputTz = document.getElementById('niyati-input-tz');
+        el.inputGender = document.getElementById('niyati-input-gender');
+        el.lblGender = document.getElementById('niyati-lbl-gender');
         el.inputLang = document.getElementById('niyati-input-lang');
         el.pobResults = document.getElementById('niyati-pob-results');
         el.btnCompute = document.getElementById('niyati-btn-compute');
@@ -553,6 +743,33 @@
         el.nudgeBubble = document.getElementById('niyati-nudge-bubble');
         el.nudgeText = document.getElementById('niyati-nudge-text');
         el.nudgeClose = document.getElementById('niyati-nudge-close');
+
+        // Past Consultations Elements
+        el.btnHistory = document.getElementById('niyati-btn-history');
+        el.historyDrawer = document.getElementById('niyati-history-drawer');
+        el.historyBack = document.getElementById('niyati-history-back');
+        el.historyBackText = document.getElementById('niyati-history-back-text');
+        el.historyClose = document.getElementById('niyati-history-close');
+        el.historyTitle = document.getElementById('niyati-history-title');
+        el.historyListView = document.getElementById('niyati-history-list-view');
+        el.historyCountText = document.getElementById('niyati-history-count-text');
+        el.historyItems = document.getElementById('niyati-history-items');
+        el.historyEmpty = document.getElementById('niyati-history-empty');
+        el.historyEmptyTitle = document.getElementById('niyati-history-empty-title');
+        el.historyEmptySub = document.getElementById('niyati-history-empty-sub');
+        el.historyLoginPrompt = document.getElementById('niyati-history-login-prompt');
+        el.historyLoginTitle = document.getElementById('niyati-history-login-title');
+        el.historyLoginSub = document.getElementById('niyati-history-login-sub');
+        el.btnHistoryLogin = document.getElementById('niyati-btn-history-login');
+        el.btnNewChat = document.getElementById('niyati-btn-new-chat');
+        el.transcriptView = document.getElementById('niyati-history-transcript-view');
+        el.transcriptBackList = document.getElementById('niyati-transcript-back-list');
+        el.transcriptBackText = document.getElementById('niyati-transcript-back-text');
+        el.transcriptProfileBadge = document.getElementById('niyati-transcript-profile-badge');
+        el.transcriptDateBadge = document.getElementById('niyati-transcript-date-badge');
+        el.transcriptNotice = document.getElementById('niyati-transcript-notice');
+        el.transcriptMessages = document.getElementById('niyati-transcript-messages');
+        el.btnTranscriptReturn = document.getElementById('niyati-btn-transcript-return');
     }
 
     function applyLanguage(lang) {
@@ -560,7 +777,19 @@
         if (el.launcherLabel) el.launcherLabel.textContent = t.launcherText;
         if (el.headerSubtitle) el.headerSubtitle.textContent = (lang === 'hi' ? 'वैदिक ज्योतिषी' : 'Vedic Astrologer');
         if (el.btnReset) el.btnReset.title = t.resetTitle;
+        if (el.btnHistory) el.btnHistory.title = t.historyBtn || 'Past Consultations';
         if (el.rechargeBtnText) el.rechargeBtnText.textContent = (t.rechargePill || 'Recharge').replace('⚡', '').trim();
+
+        if (el.historyTitle) el.historyTitle.textContent = t.historyTitle || 'Past Consultations';
+        if (el.historyBackText) el.historyBackText.textContent = t.historyCurrentChat || 'Current Chat';
+        if (el.transcriptBackText) el.transcriptBackText.textContent = t.historyBackToList || 'All Consultations';
+        if (el.historyEmptyTitle) el.historyEmptyTitle.textContent = t.historyEmptyTitle || 'No Past Consultations Yet';
+        if (el.historyEmptySub) el.historyEmptySub.textContent = t.historyEmptySub || 'Your astrological consultations with Niyati will be securely archived here so you can review them anytime.';
+        if (el.historyLoginTitle) el.historyLoginTitle.textContent = t.historyLoginTitle || 'Log In to View Past Consultations';
+        if (el.historyLoginSub) el.historyLoginSub.textContent = t.historyLoginSub || 'Sign in to your account to access your saved astrological sessions across all your devices.';
+        if (el.transcriptNotice) el.transcriptNotice.textContent = t.historyReadOnlyBanner || 'Past Consultation Transcript (Read-Only)';
+        if (el.btnTranscriptReturn) el.btnTranscriptReturn.textContent = t.historyReturnBtn || '← Return to Active Chat';
+        if (el.btnNewChat) el.btnNewChat.textContent = t.historyNewChatBtn || '+ New Chat';
 
         var obTitle = document.getElementById('niyati-onboarding-title');
         var obSub = document.getElementById('niyati-onboarding-sub');
@@ -571,6 +800,7 @@
         var lblDob = document.getElementById('niyati-lbl-dob');
         var lblTob = document.getElementById('niyati-lbl-tob');
         var lblPob = document.getElementById('niyati-lbl-pob');
+        var lblGender = document.getElementById('niyati-lbl-gender');
         var lblLang = document.getElementById('niyati-lbl-lang');
         if (lblName) lblName.textContent = t.lblName;
         if (el.inputName) el.inputName.placeholder = t.placeholderName;
@@ -578,6 +808,13 @@
         if (lblTob) lblTob.textContent = t.lblTob;
         if (lblPob) lblPob.textContent = t.lblPob;
         if (el.inputPob) el.inputPob.placeholder = t.placeholderPob;
+        if (lblGender) lblGender.textContent = t.lblGender;
+        if (el.inputGender) {
+            var mOpt = el.inputGender.querySelector('option[value="male"]');
+            var fOpt = el.inputGender.querySelector('option[value="female"]');
+            if (mOpt && t.optMale) mOpt.textContent = t.optMale;
+            if (fOpt && t.optFemale) fOpt.textContent = t.optFemale;
+        }
         if (lblLang) lblLang.textContent = t.lblLang;
         if (el.btnCompute && !state.isComputing) el.btnCompute.textContent = t.btnCompute;
 
@@ -628,6 +865,32 @@
                     showInitializingToast();
                 }
             });
+        }
+
+        // Past Consultations Events
+        if (el.btnHistory) {
+            el.btnHistory.addEventListener('click', toggleHistoryDrawer);
+        }
+        if (el.historyBack) {
+            el.historyBack.addEventListener('click', closeHistoryDrawer);
+        }
+        if (el.historyClose) {
+            el.historyClose.addEventListener('click', closeHistoryDrawer);
+        }
+        if (el.transcriptBackList) {
+            el.transcriptBackList.addEventListener('click', showHistoryListView);
+        }
+        if (el.btnTranscriptReturn) {
+            el.btnTranscriptReturn.addEventListener('click', closeHistoryDrawer);
+        }
+        if (el.btnHistoryLogin) {
+            el.btnHistoryLogin.addEventListener('click', function () {
+                closeHistoryDrawer();
+                showLoginModal();
+            });
+        }
+        if (el.btnNewChat) {
+            el.btnNewChat.addEventListener('click', handleNewChatFromHistory);
         }
 
         // Reset Kundli
@@ -884,7 +1147,7 @@
         }
 
         if (state.isOpen) {
-            scrollToBottom();
+            scrollToLatestBotMessageOrBottom(false);
             if (el.userInput && !el.userInput.disabled) {
                 el.userInput.focus();
             }
@@ -917,7 +1180,7 @@
             } else if (state.chartToken && state.birthData) {
                 checkAndApplyReturnGreeting();
             }
-            scrollToBottom();
+            scrollToLatestBotMessageOrBottom(false);
         } else {
             if (state.isFullscreen) {
                 toggleFullscreen(false);
@@ -940,7 +1203,7 @@
             el.viewOnboarding.classList.remove('active');
             el.viewChat.classList.add('active');
             renderSuggestions();
-            scrollToBottom();
+            scrollToLatestBotMessageOrBottom(false);
         } else {
             el.viewChat.classList.remove('active');
             el.viewOnboarding.classList.add('active');
@@ -975,17 +1238,20 @@
         state.savedProfiles.forEach(function (prof) {
             var chip = document.createElement('div');
             chip.className = 'niyati-profile-chip';
-            if (state.birthData && state.birthData.name && (state.birthData.name || '').toLowerCase() === (prof.name || '').toLowerCase() && state.birthData.dob === prof.dob) {
+            var profDobInput = formatDobForInput(prof.dob || '');
+            var activeDobInput = (state.birthData && state.birthData.dob) ? formatDobForInput(state.birthData.dob) : '';
+            if (state.birthData && state.birthData.name && (state.birthData.name || '').toLowerCase() === (prof.name || '').toLowerCase() && (profDobInput === activeDobInput || prof.dob === state.birthData.dob)) {
                 chip.classList.add('active');
             }
 
             var metaParts = [];
-            if (prof.dob) metaParts.push(prof.dob);
+            if (prof.dob) metaParts.push(formatDobForDisplay(prof.dob));
             if (prof.moon_sign) metaParts.push('🌙 ' + prof.moon_sign);
             var metaText = metaParts.join(' • ');
+            var avatar = (prof.gender === 'female') ? '👩' : (prof.gender === 'male' ? '👨' : '👤');
 
             chip.innerHTML = `
-                <div class="niyati-chip-avatar">👤</div>
+                <div class="niyati-chip-avatar">${avatar}</div>
                 <div class="niyati-chip-info">
                     <span class="niyati-chip-name">${escapeHTML(prof.name || 'Member')}</span>
                     ${metaText ? `<span class="niyati-chip-meta">${escapeHTML(metaText)}</span>` : ''}
@@ -993,8 +1259,10 @@
             `;
 
             chip.addEventListener('click', function () {
+                var safeDob = formatDobForInput(prof.dob || '');
                 if (el.inputName) el.inputName.value = prof.name || '';
-                if (el.inputDob) el.inputDob.value = prof.dob || '';
+                if (prof.gender && el.inputGender) el.inputGender.value = prof.gender;
+                if (el.inputDob) el.inputDob.value = safeDob;
                 if (el.inputTob) el.inputTob.value = prof.tob || '12:00';
                 if (el.inputPob) el.inputPob.value = prof.pob || '';
                 if (el.inputLat) el.inputLat.value = prof.lat || '28.6139';
@@ -1006,11 +1274,45 @@
                 allChips.forEach(function (c) { c.classList.remove('active'); });
                 chip.classList.add('active');
 
-                handleBirthFormSubmit();
+                handleBirthFormSubmit({
+                    name: prof.name || '',
+                    gender: prof.gender || 'male',
+                    dob: safeDob,
+                    tob: prof.tob || '12:00',
+                    pob: prof.pob || '',
+                    lat: prof.lat || '28.6139',
+                    lon: prof.lon || '77.2090',
+                    tz: prof.tz || '5.5',
+                    lang: prof.lang || (el.inputLang ? el.inputLang.value : 'en')
+                });
             });
 
             chipsContainer.appendChild(chip);
         });
+
+        // Prefill form inputs if currently empty and a profile is saved
+        if (state.savedProfiles.length > 0 && el.inputName && !el.inputName.value) {
+            var activeProf = state.savedProfiles[0];
+            if (state.birthData && state.birthData.name) {
+                for (var i = 0; i < state.savedProfiles.length; i++) {
+                    if ((state.savedProfiles[i].name || '').toLowerCase() === (state.birthData.name || '').toLowerCase()) {
+                        activeProf = state.savedProfiles[i];
+                        break;
+                    }
+                }
+            }
+            if (activeProf) {
+                if (el.inputName) el.inputName.value = activeProf.name || '';
+                if (activeProf.gender && el.inputGender) el.inputGender.value = activeProf.gender;
+                if (el.inputDob) el.inputDob.value = formatDobForInput(activeProf.dob || '');
+                if (el.inputTob) el.inputTob.value = activeProf.tob || '12:00';
+                if (el.inputPob) el.inputPob.value = activeProf.pob || '';
+                if (el.inputLat) el.inputLat.value = activeProf.lat || '28.6139';
+                if (el.inputLon) el.inputLon.value = activeProf.lon || '77.2090';
+                if (el.inputTz) el.inputTz.value = activeProf.tz || '5.5';
+                if (activeProf.lang && el.inputLang) el.inputLang.value = activeProf.lang;
+            }
+        }
 
         if (btnNew) {
             btnNew.addEventListener('click', function (e) {
@@ -1022,6 +1324,7 @@
                     el.inputName.focus();
                 }
                 if (el.inputDob) el.inputDob.value = '';
+                if (el.inputGender) el.inputGender.value = 'male';
                 if (el.inputTob) el.inputTob.value = '12:00';
                 if (el.inputPob) el.inputPob.value = '';
                 if (el.inputLat) el.inputLat.value = '28.6139';
@@ -1120,6 +1423,13 @@
             if (data.nudge) {
                 state.nudge = data.nudge;
             }
+
+            if (state.pendingAutoOpen) {
+                state.pendingAutoOpen = false;
+                var pendingCtx = state.pendingReportContext;
+                state.pendingReportContext = null;
+                window.openNiyatiChat(pendingCtx ? pendingCtx.slug : undefined, pendingCtx ? pendingCtx.title : undefined, pendingCtx ? pendingCtx.question : undefined);
+            }
         })
         .catch(function (err) {
             console.warn('Niyati Init Error:', err);
@@ -1127,6 +1437,13 @@
             setChatbotEnabled(true);
             updateQuotaUI();
             updateLoginNoticeUI();
+
+            if (state.pendingAutoOpen) {
+                state.pendingAutoOpen = false;
+                var pendingCtx = state.pendingReportContext;
+                state.pendingReportContext = null;
+                window.openNiyatiChat(pendingCtx ? pendingCtx.slug : undefined, pendingCtx ? pendingCtx.title : undefined, pendingCtx ? pendingCtx.question : undefined);
+            }
         });
     }
 
@@ -1351,7 +1668,7 @@
                 </div>
 
                 <button class="niyati-btn-buy ${isFeatured ? 'featured-btn' : ''}" data-pack="${pack.key}">
-                    <span>Recharge for ₹${pack.offer_price}</span>
+                    <span>Proceed to Checkout (₹${pack.offer_price})</span>
                     <span class="niyati-buy-arrow">&rarr;</span>
                 </button>
             `;
@@ -1371,63 +1688,44 @@
         });
     }
 
-    function handleBuyPack(pack, btn) {
-        var origText = btn.textContent;
-        btn.disabled = true;
-        btn.textContent = '⏳ Processing...';
+    function redirectToCheckout(packKey) {
+        var baseCheckout = (window.niyatiConfig && window.niyatiConfig.checkout_url)
+            ? window.niyatiConfig.checkout_url
+            : ((state.initData && state.initData.checkout_url) ? state.initData.checkout_url : '/checkout/');
 
-        var wpNonce = getWpNonce();
-        var wpUserId = (window.niyatiConfig && window.niyatiConfig.user_id) ? window.niyatiConfig.user_id : 0;
+        var url;
+        try {
+            url = new URL(baseCheckout, window.location.href);
+        } catch (e) {
+            url = new URL('/checkout/', window.location.href);
+        }
+
+        url.searchParams.set('type', 'chat_credits');
+        if (packKey) {
+            url.searchParams.set('pack', packKey);
+        }
+        if (state.visitorId) {
+            url.searchParams.set('visitor_id', state.visitorId);
+        }
         var wpUserName = (window.niyatiConfig && window.niyatiConfig.user_name) ? window.niyatiConfig.user_name : '';
-        var wpUserEmail = (window.niyatiConfig && window.niyatiConfig.user_email) ? window.niyatiConfig.user_email : '';
         var custName = wpUserName || (state.birthData && state.birthData.name ? state.birthData.name : '');
+        if (custName) {
+            url.searchParams.set('customer_name', custName);
+        }
+        var wpUserEmail = (window.niyatiConfig && window.niyatiConfig.user_email) ? window.niyatiConfig.user_email : '';
+        if (wpUserEmail) {
+            url.searchParams.set('customer_email', wpUserEmail);
+        }
 
-        fetch(restBase + '/create-order', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-WP-Nonce': wpNonce
-            },
-            credentials: 'same-origin',
-            body: JSON.stringify({
-                pack_key: pack.key,
-                visitor_id: state.visitorId,
-                user_id: wpUserId,
-                customer_name: custName,
-                customer_email: wpUserEmail
-            })
-        })
-        .then(function (res) { return res.json(); })
-        .then(function (orderData) {
-            if (!orderData.success) {
-                alert(orderData.message || 'Unable to create order.');
-                btn.disabled = false;
-                btn.textContent = origText;
-                return;
-            }
+        window.location.href = url.toString();
+    }
 
-            if (orderData.simulated) {
-                // Test mode simulation
-                setTimeout(function () {
-                    verifyPayment({
-                        pack_key: pack.key,
-                        order_id: orderData.order_id,
-                        internal_txn_id: orderData.internal_txn_id || '',
-                        payment_id: 'pay_sim_' + Math.floor(Math.random() * 1000000),
-                        signature: 'sim_sig',
-                        visitor_id: state.visitorId
-                    }, btn, origText, pack);
-                }, 600);
-            } else {
-                // Live Razorpay
-                openRazorpayCheckout(orderData, pack, btn, origText);
-            }
-        })
-        .catch(function (err) {
-            btn.disabled = false;
-            btn.textContent = origText;
-            alert('Payment initialization failed. Please try again.');
-        });
+    function handleBuyPack(pack, btn) {
+        if (btn) {
+            btn.disabled = true;
+            btn.textContent = '⏳ Redirecting to Checkout...';
+        }
+        redirectToCheckout(pack ? pack.key : 'pack_value');
     }
 
     function recordOrderFailure(orderId, internalTxnId, reason, dropStage) {
@@ -1583,26 +1881,55 @@
             });
     }
 
-    function handleBirthFormSubmit() {
+    function handleBirthFormSubmit(overrideData) {
         if (!state.isInitialized) {
             showInitializingToast();
             return;
         }
         if (state.isComputing) return;
 
-        var name = el.inputName.value.trim();
-        var dob = el.inputDob.value;
-        var tob = el.inputTob.value;
-        var pob = el.inputPob.value.trim();
-        var lat = el.inputLat.value;
-        var lon = el.inputLon.value;
-        var tz = el.inputTz.value;
-        var lang = el.inputLang.value;
+        var name = (overrideData && overrideData.name) ? overrideData.name.trim() : (el.inputName ? el.inputName.value.trim() : '');
+        var gender = (overrideData && overrideData.gender) ? overrideData.gender : (el.inputGender ? el.inputGender.value : 'male');
+        var rawDob = (overrideData && overrideData.dob) ? overrideData.dob : (el.inputDob ? el.inputDob.value : '');
+        var dob = formatDobForInput(rawDob);
+        var tob = (overrideData && overrideData.tob) ? overrideData.tob : (el.inputTob ? el.inputTob.value : '12:00');
+        var pob = (overrideData && overrideData.pob) ? overrideData.pob.trim() : (el.inputPob ? el.inputPob.value.trim() : '');
+        var lat = (overrideData && overrideData.lat) ? overrideData.lat : (el.inputLat ? el.inputLat.value : '28.6139');
+        var lon = (overrideData && overrideData.lon) ? overrideData.lon : (el.inputLon ? el.inputLon.value : '77.2090');
+        var tz = (overrideData && overrideData.tz) ? overrideData.tz : (el.inputTz ? el.inputTz.value : '5.5');
+        var lang = (overrideData && overrideData.lang) ? overrideData.lang : (el.inputLang ? el.inputLang.value : 'en');
+
+        // Synchronize DOM inputs with sanitized and formatted data
+        if (el.inputName && name) el.inputName.value = name;
+        if (el.inputGender && gender) el.inputGender.value = gender;
+        if (el.inputDob && dob) el.inputDob.value = dob;
+        if (el.inputTob && tob) el.inputTob.value = tob;
+        if (el.inputPob && pob) el.inputPob.value = pob;
+        if (el.inputLat && lat) el.inputLat.value = lat;
+        if (el.inputLon && lon) el.inputLon.value = lon;
+        if (el.inputTz && tz) el.inputTz.value = tz;
+        if (el.inputLang && lang) el.inputLang.value = lang;
+
+        var t = i18n[lang] || i18n['en'];
+
+        // Guard against missing DOB
+        if (!dob) {
+            if (el.inputDob) {
+                el.inputDob.focus();
+                el.inputDob.style.outline = '2px solid #ef4444';
+                setTimeout(function () {
+                    if (el.inputDob) el.inputDob.style.outline = '';
+                }, 3000);
+            }
+            alert(t.lblDob ? (t.lblDob.replace(':', '') + ' is required.') : 'Please provide your Date of Birth.');
+            return;
+        }
 
         // Guard against unauthenticated users: preserve input data and open login modal
         if (!state.isLoggedIn) {
             var tempPayload = {
                 name: name,
+                gender: gender,
                 dob: dob,
                 tob: tob,
                 pob: pob,
@@ -1627,6 +1954,7 @@
 
         var payload = {
             name: name,
+            gender: gender,
             dob: dob,
             tob: tob,
             pob: pob,
@@ -1800,16 +2128,23 @@
         state.history.push({ role: 'model', text: returnGreeting, is_return_greeting: true });
         localStorage.setItem('niyati_chat_history', JSON.stringify(state.history));
         appendMessageBubble('model', returnGreeting);
-        scrollToBottom();
     }
 
     function renderStoredHistory() {
         el.chatList.innerHTML = '';
+        var lastBotMsg = null;
         state.history.forEach(function (msg) {
-            appendMessageBubble(msg.role, msg.text, { orderBtn: msg.order_btn });
+            var b = appendMessageBubble(msg.role, msg.text, { orderBtn: msg.order_btn, noScroll: true });
+            if (msg.role === 'model' && b) {
+                lastBotMsg = b;
+            }
         });
         renderSuggestions();
-        scrollToBottom();
+        if (lastBotMsg) {
+            scrollToMessageStart(lastBotMsg, false);
+        } else {
+            scrollToBottom();
+        }
     }
 
     function hasUserStartedChat() {
@@ -1978,7 +2313,6 @@
                 var curT = i18n[state.lang] || i18n['en'];
                 appendMessageBubble('model', data.reply || curT.serverError);
             }
-            scrollToBottom();
         })
         .catch(function () {
             showTyping(false);
@@ -1986,12 +2320,12 @@
             el.btnSend.disabled = false;
             var curT = i18n[state.lang] || i18n['en'];
             appendMessageBubble('model', curT.netError || 'Internet connection error. Please try again.');
-            scrollToBottom();
         });
     }
 
     function appendMessageBubble(role, text, options) {
         if (!text) return;
+        var targetContainer = (options && options.container) ? options.container : el.chatList;
 
         // If user message, render as single bubble
         if (role === 'user') {
@@ -2001,9 +2335,11 @@
             userBubble.className = 'niyati-msg-bubble';
             userBubble.innerHTML = formatMarkdown(text);
             userDiv.appendChild(userBubble);
-            el.chatList.appendChild(userDiv);
-            scrollToBottom();
-            return;
+            targetContainer.appendChild(userDiv);
+            if (!options || !options.noScroll) {
+                scrollToBottom();
+            }
+            return userDiv;
         }
 
         // For bot/model responses, split multi-paragraph text into clean, digestible chat bubbles
@@ -2041,19 +2377,18 @@
         authorHeader.innerHTML = '<span class="niyati-author-name">' + botName + '</span>';
         bodyWrap.appendChild(authorHeader);
 
+        var bubble = document.createElement('div');
+        bubble.className = 'niyati-msg-bubble';
+
         if (paragraphs.length <= 1) {
-            var bubble = document.createElement('div');
-            bubble.className = 'niyati-msg-bubble';
             bubble.innerHTML = formatMarkdown(text);
-            bodyWrap.appendChild(bubble);
         } else {
-            paragraphs.forEach(function (para, idx) {
-                var bubble = document.createElement('div');
-                bubble.className = 'niyati-msg-bubble' + (idx > 0 ? ' niyati-msg-bubble-followup' : '');
-                bubble.innerHTML = formatMarkdown(para);
-                bodyWrap.appendChild(bubble);
+            var formattedParts = paragraphs.map(function (para) {
+                return '<div class="niyati-msg-para">' + formatMarkdown(para) + '</div>';
             });
+            bubble.innerHTML = formattedParts.join('');
         }
+        bodyWrap.appendChild(bubble);
 
         // Assisted Order Dossier CTA card
         if (options && options.orderBtn) {
@@ -2076,14 +2411,18 @@
         }
 
         msgDiv.appendChild(bodyWrap);
-        el.chatList.appendChild(msgDiv);
+        targetContainer.appendChild(msgDiv);
 
-        // If suggestions are currently active, keep them at the end of the stream
-        if (el.suggestions && el.suggestions.style.display !== 'none' && el.suggestions.parentNode === el.chatList) {
+        // If suggestions are currently active and target is main chat, keep them at the end
+        if (targetContainer === el.chatList && el.suggestions && el.suggestions.style.display !== 'none' && el.suggestions.parentNode === el.chatList) {
             el.chatList.appendChild(el.suggestions);
         }
 
-        scrollToBottom();
+        if (!options || !options.noScroll) {
+            scrollToMessageStart(msgDiv, true);
+        }
+
+        return msgDiv;
     }
 
     function appendLimitExceededCard(customMsg) {
@@ -2272,9 +2611,236 @@
         showView('onboarding');
     }
 
+    function toggleHistoryDrawer() {
+        if (!el.historyDrawer) return;
+        if (el.historyDrawer.classList.contains('active')) {
+            closeHistoryDrawer();
+        } else {
+            openHistoryDrawer();
+        }
+    }
+
+    function openHistoryDrawer() {
+        if (!el.historyDrawer) return;
+        el.historyDrawer.style.display = 'flex';
+        requestAnimationFrame(function () {
+            el.historyDrawer.classList.add('active');
+            el.historyDrawer.setAttribute('aria-hidden', 'false');
+        });
+
+        showHistoryListView();
+
+        if (!state.isLoggedIn) {
+            if (el.historyItems) el.historyItems.style.display = 'none';
+            if (el.historyEmpty) el.historyEmpty.style.display = 'none';
+            if (el.historyLoginPrompt) el.historyLoginPrompt.style.display = 'block';
+            return;
+        }
+
+        if (el.historyLoginPrompt) el.historyLoginPrompt.style.display = 'none';
+        if (el.historyEmpty) el.historyEmpty.style.display = 'none';
+        if (el.historyItems) {
+            el.historyItems.style.display = 'block';
+            el.historyItems.innerHTML = '<div class="niyati-history-loading"><div class="niyati-typing-dots"><span></span><span></span><span></span></div><p style="margin-top:8px; font-size:12.5px; color:#B3541E;">Loading past consultations...</p></div>';
+        }
+
+        var wpNonce = getWpNonce();
+        fetch(restBase + '/chat-history', {
+            method: 'GET',
+            headers: {
+                'X-WP-Nonce': wpNonce
+            },
+            credentials: 'same-origin'
+        })
+        .then(function (res) {
+            return res.json();
+        })
+        .then(function (data) {
+            if (!data.success || !data.archives || !data.archives.length) {
+                if (el.historyItems) el.historyItems.style.display = 'none';
+                if (el.historyEmpty) el.historyEmpty.style.display = 'block';
+                return;
+            }
+
+            if (el.historyEmpty) el.historyEmpty.style.display = 'none';
+            if (el.historyItems) {
+                el.historyItems.style.display = 'block';
+                el.historyItems.innerHTML = '';
+
+                var t = i18n[state.lang] || i18n['en'];
+                var qLabel = t.historyQuestions || 'Questions';
+
+                data.archives.forEach(function (arc) {
+                    var card = document.createElement('div');
+                    card.className = 'niyati-history-card';
+                    card.setAttribute('role', 'button');
+                    card.setAttribute('tabindex', '0');
+
+                    var qCount = arc.question_count || 0;
+                    var previewHtml = arc.preview ? ('"' + escapeHTML(arc.preview) + '"') : '';
+
+                    card.innerHTML = `
+                        <div class="niyati-card-header">
+                            <span class="niyati-card-date">📅 ${escapeHTML(arc.date_formatted)}</span>
+                            <div class="niyati-card-badges">
+                                <span class="niyati-card-profile">👤 ${escapeHTML(arc.profile_name || 'Self')}</span>
+                                <span class="niyati-card-qcount">${qCount} ${escapeHTML(qLabel)}</span>
+                            </div>
+                        </div>
+                        ${previewHtml ? `<div class="niyati-card-preview">${previewHtml}</div>` : ''}
+                        <div class="niyati-card-footer">
+                            <span class="niyati-card-view-btn">View Transcript →</span>
+                        </div>
+                    `;
+
+                    card.addEventListener('click', function () {
+                        loadArchiveTranscript(arc.session_id, arc.date_formatted, arc.profile_name);
+                    });
+
+                    card.addEventListener('keydown', function (e) {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            loadArchiveTranscript(arc.session_id, arc.date_formatted, arc.profile_name);
+                        }
+                    });
+
+                    el.historyItems.appendChild(card);
+                });
+            }
+        })
+        .catch(function () {
+            if (el.historyItems) {
+                el.historyItems.innerHTML = '<div style="text-align:center; padding:20px; color:#991B1B; font-size:13px;">Unable to load consultations. Please try again.</div>';
+            }
+        });
+    }
+
+    function closeHistoryDrawer() {
+        if (!el.historyDrawer) return;
+        el.historyDrawer.classList.remove('active');
+        el.historyDrawer.setAttribute('aria-hidden', 'true');
+        setTimeout(function () {
+            if (!el.historyDrawer.classList.contains('active')) {
+                el.historyDrawer.style.display = 'none';
+            }
+        }, 250);
+    }
+
+    function showHistoryListView() {
+        if (el.transcriptView) el.transcriptView.style.display = 'none';
+        if (el.historyListView) el.historyListView.style.display = 'flex';
+    }
+
+    function loadArchiveTranscript(sessionId, dateFormatted, profileName) {
+        if (!sessionId || !el.transcriptView || !el.historyListView) return;
+
+        el.historyListView.style.display = 'none';
+        el.transcriptView.style.display = 'flex';
+
+        if (el.transcriptDateBadge) {
+            el.transcriptDateBadge.textContent = '📅 ' + (dateFormatted || '');
+        }
+        if (el.transcriptProfileBadge) {
+            if (profileName) {
+                el.transcriptProfileBadge.textContent = '👤 ' + profileName;
+                el.transcriptProfileBadge.style.display = 'inline-block';
+            } else {
+                el.transcriptProfileBadge.style.display = 'none';
+            }
+        }
+
+        if (el.transcriptMessages) {
+            el.transcriptMessages.innerHTML = '<div class="niyati-history-loading" style="padding:40px 20px;"><div class="niyati-typing-dots"><span></span><span></span><span></span></div><p style="margin-top:10px; font-size:13px; color:#B3541E;">Retrieving consultation transcript...</p></div>';
+        }
+
+        var wpNonce = getWpNonce();
+        fetch(restBase + '/chat-archive-session?session_id=' + encodeURIComponent(sessionId), {
+            method: 'GET',
+            headers: {
+                'X-WP-Nonce': wpNonce
+            },
+            credentials: 'same-origin'
+        })
+        .then(function (res) {
+            return res.json();
+        })
+        .then(function (data) {
+            if (!el.transcriptMessages) return;
+            el.transcriptMessages.innerHTML = '';
+
+            if (!data.success || !data.session || !data.session.messages || !data.session.messages.length) {
+                el.transcriptMessages.innerHTML = '<div style="text-align:center; padding:30px; color:#64748B;">No messages found in this consultation session.</div>';
+                return;
+            }
+
+            data.session.messages.forEach(function (msg) {
+                appendMessageBubble(msg.role, msg.text, {
+                    noScroll: true,
+                    container: el.transcriptMessages,
+                    orderBtn: msg.order_btn
+                });
+            });
+
+            el.transcriptMessages.scrollTop = 0;
+        })
+        .catch(function () {
+            if (el.transcriptMessages) {
+                el.transcriptMessages.innerHTML = '<div style="text-align:center; padding:30px; color:#991B1B;">Error loading consultation transcript.</div>';
+            }
+        });
+    }
+
+    function handleNewChatFromHistory() {
+        var t = i18n[state.lang] || i18n['en'];
+        var confirmMsg = t.confirmNewChat || 'Do you want to archive your current chat and start a new consultation?';
+        if (confirm(confirmMsg)) {
+            resetKundli();
+            closeHistoryDrawer();
+        }
+    }
+
+    function scrollToMessageStart(targetEl, smooth) {
+        if (!el.chatList) return;
+        requestAnimationFrame(function () {
+            setTimeout(function () {
+                if (!targetEl || !el.chatList.contains(targetEl)) {
+                    el.chatList.scrollTop = el.chatList.scrollHeight;
+                    return;
+                }
+
+                var chatRect = el.chatList.getBoundingClientRect();
+                var targetRect = targetEl.getBoundingClientRect();
+                var currentScroll = el.chatList.scrollTop;
+                var offsetRelativeToContainer = targetRect.top - chatRect.top;
+                var targetScrollTop = Math.max(0, currentScroll + offsetRelativeToContainer - 8);
+
+                if (smooth !== false && typeof el.chatList.scrollTo === 'function') {
+                    el.chatList.scrollTo({
+                        top: targetScrollTop,
+                        behavior: 'smooth'
+                    });
+                } else {
+                    el.chatList.scrollTop = targetScrollTop;
+                }
+            }, 60);
+        });
+    }
+
+    function scrollToLatestBotMessageOrBottom(smooth) {
+        if (!el.chatList) return;
+        var botMsgs = el.chatList.querySelectorAll('.niyati-msg.bot');
+        if (botMsgs && botMsgs.length > 0) {
+            scrollToMessageStart(botMsgs[botMsgs.length - 1], smooth);
+        } else {
+            scrollToBottom();
+        }
+    }
+
     function scrollToBottom() {
         setTimeout(function () {
-            el.chatList.scrollTop = el.chatList.scrollHeight;
+            if (el.chatList) {
+                el.chatList.scrollTop = el.chatList.scrollHeight;
+            }
         }, 60);
     }
 
@@ -2290,11 +2856,12 @@
         'kaal-sarp-dosh': 'Kaal Sarp Dosh Check',
         'pitra-dosh': 'Pitra Dosh Check',
         'dosh': 'Vedic Dosh Overview',
+        'dasha-timing-report': 'Dasha Timing & Predictions',
         'current-mahadasha-full': 'Mahadasha Full Report',
         'current-mahadasha': 'Current Mahadasha Check',
         'maha-dasha-predictions': 'Mahadasha Predictions',
         'antar-dasha': 'Antardasha Predictions',
-        'dasha': 'Kundali Dasha',
+        'dasha': 'Kundali Dasha & Timing',
         'yearly-horoscope-prediction': 'Yearly Horoscope Prediction',
         'horoscope': 'Daily Horoscope',
         'panchang/abhijit-muhurat': 'Abhijit Muhurat Today',
@@ -2347,71 +2914,114 @@
 
         var links = [];
 
-        // 1. Extract existing HTML links <a ...>Label</a>
-        var processed = text.replace(/<a\s+(?:[^>]*?\s+)?href=["'](https?:\/\/[^"']+)["'][^>]*>(.*?)<\/a>/gi, function(match, url, label) {
-            var token = '___NIYATI_LINK_' + links.length + '___';
-            var cleanLabel = getCleanButtonTitle(url, label.replace(/<[^>]*>/g, ''));
-            links.push({ label: cleanLabel, url: url, isButton: true });
-            return token;
-        });
-
-        // 2. Extract markdown links [Label](URL) with optional leading pointer emojis
-        processed = processed.replace(/(?:👉|✨|🔗|🔍)?[ \t]*\[([^\]]+)\][ \t]*\((https?:\/\/[^\s\)\"\']+)\)/gi, function(match, label, url) {
-            var token = '___NIYATI_LINK_' + links.length + '___';
+        // 1. Standalone Markdown links occupying an entire line (explicit Call-To-Action / Recommendation buttons)
+        var processed = text.replace(/(^|\r?\n)([ \t]*(?:👉|✨|🔗|🔍|📊|📜|[-*•])?[ \t]*)\[([^\]]+)\][ \t]*\((https?:\/\/[^\s\)\"\']+)\)[ \t]*(?=\r?\n|$)/gi, function(match, leadNewline, prefix, label, url) {
+            var token = '___NIYATI_CTA_' + links.length + '___';
             var cleanLabel = getCleanButtonTitle(url, label);
-            links.push({ label: cleanLabel, url: url, isButton: true });
-            return token;
+            links.push({ label: cleanLabel, url: url, isStandalone: true });
+            return (leadNewline || '') + token;
         });
 
-        // 3. Extract bare URLs (https://... or http://...) that are not already tokenized
-        // Also handle cases where a bare URL is wrapped in brackets/parentheses e.g. (http://...) or [http://...]
-        processed = processed.replace(/(?:\[|\()?\s*(https?:\/\/[^\s\<\>\"\'\)]+)\s*(?:\]|\))?/gi, function(match, url) {
-            if (url.indexOf('___NIYATI_LINK_') !== -1) return url;
+        // 2. Standalone HTML links occupying an entire line
+        processed = processed.replace(/(^|\r?\n)([ \t]*)<a\s+(?:[^>]*?\s+)?href=["'](https?:\/\/[^"']+)["'][^>]*>(.*?)<\/a>[ \t]*(?=\r?\n|$)/gi, function(match, leadNewline, prefix, url, label) {
+            var token = '___NIYATI_CTA_' + links.length + '___';
+            var cleanLabel = getCleanButtonTitle(url, label.replace(/<[^>]*>/g, ''));
+            links.push({ label: cleanLabel, url: url, isStandalone: true });
+            return (leadNewline || '') + token;
+        });
+
+        // 3. Inline HTML links inside running text
+        processed = processed.replace(/(\s*)<a\s+(?:[^>]*?\s+)?href=["'](https?:\/\/[^"']+)["'][^>]*>(.*?)<\/a>/gi, function(match, leadSpace, url, label) {
+            var token = '___NIYATI_INLINE_' + links.length + '___';
+            var cleanLabel = label.replace(/<[^>]*>/g, '').trim();
+            if (!cleanLabel) cleanLabel = getCleanButtonTitle(url, '');
+            links.push({ label: cleanLabel, url: url, isStandalone: false });
+            return (leadSpace || '') + token;
+        });
+
+        // 4. Remaining Inline Markdown links inside sentences
+        processed = processed.replace(/(\s*)(?:👉|✨|🔗|🔍)?[ \t]*\[([^\]]+)\][ \t]*\((https?:\/\/[^\s\)\"\']+)\)/gi, function(match, leadSpace, label, url) {
+            var token = '___NIYATI_INLINE_' + links.length + '___';
+            var cleanLabel = (label || '').trim().replace(/[\[\]\(\)]+/g, '').replace(/\s+/g, ' ');
+            if (!cleanLabel) cleanLabel = getCleanButtonTitle(url, '');
+            links.push({ label: cleanLabel, url: url, isStandalone: false });
+            return (leadSpace || '') + token;
+        });
+
+        // 5. Standalone bare URLs on their own line
+        processed = processed.replace(/(^|\r?\n)([ \t]*)(?:\[|\()?\s*(https?:\/\/[^\s\<\>\"\'\)]+)\s*(?:\]|\))?[ \t]*(?=\r?\n|$)/gi, function(match, leadNewline, prefix, url) {
+            if (url.indexOf('___NIYATI_') !== -1) return match;
+            var cleanUrl = url.replace(/[.,:;!?]+$/, '');
+            var cleanLabel = getCleanButtonTitle(cleanUrl, '');
+            var token = '___NIYATI_CTA_' + links.length + '___';
+            links.push({ label: cleanLabel, url: cleanUrl, isStandalone: true });
+            return (leadNewline || '') + token;
+        });
+
+        // 6. Inline bare URLs inside running text
+        processed = processed.replace(/(\s*)(?:\[|\()?\s*(https?:\/\/[^\s\<\>\"\'\)]+)\s*(?:\]|\))?/gi, function(match, leadSpace, url) {
+            if (url.indexOf('___NIYATI_') !== -1) return match;
             var cleanUrl = url.replace(/[.,:;!?]+$/, '');
             var isInternal = cleanUrl.indexOf('localhost') !== -1 || cleanUrl.indexOf('merarashifal') !== -1;
             var cleanLabel = isInternal ? getCleanButtonTitle(cleanUrl, '') : cleanUrl;
-            var token = '___NIYATI_LINK_' + links.length + '___';
-            links.push({ label: cleanLabel, url: cleanUrl, isButton: isInternal });
-            return token;
+            var token = '___NIYATI_INLINE_' + links.length + '___';
+            links.push({ label: cleanLabel, url: cleanUrl, isStandalone: false });
+            return (leadSpace || '') + token;
         });
 
         // Clean any leftover brackets/parentheses around replaced tokens
-        processed = processed.replace(/\[\s*(___NIYATI_LINK_\d+___)\s*\]/g, '$1')
-                             .replace(/\(\s*(___NIYATI_LINK_\d+___)\s*\)/g, '$1');
+        processed = processed.replace(/\[\s*(___NIYATI_(?:CTA|INLINE)_\d+___)\s*\]/g, '$1')
+                             .replace(/\(\s*(___NIYATI_(?:CTA|INLINE)_\d+___)\s*\)/g, '$1');
 
-        // 4. Escape HTML for security against XSS
+        // 7. Escape HTML for security against XSS
         var escaped = escapeHTML(processed);
 
-        // 5. Restore links as valid clickable buttons / <a> tags
+        // 8. Restore links: Standalone CTAs get full-width button wrappers; inline links get smooth in-text tags
         links.forEach(function(item, idx) {
-            var token = '___NIYATI_LINK_' + idx + '___';
+            var ctaToken = '___NIYATI_CTA_' + idx + '___';
+            var inlineToken = '___NIYATI_INLINE_' + idx + '___';
             var safeLabel = escapeHTML(item.label);
             var safeUrl = item.url.replace(/"/g, '&quot;');
-            var isAction = item.isButton || /👉|✨|📜|🔍|📊|🔗|view|check|open|dekhein|dekh|explore|report|kundali|matchmaking|panchang|muhurat|horoscope|calculator|remedies/i.test(item.label);
-            var btnClass = isAction ? 'niyati-auto-link niyati-action-btn' : 'niyati-auto-link';
-            var html = '<a href="' + safeUrl + '" target="_blank" rel="noopener noreferrer" class="' + btnClass + '">' + safeLabel + '<span class="niyati-link-icon">↗</span></a>';
-            escaped = escaped.split(token).join(html);
+
+            if (item.isStandalone) {
+                var html = '<div class="niyati-cta-container">' +
+                    '<a href="' + safeUrl + '" target="_blank" rel="noopener noreferrer" class="niyati-action-btn">' +
+                    '<span class="niyati-action-text">' + safeLabel + '</span>' +
+                    '<span class="niyati-link-icon">➔</span>' +
+                    '</a></div>';
+                escaped = escaped.split(ctaToken).join(html);
+            } else {
+                var html = '<a href="' + safeUrl + '" target="_blank" rel="noopener noreferrer" class="niyati-inline-link">' +
+                    safeLabel + '<span class="niyati-inline-icon">↗</span></a>';
+                escaped = escaped.split(inlineToken).join(html);
+            }
         });
 
-        // 6. Bold: **text**
+        // 9. Bold: **text**
         escaped = escaped.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
 
-        // 7. Auto-Highlight Vedic entities (Planets, Deities, Days, Mantras, Gemstones, Months, Festivals)
+        // 10. Auto-Highlight Vedic entities (Planets, Deities, Days, Mantras, Gemstones, Months, Festivals)
         escaped = highlightVedicTerms(escaped);
 
-        // 8. Bullet points: * or -
+        // 11. Bullet points: * or -
         escaped = escaped.replace(/(?:^|\n)[*-]\s+(.+)/g, '<br>• $1');
-        // 9. Line breaks
+
+        // 12. Line breaks
         escaped = escaped.replace(/\n/g, '<br>');
+
+        // 13. Clean redundant breaks immediately adjacent to CTA button blocks
+        escaped = escaped.replace(/(?:<br>\s*)+(<div class="niyati-cta-container">)/gi, '$1')
+                         .replace(/(<\/div>)(?:\s*<br>)+/gi, '$1');
+
         return escaped;
     }
 
     function highlightVedicTerms(html) {
         if (!html) return '';
 
-        // 1. Temporarily protect existing <strong>...</strong> and <a ...>...</a> blocks
+        // 1. Temporarily protect existing <strong>...</strong>, <a ...>...</a>, and <div ...>...</div> blocks
         var preserved = [];
-        var text = html.replace(/<(strong|a)\b[^>]*>.*?<\/\1>/gi, function(match) {
+        var text = html.replace(/<(strong|a|div)\b[^>]*>.*?<\/\1>/gi, function(match) {
             var token = '___NIYATI_PRESERVED_' + preserved.length + '___';
             preserved.push(match);
             return token;
@@ -2833,7 +3443,7 @@
             }
 
             renderSuggestions();
-            scrollToBottom();
+            scrollToLatestBotMessageOrBottom(false);
 
             if (initialQuestion && el.userInput) {
                 el.userInput.value = initialQuestion;
@@ -2852,7 +3462,10 @@
     // Expose global window.openNiyatiChat
     window.openNiyatiChat = function (reportSlug, reportTitle, initialQuestion) {
         if (!state.isInitialized) {
-            state.pendingReportContext = { slug: reportSlug, title: reportTitle, question: initialQuestion };
+            state.pendingAutoOpen = true;
+            if (reportSlug) {
+                state.pendingReportContext = { slug: reportSlug, title: reportTitle, question: initialQuestion };
+            }
             showInitializingToast();
             return;
         }
@@ -2863,13 +3476,28 @@
             el.container.classList.add('active');
         }
 
+        if (el.rechargeSheet && el.rechargeSheet.classList.contains('active')) {
+            closeRechargeSheet();
+        }
+
         if (reportSlug) {
             applyReportContext(reportSlug, reportTitle, initialQuestion);
         } else {
-            scrollToBottom();
+            if (state.isLoggedIn && state.chartToken && state.birthData) {
+                showView('chat');
+                checkAndApplyReturnGreeting();
+            }
+            scrollToLatestBotMessageOrBottom(false);
             if (el.userInput && !el.userInput.disabled) {
                 el.userInput.focus();
             }
+        }
+    };
+
+    // Expose global window.niyatiRefreshWallet
+    window.niyatiRefreshWallet = function () {
+        if (typeof fetchInitData === 'function') {
+            fetchInitData();
         }
     };
 

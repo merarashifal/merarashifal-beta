@@ -173,6 +173,17 @@ class MR_Packs {
                 'pages' => '22 Pages',
                 'description' => '22-page Sankhya Shastra audit: Lo Shu grid, core numbers, 8-1-6 arrow, and 90-day roadmap.'
             ],
+            'numero_report' => [
+                'name' => 'Master Numerology & Vedic Integration Report',
+                'system' => 'universal',
+                'category' => 'General & Numerology',
+                'icon' => 'fa-solid fa-star',
+                'dashicon' => 'dashicons-star-filled',
+                'price_usd' => 3.99,
+                'price_cad' => 5.59,
+                'pages' => '22 Pages',
+                'description' => '22-page Sankhya Shastra audit: Lo Shu grid, core numbers, 8-1-6 arrow, and 90-day roadmap.'
+            ],
             'numerology' => [
                 'name' => 'Numerology Report',
                 'system' => 'universal',
@@ -375,6 +386,13 @@ class MR_Packs {
         $reports = self::get_reports();
         if ($report_key === 'yearly_horoscope') $report_key = 'yearly_horoscope_vedic';
         if ($report_key === 'monthly_horoscope') $report_key = 'monthly_horoscope_vedic';
+        if ($report_key === 'numero_report' || $report_key === 'numerology-report') $report_key = 'numerology_report';
+        if ($report_key === 'palm-reading-report' || $report_key === 'palm_reading') $report_key = 'palmistry_report';
+        if ($report_key === 'kundali-and-gun-matching-report') $report_key = 'kundli_matching';
+        if ($report_key === 'janam-kundali-master-report') $report_key = 'kundli_predictions';
+        if ($report_key === 'dasha-timing-report') $report_key = 'mahadasha_timing';
+        if ($report_key === 'kundali-dosh-report') $report_key = 'dosh_remedial';
+        if ($report_key === 'yearly-horoscope-report' || $report_key === 'landingpage') $report_key = 'yearly_horoscope_long';
         return $reports[$report_key] ?? null;
     }
 

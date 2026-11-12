@@ -242,27 +242,162 @@ class MR_Report_Builder {
     }
 
     /**
+     * Render Statutory Disclaimer & Non-Liability Notice
+     */
+    public static function render_statutory_disclaimer() {
+        return '<div style="margin-top:auto; margin-bottom:6px; padding:4px 8px; background:#FFFFFF; border:1px solid #ECE6DD; border-radius:4px; font-size:7.2px; color:#64748B; line-height:1.35; text-align:justify; z-index:2; position:relative;">
+            <strong style="color:#111827;">Statutory Disclaimer &amp; Non-Liability Notice:</strong> This publication is generated using automated computational algorithms and Artificial Intelligence (AI) based on user-provided birth coordinates. Astrological readings are inherently speculative and subjective; this report does not constitute certified legal, financial, medical, or psychological advice. Neither MeraRashifal nor its associates accept any liability or responsibility for errors, omissions, calculation discrepancies, or predictions herein, nor for any direct, indirect, or consequential outcomes, losses, or life situations arising from reliance on this content. Users are strictly advised to apply their independent intellect and consult licensed professionals for critical life decisions. By reviewing this document, you acknowledge that all actions remain your sole responsibility.
+        </div>';
+    }
+
+    /**
+     * Resolve Sun Signs with Western and Vedic Calendar Dates
+     */
+    public static function get_sunsigns_info($dob) {
+        $clean = str_replace('/', '-', $dob);
+        $ts = strtotime($clean);
+        if (!$ts) $ts = time();
+        $m = (int)date('n', $ts);
+        $d = (int)date('j', $ts);
+
+        // Western Tropical Sun Sign
+        $western_sign = 'Capricorn';
+        $western_dates = 'Dec 22 – Jan 19';
+        if (($m == 1 && $d >= 20) || ($m == 2 && $d <= 18)) {
+            $western_sign = 'Aquarius'; $western_dates = 'Jan 20 – Feb 18';
+        } elseif (($m == 2 && $d >= 19) || ($m == 3 && $d <= 20)) {
+            $western_sign = 'Pisces'; $western_dates = 'Feb 19 – Mar 20';
+        } elseif (($m == 3 && $d >= 21) || ($m == 4 && $d <= 19)) {
+            $western_sign = 'Aries'; $western_dates = 'Mar 21 – Apr 19';
+        } elseif (($m == 4 && $d >= 20) || ($m == 5 && $d <= 20)) {
+            $western_sign = 'Taurus'; $western_dates = 'Apr 20 – May 20';
+        } elseif (($m == 5 && $d >= 21) || ($m == 6 && $d <= 20)) {
+            $western_sign = 'Gemini'; $western_dates = 'May 21 – Jun 20';
+        } elseif (($m == 6 && $d >= 21) || ($m == 7 && $d <= 22)) {
+            $western_sign = 'Cancer'; $western_dates = 'Jun 21 – Jul 22';
+        } elseif (($m == 7 && $d >= 23) || ($m == 8 && $d <= 22)) {
+            $western_sign = 'Leo'; $western_dates = 'Jul 23 – Aug 22';
+        } elseif (($m == 8 && $d >= 23) || ($m == 9 && $d <= 22)) {
+            $western_sign = 'Virgo'; $western_dates = 'Aug 23 – Sep 22';
+        } elseif (($m == 9 && $d >= 23) || ($m == 10 && $d <= 22)) {
+            $western_sign = 'Libra'; $western_dates = 'Sep 23 – Oct 22';
+        } elseif (($m == 10 && $d >= 23) || ($m == 11 && $d <= 21)) {
+            $western_sign = 'Scorpio'; $western_dates = 'Oct 23 – Nov 21';
+        } elseif (($m == 11 && $d >= 22) || ($m == 12 && $d <= 21)) {
+            $western_sign = 'Sagittarius'; $western_dates = 'Nov 22 – Dec 21';
+        }
+
+        // Vedic Sidereal Sun Sign (Sankranti-based)
+        $vedic_sign = 'Sagittarius (Dhanu)';
+        $vedic_dates = 'Dec 16 – Jan 13';
+        if (($m == 1 && $d >= 14) || ($m == 2 && $d <= 12)) {
+            $vedic_sign = 'Capricorn (Makara)'; $vedic_dates = 'Jan 14 – Feb 12';
+        } elseif (($m == 2 && $d >= 13) || ($m == 3 && $d <= 14)) {
+            $vedic_sign = 'Aquarius (Kumbha)'; $vedic_dates = 'Feb 13 – Mar 14';
+        } elseif (($m == 3 && $d >= 15) || ($m == 4 && $d <= 13)) {
+            $vedic_sign = 'Pisces (Meena)'; $vedic_dates = 'Mar 15 – Apr 13';
+        } elseif (($m == 4 && $d >= 14) || ($m == 5 && $d <= 14)) {
+            $vedic_sign = 'Aries (Mesha)'; $vedic_dates = 'Apr 14 – May 14';
+        } elseif (($m == 5 && $d >= 15) || ($m == 6 && $d <= 14)) {
+            $vedic_sign = 'Taurus (Vrishabha)'; $vedic_dates = 'May 15 – Jun 14';
+        } elseif (($m == 6 && $d >= 15) || ($m == 7 && $d <= 15)) {
+            $vedic_sign = 'Gemini (Mithuna)'; $vedic_dates = 'Jun 15 – Jul 15';
+        } elseif (($m == 7 && $d >= 16) || ($m == 8 && $d <= 16)) {
+            $vedic_sign = 'Cancer (Karka)'; $vedic_dates = 'Jul 16 – Aug 16';
+        } elseif (($m == 8 && $d >= 17) || ($m == 9 && $d <= 16)) {
+            $vedic_sign = 'Leo (Simha)'; $vedic_dates = 'Aug 17 – Sep 16';
+        } elseif (($m == 9 && $d >= 17) || ($m == 10 && $d <= 16)) {
+            $vedic_sign = 'Virgo (Kanya)'; $vedic_dates = 'Sep 17 – Oct 16';
+        } elseif (($m == 10 && $d >= 17) || ($m == 11 && $d <= 15)) {
+            $vedic_sign = 'Libra (Tula)'; $vedic_dates = 'Oct 17 – Nov 15';
+        } elseif (($m == 11 && $d >= 16) || ($m == 12 && $d <= 15)) {
+            $vedic_sign = 'Scorpio (Vrischika)'; $vedic_dates = 'Nov 16 – Dec 15';
+        }
+
+        return [
+            'western_sign'  => $western_sign,
+            'western_dates' => $western_dates,
+            'vedic_sign'    => $vedic_sign,
+            'vedic_dates'   => $vedic_dates,
+        ];
+    }
+
+    /**
+     * Extract Ground-Truth Astrological Metrics from Payload
+     */
+    public static function extract_astro_profile($dob, $tob, $pob, $vedic_data = []) {
+        $clean_dob = str_replace('/', '-', $dob);
+        $dt = DateTime::createFromFormat('d-m-Y', $clean_dob) ?: (strtotime($clean_dob) ? new DateTime($clean_dob) : new DateTime());
+        $now = new DateTime();
+        $age = $dt->diff($now)->y;
+
+        $planets = $vedic_data['planet_details'] ?? [];
+        $lagna = $planets[0] ?? [];
+        $sun   = $planets[1] ?? [];
+        $moon  = $planets[2] ?? [];
+        $mars  = $planets[3] ?? [];
+        $merc  = $planets[4] ?? [];
+        $jup   = $planets[5] ?? [];
+        $ven   = $planets[6] ?? [];
+        $sat   = $planets[7] ?? [];
+        $rahu  = $planets[8] ?? [];
+        $ketu  = $planets[9] ?? [];
+
+        $lagna_sign = !empty($lagna['zodiac']) ? $lagna['zodiac'] : 'Cancer';
+        $lagna_deg  = round((float)($lagna['local_degree'] ?? 0), 2);
+        $lagna_lord = !empty($lagna['zodiac_lord']) ? $lagna['zodiac_lord'] : 'Moon';
+
+        $moon_sign  = !empty($moon['zodiac']) ? $moon['zodiac'] : 'Pisces';
+        $moon_deg   = round((float)($moon['local_degree'] ?? 0), 2);
+        $moon_nak   = !empty($moon['nakshatra']) ? $moon['nakshatra'] : 'PurvaBhadra';
+        $moon_pada  = !empty($moon['nakshatra_pada']) ? $moon['nakshatra_pada'] : 4;
+        $moon_lord  = !empty($moon['nakshatra_lord']) ? $moon['nakshatra_lord'] : 'Jupiter';
+
+        $sun_sign   = !empty($sun['zodiac']) ? $sun['zodiac'] : 'Sagittarius';
+        $sun_deg    = round((float)($sun['local_degree'] ?? 0), 2);
+
+        $sunsigns = self::get_sunsigns_info($dob);
+
+        return [
+            'age'           => $age,
+            'formatted_dob' => $dt->format('F j, Y'),
+            'sunsigns'      => $sunsigns,
+            'lagna_sign'    => $lagna_sign,
+            'lagna_deg'     => $lagna_deg,
+            'lagna_lord'    => $lagna_lord,
+            'moon_sign'     => $moon_sign,
+            'moon_deg'      => $moon_deg,
+            'moon_nak'      => $moon_nak,
+            'moon_pada'     => $moon_pada,
+            'moon_lord'     => $moon_lord,
+            'sun_sign'      => $sun_sign,
+            'sun_deg'       => $sun_deg,
+            'planets'       => $planets
+        ];
+    }
+
+    /**
      * Render Clean Bullet-Pointed Essential Takeaway Callout Box with Larger Typography
      */
-    public static function render_page_bottom_synthesis($bullets, $title = 'Essential Monthly Takeaways', $heading_font = 'var(--font-heading, serif)') {
+    public static function render_page_bottom_synthesis($bullets, $title = 'Essential Key Insights', $heading_font = 'var(--font-heading, sans-serif)') {
         if (is_string($bullets)) {
             $sentences = preg_split('/(?<=[.?!])\s+(?=[A-Z])/', trim($bullets));
             $bullets = array_filter(array_map('trim', $sentences));
         }
 
         $html = '
-        <div style="background: #FFFFFF; border: 1px solid #ECE6DD; border-left: 4px solid #C45738; border-radius: 8px; padding: 11px 16px; margin-top: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); z-index: 2; position: relative;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
-                <span style="font-family:' . $heading_font . '; font-size: 15px; font-weight: 700; color: #C45738; text-transform: uppercase; letter-spacing: 0.04em;">
+        <div style="background: #FFFFFF; border: 1px solid #ECE6DD; border-left: 4px solid #C45738; border-radius: 8px; padding: 10px 15px; margin-top: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.02); z-index: 2; position: relative;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+                <span style="font-family:' . $heading_font . '; font-size: 14.5px; font-weight: 700; color: #C45738; text-transform: uppercase; letter-spacing: 0.04em;">
                     ✦ ' . esc_html($title) . '
                 </span>
-                <span style="font-size: 9.5px; color: #6B6864; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700;">Key Insights for Daily Life</span>
+                <span style="font-size: 10.5px; color: #6B6864; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700;">Strategic Action Windows</span>
             </div>
-            <ul style="margin: 0; padding-left: 18px; font-size: 12px; color: #111827; line-height: 1.65;">';
+            <ul style="margin: 0; padding-left: 18px; font-size: 13.8px; color: #111827; line-height: 1.55;">';
 
         foreach ($bullets as $b) {
             if (!empty($b)) {
-                $html .= '<li style="margin-bottom: 3.5px;">' . esc_html($b) . '</li>';
+                $html .= '<li style="margin-bottom: 3px;">' . esc_html($b) . '</li>';
             }
         }
 

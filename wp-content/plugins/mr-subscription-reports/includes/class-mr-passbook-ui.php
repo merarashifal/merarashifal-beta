@@ -371,7 +371,21 @@ class MR_Passbook_UI {
                                         <?php elseif ($t['status'] === 'success'): ?>
                                             <div style="display:flex; flex-direction:column; gap:5px; align-items:flex-start;">
                                                 <?php if ($t['channel'] === 'report'): ?>
-                                                    <a href="<?php echo esc_url(home_url('/reports')); ?>" class="mr-btn-action" style="white-space:nowrap;">Generate Report</a>
+                                                    <?php if (!empty($meta['bundle_reports']) && is_array($meta['bundle_reports'])): ?>
+                                                        <?php foreach ($meta['bundle_reports'] as $b_slug): 
+                                                            $has_tok = class_exists('MR_Tokens') ? MR_Tokens::has_token($user_id, $b_slug) : false;
+                                                            $b_name  = class_exists('MR_Bundles') ? MR_Bundles::get_report_name($b_slug) : $b_slug;
+                                                            $short_name = trim(str_replace(['Report (2026-2027)', 'Report (Vedic)', 'Report', 'Detailed', 'Vedic', 'Master'], '', $b_name));
+                                                        ?>
+                                                            <?php if ($has_tok): ?>
+                                                                <button type="button" class="mr-btn-action mr-btn-generate-direct" data-slug="<?php echo esc_attr($b_slug); ?>" data-title="<?php echo esc_attr($b_name); ?>" style="white-space:nowrap; background:#F58220; padding:4px 9px; font-size:11px; border:none; cursor:pointer;" title="Enter birth details and generate <?php echo esc_attr($b_name); ?>">
+                                                                    <i class="fa-solid fa-wand-magic-sparkles"></i> Generate <?php echo esc_html($short_name ?: $b_name); ?> &rarr;
+                                                                </button>
+                                                            <?php endif; ?>
+                                                        <?php endforeach; ?>
+                                                    <?php else: ?>
+                                                        <a href="<?php echo esc_url(home_url('/reports')); ?>" class="mr-btn-action" style="white-space:nowrap;">Generate Report</a>
+                                                    <?php endif; ?>
                                                 <?php elseif ($t['channel'] === 'subscription'): ?>
                                                     <a href="<?php echo esc_url(home_url('/reports')); ?>" class="mr-btn-action" style="background:#0f172a; white-space:nowrap;">View Pack</a>
                                                 <?php elseif ($t['channel'] === 'chat_credit'): ?>

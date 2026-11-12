@@ -40,8 +40,8 @@ class MR_Validator {
         }
 
         // 2. Manglik Dosha Audit
-        if (isset($raw_payload['mangal']['response']) && is_array($raw_payload['mangal']['response'])) {
-            $m = $raw_payload['mangal']['response'];
+        $m = $raw_payload['mangal']['response'] ?? $raw_payload['mangal'] ?? null;
+        if (is_array($m) && !empty($m)) {
             $score = (float)($m['score'] ?? ($m['percentage'] ?? 0));
             $is_present = (bool)($m['is_dosha_present'] ?? ($m['manglik_by_mars'] ?? ($score > 0)));
             $is_anshik = (bool)($m['is_anshik'] ?? ($score > 0 && $score < 70));
@@ -61,8 +61,8 @@ class MR_Validator {
         }
 
         // 3. Kaal Sarp Dosha Audit
-        if (isset($raw_payload['kaalsarp']['response']) && is_array($raw_payload['kaalsarp']['response'])) {
-            $ks = $raw_payload['kaalsarp']['response'];
+        $ks = $raw_payload['kaalsarp']['response'] ?? $raw_payload['kaalsarp'] ?? null;
+        if (is_array($ks) && !empty($ks)) {
             $is_present = (bool)($ks['is_dosha_present'] ?? false);
             $type = $ks['dosha_type'] ?? ($ks['type'] ?? 'Kaal Sarp Yoga');
             $axis = $ks['axis'] ?? ($ks['one_line'] ?? '1-7 Axis');
@@ -81,8 +81,8 @@ class MR_Validator {
         }
 
         // 4. Pitra Dosha Audit
-        if (isset($raw_payload['pitra']['response']) && is_array($raw_payload['pitra']['response'])) {
-            $pt = $raw_payload['pitra']['response'];
+        $pt = $raw_payload['pitra']['response'] ?? $raw_payload['pitra'] ?? null;
+        if (is_array($pt) && !empty($pt)) {
             $is_present = (bool)($pt['is_dosha_present'] ?? false);
             $audit['verified_metrics']['pitra'] = [
                 'is_present' => $is_present,

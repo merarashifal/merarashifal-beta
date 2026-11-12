@@ -95,7 +95,7 @@ class MR_Frontend {
             'is_logged_in' => is_user_logged_in(),
             'login_url' => $login_url,
             'pricing_url' => home_url('/pricing/'),
-            'checkout_url' => home_url('/checkout/'),
+            'checkout_url' => class_exists('MR_Checkout') ? MR_Checkout::get_checkout_url() : home_url('/checkout/'),
             'catalog_url' => home_url('/reports-catalog/'),
             'dashboard_url' => home_url('/my-account-reports/'),
             'account_url'   => $account_url,
@@ -490,11 +490,13 @@ class MR_Frontend {
                 <button type="button" class="mr-modal-close mr-details-close" aria-label="Close modal">&times;</button>
                 
                 <div class="mr-modal-header" style="margin-bottom:20px; padding-right:32px;">
-                    <div class="mr-tag-eyebrow" style="margin-bottom:10px;">
-                        <i class="fa-solid fa-sun" style="color:#D9A441;"></i> Seeking Birth Details For
+                    <div id="mr-modal-step-tag" class="mr-modal-step-badge" style="display:none; margin-bottom:10px;">
+                        <span style="background:linear-gradient(135deg, #F58220 0%, #D9A441 100%); color:#fff; font-size:11px; font-weight:800; padding:3px 12px; border-radius:9999px; text-transform:uppercase; letter-spacing:0.5px;">
+                            <i class="fa-solid fa-layer-group"></i> <span id="mr-modal-step-text">Step 1 of 2: Primary Report</span>
+                        </span>
                     </div>
                     <h3 id="mr-modal-report-title" class="mr-modal-brand-title"><?php echo esc_html($display_report_title); ?></h3>
-                    <p class="mr-modal-sub">Enter birth details to compute high-accuracy planetary coordinates, divisional charts (D1 &amp; D9) &amp; predictive life cycles.</p>
+                    <p class="mr-modal-sub" id="mr-modal-sub-desc">Enter birth details to compute high-accuracy planetary coordinates, divisional charts (D1 &amp; D9) &amp; predictive life cycles.</p>
                 </div>
 
                 <form id="mr-birth-details-form" enctype="multipart/form-data">
@@ -508,6 +510,19 @@ class MR_Frontend {
 
                     <!-- A. Standard Single Person Fields (Default for 8 Reports) -->
                     <div id="mr-single-person-fields">
+                        <!-- "Same as previous" checkbox bar for sequential multi-report generation -->
+                        <div id="mr-same-as-prev-wrap" style="display:none; background:#FFFBEB; border:1.5px solid #F58220; border-radius:12px; padding:12px 16px; margin-bottom:16px;">
+                            <label class="mr-same-label" style="display:flex; align-items:center; gap:12px; cursor:pointer; margin:0; user-select:none;">
+                                <input type="checkbox" id="mr-same-as-prev-checkbox" style="width:20px; height:20px; accent-color:#F58220; cursor:pointer; flex-shrink:0;" checked />
+                                <span style="font-size:14px; font-weight:700; color:#7A1F3D; line-height:1.35;">
+                                    Same as previous report details
+                                    <span id="mr-same-prev-summary" style="display:block; font-size:12px; font-weight:500; color:#64748B; margin-top:2px;">
+                                        Use previous inputs (<span id="mr-same-prev-person-name">Same Person</span>)
+                                    </span>
+                                </span>
+                            </label>
+                        </div>
+
                         <div class="mr-form-group">
                             <label for="mr_person_name" id="mr_person_name_label">Full Name *</label>
                             <input type="text" id="mr_person_name" name="person_name" placeholder="e.g. Rahul Sharma" value="<?php echo esc_attr($default_name); ?>" autocomplete="name">
@@ -549,18 +564,47 @@ class MR_Frontend {
 
                     <!-- B. Palm Image Upload Field (Used for Master Hast Rekha & Palmistry Report) -->
                     <div id="mr-palm-upload-fields" style="display:none; margin-bottom:18px;">
-                        <div style="background:#FFF9F0; border:1.5px dashed #D9A441; border-radius:16px; padding:16px; text-align:center;">
-                            <label style="display:block; font-weight:700; color:#7A1F3D; margin-bottom:6px; font-size:13.5px;">
-                                <i class="fa-solid fa-hand-holding-heart" style="color:#F58220; margin-right:6px;"></i> Dominant Palm Photo (Dominant Working Hand)
+                        <div style="background:#FFF9F0; border:1.5px dashed #D9A441; border-radius:16px; padding:18px 16px; text-align:center;">
+                            <label style="display:block; font-weight:700; color:#7A1F3D; margin-bottom:6px; font-size:14px;">
+                                <i class="fa-solid fa-hand-holding-heart" style="color:#F58220; margin-right:6px;"></i> Dominant Palm Photo (Working Hand) <span style="color:#DC2626;">*</span>
                             </label>
-                            <p style="font-size:12px; color:#6B5E57; margin:0 0 10px 0; line-height:1.4;">
-                                Photograph your palm flat under bright, even lighting with fingers slightly apart.
+                            <p style="font-size:12px; color:#6B5E57; margin:0 0 12px 0; line-height:1.45;">
+                                Upload or snap a clear photo of your dominant open palm for authentic Vedic Hast Rekha &amp; Samudrik Shastra analysis.
                             </p>
+
+                            <!-- Guidelines Strip -->
+                            <div style="display:flex; justify-content:center; gap:8px; flex-wrap:wrap; margin-bottom:14px;">
+                                <span style="font-size:11px; background:#FFF3E1; color:#92400E; padding:3px 10px; border-radius:9999px; font-weight:600;">
+                                    <i class="fa-solid fa-circle-check" style="color:#10B981;"></i> Flat Open Palm
+                                </span>
+                                <span style="font-size:11px; background:#FFF3E1; color:#92400E; padding:3px 10px; border-radius:9999px; font-weight:600;">
+                                    <i class="fa-solid fa-circle-check" style="color:#10B981;"></i> Bright Lighting
+                                </span>
+                                <span style="font-size:11px; background:#FFF3E1; color:#92400E; padding:3px 10px; border-radius:9999px; font-weight:600;">
+                                    <i class="fa-solid fa-circle-check" style="color:#10B981;"></i> Clear Palm Lines
+                                </span>
+                            </div>
+
                             <input type="file" id="mr_palm_image" name="palm_image" accept="image/*" style="display:none;">
-                            <button type="button" class="mr-btn-hero-secondary" id="mr-btn-choose-palm" style="padding:8px 20px; font-size:13px; border-radius:9999px;">
-                                <i class="fa-solid fa-camera"></i> Select or Snap Hand Photo
-                            </button>
-                            <div id="mr-palm-file-status" style="margin-top:8px; font-size:12.5px; font-weight:600; color:#2CB67D; display:none;"></div>
+
+                            <div id="mr-palm-upload-action-wrap">
+                                <button type="button" class="mr-btn-hero-secondary" id="mr-btn-choose-palm" style="padding:10px 24px; font-size:13.5px; border-radius:9999px; cursor:pointer;">
+                                    <i class="fa-solid fa-camera"></i> Select or Snap Hand Photo
+                                </button>
+                            </div>
+
+                            <!-- Live Photo Preview Container -->
+                            <div id="mr-palm-preview-wrap" style="display:none; margin-top:14px; text-align:center;">
+                                <div style="display:inline-block; position:relative; max-width:200px; border-radius:12px; overflow:hidden; border:2px solid #F58220; box-shadow:0 6px 18px rgba(245,130,32,0.2);">
+                                    <img id="mr-palm-preview-img" src="" alt="Selected Palm Preview" style="width:100%; height:auto; display:block; max-height:220px; object-fit:cover;">
+                                </div>
+                                <div id="mr-palm-file-status" style="margin-top:8px; font-size:12.5px; font-weight:700; color:#059669;"></div>
+                                <button type="button" id="mr-btn-reselect-palm" style="margin-top:6px; background:none; border:none; color:#DC2626; font-size:12px; font-weight:700; cursor:pointer; text-decoration:underline;">
+                                    <i class="fa-solid fa-rotate-right"></i> Change Photo
+                                </button>
+                            </div>
+
+                            <div id="mr-palm-client-error" style="display:none; margin-top:10px; font-size:12px; font-weight:600; color:#DC2626;"></div>
                         </div>
                     </div>
 
@@ -571,6 +615,19 @@ class MR_Frontend {
                             <div style="font-size:12.5px; color:#7A1F3D; line-height:1.45;">
                                 <strong>Dual Kundali Required:</strong> Ashtakoot Gun Milan (36 Points) and Manglik dosha balancing require birth details for both the <strong>Boy (Var)</strong> and <strong>Girl (Kanya)</strong>.
                             </div>
+                        </div>
+
+                        <!-- Copy Details to Boy or Girl for Kundli Matching -->
+                        <div id="mr-matching-copy-bar" style="display:none; background:#FFFBEB; border:1.5px solid #F58220; border-radius:12px; padding:12px 16px; margin-bottom:16px;">
+                            <label class="mr-same-label" style="display:flex; align-items:center; gap:12px; cursor:pointer; margin:0; user-select:none;">
+                                <input type="checkbox" id="mr-matching-same-prev-checkbox" style="width:20px; height:20px; accent-color:#F58220; cursor:pointer; flex-shrink:0;" checked />
+                                <span style="font-size:14px; font-weight:700; color:#7A1F3D; line-height:1.35;">
+                                    Use previous report details for Boy (Var)
+                                    <span id="mr-matching-same-summary" style="display:block; font-size:12px; font-weight:500; color:#64748B; margin-top:2px;">
+                                        (<span id="mr-matching-copy-name">Same Person</span>)
+                                    </span>
+                                </span>
+                            </label>
                         </div>
 
                         <!-- Boy's Section -->
@@ -650,7 +707,7 @@ class MR_Frontend {
 
                     <div class="mr-form-actions" style="margin-top:22px;">
                         <button type="submit" class="mr-btn-brand-submit" id="mr-btn-submit-report">
-                            <i class="fa-solid fa-wand-magic-sparkles"></i> Confirm &amp; Generate Report &rarr;
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> <span id="mr-btn-submit-report-text">Confirm &amp; Generate Report &rarr;</span>
                         </button>
                     </div>
 
@@ -1238,29 +1295,65 @@ class MR_Frontend {
             $slug = $alias_map[$slug];
         }
 
-        // Map report slug to sample HTML file in uploads/mr-reports/samples/
-        $sample_files = [
-            'yearly_horoscope_long'   => 'yearly-horoscope-2027-tushar-singhal-verified.html',
-            'yearly_horoscope_vedic'  => 'yearly-horoscope-2027-tushar-singhal-verified.html',
-            'kundli_predictions'      => 'sample-kundli-predictions-master-report.html',
-            'mahadasha_timing'        => 'sample-mahadasha-life-timing-master-report.html',
-            'dosh_remedial'           => 'sample-kundli-dosh-remedial-master-report.html',
-            'kundli_matching'         => 'sample-kundli-gun-milan-matching-master-report.html',
-            'numerology'              => 'sample-numerology-western-master-report.html',
-            'monthly_horoscope_vedic' => 'monthly-horoscope-november-2026-tushar-singhal.html',
-            'palmistry_report'        => 'sample-palmistry-dossier-report.html',
-        ];
+        // 1. Check for custom uploaded sample file from Card Settings
+        $file_path = null;
+        if (class_exists('MR_Catalog_Manager')) {
+            $cards = MR_Catalog_Manager::get_all_cards();
+            $card_item = $cards[$slug] ?? null;
+            if (!$card_item) {
+                if ($slug === 'numerology' && isset($cards['numerology_report'])) {
+                    $card_item = $cards['numerology_report'];
+                } elseif ($slug === 'palm_reading' && isset($cards['palmistry_report'])) {
+                    $card_item = $cards['palmistry_report'];
+                }
+            }
+            if ($card_item && !empty($card_item['sample_report_url'])) {
+                $custom_url = trim($card_item['sample_report_url']);
+                // If it's a PDF, render via custom secure PDF canvas viewer (No browser download/save toolbar, watermarked on all pages)
+                if (preg_match('/\.pdf($|\?)/i', $custom_url)) {
+                    $report_title = !empty($card_item['name']) ? $card_item['name'] : 'Astrological Sample Report';
+                    self::render_secure_pdf_sample_viewer($custom_url, $report_title);
+                    exit;
+                }
 
-        $filename = $sample_files[$slug] ?? 'sample-kundli-predictions-master-report.html';
-        $upload_dir = wp_upload_dir();
-        $sample_dir = $upload_dir['basedir'] . '/mr-reports/samples';
-        $file_path  = $sample_dir . '/' . $filename;
+                // If it's HTML stored in uploads directory
+                $upload_info = wp_upload_dir();
+                $base_url = $upload_info['baseurl'];
+                if (strpos($custom_url, $base_url) === 0) {
+                    $rel_path = substr($custom_url, strlen($base_url));
+                    $target_path = $upload_info['basedir'] . $rel_path;
+                    if (file_exists($target_path)) {
+                        $file_path = $target_path;
+                    }
+                }
+            }
+        }
 
-        // Fallback search if exact file doesn't exist
-        if (!file_exists($file_path)) {
-            $fallbacks = glob($sample_dir . '/*.html');
-            if (!empty($fallbacks)) {
-                $file_path = $fallbacks[0];
+        // 2. Fallback to default verified sample HTML file in uploads/mr-reports/samples/
+        if (!$file_path) {
+            $sample_files = [
+                'yearly_horoscope_long'   => 'yearly-horoscope-2027-tushar-singhal-verified.html',
+                'yearly_horoscope_vedic'  => 'yearly-horoscope-2027-tushar-singhal-verified.html',
+                'kundli_predictions'      => 'sample-kundli-predictions-master-report.html',
+                'mahadasha_timing'        => 'sample-mahadasha-life-timing-master-report.html',
+                'dosh_remedial'           => 'sample-kundli-dosh-remedial-master-report.html',
+                'kundli_matching'         => 'sample-kundli-gun-milan-matching-master-report.html',
+                'numerology'              => 'sample-numerology-western-master-report.html',
+                'monthly_horoscope_vedic' => 'monthly-horoscope-november-2026-tushar-singhal.html',
+                'palmistry_report'        => 'sample-palmistry-dossier-report.html',
+            ];
+
+            $filename = $sample_files[$slug] ?? 'sample-kundli-predictions-master-report.html';
+            $upload_dir = wp_upload_dir();
+            $sample_dir = $upload_dir['basedir'] . '/mr-reports/samples';
+            $file_path  = $sample_dir . '/' . $filename;
+
+            // Fallback search if exact file doesn't exist
+            if (!file_exists($file_path)) {
+                $fallbacks = glob($sample_dir . '/*.html');
+                if (!empty($fallbacks)) {
+                    $file_path = $fallbacks[0];
+                }
             }
         }
 
@@ -1268,60 +1361,69 @@ class MR_Frontend {
             wp_die('Sample report archive unavailable. Please try again shortly.', 'Sample Report', ['response' => 404]);
         }
 
+        // If file_path is a PDF, render via custom secure PDF canvas viewer
+        if (preg_match('/\.pdf$/i', $file_path)) {
+            $upload_info = wp_upload_dir();
+            $pdf_url = str_replace($upload_info['basedir'], $upload_info['baseurl'], $file_path);
+            $report_title = !empty($card_item['name']) ? $card_item['name'] : 'Astrological Sample Report';
+            self::render_secure_pdf_sample_viewer($pdf_url, $report_title);
+            exit;
+        }
+
         $html = file_get_contents($file_path);
 
-        // Security, Watermarking and Responsive Styles to inject
+        // Security, Multi-Layer Watermarking on Every Single Page, and Responsive Styles to inject
         $protection_css = '<style>
-            /* Protected Sample Styling & Responsive Enhancements */
+            /* Protected Sample Styling & Multi-Layer Watermarking on Every Single Page */
             html, body {
                 user-select: none !important;
                 -webkit-user-select: none !important;
                 -ms-user-select: none !important;
-            }
-            body::before {
-                content: "SAMPLE PREVIEW • MERA RASHIFAL • FOR ONLINE READING ONLY • NOT FOR DOWNLOAD";
-                position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%) rotate(-35deg);
-                font-size: 34px;
-                font-weight: 800;
-                font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-                color: rgba(194, 150, 76, 0.13);
-                pointer-events: none;
-                z-index: 9999999;
-                white-space: nowrap;
-                letter-spacing: 3.5px;
-                text-transform: uppercase;
             }
             .mr-page {
                 position: relative !important;
                 margin: 22px auto !important;
                 box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
                 border-radius: 6px !important;
+                overflow: hidden !important;
             }
+            /* Tiled repeating watermark over every single HTML report page */
+            .mr-page::before {
+                content: "" !important;
+                position: absolute !important;
+                top: 0 !important;
+                left: 0 !important;
+                right: 0 !important;
+                bottom: 0 !important;
+                background-image: url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'340\' height=\'220\' viewBox=\'0 0 340 220\'%3E%3Ctext x=\'20\' y=\'125\' transform=\'rotate(-28 170 110)\' fill=\'rgba(220,38,38,0.11)\' font-size=\'18\' font-weight=\'800\' font-family=\'sans-serif\' letter-spacing=\'2.5\'%3ESAMPLE REPORT • NOT FOR USE%3C/text%3E%3C/svg%3E") !important;
+                background-repeat: repeat !important;
+                pointer-events: none !important;
+                z-index: 9998 !important;
+            }
+            /* Top-right confidential sample tag */
             .mr-page::after {
-                content: "SAMPLE PREVIEW — CONFIDENTIAL SAMPLE";
-                position: absolute;
-                top: 14mm;
-                right: 18mm;
-                font-size: 9.5px;
-                font-weight: 700;
-                letter-spacing: 1.5px;
-                color: #92400E;
-                background: #FEF3C7;
-                padding: 3px 12px;
-                border-radius: 4px;
-                border: 1px solid #FCD34D;
-                pointer-events: none;
-                z-index: 9999;
+                content: "SAMPLE PREVIEW — CONFIDENTIAL SAMPLE" !important;
+                position: absolute !important;
+                top: 14mm !important;
+                right: 18mm !important;
+                font-size: 9.5px !important;
+                font-weight: 700 !important;
+                letter-spacing: 1.5px !important;
+                color: #92400E !important;
+                background: #FEF3C7 !important;
+                padding: 3px 12px !important;
+                border-radius: 4px !important;
+                border: 1px solid #FCD34D !important;
+                pointer-events: none !important;
+                z-index: 9999 !important;
             }
             @media print {
-                html, body {
+                html, body, * {
                     display: none !important;
                     visibility: hidden !important;
                     height: 0 !important;
                     overflow: hidden !important;
+                    opacity: 0 !important;
                 }
             }
             @media (max-width: 860px) {
@@ -1347,6 +1449,11 @@ class MR_Frontend {
             document.addEventListener("contextmenu", function(e) { e.preventDefault(); return false; });
             document.addEventListener("keydown", function(e) {
                 if ((e.ctrlKey || e.metaKey) && (e.key === "s" || e.key === "p" || e.key === "u" || e.key === "S" || e.key === "P" || e.key === "U")) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                }
+                if (e.key === "F12" || (e.ctrlKey && e.shiftKey && (e.key === "I" || e.key === "i" || e.key === "J" || e.key === "j" || e.key === "C" || e.key === "c"))) {
                     e.preventDefault();
                     e.stopPropagation();
                     return false;
@@ -1379,6 +1486,525 @@ class MR_Frontend {
     }
 
     /**
+     * Render a publication-grade secure canvas-based PDF reader for sample reports.
+     * Prevents browser PDF toolbar, disables print & save/download options,
+     * and overlays multi-layer security watermarks on every single page.
+     *
+     * @param string $pdf_url Direct URL to the PDF file.
+     * @param string $title   Human-readable report name.
+     */
+    public static function render_secure_pdf_sample_viewer($pdf_url, $title = 'Astrological Sample Report') {
+        while (ob_get_level()) {
+            ob_end_clean();
+        }
+
+        header('Content-Type: text/html; charset=UTF-8');
+        header('X-Robots-Tag: noindex, nofollow, noarchive');
+        header('X-Content-Type-Options: nosniff');
+        header('Cache-Control: private, max-age=1800');
+
+        $pdf_js_url     = esc_url(MR_PLUGIN_URL . 'assets/js/pdf.min.js');
+        $pdf_worker_url = esc_url(MR_PLUGIN_URL . 'assets/js/pdf.worker.min.js');
+        $safe_title     = esc_html($title);
+        $escaped_url    = esc_url($pdf_url);
+        ?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0">
+    <title><?php echo $safe_title; ?> — Sample Preview</title>
+    <script src="<?php echo $pdf_js_url; ?>"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        html, body {
+            width: 100%;
+            height: 100%;
+            background-color: #1a1a24;
+            color: #f1f5f9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            overflow: hidden;
+            user-select: none !important;
+            -webkit-user-select: none !important;
+        }
+
+        /* Fixed Top Navigation Bar */
+        .mr-pdf-topbar {
+            height: 52px;
+            background: rgba(18, 18, 28, 0.96);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 18px;
+            position: relative;
+            z-index: 100;
+        }
+        .mr-pdf-title-area {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            min-width: 0;
+        }
+        .mr-pdf-lock-badge {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: #1e1b4b;
+            font-size: 11px;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 4px;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            white-space: nowrap;
+        }
+        .mr-pdf-report-title {
+            font-size: 13.5px;
+            font-weight: 600;
+            color: #f8fafc;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 320px;
+        }
+
+        .mr-pdf-controls-area {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .mr-pdf-btn {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            color: #f1f5f9;
+            padding: 5px 11px;
+            border-radius: 6px;
+            font-size: 12.5px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
+            user-select: none;
+        }
+        .mr-pdf-btn:hover {
+            background: rgba(255, 255, 255, 0.18);
+            border-color: rgba(255, 255, 255, 0.28);
+            color: #ffffff;
+        }
+        .mr-pdf-btn:active {
+            transform: scale(0.96);
+        }
+        .mr-pdf-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+        .mr-pdf-zoom-val {
+            font-size: 12px;
+            font-weight: 600;
+            color: #94a3b8;
+            min-width: 44px;
+            text-align: center;
+        }
+        .mr-pdf-divider {
+            width: 1px;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.12);
+            margin: 0 4px;
+        }
+        .mr-pdf-page-display {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: #cbd5e1;
+            padding: 0 4px;
+        }
+
+        /* Scrollable Viewer Body */
+        #mr-pdf-viewport {
+            height: calc(100% - 52px);
+            overflow-y: auto;
+            overflow-x: auto;
+            padding: 24px 16px 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 22px;
+            scroll-behavior: smooth;
+        }
+
+        /* Loading Indicator */
+        #mr-pdf-loader {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 20px;
+            color: #cbd5e1;
+            gap: 14px;
+        }
+        .mr-pdf-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3.5px solid rgba(245, 158, 11, 0.2);
+            border-top-color: #f59e0b;
+            border-radius: 50%;
+            animation: mrPdfSpin 0.8s linear infinite;
+        }
+        @keyframes mrPdfSpin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Individual Page Container */
+        .mr-pdf-page-card {
+            position: relative;
+            background: #ffffff;
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+            border-radius: 4px;
+            overflow: hidden;
+            display: inline-block;
+            line-height: 0;
+            flex-shrink: 0;
+        }
+        .mr-pdf-canvas {
+            display: block;
+            pointer-events: none;
+        }
+
+        /* Multi-layer Watermark Overlay for EVERY Page */
+        .mr-pdf-watermark-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 10;
+        }
+
+        /* Layer 1: Repeating Tiled Pattern covering 100% of the page */
+        .mr-pdf-wm-tile {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='340' height='220' viewBox='0 0 340 220'%3E%3Ctext x='20' y='125' transform='rotate(-28 170 110)' fill='rgba(220,38,38,0.11)' font-size='18' font-weight='800' font-family='sans-serif' letter-spacing='2.5'%3ESAMPLE REPORT • NOT FOR USE%3C/text%3E%3C/svg%3E");
+            background-repeat: repeat;
+        }
+
+        /* Layer 2: Top Confidential Header Strip */
+        .mr-pdf-wm-top-strip {
+            position: absolute;
+            top: 12px;
+            left: 16px;
+            background: rgba(254, 243, 199, 0.90);
+            color: #92400e;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 1px;
+            padding: 3px 10px;
+            border-radius: 4px;
+            border: 1px solid rgba(245, 158, 11, 0.45);
+            font-family: sans-serif;
+            text-transform: uppercase;
+            line-height: 1.3;
+        }
+
+        /* Layer 3: Bottom Security Badge */
+        .mr-pdf-wm-bottom-badge {
+            position: absolute;
+            bottom: 12px;
+            right: 16px;
+            background: rgba(254, 226, 226, 0.90);
+            color: #991b1b;
+            font-size: 10.5px;
+            font-weight: 800;
+            letter-spacing: 0.8px;
+            padding: 3px 10px;
+            border-radius: 4px;
+            border: 1px solid rgba(239, 68, 68, 0.40);
+            font-family: sans-serif;
+            line-height: 1.3;
+        }
+
+        /* STRICT ANTI-PRINT PROTECTION: Renders blank sheet on print */
+        @media print {
+            html, body, #mr-pdf-viewport, .mr-pdf-page-card, canvas, * {
+                display: none !important;
+                visibility: hidden !important;
+                height: 0 !important;
+                opacity: 0 !important;
+            }
+        }
+
+        @media (max-width: 680px) {
+            .mr-pdf-report-title {
+                display: none;
+            }
+            .mr-pdf-topbar {
+                padding: 0 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Topbar Controls (NO download or save options) -->
+    <header class="mr-pdf-topbar">
+        <div class="mr-pdf-title-area">
+            <span class="mr-pdf-lock-badge">Sample Preview</span>
+            <span class="mr-pdf-report-title"><?php echo $safe_title; ?></span>
+        </div>
+        <div class="mr-pdf-controls-area">
+            <button type="button" class="mr-pdf-btn" id="mr-zoom-out" title="Zoom Out">&minus;</button>
+            <span class="mr-pdf-zoom-val" id="mr-zoom-val">100%</span>
+            <button type="button" class="mr-pdf-btn" id="mr-zoom-in" title="Zoom In">&plus;</button>
+            <button type="button" class="mr-pdf-btn" id="mr-fit-width" title="Fit to Screen Width">Fit</button>
+            <span class="mr-pdf-divider"></span>
+            <button type="button" class="mr-pdf-btn" id="mr-prev-page" title="Previous Page">&lsaquo;</button>
+            <span class="mr-pdf-page-display">
+                <span id="mr-current-page">1</span> / <span id="mr-total-pages">-</span>
+            </span>
+            <button type="button" class="mr-pdf-btn" id="mr-next-page" title="Next Page">&rsaquo;</button>
+        </div>
+    </header>
+
+    <!-- Scrollable Continuous Pages Canvas Container -->
+    <main id="mr-pdf-viewport">
+        <div id="mr-pdf-loader">
+            <div class="mr-pdf-spinner"></div>
+            <div style="font-size:14px; font-weight:600;">Rendering secure astrological preview...</div>
+        </div>
+        <div id="mr-pdf-pages-list" style="display:none; width:100%; display:flex; flex-direction:column; align-items:center; gap:22px;"></div>
+    </main>
+
+    <script>
+    (function() {
+        // Anti-theft event suppression
+        window.addEventListener('contextmenu', function(e) { e.preventDefault(); return false; });
+        window.addEventListener('dragstart', function(e) { e.preventDefault(); return false; });
+        window.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && ['s', 'p', 'u', 'S', 'P', 'U'].indexOf(e.key) !== -1) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['I', 'i', 'J', 'j', 'C', 'c'].indexOf(e.key) !== -1)) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            }
+            if (e.key === 'PrintScreen') {
+                e.preventDefault();
+            }
+        });
+
+        const pdfUrl = <?php echo json_encode($escaped_url); ?>;
+        if (typeof pdfjsLib !== 'undefined') {
+            pdfjsLib.GlobalWorkerOptions.workerSrc = <?php echo json_encode($pdf_worker_url); ?>;
+        }
+
+        let pdfDoc = null;
+        let currentScale = 1.0;
+        const activeRenderTasks = new Map();
+
+        const viewportEl = document.getElementById('mr-pdf-viewport');
+        const pagesListEl = document.getElementById('mr-pdf-pages-list');
+        const loaderEl = document.getElementById('mr-pdf-loader');
+        const totalPagesEl = document.getElementById('mr-total-pages');
+        const currentPageEl = document.getElementById('mr-current-page');
+        const zoomValEl = document.getElementById('mr-zoom-val');
+
+        function updateZoomLabel() {
+            zoomValEl.textContent = Math.round(currentScale * 100) + '%';
+        }
+
+        async function renderPageCanvas(pageNum) {
+            if (!pdfDoc) return;
+            if (activeRenderTasks.has(pageNum)) {
+                try { activeRenderTasks.get(pageNum).cancel(); } catch (err) {}
+            }
+
+            const page = await pdfDoc.getPage(pageNum);
+            const card = document.getElementById('mr-page-card-' + pageNum);
+            const canvas = document.getElementById('mr-canvas-' + pageNum);
+            if (!card || !canvas) return;
+
+            const viewport = page.getViewport({ scale: currentScale });
+            const outputScale = window.devicePixelRatio || 1;
+
+            canvas.width = Math.floor(viewport.width * outputScale);
+            canvas.height = Math.floor(viewport.height * outputScale);
+            canvas.style.width = Math.floor(viewport.width) + 'px';
+            canvas.style.height = Math.floor(viewport.height) + 'px';
+            card.style.width = Math.floor(viewport.width) + 'px';
+            card.style.height = Math.floor(viewport.height) + 'px';
+
+            const ctx = canvas.getContext('2d');
+            const transform = outputScale !== 1 ? [outputScale, 0, 0, outputScale, 0, 0] : null;
+
+            const renderTask = page.render({
+                canvasContext: ctx,
+                transform: transform,
+                viewport: viewport
+            });
+            activeRenderTasks.set(pageNum, renderTask);
+
+            try {
+                await renderTask.promise;
+            } catch (err) {
+                if (err && err.name !== 'RenderingCancelledException') {
+                    console.error('Page render error:', err);
+                }
+            } finally {
+                activeRenderTasks.delete(pageNum);
+            }
+        }
+
+        async function renderAllPages() {
+            if (!pdfDoc) return;
+            for (let i = 1; i <= pdfDoc.numPages; i++) {
+                await renderPageCanvas(i);
+            }
+        }
+
+        function createPageStructure(numPages) {
+            pagesListEl.innerHTML = '';
+            for (let p = 1; p <= numPages; p++) {
+                const card = document.createElement('div');
+                card.className = 'mr-pdf-page-card';
+                card.id = 'mr-page-card-' + p;
+                card.setAttribute('data-page-num', p);
+
+                const canvas = document.createElement('canvas');
+                canvas.className = 'mr-pdf-canvas';
+                canvas.id = 'mr-canvas-' + p;
+                card.appendChild(canvas);
+
+                const wmOverlay = document.createElement('div');
+                wmOverlay.className = 'mr-pdf-watermark-overlay';
+                wmOverlay.innerHTML = `
+                    <div class="mr-pdf-wm-tile"></div>
+                    <div class="mr-pdf-wm-top-strip">CONFIDENTIAL SAMPLE • PREVIEW COPY</div>
+                    <div class="mr-pdf-wm-bottom-badge">SAMPLE REPORT • PAGE ${p} OF ${numPages}</div>
+                `;
+                card.appendChild(wmOverlay);
+                pagesListEl.appendChild(card);
+            }
+            pagesListEl.style.display = 'flex';
+        }
+
+        function setupObserver() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const pageNum = entry.target.getAttribute('data-page-num');
+                        if (pageNum) {
+                            currentPageEl.textContent = pageNum;
+                        }
+                    }
+                });
+            }, {
+                root: viewportEl,
+                threshold: 0.35
+            });
+
+            document.querySelectorAll('.mr-pdf-page-card').forEach(card => {
+                observer.observe(card);
+            });
+        }
+
+        async function initViewer() {
+            try {
+                if (typeof pdfjsLib === 'undefined') {
+                    throw new Error('PDF.js library failed to load.');
+                }
+                const loadingTask = pdfjsLib.getDocument({ url: pdfUrl });
+                pdfDoc = await loadingTask.promise;
+                totalPagesEl.textContent = pdfDoc.numPages;
+
+                // Determine sensible default scale to fit viewport width
+                const firstPage = await pdfDoc.getPage(1);
+                const unscaledVp = firstPage.getViewport({ scale: 1.0 });
+                const availWidth = Math.min(viewportEl.clientWidth - 40, 860);
+                if (availWidth > 240 && unscaledVp.width > 0) {
+                    currentScale = Math.min(Math.max(availWidth / unscaledVp.width, 0.6), 1.4);
+                } else {
+                    currentScale = 1.0;
+                }
+                updateZoomLabel();
+
+                createPageStructure(pdfDoc.numPages);
+                loaderEl.style.display = 'none';
+
+                await renderAllPages();
+                setupObserver();
+            } catch (err) {
+                console.error('PDF preview error:', err);
+                loaderEl.innerHTML = '<div style="color:#ef4444; font-size:14px; font-weight:600; text-align:center;">' +
+                    'Unable to display sample preview.<br><span style="font-size:12px; color:#94a3b8; font-weight:normal;">' +
+                    (err.message || 'File error') + '</span></div>';
+            }
+        }
+
+        // Controls events
+        document.getElementById('mr-zoom-in').addEventListener('click', function() {
+            currentScale = Math.min(currentScale + 0.15, 2.5);
+            updateZoomLabel();
+            renderAllPages();
+        });
+
+        document.getElementById('mr-zoom-out').addEventListener('click', function() {
+            currentScale = Math.max(currentScale - 0.15, 0.5);
+            updateZoomLabel();
+            renderAllPages();
+        });
+
+        document.getElementById('mr-fit-width').addEventListener('click', async function() {
+            if (!pdfDoc) return;
+            const firstPage = await pdfDoc.getPage(1);
+            const unscaledVp = firstPage.getViewport({ scale: 1.0 });
+            const availWidth = viewportEl.clientWidth - 44;
+            if (availWidth > 200 && unscaledVp.width > 0) {
+                currentScale = Math.min(Math.max(availWidth / unscaledVp.width, 0.5), 2.2);
+                updateZoomLabel();
+                renderAllPages();
+            }
+        });
+
+        document.getElementById('mr-prev-page').addEventListener('click', function() {
+            const cur = parseInt(currentPageEl.textContent) || 1;
+            if (cur > 1) {
+                const target = document.getElementById('mr-page-card-' + (cur - 1));
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+
+        document.getElementById('mr-next-page').addEventListener('click', function() {
+            const cur = parseInt(currentPageEl.textContent) || 1;
+            if (pdfDoc && cur < pdfDoc.numPages) {
+                const target = document.getElementById('mr-page-card-' + (cur + 1));
+                if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+
+        initViewer();
+    })();
+    </script>
+</body>
+</html>
+        <?php
+        exit;
+    }
+
+    /**
      * AJAX handler to generate report
      */
     public static function ajax_generate_report() {
@@ -1387,6 +2013,15 @@ class MR_Frontend {
         @set_time_limit(300);
 
         $report_slug     = sanitize_key($_POST['report_slug'] ?? '');
+        if (class_exists('MR_Bundles')) {
+            $report_slug = MR_Bundles::normalize_slug($report_slug);
+        }
+        if ($report_slug === 'palm-reading-report') {
+            $report_slug = 'palmistry_report';
+        }
+        if ($report_slug === 'kundali-and-gun-matching-report') {
+            $report_slug = 'kundli_matching';
+        }
         $recipient_email = sanitize_email($_POST['recipient_email'] ?? '');
 
         // Determine if report is free promotional offer (e.g. ₹0)
@@ -1482,17 +2117,26 @@ class MR_Frontend {
                 }
             }
 
-            // Save uploaded palm image to cache
+            // Compress and save uploaded palm image to cache while uploading (visually lossless, max 1600px, quality 88)
             $cache_dir = WP_CONTENT_DIR . '/uploads/palm-cache';
             if (!file_exists($cache_dir)) {
                 wp_mkdir_p($cache_dir);
             }
             $hash = md5_file($_FILES['palm_image']['tmp_name']);
             $validated_palm_file = $cache_dir . '/mr_palm_' . $hash . '.jpg';
-            move_uploaded_file($_FILES['palm_image']['tmp_name'], $validated_palm_file);
+            if (class_exists('MR_Palmistry_Builder')) {
+                MR_Palmistry_Builder::compress_and_store_palm_image($_FILES['palm_image']['tmp_name'], $validated_palm_file);
+            } else {
+                move_uploaded_file($_FILES['palm_image']['tmp_name'], $validated_palm_file);
+            }
         }
 
-        // Deduct token only after all details & palm validation have passed
+        $report_info = MR_Packs::get_report($report_slug);
+        if (!$report_info) {
+            wp_send_json_error(['message' => 'Invalid report requested.']);
+        }
+
+        // Deduct token only after all details, palm validation & report_info verification have passed
         if (!$is_free) {
             MR_Tokens::deduct_token($user_id, $report_slug);
         } elseif ($user_id && class_exists('MR_Tokens') && MR_Tokens::has_token($user_id, $report_slug)) {
@@ -1504,11 +2148,6 @@ class MR_Frontend {
             if ($user_obj && !empty($user_obj->user_email)) {
                 $recipient_email = $user_obj->user_email;
             }
-        }
-
-        $report_info = MR_Packs::get_report($report_slug);
-        if (!$report_info) {
-            wp_send_json_error(['message' => 'Invalid report requested.']);
         }
 
         // Create target directory in uploads
@@ -1599,7 +2238,7 @@ class MR_Frontend {
             $girl_tob  = !empty($_POST['girl_tob']) ? sanitize_text_field($_POST['girl_tob']) : $tob;
             $girl_pob  = !empty($_POST['girl_pob']) ? sanitize_text_field($_POST['girl_pob']) : $pob;
             $html_content = MR_Matching_Report_Builder::build_matching_report_html($boy_name, $boy_dob, $boy_tob, $boy_pob, $girl_name, $girl_dob, $girl_tob, $girl_pob);
-        } elseif (($report_slug === 'numerology_report' || $report_slug === 'numerology') && class_exists('MR_Numero_Report_Builder')) {
+        } elseif (($report_slug === 'numerology_report' || $report_slug === 'numerology' || $report_slug === 'numero_report' || $report_slug === 'numerology-report') && class_exists('MR_Numero_Report_Builder')) {
             $html_content = MR_Numero_Report_Builder::build_numero_report_html($person_name, $gender, $dob, $tob, $pob);
         } elseif ($report_slug === 'palmistry_report' && class_exists('MR_Palmistry_Builder')) {
             $palm_data = null;
@@ -1724,55 +2363,88 @@ class MR_Frontend {
      */
     public static function get_standard_report_filename($report_slug, $person_name, $partner_name = '', $dob = '') {
         // Clean and format person name in Title Case, stripping filesystem reserved characters
-        $clean_name = trim(preg_replace('/[\/\\\\:*?"<>|]/', '', ucwords(strtolower(trim($person_name)))));
+        $raw_name = trim(ucwords(strtolower(trim($person_name))));
+        $clean_name = preg_replace('/[^a-zA-Z0-9\-_]+/', '-', $raw_name);
+        $clean_name = trim(preg_replace('/-+/', '-', $clean_name), '-');
         if (empty($clean_name)) {
             $clean_name = 'User';
         }
 
-        $clean_partner = trim(preg_replace('/[\/\\\\:*?"<>|]/', '', ucwords(strtolower(trim($partner_name)))));
+        $raw_partner = trim(ucwords(strtolower(trim($partner_name))));
+        $clean_partner = preg_replace('/[^a-zA-Z0-9\-_]+/', '-', $raw_partner);
+        $clean_partner = trim(preg_replace('/-+/', '-', $clean_partner), '-');
 
         switch ($report_slug) {
             case 'yearly_horoscope_long':
                 // MR_YHLR
-                return "MeraRashifal Yearly Horoscope Detailed Report {$clean_name}";
+                return "MeraRashifal-Yearly-Horoscope-Detailed-Report-{$clean_name}";
 
             case 'yearly_horoscope_vedic':
                 // MR_YHSR
-                return "MeraRashifal Yearly Horoscope Short Report {$clean_name}";
+                return "MeraRashifal-Yearly-Horoscope-Short-Report-2026-{$clean_name}";
 
             case 'kundli_predictions':
                 // MR_JKHR
-                return "MeraRashifal Master Janam Kundali Detail Report {$clean_name}";
+                return "MeraRashifal-Master-Janma-Kundali-Detailed-Report-{$clean_name}";
 
             case 'mahadasha_timing':
                 // MR_VDLT
-                return "MeraRashifal Mahadasha Life Timing Detail Report {$clean_name}";
+                return "MeraRashifal-Master-Vedic-Dasha-Timing-Report-{$clean_name}";
 
             case 'dosh_remedial':
                 // MR_KDRA
-                return "MeraRashifal Kundali Dosh Detailed Report {$clean_name}";
+                return "MeraRashifal-Kundali-Dosh-Remedial-Report-{$clean_name}";
 
             case 'kundli_matching':
                 // MR_KMMR
                 if (!empty($clean_partner)) {
-                    return "MeraRashifal Kundali and Gun Matching Detailed Report {$clean_name} and {$clean_partner}";
+                    return "MeraRashifal-Kundali-Matching-Gun-Milan-{$clean_name}-{$clean_partner}";
                 }
-                return "MeraRashifal Kundali and Gun Matching Detailed Report {$clean_name}";
+                return "MeraRashifal-Kundali-Matching-Gun-Milan-{$clean_name}";
 
             case 'numerology':
             case 'numerology_report':
+            case 'numero_report':
+            case 'numerology-report':
                 // MR_NMVI
-                return "MeraRashifal Master Numerology Detailed Report {$clean_name}";
+                return "MeraRashifal-Master-Numerology-Detailed-Report-{$clean_name}";
 
             case 'monthly_horoscope_vedic':
-            case 'monthly_horoscope_western':
-                // MR_MHTS: MeraRashifal Monthly Horoscope Detailed Report <user name> - <month> - <year>
+                // MR_MHTS
                 $month_name = date('F');
                 $year_name  = date('Y');
-                return "MeraRashifal Monthly Horoscope Detailed Report {$clean_name} - {$month_name} - {$year_name}";
+                return "MeraRashifal-Monthly-Horoscope-{$month_name}-{$year_name}-{$clean_name}";
+
+            case 'palmistry_report':
+            case 'palm_reading':
+                // MR_PLMR
+                return "MeraRashifal-Master-Hast-Rekha-Palmistry-Report-{$clean_name}";
+
+            case 'yearly_horoscope_western':
+                return "MeraRashifal-Western-Yearly-Horoscope-Report-{$clean_name}";
+
+            case 'monthly_horoscope_western':
+                $month_name = date('F');
+                $year_name  = date('Y');
+                return "MeraRashifal-Western-Monthly-Horoscope-{$month_name}-{$year_name}-{$clean_name}";
+
+            case 'natal_chat_reading':
+                return "MeraRashifal-Natal-Reading-Report-{$clean_name}";
+
+            case 'synastry_chart_reading':
+                if (!empty($clean_partner)) {
+                    return "MeraRashifal-Synastry-Relationship-Report-{$clean_name}-{$clean_partner}";
+                }
+                return "MeraRashifal-Synastry-Relationship-Report-{$clean_name}";
+
+            case 'transit_report':
+                return "MeraRashifal-Transits-Report-{$clean_name}";
+
+            case 'tarot_reading':
+                return "MeraRashifal-Tarot-Reading-Report-{$clean_name}";
 
             default:
-                return "MeraRashifal Detailed Report {$clean_name}";
+                return "MeraRashifal-Detailed-Report-{$clean_name}";
         }
     }
 

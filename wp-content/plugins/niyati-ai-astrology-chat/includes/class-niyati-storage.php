@@ -79,6 +79,10 @@ class Niyati_Storage {
     public static function get_profile_hash($birth_data) {
         $name = strtolower(trim($birth_data['name'] ?? 'user'));
         $dob  = trim($birth_data['dob'] ?? '');
+        // Normalize DOB so both DD/MM/YYYY and YYYY-MM-DD yield the identical hash
+        if (preg_match('/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/', $dob, $m)) {
+            $dob = sprintf('%04d-%02d-%02d', (int)$m[3], (int)$m[2], (int)$m[1]);
+        }
         $tob  = trim($birth_data['tob'] ?? '12:00');
         $lat  = round(floatval($birth_data['lat'] ?? 28.6139), 3);
         $lon  = round(floatval($birth_data['lon'] ?? 77.2090), 3);
@@ -122,7 +126,16 @@ class Niyati_Storage {
             return [];
         }
 
-        return $keyed ? $json['profiles'] : array_values($json['profiles']);
+        $profiles = $json['profiles'];
+        // Ensure all loaded profiles have DOB normalized to standard HTML5 input format (YYYY-MM-DD)
+        foreach ($profiles as &$p) {
+            if (!empty($p['dob']) && preg_match('/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/', trim($p['dob']), $m)) {
+                $p['dob'] = sprintf('%04d-%02d-%02d', (int)$m[3], (int)$m[2], (int)$m[1]);
+            }
+        }
+        unset($p);
+
+        return $keyed ? $profiles : array_values($profiles);
     }
 
     /**
@@ -179,6 +192,9 @@ class Niyati_Storage {
 
         $hash = self::get_profile_hash($birth_data);
         $profile_entry = array_merge($birth_data, $profile_data);
+        if (!empty($profile_entry['dob']) && preg_match('/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/', trim($profile_entry['dob']), $m)) {
+            $profile_entry['dob'] = sprintf('%04d-%02d-%02d', (int)$m[3], (int)$m[2], (int)$m[1]);
+        }
         $profile_entry['profile_hash'] = $hash;
         $profile_entry['cached_at']    = time();
 
@@ -420,5 +436,164 @@ class Niyati_Storage {
         }
 
         return $deleted_count;
+    }
+
+    /**
+     * Get list of past consultation archives for a user
+     *
+     * @param int $user_id
+     * @return array List of archives with metadata and previews, sorted newest first
+     */
+    public static function get_user_archives_list($user_id) {
+        $user_id = absint($user_id);
+        if ($user_id <= 0) {
+            return [];
+        }
+
+        $archive_base = self::get_sub_dir(self::ARCHIVE_FOLDER);
+        if (!file_exists($archive_base)) {
+            return [];
+        }
+
+        $archives = [];
+        $prefix = "user_{$user_id}_";
+
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($archive_base, RecursiveDirectoryIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::CHILD_FIRST
+        );
+
+        $base_real = realpath($archive_base);
+
+        foreach ($iterator as $item) {
+            if (!$item->isFile()) {
+                continue;
+            }
+            $filename = $item->getFilename();
+            if (substr($filename, -8) !== '.json.gz' || strpos($filename, $prefix) !== 0) {
+                continue;
+            }
+
+            $real_path = $item->getRealPath();
+            $rel_path = str_replace('\\', '/', substr($real_path, strlen($base_real) + 1));
+
+            $raw_gz = @file_get_contents($real_path);
+            if (!$raw_gz) {
+                continue;
+            }
+            $raw_json = @gzdecode($raw_gz);
+            if (!$raw_json) {
+                continue;
+            }
+            $data = json_decode($raw_json, true);
+            if (!is_array($data)) {
+                continue;
+            }
+
+            $messages = is_array($data['messages'] ?? null) ? $data['messages'] : [];
+            $user_messages = array_values(array_filter($messages, function($m) {
+                return ($m['role'] ?? '') === 'user';
+            }));
+
+            // Extract first question preview
+            $preview = '';
+            if (!empty($user_messages)) {
+                $preview = $user_messages[0]['text'] ?? '';
+            } elseif (!empty($messages)) {
+                $preview = $messages[0]['text'] ?? '';
+            }
+            $preview = wp_strip_all_tags($preview);
+            if (mb_strlen($preview, 'UTF-8') > 90) {
+                $preview = mb_substr($preview, 0, 87, 'UTF-8') . '...';
+            }
+
+            $created_at = intval($data['created_at'] ?? $item->getMTime());
+            $updated_at = intval($data['updated_at'] ?? $item->getMTime());
+            $profile_name = sanitize_text_field($data['active_profile_name'] ?? '');
+
+            $archives[] = [
+                'session_id'     => base64_encode($rel_path),
+                'file_name'      => $filename,
+                'created_at'     => $created_at,
+                'updated_at'     => $updated_at,
+                'date_formatted' => date_i18n('d M Y, h:i A', $created_at),
+                'profile_name'   => $profile_name ?: __('Self', 'niyati-ai-astrology-chat'),
+                'total_messages' => count($messages),
+                'question_count' => count($user_messages),
+                'preview'        => $preview,
+            ];
+        }
+
+        // Sort newest first
+        usort($archives, function($a, $b) {
+            return $b['created_at'] <=> $a['created_at'];
+        });
+
+        return $archives;
+    }
+
+    /**
+     * Retrieve full transcript of a specific past consultation archive
+     *
+     * @param int $user_id
+     * @param string $session_id Base64 encoded relative path to archive file
+     * @return array|false
+     */
+    public static function get_archive_transcript($user_id, $session_id) {
+        $user_id = absint($user_id);
+        if ($user_id <= 0 || empty($session_id)) {
+            return false;
+        }
+
+        $rel_path = base64_decode($session_id, true);
+        if (!$rel_path || strpos($rel_path, '..') !== false) {
+            return false;
+        }
+
+        // Sanitize path: only allow digits, letters, underscores, hyphens, slashes and ending in .json.gz
+        $rel_path = str_replace('\\', '/', trim($rel_path));
+        if (!preg_match('/^[\w\-\.\/]+\.json\.gz$/', $rel_path)) {
+            return false;
+        }
+
+        $filename = basename($rel_path);
+        if (strpos($filename, "user_{$user_id}_") !== 0) {
+            return false;
+        }
+
+        $archive_base = self::get_sub_dir(self::ARCHIVE_FOLDER);
+        $full_path = trailingslashit($archive_base) . $rel_path;
+
+        if (!file_exists($full_path)) {
+            return false;
+        }
+
+        $raw_gz = @file_get_contents($full_path);
+        if (!$raw_gz) {
+            return false;
+        }
+
+        $raw_json = @gzdecode($raw_gz);
+        if (!$raw_json) {
+            return false;
+        }
+
+        $data = json_decode($raw_json, true);
+        if (!is_array($data)) {
+            return false;
+        }
+
+        $created_at = intval($data['created_at'] ?? filemtime($full_path));
+        $updated_at = intval($data['updated_at'] ?? filemtime($full_path));
+
+        return [
+            'session_id'          => $session_id,
+            'created_at'          => $created_at,
+            'updated_at'          => $updated_at,
+            'date_formatted'      => date_i18n('d M Y, h:i A', $created_at),
+            'active_profile_name' => $data['active_profile_name'] ?? '',
+            'chart_token'         => $data['chart_token'] ?? '',
+            'messages'            => $data['messages'] ?? [],
+        ];
     }
 }

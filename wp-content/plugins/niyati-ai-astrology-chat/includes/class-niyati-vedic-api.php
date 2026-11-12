@@ -77,33 +77,41 @@ class Niyati_Vedic_API {
      */
     public static function get_kundli_profile($birth_data) {
         $name = sanitize_text_field($birth_data['name'] ?? 'User');
-        $dob  = sanitize_text_field($birth_data['dob'] ?? '');
-        $tob  = sanitize_text_field($birth_data['tob'] ?? '');
-        $lat  = floatval($birth_data['lat'] ?? 28.6139);
-        $lon  = floatval($birth_data['lon'] ?? 77.2090);
-        $tz   = floatval($birth_data['tz'] ?? 5.5);
-        $lang = sanitize_text_field($birth_data['lang'] ?? 'hi');
+        $raw_dob = sanitize_text_field($birth_data['dob'] ?? '');
+        $tob     = sanitize_text_field($birth_data['tob'] ?? '');
+        $lat     = floatval($birth_data['lat'] ?? 28.6139);
+        $lon     = floatval($birth_data['lon'] ?? 77.2090);
+        $tz      = floatval($birth_data['tz'] ?? 5.5);
+        $lang    = sanitize_text_field($birth_data['lang'] ?? 'hi');
 
-        // Normalize DOB from YYYY-MM-DD to DD/MM/YYYY if needed
-        if (strpos($dob, '-') !== false) {
-            $parts = explode('-', $dob);
+        // Normalize DOB for VedicAstroAPI (requires DD/MM/YYYY)
+        $api_dob = $raw_dob;
+        if (strpos($api_dob, '-') !== false) {
+            $parts = explode('-', $api_dob);
             if (count($parts) === 3 && strlen($parts[0]) === 4) {
-                $dob = sprintf('%02d/%02d/%04d', (int)$parts[2], (int)$parts[1], (int)$parts[0]);
+                $api_dob = sprintf('%02d/%02d/%04d', (int)$parts[2], (int)$parts[1], (int)$parts[0]);
             }
         }
 
+        // Standard ISO DOB for storage & HTML5 input (YYYY-MM-DD)
+        $standard_dob = $raw_dob;
+        if (preg_match('/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})$/', $raw_dob, $m)) {
+            $standard_dob = sprintf('%04d-%02d-%02d', (int)$m[3], (int)$m[2], (int)$m[1]);
+        }
+
         // Cache Key
-        $cache_key = 'niyati_k_' . md5("{$dob}_{$tob}_{$lat}_{$lon}_{$lang}");
+        $cache_key = 'niyati_k_' . md5("{$api_dob}_{$tob}_{$lat}_{$lon}_{$lang}");
         $cached = get_transient($cache_key);
         if ($cached && is_array($cached)) {
             $cached['name'] = $name;
+            $cached['dob']  = $standard_dob;
             return $cached;
         }
 
         $api_key = self::get_api_key();
         $api_lang = ($lang === 'hi' ? 'hi' : 'en');
         $base_params = [
-            'dob'     => $dob,
+            'dob'     => $api_dob,
             'tob'     => $tob,
             'lat'     => (string)$lat,
             'lon'     => (string)$lon,
@@ -194,7 +202,7 @@ class Niyati_Vedic_API {
 
         $profile = [
             'name'             => $name,
-            'dob'              => $dob,
+            'dob'              => $standard_dob,
             'tob'              => $tob,
             'pob_coords'       => "Lat: {$lat}, Lon: {$lon}",
             'ascendant'        => $ascendant_sign ?: 'Lagna',

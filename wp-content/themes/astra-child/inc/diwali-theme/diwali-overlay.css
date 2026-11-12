@@ -1,0 +1,269 @@
+/* ==========================================================================
+   Merarashifal - Grand Diwali Festive Theme Overlay (v3)
+   Clean, non-intrusive festive decorations & skyshot sparkles
+   ========================================================================== */
+
+/* Main Overlay Container - Pure visual layer, zero click interception */
+#mr-diwali-overlay-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none !important;
+    z-index: 99990 !important;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* Grand Skyshots & Fireworks Canvas */
+#mr-diwali-sparkles-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    pointer-events: none !important;
+    z-index: 99991 !important;
+}
+
+/* --------------------------------------------------------------------------
+   Header-Anchored Toran / Cross Dangler ("Happy Diwali")
+   Hangs directly BELOW the navigation bar: 100% visible menu text!
+   -------------------------------------------------------------------------- */
+.mr-diwali-toran-wrapper {
+    position: absolute;
+    top: 76px; /* Initial fallback below header */
+    left: 0;
+    width: 100%;
+    z-index: 99998 !important;
+    pointer-events: none !important;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    overflow: visible;
+}
+
+/* When appended directly to the header element */
+.mr-diwali-toran-wrapper.mr-toran-attached {
+    position: absolute !important;
+    top: 100% !important; /* Starts exactly at the bottom pixel of the header */
+    left: 0 !important;
+    width: 100% !important;
+}
+
+.mr-diwali-toran-svg {
+    width: 100%;
+    max-width: 100%;
+    height: 80px;
+    display: block;
+    pointer-events: none !important;
+    filter: drop-shadow(0 5px 12px rgba(180, 83, 9, 0.4));
+}
+
+/* Gentle Pendulum Sway on Hanging Bells & Lanterns */
+.mr-diwali-sway-1,
+.mr-diwali-sway-3 {
+    transform-origin: top center;
+    animation: mrDiwaliSwayLeft 3.6s ease-in-out infinite alternate;
+}
+
+.mr-diwali-sway-2,
+.mr-diwali-sway-4 {
+    transform-origin: top center;
+    animation: mrDiwaliSwayRight 4.2s ease-in-out infinite alternate;
+}
+
+.mr-diwali-crest-sway {
+    transform-origin: top center;
+    animation: mrDiwaliCrestPulse 3.5s ease-in-out infinite alternate;
+}
+
+@keyframes mrDiwaliSwayLeft {
+    0% {
+        transform: rotate(-4deg);
+    }
+    100% {
+        transform: rotate(4deg);
+    }
+}
+
+@keyframes mrDiwaliSwayRight {
+    0% {
+        transform: rotate(3.5deg);
+    }
+    100% {
+        transform: rotate(-3.5deg);
+    }
+}
+
+@keyframes mrDiwaliCrestPulse {
+    0% {
+        transform: translateY(0) scale(1);
+    }
+    100% {
+        transform: translateY(2px) scale(1.01);
+    }
+}
+
+/* Flame Animation for Diya inside Crest */
+.mr-diwali-flame {
+    transform-origin: bottom center;
+    animation: mrFlameFlicker 0.16s ease-in-out infinite alternate;
+}
+
+.mr-diwali-flame-inner {
+    transform-origin: bottom center;
+    animation: mrInnerFlameWobble 0.22s ease-in-out infinite alternate;
+}
+
+@keyframes mrFlameFlicker {
+    0% {
+        transform: scale(1) rotate(-1deg);
+        opacity: 0.94;
+    }
+    100% {
+        transform: scale(1.06, 1.15) rotate(1.5deg);
+        opacity: 1;
+    }
+}
+
+@keyframes mrInnerFlameWobble {
+    0% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(1.1, 1.2) translateY(-1px);
+    }
+}
+
+/* --------------------------------------------------------------------------
+   Vertical Side Garlands (Phool Mala framing screen margins)
+   -------------------------------------------------------------------------- */
+.mr-diwali-side-garland {
+    position: fixed;
+    top: 0;
+    width: 30px;
+    height: 100vh;
+    z-index: 99992 !important;
+    pointer-events: none !important;
+    opacity: 0.92;
+    filter: drop-shadow(0 4px 10px rgba(180, 83, 9, 0.35));
+}
+
+.mr-diwali-side-left {
+    left: 4px;
+}
+
+.mr-diwali-side-right {
+    right: 4px;
+}
+
+/* --------------------------------------------------------------------------
+   Festive Mode Toggle Pill (Visitor Controls)
+   -------------------------------------------------------------------------- */
+.mr-diwali-toggle-btn {
+    position: fixed;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 99999 !important;
+    pointer-events: auto !important;
+    background: linear-gradient(135deg, rgba(28, 15, 6, 0.92), rgba(65, 30, 8, 0.95));
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    color: #fef08a;
+    border: 1.5px solid rgba(251, 191, 36, 0.6);
+    border-radius: 9999px;
+    padding: 6px 16px 7px 14px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    cursor: pointer;
+    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.35), 0 0 14px rgba(245, 158, 11, 0.45);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    outline: none;
+    line-height: 1;
+}
+
+.mr-diwali-toggle-btn:hover {
+    background: linear-gradient(135deg, rgba(55, 22, 6, 0.98), rgba(95, 38, 10, 0.98));
+    border-color: #f59e0b;
+    box-shadow: 0 6px 22px rgba(0, 0, 0, 0.45), 0 0 20px rgba(245, 158, 11, 0.7);
+    transform: translateX(-50%) translateY(-2px);
+    color: #ffffff;
+}
+
+.mr-diwali-toggle-btn svg {
+    width: 15px;
+    height: 15px;
+    fill: currentColor;
+    flex-shrink: 0;
+}
+
+/* When Diwali overlay is toggled OFF by visitor */
+body.mr-diwali-disabled #mr-diwali-overlay-container,
+body.mr-diwali-disabled #mr-diwali-sparkles-canvas,
+body.mr-diwali-disabled .mr-diwali-toran-wrapper,
+body.mr-diwali-disabled .mr-diwali-side-garland {
+    display: none !important;
+}
+
+body.mr-diwali-disabled .mr-diwali-toggle-btn {
+    opacity: 0.65;
+    background: rgba(20, 20, 20, 0.88);
+    color: #cbd5e1;
+    border-color: rgba(148, 163, 184, 0.3);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+/* --------------------------------------------------------------------------
+   Mobile & Responsive Adaptations
+   -------------------------------------------------------------------------- */
+@media screen and (max-width: 992px) {
+    .mr-diwali-side-garland {
+        display: none !important;
+    }
+    
+    .mr-diwali-toran-svg {
+        height: 65px;
+    }
+}
+
+@media screen and (max-width: 768px) {
+    .mr-diwali-toran-svg {
+        height: 52px;
+    }
+
+    .mr-diwali-toggle-btn {
+        bottom: 72px;
+        font-size: 11px;
+        padding: 5px 12px;
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .mr-diwali-toran-svg {
+        height: 44px;
+    }
+}
+
+/* --------------------------------------------------------------------------
+   Accessibility: Reduced Motion Preference
+   -------------------------------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+    .mr-diwali-sway-1,
+    .mr-diwali-sway-2,
+    .mr-diwali-sway-3,
+    .mr-diwali-sway-4,
+    .mr-diwali-crest-sway,
+    .mr-diwali-flame,
+    .mr-diwali-flame-inner {
+        animation: none !important;
+    }
+}

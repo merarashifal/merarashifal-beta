@@ -23,6 +23,14 @@ class MR_Account_UI {
         // AJAX handlers for saving details
         add_action('wp_ajax_mr_save_account_astro_details', [__CLASS__, 'ajax_save_astro_details']);
         add_action('wp_ajax_mr_save_account_settings', [__CLASS__, 'ajax_save_settings']);
+        add_action('wp_ajax_mr_get_passbook_page', [__CLASS__, 'ajax_get_passbook_page']);
+        add_action('wp_ajax_mr_submit_support_ticket', [__CLASS__, 'ajax_submit_support_ticket']);
+        add_action('wp_ajax_nopriv_mr_submit_support_ticket', [__CLASS__, 'ajax_submit_support_ticket']);
+
+        // DPDP Act 2023 Data Principal Handlers
+        add_action('wp_ajax_mr_dpdp_export_data', [__CLASS__, 'ajax_dpdp_export_data']);
+        add_action('wp_ajax_mr_dpdp_erase_account', [__CLASS__, 'ajax_dpdp_erase_account']);
+        add_action('wp_ajax_mr_dpdp_get_erase_challenge', [__CLASS__, 'ajax_get_erase_challenge']);
 
         // Strict Barrier: Block non-admin customers from entering WP Admin
         add_action('init', [__CLASS__, 'restrict_admin_area_access']);
@@ -471,13 +479,18 @@ class MR_Account_UI {
         }
         $target = !empty($redirect_to) ? $redirect_to : $account_url;
 
-        if (class_exists('NextendSocialLogin') && NextendSocialLogin::isProviderEnabled('google')) {
-            return add_query_arg([
-                'loginSocial' => 'google',
-                'redirect'    => $target
-            ], site_url('wp-login.php', 'login'));
+        // Direct Nextend Social Login Google OAuth endpoint
+        $login_base = site_url('wp-login.php', 'login');
+        if (class_exists('NextendSocialLogin')) {
+            $nsl_url = NextendSocialLogin::getLoginUrl();
+            if (!empty($nsl_url)) {
+                $login_base = $nsl_url;
+            }
         }
-        return !empty($redirect_to) && $redirect_to !== $account_url ? add_query_arg('redirect_to', $redirect_to, $account_url) : $account_url;
+        return add_query_arg([
+            'loginSocial' => 'google',
+            'redirect'    => $target
+        ], $login_base);
     }
 
     /**
@@ -498,13 +511,17 @@ class MR_Account_UI {
         $account_url = self::get_account_page_url();
         $target = !empty($redirect) ? $redirect : (!empty($_GET['redirect_to']) ? esc_url_raw($_GET['redirect_to']) : (!empty($_GET['redirect']) ? esc_url_raw($_GET['redirect']) : (!empty($_COOKIE['mr_login_return_url']) ? esc_url_raw($_COOKIE['mr_login_return_url']) : $account_url)));
 
-        if (class_exists('NextendSocialLogin') && NextendSocialLogin::isProviderEnabled('google')) {
-            return add_query_arg([
-                'loginSocial' => 'google',
-                'redirect'    => $target
-            ], site_url('wp-login.php', 'login'));
+        $login_base = site_url('wp-login.php', 'login');
+        if (class_exists('NextendSocialLogin')) {
+            $nsl_url = NextendSocialLogin::getLoginUrl();
+            if (!empty($nsl_url)) {
+                $login_base = $nsl_url;
+            }
         }
-        return !empty($target) && $target !== $account_url ? add_query_arg('redirect_to', $target, $account_url) : $account_url;
+        return add_query_arg([
+            'loginSocial' => 'google',
+            'redirect'    => $target
+        ], $login_base);
     }
 
     /**
@@ -743,11 +760,16 @@ class MR_Account_UI {
 
         // 9. CUSTOMERS / FRONTEND USERS:
         // Only if redirect_to points to a frontend customer URL (e.g. /my-account/), redirect to Google OAuth
-        if (class_exists('NextendSocialLogin') && NextendSocialLogin::isProviderEnabled('google')) {
+        if (class_exists('NextendSocialLogin')) {
+            $login_base = site_url('wp-login.php', 'login');
+            $nsl_url = NextendSocialLogin::getLoginUrl();
+            if (!empty($nsl_url)) {
+                $login_base = $nsl_url;
+            }
             $google_oauth_url = add_query_arg([
                 'loginSocial' => 'google',
                 'redirect'    => $redirect_to
-            ], site_url('wp-login.php', 'login'));
+            ], $login_base);
 
             wp_redirect($google_oauth_url);
             exit;
@@ -820,6 +842,18 @@ class MR_Account_UI {
         $pref_system = get_user_meta($user_id, 'mr_pref_system', true) ?: 'vedic';
         $pref_notify = get_user_meta($user_id, 'mr_pref_notify', true) ?: '1';
 
+        // DPDP Act 2023 - Data Principal Nominee & Consent preferences
+        $nominee_name     = get_user_meta($user_id, 'mr_dpdp_nominee_name', true) ?: '';
+        $nominee_email    = get_user_meta($user_id, 'mr_dpdp_nominee_email', true) ?: '';
+        $nominee_phone    = get_user_meta($user_id, 'mr_dpdp_nominee_phone', true) ?: '';
+        $nominee_relation = get_user_meta($user_id, 'mr_dpdp_nominee_relation', true) ?: '';
+        $consent_profile  = get_user_meta($user_id, 'mr_dpdp_consent_profiling', true) !== '0' ? '1' : '0';
+        $consent_ai       = get_user_meta($user_id, 'mr_dpdp_consent_ai_chat', true) !== '0' ? '1' : '0';
+        $consent_comms    = get_user_meta($user_id, 'mr_dpdp_consent_comms', true) !== '0' ? '1' : '0';
+
+        // DPDP Erasure Dynamic Security Challenge (Anti-bot word & 50-sentence pool)
+        $erase_challenge  = self::generate_dpdp_erase_challenge($user_id);
+
         // Calculate Vedic Sun / Moon Sign if DOB is available
         $calculated_rashi = !empty($astro_dob) ? self::calculate_vedic_sun_sign($astro_dob) : null;
 
@@ -832,7 +866,21 @@ class MR_Account_UI {
             ORDER BY id DESC
         ", $user_id));
 
-        // Fetch user transactions
+        // Fetch Niyati AI Astrologer Credit Wallet stats
+        $niyati_wallet = class_exists('Niyati_Wallet') ? Niyati_Wallet::get_wallet('', $user_id) : null;
+        $niyati_balance   = $niyati_wallet ? intval($niyati_wallet->credits_balance) : 0;
+        $niyati_purchased = $niyati_wallet ? intval($niyati_wallet->total_purchased) : 0;
+        $niyati_consumed  = $niyati_wallet ? intval($niyati_wallet->total_consumed) : 0;
+        $niyati_validity  = ($niyati_wallet && !empty($niyati_wallet->validity_expires_at) && $niyati_wallet->validity_expires_at !== '0000-00-00 00:00:00') ? date('d M Y', strtotime($niyati_wallet->validity_expires_at)) : 'Lifetime';
+
+        // Fetch unified ledger & load initial 25 entries for initial view (zero DOM bloat)
+        $unified_ledger       = self::get_user_unified_ledger($user_id);
+        $passbook_data        = self::filter_and_paginate_ledger($unified_ledger, 'all', 1, 25);
+        $count_all_ledger     = $passbook_data['counts']['all'];
+        $count_credits_ledger = $passbook_data['counts']['credits'];
+        $count_orders_ledger  = $passbook_data['counts']['orders'];
+
+        // User transactions for spent stats
         $table_txns = $wpdb->prefix . 'mr_transactions';
         $txns = $wpdb->get_results($wpdb->prepare("
             SELECT * FROM $table_txns 
@@ -943,7 +991,7 @@ class MR_Account_UI {
                     </button>
                     <button type="button" class="mr-tab-btn" data-tab="passbook">
                         <span>Transaction Passbook</span>
-                        <span class="mr-tab-count"><?php echo count($txns); ?></span>
+                        <span class="mr-tab-count"><?php echo count($unified_ledger); ?></span>
                     </button>
                     <button type="button" class="mr-tab-btn" data-tab="settings">
                         <span>Settings</span>
@@ -1120,6 +1168,49 @@ class MR_Account_UI {
                         </a>
                     </div>
 
+                    <!-- Available Prepaid Report Tokens Queue (e.g. from Bundles or Packs) -->
+                    <?php 
+                    $user_tokens = class_exists('MR_Tokens') ? MR_Tokens::get_user_tokens($user_id) : [];
+                    $available_tokens = [];
+                    foreach ($user_tokens as $atk_slug => $tk) {
+                        $rem = intval($tk['remaining'] ?? ($tk['tokens_remaining'] ?? 0));
+                        if ($rem > 0) {
+                            $available_tokens[$atk_slug] = $tk;
+                        }
+                    }
+                    if (!empty($available_tokens)):
+                    ?>
+                        <div class="mr-available-tokens-banner" style="background: linear-gradient(135deg, #FFF9F0 0%, #FFF2DF 100%); border: 2px solid #D9A441; border-radius: 16px; padding: 18px 22px; margin-bottom: 24px; box-shadow: 0 6px 20px rgba(217,164,65,0.15);">
+                            <div style="font-weight: 800; color: #7A1F3D; font-size: 15px; margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+                                <i class="fa-solid fa-wand-magic-sparkles" style="color: #F58220;"></i>
+                                <span>Unused Prepaid Report Tokens Ready to Generate:</span>
+                            </div>
+                            <p style="margin: 0 0 14px 0; font-size: 12.5px; color: #554841; line-height: 1.45;">
+                                You have active prepaid tokens ready. Click below to enter birth details (for yourself or another person):
+                            </p>
+                            <div style="display: flex; flex-direction: column; gap: 10px;">
+                                <?php foreach ($available_tokens as $atk_slug => $atk): 
+                                    $atk_name = !empty($atk['name']) ? $atk['name'] : (class_exists('MR_Bundles') ? MR_Bundles::get_report_name($atk_slug) : ucwords(str_replace('_', ' ', $atk_slug)));
+                                    $atk_rem  = intval($atk['remaining'] ?? ($atk['tokens_remaining'] ?? 1));
+                                ?>
+                                    <div style="background: #FFFFFF; border: 1.5px solid #EADCCB; border-radius: 10px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                                        <div>
+                                            <div style="font-weight: 700; color: #1E293B; font-size: 14.5px;"><?php echo esc_html($atk_name); ?></div>
+                                            <span style="font-size: 11px; font-weight: 700; color: #059669; background: #ECFDF5; padding: 2px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px; margin-top: 3px;">
+                                                <i class="fa-solid fa-ticket"></i> <?php echo esc_html($atk_rem); ?> Prepaid Token<?php echo $atk_rem > 1 ? 's' : ''; ?> Available
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <button type="button" class="mr-btn-generate-direct" data-slug="<?php echo esc_attr($atk_slug); ?>" data-title="<?php echo esc_attr($atk_name); ?>" style="padding: 9px 18px; font-size: 12.5px; border-radius: 8px; cursor: pointer; background: #7A1F3D; color: #fff; font-weight: 700; border: none; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(122,31,61,0.2);">
+                                                <i class="fa-solid fa-wand-magic-sparkles"></i> Enter Details &amp; Generate &rarr;
+                                            </button>
+                                        </div>
+                                    </div>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
+                    <?php endif; ?>
+
                     <?php if (empty($reports)): ?>
                         <div class="mr-empty-state-box">
                             <div class="mr-empty-icon"><img src="<?php echo esc_url($loader_url); ?>" alt="" class="mr-spin-loader" style="width:40px; height:40px; opacity:0.6;" /></div>
@@ -1203,16 +1294,83 @@ class MR_Account_UI {
 
             <!-- TAB 3: Transaction Passbook -->
             <div class="mr-account-tab-pane" id="mr-pane-passbook">
-                <div class="mr-account-card">
-                    <div class="mr-card-header">
-                        <div class="mr-card-icon-badge mr-loader-badge"><img src="<?php echo esc_url($loader_url); ?>" alt="" class="mr-spin-loader" /></div>
+                <!-- Top Niyati Credit Wallet & Activity Card -->
+                <div class="mr-passbook-hero-card">
+                    <div class="mr-passbook-hero-top">
+                        <div class="mr-passbook-hero-identity">
+                            <span class="mr-passbook-hero-eyebrow">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#F58220" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+                                <span>NIYATI AI VEDIC ASTROLOGER WALLET</span>
+                            </span>
+                            <h3 class="mr-passbook-hero-title">Live Chat &amp; Consultation Credits</h3>
+                            <div class="mr-passbook-balance-badge-wrap">
+                                <div class="mr-passbook-balance-badge">
+                                    <span class="mr-balance-num"><?php echo number_format($niyati_balance); ?></span>
+                                    <span class="mr-balance-unit">Questions Available</span>
+                                </div>
+                                <span class="mr-passbook-validity-pill">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                    <span>Validity: <?php echo esc_html($niyati_validity); ?></span>
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Wallet Lifetime Stats -->
+                        <div class="mr-passbook-stats-grid">
+                            <div class="mr-stat-tile">
+                                <span class="mr-stat-label">Lifetime Awarded</span>
+                                <span class="mr-stat-val mr-stat-plus">+<?php echo number_format($niyati_purchased); ?> <small>Credits</small></span>
+                            </div>
+                            <div class="mr-stat-tile">
+                                <span class="mr-stat-label">Total Consumed</span>
+                                <span class="mr-stat-val mr-stat-minus">-<?php echo number_format($niyati_consumed); ?> <small>Asked</small></span>
+                            </div>
+                            <div class="mr-stat-tile">
+                                <span class="mr-stat-label">Total Spent</span>
+                                <span class="mr-stat-val">₹<?php echo number_format($total_spent, 2); ?></span>
+                            </div>
+                        </div>
+
+                        <!-- Quick Action CTAs -->
+                        <div class="mr-passbook-hero-actions">
+                            <button type="button" class="mr-btn-ask-niyati" onclick="window.NiyatiChat && window.NiyatiChat.open ? window.NiyatiChat.open() : null;" title="Chat with Niyati AI Vedic Astrologer">
+                                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                                <span>Ask Niyati &rarr;</span>
+                            </button>
+                            <button type="button" class="mr-btn-recharge-credits" onclick="window.NiyatiChat && window.NiyatiChat.openWalletModal ? window.NiyatiChat.openWalletModal() : (window.NiyatiChat && window.NiyatiChat.open ? window.NiyatiChat.open() : null);" title="Recharge Question Credits">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                                <span>+ Recharge</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Ledger Table Card -->
+                <div class="mr-account-card" style="margin-top: 20px;">
+                    <div class="mr-card-header" style="flex-wrap: wrap; gap: 14px; align-items: center; justify-content: space-between;">
                         <div>
-                            <h3 class="mr-card-title">My Transaction Passbook &amp; Payment History</h3>
-                            <p class="mr-card-sub">Complete chronological ledger of your purchases, subscription renewals, and payments.</p>
+                            <h3 class="mr-card-title">Transaction Passbook &amp; Activity History</h3>
+                            <p class="mr-passbook-filter-hint" id="mr-passbook-filter-hint">Showing complete chronological ledger of report orders, credit recharges, and chat sessions.</p>
+                        </div>
+
+                        <!-- Filter Pills with Purpose & Clear Count -->
+                        <div class="mr-passbook-filters">
+                            <button type="button" class="mr-passbook-filter-btn active" data-filter="all" title="View all report purchases, credit top-ups, and chat consultations">
+                                <span>All Activity</span>
+                                <span class="mr-filter-count"><?php echo $count_all_ledger; ?></span>
+                            </button>
+                            <button type="button" class="mr-passbook-filter-btn" data-filter="credits" title="View only Niyati AI credit additions and daily chat consumption">
+                                <span>AI Chat Credits ⚡</span>
+                                <span class="mr-filter-count"><?php echo $count_credits_ledger; ?></span>
+                            </button>
+                            <button type="button" class="mr-passbook-filter-btn" data-filter="orders" title="View only paid reports, subscriptions, and invoice receipts">
+                                <span>Orders &amp; Receipts ₹</span>
+                                <span class="mr-filter-count"><?php echo $count_orders_ledger; ?></span>
+                            </button>
                         </div>
                     </div>
 
-                    <?php if (empty($txns)): ?>
+                    <?php if (empty($unified_ledger)): ?>
                         <div class="mr-empty-state-box">
                             <div class="mr-empty-icon"><img src="<?php echo esc_url($loader_url); ?>" alt="" class="mr-spin-loader" style="width:40px; height:40px; opacity:0.6;" /></div>
                             <h4>No Transactions in Passbook</h4>
@@ -1221,75 +1379,28 @@ class MR_Account_UI {
                                 Consult Vedic Astrologer &rarr;
                             </a>
                         </div>
-                    <?php else: 
-                        $per_page = 10;
-                        $total_txns = count($txns);
-                        $total_pages = ceil($total_txns / $per_page);
-                    ?>
-                        <div class="mr-reports-table-responsive">
-                            <table class="mr-account-table">
+                    <?php else: ?>
+                        <div class="mr-reports-table-responsive mr-passbook-container">
+                            <table class="mr-account-table" id="mr-passbook-ledger-table">
                                 <thead>
                                     <tr>
-                                        <th>Date &amp; Time</th>
-                                        <th>Transaction ID</th>
-                                        <th>Service / Item</th>
-                                        <th>Amount</th>
-                                        <th class="mr-col-status">Status</th>
+                                        <th style="width: 17%;">Date &amp; Time</th>
+                                        <th style="width: 43%;">Activity &amp; Reference</th>
+                                        <th style="width: 14%; text-align: center;">Credits Impact</th>
+                                        <th style="width: 12%; text-align: right;">Amount</th>
+                                        <th class="mr-col-status" style="width: 14%; text-align: center;">Status &amp; Invoice</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($txns as $idx => $t): 
-                                        $status_class = ($t->status === 'success') ? 'mr-status-ready' : (($t->status === 'refunded') ? 'mr-status-refund' : 'mr-status-pending');
-                                        $channel_name = ($t->channel === 'subscription') ? 'Subscription Pack' : (($t->channel === 'chat_credit') ? 'AI Astro Chat' : 'Report Order');
-                                        $page_num = floor($idx / $per_page) + 1;
-                                    ?>
-                                        <tr class="mr-txn-row" data-page="<?php echo $page_num; ?>" style="<?php echo $page_num > 1 ? 'display:none;' : ''; ?>">
-                                            <td>
-                                                <div class="mr-cell-date"><strong><?php echo date('d M Y', strtotime($t->created_at)); ?></strong></div>
-                                                <div class="mr-cell-time" style="font-size:11px; color:#94a3b8;"><?php echo date('h:i A', strtotime($t->created_at)); ?></div>
-                                            </td>
-                                            <td>
-                                                <code class="mr-code-badge"><?php echo esc_html($t->internal_txn_id); ?></code>
-                                                <?php if (!empty($t->gateway_payment_id)): ?>
-                                                    <div class="mr-gateway-meta"><?php echo esc_html($t->gateway_payment_id); ?></div>
-                                                <?php endif; ?>
-                                            </td>
-                                            <td>
-                                                <div class="mr-channel-badge"><?php echo esc_html($channel_name); ?></div>
-                                                <div class="mr-item-name"><strong><?php echo esc_html($t->item_name); ?></strong></div>
-                                            </td>
-                                            <td>
-                                                <span class="mr-amount-val">₹<?php echo number_format($t->net_amount, 2); ?></span>
-                                            </td>
-                                            <td class="mr-col-status">
-                                                <span class="mr-status-pill <?php echo esc_attr($status_class); ?>">
-                                                    <?php if ($t->status === 'success'): ?>
-                                                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
-                                                        <span>Success</span>
-                                                    <?php elseif ($t->status === 'refunded'): ?>
-                                                        <span>Refunded</span>
-                                                    <?php else: ?>
-                                                        <span><?php echo esc_html(ucfirst($t->status)); ?></span>
-                                                    <?php endif; ?>
-                                                </span>
-                                            </td>
-                                        </tr>
-                                    <?php endforeach; ?>
+                                    <?php echo self::render_passbook_rows_html($passbook_data['items']); ?>
                                 </tbody>
                             </table>
                         </div>
 
-                        <?php if ($total_pages > 1): ?>
-                            <div class="mr-pagination-wrap" id="mr-passbook-pagination" data-total-pages="<?php echo $total_pages; ?>" data-current-page="1">
-                                <button type="button" class="mr-page-btn mr-prev-page" disabled>&laquo; Prev</button>
-                                <div class="mr-page-numbers">
-                                    <?php for ($p = 1; $p <= $total_pages; $p++): ?>
-                                        <button type="button" class="mr-page-num <?php echo ($p === 1) ? 'active' : ''; ?>" data-page="<?php echo $p; ?>"><?php echo $p; ?></button>
-                                    <?php endfor; ?>
-                                </div>
-                                <button type="button" class="mr-page-btn mr-next-page">&raquo; Next</button>
-                            </div>
-                        <?php endif; ?>
+                        <!-- On-Demand Pagination Container (AJAX 25-item slices) -->
+                        <div id="mr-passbook-pagination-container">
+                            <?php echo self::render_passbook_pagination_html($passbook_data['total_pages'], 1); ?>
+                        </div>
                     <?php endif; ?>
                 </div>
             </div>
@@ -1340,23 +1451,199 @@ class MR_Account_UI {
                         </div>
 
                         <div class="mr-form-divider">
-                            <span>Alerts &amp; Notifications</span>
+                            <span>DPDP Act 2023 &bull; Section 14: Data Principal Nomination</span>
                         </div>
 
-                        <div class="mr-checkbox-group">
+                        <p class="mr-settings-field-hint" style="font-size:13px; color:#64748B; margin-top:-6px; margin-bottom:16px; line-height:1.5;">
+                            Under Section 14 of the Digital Personal Data Protection Act, 2023 (DPDP Act), you have the statutory right to nominate an individual who shall, in the event of death or incapacity, exercise your data rights and access your astrological archives.
+                        </p>
+
+                        <div class="mr-form-row mr-cols-2">
+                            <div class="mr-form-group">
+                                <label for="mr_dpdp_nominee_name">Nominee Full Name</label>
+                                <div class="mr-input-wrap">
+                                    <input type="text" id="mr_dpdp_nominee_name" name="nominee_name" value="<?php echo esc_attr($nominee_name); ?>" placeholder="e.g. Aditi Sharma" />
+                                </div>
+                            </div>
+                            <div class="mr-form-group">
+                                <label for="mr_dpdp_nominee_relation">Relationship to Nominee</label>
+                                <div class="mr-input-wrap">
+                                    <select id="mr_dpdp_nominee_relation" name="nominee_relation">
+                                        <option value="" <?php selected($nominee_relation, ''); ?>>-- Select Relationship --</option>
+                                        <option value="Spouse" <?php selected($nominee_relation, 'Spouse'); ?>>Spouse</option>
+                                        <option value="Son / Daughter" <?php selected($nominee_relation, 'Son / Daughter'); ?>>Son / Daughter</option>
+                                        <option value="Parent" <?php selected($nominee_relation, 'Parent'); ?>>Parent</option>
+                                        <option value="Sibling" <?php selected($nominee_relation, 'Sibling'); ?>>Sibling</option>
+                                        <option value="Legal Heir / Relative" <?php selected($nominee_relation, 'Legal Heir / Relative'); ?>>Legal Heir / Relative</option>
+                                        <option value="Other" <?php selected($nominee_relation, 'Other'); ?>>Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mr-form-row mr-cols-2">
+                            <div class="mr-form-group">
+                                <label for="mr_dpdp_nominee_email">Nominee Email Address</label>
+                                <div class="mr-input-wrap">
+                                    <input type="email" id="mr_dpdp_nominee_email" name="nominee_email" value="<?php echo esc_attr($nominee_email); ?>" placeholder="nominee@example.com" />
+                                </div>
+                            </div>
+                            <div class="mr-form-group">
+                                <label for="mr_dpdp_nominee_phone">Nominee Phone Number</label>
+                                <div class="mr-input-wrap">
+                                    <input type="tel" id="mr_dpdp_nominee_phone" name="nominee_phone" value="<?php echo esc_attr($nominee_phone); ?>" placeholder="+91 98765 43210" />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mr-form-divider">
+                            <span>DPDP Act 2023 &bull; Section 6(4) &amp; Section 9: Consent Governance</span>
+                        </div>
+
+                        <p class="mr-settings-field-hint" style="font-size:13px; color:#64748B; margin-top:-6px; margin-bottom:14px; line-height:1.5;">
+                            Under Section 6(4) of the DPDP Act 2023, you retain the continuous statutory right to manage or withdraw consent for data processing. Under Section 9, the statutory age of majority in India is 18 years; behavioral profiling or targeted advertising directed at minors is strictly prohibited.
+                        </p>
+
+                        <div class="mr-checkbox-group mr-dpdp-consent-group" style="display:flex; flex-direction:column; gap:12px; margin-bottom:16px;">
                             <label class="mr-toggle-label">
-                                <input type="checkbox" name="pref_notify" value="1" <?php checked($pref_notify, '1'); ?> />
-                                <span>Receive instant email copies when a new astrological report is generated.</span>
+                                <input type="checkbox" name="consent_profile" id="mr_consent_profile" value="1" <?php checked($consent_profile, '1'); ?> />
+                                <span><strong>Astrological Kundli Calculations &amp; Profiling:</strong> Processing date, time, and coordinates of birth for planetary transit charts, Kundli matchings, and personalized horoscope forecasts.</span>
+                            </label>
+                            <label class="mr-toggle-label">
+                                <input type="checkbox" name="consent_ai" id="mr_consent_ai" value="1" <?php checked($consent_ai, '1'); ?> />
+                                <span><strong>Niyati AI Astrologer Session Memory:</strong> Retaining encrypted Vedic conversation history across devices for personalized astrological continuity.</span>
+                            </label>
+                            <label class="mr-toggle-label">
+                                <input type="checkbox" name="consent_comms" id="mr_consent_comms" value="1" <?php checked($consent_comms, '1'); ?> />
+                                <span><strong>Planetary Transit Alerts &amp; PDF Report Delivery:</strong> Receiving instant transactional email copies of generated PDF reports, astrological transit updates, and order receipts.</span>
                             </label>
                         </div>
 
-                        <div class="mr-form-actions" style="margin-top:16px;">
+                        <div class="mr-form-actions" style="margin-top:20px;">
                             <button type="submit" class="mr-btn-glow-gold" id="mr-btn-save-settings">
-                                Save Settings
+                                Save Preferences &amp; DPDP Settings
                             </button>
                             <span id="mr-settings-feedback" class="mr-save-feedback"></span>
                         </div>
                     </form>
+
+                    <!-- DPDP Section 11: Right to Access / Data Export Card -->
+                    <div class="mr-account-card mr-dpdp-card" style="margin-top:24px;">
+                        <div class="mr-card-header">
+                            <div class="mr-card-icon-badge mr-badge-icon-blue">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                            </div>
+                            <div>
+                                <div class="mr-dpdp-badge mr-dpdp-badge-blue">DPDP Act 2023 &bull; Section 11</div>
+                                <h3 class="mr-card-title">Right to Access &amp; Data Portability</h3>
+                                <p class="mr-card-sub">Export and download a complete, machine-readable JSON copy of all personal, astrological, and transaction data stored with MeraRashifal Technologies.</p>
+                            </div>
+                        </div>
+                        <div class="mr-dpdp-card-content">
+                            <ul class="mr-dpdp-data-summary-list">
+                                <li><strong>Identity &amp; Profile:</strong> Account details, registered email, and contact info.</li>
+                                <li><strong>Astrological Vault:</strong> Birth date, exact time, geographic coordinates, and calculated Rashi.</li>
+                                <li><strong>Saved Family Kundlis:</strong> All saved family birth profiles stored in your personal vault.</li>
+                                <li><strong>Niyati AI History:</strong> Transcript summary of past astrological consultations and questions.</li>
+                                <li><strong>Transaction Ledger:</strong> Complete retail invoices, token purchases, and payment references.</li>
+                            </ul>
+                            <div class="mr-dpdp-card-actions" style="margin-top:16px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                                <button type="button" class="mr-btn-outline-gold" id="mr-btn-dpdp-export">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:6px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                    <span>Download My Data Archive (.JSON)</span>
+                                </button>
+                                <span id="mr-dpdp-export-feedback" class="mr-save-feedback"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DPDP Section 12: Right to Erasure / Account Deletion Danger Zone -->
+                    <div class="mr-account-card mr-dpdp-card mr-dpdp-danger-card" style="margin-top:24px;">
+                        <div class="mr-card-header">
+                            <div class="mr-card-icon-badge mr-badge-icon-red">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
+                            </div>
+                            <div>
+                                <div class="mr-dpdp-badge mr-dpdp-badge-red">DPDP Act 2023 &bull; Section 12</div>
+                                <h3 class="mr-card-title" style="color:#991B1B;">Right to Erasure &amp; Account Deletion</h3>
+                                <p class="mr-card-sub">Permanently delete your account, saved astrological records, and Niyati AI conversation history.</p>
+                            </div>
+                        </div>
+                        <div class="mr-dpdp-card-content">
+                            <p style="font-size:13.5px; color:#475569; line-height:1.55; margin-bottom:14px;">
+                                You have the statutory right under Section 12 of the DPDP Act 2023 to request the permanent erasure of your personal data. Once deleted, your saved Kundlis, consultation history, and unused credit tokens cannot be recovered.
+                            </p>
+                            
+                            <button type="button" class="mr-btn-danger-outline" id="mr-btn-dpdp-erase-open">
+                                <span>Request Account Erasure &amp; Data Deletion &darr;</span>
+                            </button>
+
+                            <!-- Collapsible Inline Confirmation Container -->
+                            <div id="mr-dpdp-erase-confirm-container" class="mr-dpdp-confirm-box" style="display:none; margin-top:16px;">
+                                <div class="mr-dpdp-warning-notice">
+                                    <strong>⚠ Permanent &amp; Irreversible Action:</strong>
+                                    <ul style="margin:8px 0 10px 18px; padding:0; font-size:13px; color:#991B1B; line-height:1.5;">
+                                        <li>Your user account and Google OAuth authentication link will be terminated immediately.</li>
+                                        <li>All saved family Kundlis and birth chart profiles will be permanently purged from server disk.</li>
+                                        <li>Your complete Niyati AI chat history will be permanently deleted.</li>
+                                        <li><em>Statutory Audit Exemption:</em> In compliance with Indian GST, taxation, and company audit regulations, past financial transaction records are retained in an anonymized, non-personally identifiable format.</li>
+                                    </ul>
+                                </div>
+
+                                <div class="mr-dpdp-challenge-wrapper">
+                                    <div class="mr-dpdp-challenge-header">
+                                        <span class="mr-dpdp-shield-pill">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:4px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                                            Anti-Bot Runtime Verification
+                                        </span>
+                                        <button type="button" class="mr-btn-refresh-challenge" id="mr-btn-refresh-challenge" title="Generate another security phrase and verification word">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle; margin-right:4px;"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                                            <span>Change Phrase</span>
+                                        </button>
+                                    </div>
+                                    <p class="mr-dpdp-challenge-sentence" id="mr-dpdp-challenge-sentence" style="font-size:13.5px; font-weight:600; color:#1E293B; margin:8px 0 12px 0; line-height:1.6;">
+                                        <?php echo $erase_challenge['sentence_html']; ?>
+                                    </p>
+                                </div>
+
+                                <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center;">
+                                    <input type="text" id="mr-dpdp-erase-confirm-input" data-expected="<?php echo esc_attr($erase_challenge['word']); ?>" placeholder="Type <?php echo esc_attr($erase_challenge['word']); ?>" class="mr-input-danger-text" autocomplete="off" style="max-width:240px;" />
+                                    <button type="button" class="mr-btn-danger-solid" id="mr-btn-dpdp-erase-confirm" disabled>
+                                        <span>Permanently Erase My Account</span>
+                                    </button>
+                                    <button type="button" class="mr-btn-secondary" id="mr-btn-dpdp-erase-cancel">
+                                        <span>Cancel</span>
+                                    </button>
+                                </div>
+                                <div id="mr-dpdp-erase-feedback" class="mr-save-feedback" style="margin-top:10px;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DPDP Section 13 & 15: Grievance Redressal & DPBI Notice Card -->
+                    <div class="mr-account-card mr-dpdp-card mr-dpdp-info-card" style="margin-top:24px;">
+                        <div class="mr-card-header">
+                            <div class="mr-card-icon-badge mr-badge-icon-green">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                            </div>
+                            <div>
+                                <div class="mr-dpdp-badge mr-dpdp-badge-green">DPDP Act 2023 &bull; Section 13 &amp; 15</div>
+                                <h3 class="mr-card-title">Grievance Redressal &amp; DPBI Rights</h3>
+                                <p class="mr-card-sub">Statutory contact details of the Data Fiduciary and escalation rights to the Data Protection Board of India.</p>
+                            </div>
+                        </div>
+                        <div class="mr-dpdp-card-content" style="font-size:13px; line-height:1.6; color:#475569;">
+                            <div class="mr-dpdp-fiduciary-grid">
+                                <div><strong>Data Fiduciary:</strong> MeraRashifal Technologies</div>
+                                <div><strong>Grievance &amp; DPO Officer:</strong> <a href="mailto:grievance@merarashifal.com" style="color:#2563EB;">grievance@merarashifal.com</a></div>
+                                <div><strong>Statutory Address:</strong> Rishabh Cloud 9, Ahinsa Khand 2, Indirapuram, Ghaziabad, Uttar Pradesh, 201014</div>
+                                <div><strong>Redressal SLA:</strong> Inquiries acknowledged within 24 hours and addressed within statutory timelines.</div>
+                            </div>
+                            <div style="margin-top:12px; padding:10px 14px; background:#F8FAFC; border-left:3px solid #16A34A; border-radius:0 6px 6px 0; font-size:12.5px; color:#334155;">
+                                <strong>DPBI Escalation:</strong> If you are not satisfied with the resolution provided by our Grievance Officer, you have the statutory right under Section 15 of the DPDP Act 2023 to register a complaint directly with the <strong>Data Protection Board of India (DPBI)</strong>.
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -1364,51 +1651,97 @@ class MR_Account_UI {
             <div class="mr-account-tab-pane" id="mr-pane-contact">
                 <div class="mr-pane-grid">
                     <div class="mr-pane-col-main">
-                        <div class="mr-account-card">
+                        <div class="mr-account-card mr-support-card">
                             <div class="mr-card-header">
                                 <div class="mr-card-icon-badge mr-loader-badge"><img src="<?php echo esc_url($loader_url); ?>" alt="" class="mr-spin-loader" /></div>
                                 <div>
-                                    <h3 class="mr-card-title">MeraRashifal Astro Support &amp; Guidance</h3>
-                                    <p class="mr-card-sub">Need help with your report interpretation, birth time correction, or transactions? We are here for you.</p>
+                                    <h3 class="mr-card-title">MeraRashifal Astro Support &amp; Helpdesk</h3>
+                                    <p class="mr-card-sub">Ask any question regarding your Vedic reports, birth chart data, or consultations. Our senior team emails the reply directly to your inbox.</p>
                                 </div>
                             </div>
 
-                            <div class="mr-contact-channels-grid">
-                                <div class="mr-contact-channel-card">
-                                    <div class="mr-channel-icon"><img src="<?php echo esc_url($loader_url); ?>" alt="" class="mr-spin-loader-sm" /></div>
-                                    <h4>WhatsApp Support</h4>
-                                    <p>Instant chat support for Kundali queries and report assistance.</p>
-                                    <a href="https://wa.me/919999999999?text=Hello%20MeraRashifal%20Team%2C%20I%20need%20assistance%20with%20my%20account" target="_blank" class="mr-btn-contact-action mr-whatsapp-btn">
-                                        Chat on WhatsApp &rarr;
-                                    </a>
+                            <!-- Helpdesk Info Strip -->
+                            <div class="mr-support-info-strip">
+                                <div class="mr-support-info-chip">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#F58220" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+                                    <span>Official Email: <strong>support@merarashifal.com</strong></span>
                                 </div>
-
-                                <div class="mr-contact-channel-card">
-                                    <div class="mr-channel-icon"><img src="<?php echo esc_url($loader_url); ?>" alt="" class="mr-spin-loader-sm" /></div>
-                                    <h4>Official Email Helpdesk</h4>
-                                    <p>Send detailed queries along with your birth data or transaction reference.</p>
-                                    <a href="mailto:rashifalmera@gmail.com?subject=Support%20Request%20-%20MeraRashifal%20Account" class="mr-btn-contact-action mr-email-btn">
-                                        Email Support &rarr;
-                                    </a>
+                                <div class="mr-support-info-chip">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                                    <span>Hours: Mon–Sat, 9 AM–8 PM IST &bull; <strong>Response &lt; 2 hrs</strong></span>
                                 </div>
                             </div>
 
-                            <div class="mr-office-hours-banner">
-                                <span><strong>Support Working Hours:</strong> Monday – Saturday, 9:00 AM – 8:00 PM IST (GMT +5:30). Usual response time: under 2 hours.</span>
+                            <!-- User Context Note -->
+                            <div class="mr-support-user-meta">
+                                <span>Submitting as: <strong><?php echo esc_html($astro_name ?: $user->display_name); ?></strong> (<?php echo esc_html($user->user_email); ?>)</span>
                             </div>
-                        </div>
-                    </div>
 
-                    <div class="mr-pane-col-side">
-                        <div class="mr-account-card">
-                            <h4>Quick Links</h4>
-                            <ul class="mr-quick-links-list">
-                                <li><a href="<?php echo esc_url(home_url('/about-us/')); ?>">About MeraRashifal &rarr;</a></li>
-                                <li><a href="<?php echo esc_url(home_url('/kundali-details/?ku_type=kundali-details-report')); ?>">Kundali Predictions &rarr;</a></li>
-                                <li><a href="<?php echo esc_url(home_url('/horoscope/')); ?>">Daily Horoscope &rarr;</a></li>
-                                <li><a href="<?php echo esc_url(home_url('/terms-and-conditions/')); ?>">Terms of Service &rarr;</a></li>
-                                <li><a href="<?php echo esc_url(home_url('/privacy-policy/')); ?>">Privacy Policy &rarr;</a></li>
-                            </ul>
+                            <!-- Question Form + 1 Attachment Option -->
+                            <form id="mr-support-ticket-form" method="post" enctype="multipart/form-data" novalidate class="mr-compact-support-form">
+                                <input type="hidden" id="mr_support_name" name="support_name" value="<?php echo esc_attr($astro_name ?: $user->display_name); ?>" />
+                                <input type="hidden" id="mr_support_email" name="support_email" value="<?php echo esc_attr($user->user_email); ?>" />
+                                <input type="hidden" id="mr_support_phone" name="support_phone" value="<?php echo esc_attr($user_phone); ?>" />
+                                <input type="hidden" id="mr_support_category" name="support_category" value="Astrological Support &amp; Consultation" />
+                                <input type="hidden" id="mr_support_subject" name="support_subject" value="" />
+
+                                <!-- Your Question Input Box -->
+                                <div class="mr-form-group">
+                                    <label for="mr_support_message" class="mr-field-label">
+                                        Your Question / Query <span class="mr-req">*</span>
+                                    </label>
+                                    <textarea id="mr_support_message" name="support_message" class="mr-input-textarea" rows="4" placeholder="Enter your question or issue here (e.g. question regarding your Kundali report, birth time update, payment reference, or consultation)..." required></textarea>
+                                </div>
+
+                                <!-- 1 Attachment Option (Picture / Screenshot) -->
+                                <div class="mr-form-group mr-attachment-group">
+                                    <label class="mr-field-label">
+                                        Attach Picture or Screenshot 
+                                        <span class="mr-sub-label">(Optional &bull; 1 Image &bull; Max 5MB &bull; JPG, PNG, WEBP)</span>
+                                    </label>
+                                    
+                                    <input type="file" id="mr_support_attachment" name="support_attachment" accept="image/png,image/jpeg,image/jpg,image/webp" style="display: none;" />
+                                    
+                                    <div class="mr-file-dropzone" id="mr-file-dropzone" tabindex="0" role="button" aria-label="Upload Screenshot or Picture">
+                                        <div class="mr-dropzone-inner" id="mr-dropzone-prompt">
+                                            <div class="mr-dropzone-icon">
+                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                                            </div>
+                                            <p class="mr-dropzone-title">Click to upload or drag &amp; drop a picture</p>
+                                            <span class="mr-dropzone-sub">PNG, JPG, or WEBP up to 5MB (1 picture allowed)</span>
+                                        </div>
+
+                                        <div class="mr-file-preview-card" id="mr-file-preview-card" style="display: none;">
+                                            <div class="mr-file-preview-thumb-wrap">
+                                                <img id="mr-file-preview-img" src="" alt="Attachment Preview" class="mr-file-preview-img" />
+                                            </div>
+                                            <div class="mr-file-preview-meta">
+                                                <span class="mr-file-preview-name" id="mr-file-name">filename.png</span>
+                                                <span class="mr-file-preview-size" id="mr-file-size">0 KB</span>
+                                            </div>
+                                            <button type="button" class="mr-btn-clear-attachment" id="mr-btn-clear-attachment" title="Remove attachment" aria-label="Remove attachment">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div id="mr-file-upload-error" class="mr-file-error-msg" style="display: none;"></div>
+                                </div>
+
+                                <div class="mr-form-actions-bar">
+                                    <button type="submit" class="mr-btn-glow-gold" id="mr-btn-submit-support">
+                                        <span class="mr-btn-text">Send Question to Support &rarr;</span>
+                                        <span class="mr-btn-spinner" style="display: none;">
+                                            <img src="<?php echo esc_url($loader_url); ?>" alt="" class="mr-spin-loader-sm" /> Sending to support@merarashifal.com...
+                                        </span>
+                                    </button>
+                                    <span class="mr-support-safe-note">
+                                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#047857" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                                        Delivered directly to <strong>support@merarashifal.com</strong>
+                                    </span>
+                                </div>
+
+                                <div id="mr-support-ticket-feedback" class="mr-support-ticket-feedback" style="display: none; margin-top: 14px;"></div>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -1442,59 +1775,71 @@ class MR_Account_UI {
         // Quick feature offerings for the right hero side showcase
         $hero_quick_offerings = [
             [
-                'title'     => 'Yearly Varshaphal (2026)',
-                'badge'     => '26 Pages • Best Seller',
-                'badge_cls' => 'mr-tag-orange',
-                'desc'      => '12-month career, finance, health & remedies timeline.',
-                'price'     => '₹299',
-                'url'       => home_url('/yearly-horoscope-report/'),
-                'icon_svg'  => '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#F58220" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>'
+                'slug'         => 'yearly_horoscope_long',
+                'title'        => 'Yearly Varshaphal (2026)',
+                'badge'        => '26 Pages • Best Seller',
+                'badge_suffix' => 'Best Seller',
+                'badge_cls'    => 'mr-tag-orange',
+                'desc'         => '12-month career, finance, health & remedies timeline.',
+                'price'        => '₹99',
+                'url'          => home_url('/yearly-horoscope-report/'),
+                'icon_svg'     => '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#F58220" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>'
             ],
             [
-                'title'     => 'Master Janma Kundali',
-                'badge'     => '26 Pages • Top Rated',
-                'badge_cls' => 'mr-tag-gold',
-                'desc'      => 'Full birth chart, 16 divisional harmonics & Shadbala.',
-                'price'     => '₹99',
-                'url'       => home_url('/janam-kundali-master-report/'),
-                'icon_svg'  => '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#D9A441" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="3" x2="21" y2="21"/><line x1="21" y1="3" x2="3" y2="21"/><polygon points="12,3 21,12 12,21 3,12"/></svg>'
+                'slug'         => 'kundli_predictions',
+                'title'        => 'Master Janma Kundali',
+                'badge'        => '26 Pages • Top Rated',
+                'badge_suffix' => 'Top Rated',
+                'badge_cls'    => 'mr-tag-gold',
+                'desc'         => 'Full birth chart, 16 divisional harmonics & Shadbala.',
+                'price'        => '₹99',
+                'url'          => home_url('/janam-kundali-master-report/'),
+                'icon_svg'     => '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#D9A441" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="3" x2="21" y2="21"/><line x1="21" y1="3" x2="3" y2="21"/><polygon points="12,3 21,12 12,21 3,12"/></svg>'
             ],
             [
-                'title'     => 'Ask Niyati AI (24/7)',
-                'badge'     => 'Live Astrologer',
-                'badge_cls' => 'mr-tag-maroon',
-                'desc'      => 'Real-time Vedic AI conversation for instant guidance.',
-                'price'     => 'Live Chat',
-                'url'       => '#niyati-chat',
-                'is_chat'   => true,
-                'icon_svg'  => '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#F58220" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z"/></svg>'
+                'slug'         => '',
+                'title'        => 'Ask Niyati AI (24/7)',
+                'badge'        => 'Live Astrologer',
+                'badge_suffix' => 'Live Astrologer',
+                'badge_cls'    => 'mr-tag-maroon',
+                'desc'         => 'Real-time Vedic AI conversation for instant guidance.',
+                'price'        => 'Live Chat',
+                'url'          => '#niyati-chat',
+                'is_chat'      => true,
+                'icon_svg'     => '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#F58220" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L14.5 9.5L22 12L14.5 14.5L12 22L9.5 14.5L2 12L9.5 9.5L12 2Z"/></svg>'
             ],
             [
-                'title'     => 'Vedic Dasha Life Timing',
-                'badge'     => '26 Pages • Timing',
-                'badge_cls' => 'mr-tag-purple',
-                'desc'      => 'Vimshottari Dasha cycles and event timing predictions.',
-                'price'     => '₹99',
-                'url'       => home_url('/dasha-timing-report/'),
-                'icon_svg'  => '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#7B61FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'
+                'slug'         => 'mahadasha_timing',
+                'title'        => 'Vedic Dasha Life Timing',
+                'badge'        => '20 Pages • Timing',
+                'badge_suffix' => 'Timing',
+                'badge_cls'    => 'mr-tag-purple',
+                'desc'         => 'Vimshottari Dasha cycles and event timing predictions.',
+                'price'        => '₹99',
+                'url'          => home_url('/dasha-timing-report/'),
+                'icon_svg'     => '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#7B61FF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'
             ],
             [
-                'title'     => 'Kundali Dosh & Remedial',
-                'badge'     => '20 Pages • Remedies',
-                'badge_cls' => 'mr-tag-pink',
-                'desc'      => 'Manglik, Kaal Sarp, Sade Sati & authentic upayas.',
-                'price'     => '₹99',
-                'url'       => home_url('/kundali-dosh-report/'),
-                'icon_svg'  => '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#E66BA5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>'
+                'slug'         => 'dosh_remedial',
+                'title'        => 'Kundali Dosh & Remedial',
+                'badge'        => '20 Pages • Remedies',
+                'badge_suffix' => 'Remedies',
+                'badge_cls'    => 'mr-tag-pink',
+                'desc'         => 'Manglik, Kaal Sarp, Sade Sati & authentic upayas.',
+                'price'        => '₹79',
+                'url'          => home_url('/kundali-dosh-report/'),
+                'icon_svg'     => '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#E66BA5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>'
             ],
             [
-                'title'     => 'Daily Rashifal & Panchang',
-                'badge'     => 'Free Daily Forecast',
-                'badge_cls' => 'mr-tag-green',
-                'desc'      => 'Planetary Moon transits, Tithi & Shubh Muhurat.',
-                'price'     => '100% Free',
-                'url'       => home_url('/horoscope/'),
-                'icon_svg'  => '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#2CB67D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'
+                'slug'         => '',
+                'title'        => 'Daily Rashifal & Panchang',
+                'badge'        => 'Free Daily Forecast',
+                'badge_suffix' => 'Free Daily Forecast',
+                'badge_cls'    => 'mr-tag-green',
+                'desc'         => 'Planetary Moon transits, Tithi & Shubh Muhurat.',
+                'price'        => '100% Free',
+                'url'          => home_url('/horoscope/'),
+                'icon_svg'     => '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#2CB67D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>'
             ],
         ];
 
@@ -1502,15 +1847,15 @@ class MR_Account_UI {
         $showcase_reports = [
             [
                 'id'         => 'yearly_horoscope_long',
-                'title'      => 'Yearly Horoscope Detailed Report (2026-2027)',
-                'subtitle'   => 'Comprehensive 26-page annual Vedic Varshaphal forecast covering career, wealth, health, and family.',
+                'title'      => 'Yearly Horoscope Detailed Long Report',
+                'subtitle'   => 'Comprehensive 26-page 12-month Vedic Varshaphal forecast covering career, wealth, relationships, and finances.',
                 'pages'      => '26 Pages',
                 'badge'      => 'Best Seller',
                 'badge_cls'  => 'mr-badge-bestseller',
                 'image'      => $img_base . 'yearly_horoscope_long.png',
-                'price'      => '₹299',
-                'orig_price' => '₹1,499',
-                'discount'   => 'Save 80%',
+                'price'      => '₹99',
+                'orig_price' => '₹999',
+                'discount'   => 'Save 90%',
                 'url'        => home_url('/yearly-horoscope-report/'),
                 'highlights' => ['12-Month Detailed Timeline', 'Career, Wealth & Love Milestones', 'Planetary Yogas & Dasha Impact', 'Personalized Shastric Remedies']
             ],
@@ -1531,8 +1876,8 @@ class MR_Account_UI {
             [
                 'id'         => 'mahadasha_timing',
                 'title'      => 'Master Vedic Dasha Life Timing Report',
-                'subtitle'   => 'Deep dive into active Vimshottari Mahadasha cycles, Antardasha transitions, and milestone timing.',
-                'pages'      => '26 Pages',
+                'subtitle'   => 'Deep dive 20-page audit into your active Vimshottari Dasha cycles and event timing predictions.',
+                'pages'      => '20 Pages',
                 'badge'      => 'Essential',
                 'badge_cls'  => 'mr-badge-essential',
                 'image'      => $img_base . 'mahadasha_timing.png',
@@ -1545,46 +1890,101 @@ class MR_Account_UI {
             [
                 'id'         => 'dosh_remedial',
                 'title'      => 'Master Kundali Dosh & Remedial Audit Report',
-                'subtitle'   => 'Comprehensive audit of Manglik, Kaal Sarp, Pitra, and Shani Sade Sati doshas with authenticated Vedic remedies.',
+                'subtitle'   => 'Clinical diagnosis of Manglik, Kaal Sarp, Pitra, or Sade Sati doshas with personalized Shastric remedies.',
                 'pages'      => '20 Pages',
                 'badge'      => 'Remedial',
                 'badge_cls'  => 'mr-badge-remedial',
                 'image'      => $img_base . 'dosh_remedial.png',
-                'price'      => '₹99',
+                'price'      => '₹79',
                 'orig_price' => '₹799',
-                'discount'   => 'Save 88%',
+                'discount'   => 'Save 90%',
                 'url'        => home_url('/kundali-dosh-report/'),
                 'highlights' => ['Manglik & Kaal Sarp Audit', 'Pitra Dosh & Sade Sati Timeline', 'Root Cause Planetary Analysis', 'Vedic Mantras, Yantras & Upayas']
             ],
             [
                 'id'         => 'kundli_matching',
-                'title'      => 'Master Kundali Matching & 36 Gun Milan Report',
-                'subtitle'   => 'Comprehensive 24-page Ashtakoot Gun Milan with Manglik compatibility balance and marital longevity analysis.',
+                'title'      => 'Master Kundali Matching (Gun Milan) Report',
+                'subtitle'   => '24-page Ashtakoot matching with 36 Gunas, Manglik compatibility, Papasamaya load balance, and dual Dasha sync.',
                 'pages'      => '24 Pages',
                 'badge'      => 'Marriage Milan',
                 'badge_cls'  => 'mr-badge-milan',
                 'image'      => $img_base . 'kundli_matching.png',
                 'price'      => '₹99',
-                'orig_price' => '₹1,499',
-                'discount'   => 'Save 93%',
+                'orig_price' => '₹1,299',
+                'discount'   => 'Save 92%',
                 'url'        => home_url('/kundali-and-gun-matching-report/'),
                 'highlights' => ['36 Guna Ashtakoot Score', 'Manglik Compatibility Check', 'Bhakoot & Nadi Dosh Analysis', 'Relationship Longevity & Harmony']
             ],
             [
-                'id'         => 'numerology',
+                'id'         => 'numerology_report',
                 'title'      => 'Master Numerology & Vedic Integration Report',
-                'subtitle'   => '22-page Sankhya Shastra audit with 3x3 Lo Shu energy grid, Destiny numbers, and 90-day actionable roadmap.',
+                'subtitle'   => '22-page Sankhya Shastra audit: Lo Shu 3x3 energy grid, core life paths, 8-1-6 Practical Arrow, and 90-day roadmap.',
                 'pages'      => '22 Pages',
                 'badge'      => 'Sankhya Shastra',
                 'badge_cls'  => 'mr-badge-numero',
                 'image'      => $img_base . 'numerology.png',
                 'price'      => '₹99',
-                'orig_price' => '₹599',
-                'discount'   => 'Save 83%',
+                'orig_price' => '₹999',
+                'discount'   => 'Save 90%',
                 'url'        => home_url('/numerology-report/'),
                 'highlights' => ['Lo Shu Grid Energy Matrix', 'Driver & Conductor Numbers', 'Lucky Dates, Colors & Gemstones', 'Personalized 90-Day Trajectory']
             ],
         ];
+
+        // Live synchronize with Master Report Pricing & Catalog Manager configuration
+        if (class_exists('MR_Report_Pricing_Admin')) {
+            $cat_config = MR_Report_Pricing_Admin::get_config();
+
+            // Sync Hero Quick Offerings
+            foreach ($hero_quick_offerings as &$off) {
+                if (!empty($off['slug'])) {
+                    $s = $off['slug'];
+                    $cfg = $cat_config[$s] ?? null;
+                    if ($cfg) {
+                        $sale = floatval($cfg['sale_price'] ?? 0);
+                        $off['price'] = ($sale <= 0) ? '100% Free' : ('₹' . intval($sale));
+                        if (!empty($cfg['pages']) && !empty($off['badge_suffix'])) {
+                            $off['badge'] = $cfg['pages'] . ' • ' . $off['badge_suffix'];
+                        }
+                    }
+                }
+            }
+            unset($off);
+
+            // Sync Showcase Reports
+            foreach ($showcase_reports as &$rep) {
+                $s = $rep['id'];
+                $cfg = $cat_config[$s] ?? null;
+                if (!$cfg) {
+                    if ($s === 'numerology' && isset($cat_config['numerology_report'])) {
+                        $cfg = $cat_config['numerology_report'];
+                    } elseif ($s === 'numerology_report' && isset($cat_config['numerology'])) {
+                        $cfg = $cat_config['numerology'];
+                    }
+                }
+                if ($cfg) {
+                    if (!empty($cfg['name'])) {
+                        $rep['title'] = $cfg['name'];
+                    }
+                    if (!empty($cfg['pages'])) {
+                        $rep['pages'] = $cfg['pages'];
+                    }
+                    if (!empty($cfg['description'])) {
+                        $rep['subtitle'] = $cfg['description'];
+                    }
+                    $sale = floatval($cfg['sale_price'] ?? 0);
+                    $list = floatval($cfg['list_price'] ?? 0);
+                    $rep['price'] = ($sale <= 0) ? '100% Free' : ('₹' . intval($sale));
+                    $rep['orig_price'] = '₹' . number_format($list);
+                    if ($list > $sale && $list > 0) {
+                        $rep['discount'] = 'Save ' . round((($list - $sale) / $list) * 100) . '%';
+                    } else {
+                        $rep['discount'] = '';
+                    }
+                }
+            }
+            unset($rep);
+        }
 
         // Interactive Vedic Tools & AI Services
         $interactive_tools = [
@@ -1679,6 +2079,12 @@ class MR_Account_UI {
 
                     <!-- Left Column: Primary Sign In Portal Card (Zero Scroll on Mobile) -->
                     <div class="mr-hero-col-signin">
+                        <?php if (isset($_GET['mr_dpdp_erased'])): ?>
+                            <div class="mr-dpdp-erased-banner" style="background:#ECFDF5; border:1px solid #A7F3D0; color:#065F46; padding:12px 16px; border-radius:10px; margin-bottom:16px; font-size:13.5px; font-weight:600; display:flex; align-items:center; gap:10px; box-shadow:0 2px 8px rgba(6,95,70,0.06);">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                                <span>Your account, astrological data, and AI history have been completely erased in accordance with Section 12 of the DPDP Act 2023.</span>
+                            </div>
+                        <?php endif; ?>
                         <div class="mr-login-box mr-account-card" id="mr-login-card">
                             <div class="mr-login-badge">
                                 <img src="<?php echo esc_url($loader_url); ?>" alt="" class="mr-spin-loader-sm" />
@@ -1985,7 +2391,7 @@ class MR_Account_UI {
     }
 
     /**
-     * AJAX handler: Save Settings & Preferences
+     * AJAX handler: Save Settings, Preferences & DPDP Data Principal Nomination / Consents
      */
     public static function ajax_save_settings() {
         check_ajax_referer('mr_account_nonce', 'nonce');
@@ -1997,14 +2403,386 @@ class MR_Account_UI {
 
         $pref_chart  = sanitize_text_field($_POST['pref_chart'] ?? 'north_indian');
         $pref_system = sanitize_text_field($_POST['pref_system'] ?? 'vedic');
-        $pref_notify = isset($_POST['pref_notify']) ? '1' : '0';
+        $pref_notify = isset($_POST['pref_notify']) && ($_POST['pref_notify'] === '1' || $_POST['pref_notify'] === 1) ? '1' : '0';
+
+        // DPDP Act 2023 - Section 14: Data Principal Nominee
+        $nominee_name     = sanitize_text_field($_POST['nominee_name'] ?? '');
+        $nominee_email    = sanitize_email($_POST['nominee_email'] ?? '');
+        $nominee_phone    = sanitize_text_field($_POST['nominee_phone'] ?? '');
+        $nominee_relation = sanitize_text_field($_POST['nominee_relation'] ?? '');
+
+        // DPDP Act 2023 - Section 6(4): Consent Governance
+        $consent_profile  = isset($_POST['consent_profile']) && ($_POST['consent_profile'] === '1' || $_POST['consent_profile'] === 1) ? '1' : '0';
+        $consent_ai       = isset($_POST['consent_ai']) && ($_POST['consent_ai'] === '1' || $_POST['consent_ai'] === 1) ? '1' : '0';
+        $consent_comms    = isset($_POST['consent_comms']) && ($_POST['consent_comms'] === '1' || $_POST['consent_comms'] === 1) ? '1' : '0';
 
         update_user_meta($user_id, 'mr_pref_chart', $pref_chart);
         update_user_meta($user_id, 'mr_pref_system', $pref_system);
         update_user_meta($user_id, 'mr_pref_notify', $pref_notify);
 
+        update_user_meta($user_id, 'mr_dpdp_nominee_name', $nominee_name);
+        update_user_meta($user_id, 'mr_dpdp_nominee_email', $nominee_email);
+        update_user_meta($user_id, 'mr_dpdp_nominee_phone', $nominee_phone);
+        update_user_meta($user_id, 'mr_dpdp_nominee_relation', $nominee_relation);
+
+        update_user_meta($user_id, 'mr_dpdp_consent_profiling', $consent_profile);
+        update_user_meta($user_id, 'mr_dpdp_consent_ai_chat', $consent_ai);
+        update_user_meta($user_id, 'mr_dpdp_consent_comms', $consent_comms);
+
         wp_send_json_success([
-            'message' => 'Preferences updated successfully!'
+            'message' => 'Preferences and DPDP Data Principal settings updated successfully!'
+        ]);
+    }
+
+    /**
+     * AJAX: Export Data Principal Personal Data Archive (DPDP Act 2023 - Section 11)
+     */
+    public static function ajax_dpdp_export_data() {
+        check_ajax_referer('mr_account_nonce', 'nonce');
+
+        $user_id = get_current_user_id();
+        if (!$user_id) {
+            wp_send_json_error(['message' => 'Please log in to export your personal data archive.']);
+        }
+
+        $user = get_userdata($user_id);
+        if (!$user) {
+            wp_send_json_error(['message' => 'User profile could not be loaded.']);
+        }
+
+        global $wpdb;
+
+        // 1. Astrological Profile & Preferences
+        $astro_data = [
+            'full_name'         => get_user_meta($user_id, 'mr_astro_name', true) ?: $user->display_name,
+            'gender'            => get_user_meta($user_id, 'mr_astro_gender', true) ?: '',
+            'date_of_birth'     => get_user_meta($user_id, 'mr_astro_dob', true) ?: '',
+            'time_of_birth'     => get_user_meta($user_id, 'mr_astro_tob', true) ?: '',
+            'place_of_birth'    => get_user_meta($user_id, 'mr_astro_pob', true) ?: '',
+            'latitude'          => get_user_meta($user_id, 'mr_astro_lat', true) ?: '',
+            'longitude'         => get_user_meta($user_id, 'mr_astro_lon', true) ?: '',
+            'timezone'          => get_user_meta($user_id, 'mr_astro_tz', true) ?: '5.5',
+            'phone'             => get_user_meta($user_id, 'user_phone', true) ?: (get_user_meta($user_id, 'billing_phone', true) ?: ''),
+            'preferred_chart'   => get_user_meta($user_id, 'mr_pref_chart', true) ?: 'north_indian',
+            'preferred_system'  => get_user_meta($user_id, 'mr_pref_system', true) ?: 'vedic',
+            'email_alerts'      => get_user_meta($user_id, 'mr_pref_notify', true) ?: '1',
+        ];
+
+        // 2. DPDP Statutory Rights (Nominee & Consents)
+        $dpdp_rights = [
+            'statutory_framework'     => 'Digital Personal Data Protection Act, 2023 (DPDP Act), Government of India',
+            'data_fiduciary'          => 'MeraRashifal Technologies (Rishabh Cloud 9, Ahinsa Khand 2, Indirapuram, Ghaziabad, U.P., 201014)',
+            'data_protection_officer' => 'grievance@merarashifal.com',
+            'nominee' => [
+                'name'         => get_user_meta($user_id, 'mr_dpdp_nominee_name', true) ?: 'Not Nominated',
+                'email'        => get_user_meta($user_id, 'mr_dpdp_nominee_email', true) ?: '',
+                'phone'        => get_user_meta($user_id, 'mr_dpdp_nominee_phone', true) ?: '',
+                'relationship' => get_user_meta($user_id, 'mr_dpdp_nominee_relation', true) ?: '',
+            ],
+            'consents_granted' => [
+                'astrological_profiling' => get_user_meta($user_id, 'mr_dpdp_consent_profiling', true) !== '0',
+                'ai_chat_session_memory' => get_user_meta($user_id, 'mr_dpdp_consent_ai_chat', true) !== '0',
+                'service_alerts'         => get_user_meta($user_id, 'mr_dpdp_consent_comms', true) !== '0',
+            ],
+            'escalation_notice' => 'Under Section 15 of the DPDP Act 2023, the Data Principal has the right to escalate any unresolved grievances to the Data Protection Board of India (DPBI).'
+        ];
+
+        // 3. Saved Family Kundlis
+        $saved_kundlis = [];
+        if (class_exists('Niyati_Storage')) {
+            $saved_kundlis = Niyati_Storage::get_saved_kundlis($user_id);
+        }
+
+        // 4. Niyati AI Chat Summary
+        $chat_data = [];
+        if (class_exists('Niyati_Storage')) {
+            $chat = Niyati_Storage::get_active_chat($user_id);
+            if (!empty($chat['success'])) {
+                $chat_data = [
+                    'active_profile' => $chat['active_profile_name'] ?? '',
+                    'message_count'  => count($chat['messages'] ?? []),
+                    'last_active'    => !empty($chat['updated_at']) ? date('c', $chat['updated_at']) : '',
+                    'messages'       => $chat['messages'] ?? []
+                ];
+            }
+        }
+
+        // 5. Niyati Credit Wallet
+        $wallet_data = [];
+        if (class_exists('Niyati_Wallet')) {
+            $wallet = Niyati_Wallet::get_wallet('', $user_id);
+            if ($wallet) {
+                $wallet_data = [
+                    'credits_balance' => intval($wallet->credits_balance),
+                    'total_purchased' => intval($wallet->total_purchased),
+                    'total_consumed'  => intval($wallet->total_consumed),
+                    'expires_at'      => $wallet->validity_expires_at
+                ];
+            }
+        }
+
+        // 6. Generated Reports Archive
+        $table_reports = $wpdb->prefix . 'mr_generated_reports';
+        $reports = $wpdb->get_results($wpdb->prepare("
+            SELECT report_type, title, language, pdf_url, created_at 
+            FROM $table_reports 
+            WHERE user_id = %d 
+            ORDER BY id DESC
+        ", $user_id), ARRAY_A);
+
+        // 7. Financial Transactions & Invoices (Audit Trail)
+        $table_txns = $wpdb->prefix . 'mr_transactions';
+        $txns = $wpdb->get_results($wpdb->prepare("
+            SELECT internal_txn_id, channel, gateway, gross_amount, net_amount, status, invoice_number, created_at 
+            FROM $table_txns 
+            WHERE user_id = %d OR customer_email = %s 
+            ORDER BY id DESC
+        ", $user_id, $user->user_email), ARRAY_A);
+
+        $export_payload = [
+            'export_meta' => [
+                'export_id'      => 'DPDP-' . $user_id . '-' . time(),
+                'generated_at'   => current_time('mysql'),
+                'iso_timestamp'  => current_time('c'),
+                'fiduciary'      => 'MeraRashifal Technologies',
+                'jurisdiction'   => 'Republic of India (DPDP Act, 2023)',
+            ],
+            'data_principal' => [
+                'user_id'         => $user_id,
+                'email'           => $user->user_email,
+                'registered_date' => $user->user_registered,
+            ],
+            'astrological_profile'    => $astro_data,
+            'dpdp_statutory_rights'   => $dpdp_rights,
+            'saved_family_kundlis'    => $saved_kundlis,
+            'niyati_ai_conversations' => $chat_data,
+            'ai_credit_wallet'        => $wallet_data,
+            'reports_archive'         => $reports ?: [],
+            'transaction_ledger'      => $txns ?: [],
+        ];
+
+        wp_send_json_success([
+            'filename' => 'merarashifal-data-principal-export-' . $user_id . '.json',
+            'data'     => $export_payload
+        ]);
+    }
+
+    /**
+     * Generate dynamic anti-bot challenge phrase and randomized sentence for DPDP Erasure
+     * Pool of 50 varied sentences where {WORD} placement and grammatical structure shifts.
+     */
+    public static function generate_dpdp_erase_challenge($user_id) {
+        $words = [
+            'PURGE', 'ERASE', 'EXPUNGE', 'TERMINATE', 'DESTROY', 'REVOKE', 'DISCARD', 'OBLITERATE',
+            'CLEANSE', 'ABOLISH', 'MUKTI', 'NIRVANA', 'PRALAYA', 'SAMAPTI', 'TYAGA', 'VILAYA',
+            'DISMISS', 'AUTHORIZE', 'OVERWRITE', 'RELEASE', 'NULLIFY', 'SHRED', 'UNBIND', 'EXTINGUISH',
+            'WITHDRAW', 'FORGET', 'CANCEL', 'PERMANENT', 'SECURE', 'CERTIFY', 'SANCTION', 'ARCHIVE',
+            'DISCONNECT', 'DETACH', 'SEVER', 'ELIMINATE', 'SCRUB', 'RESET', 'FORFEIT', 'REDUCE',
+            'EXPIRE', 'REMOVE', 'VOID', 'SHASTRA', 'NAKSHATRA', 'VIMSHOTTARI', 'JYOTISH', 'CHAKRA',
+            'SANKALPA', 'MOKSHA'
+        ];
+
+        // Combine random word with 3-digit security integer to eliminate bot dictionary attacks
+        $random_word = $words[array_rand($words)] . '-' . wp_rand(100, 999);
+
+        // 50 diverse sentence templates with varied word positioning (front, middle, pre-end, end)
+        $sentences = [
+            'As an anti-bot security safeguard, please verify your erasure request by typing {WORD} below:',
+            'To verify this is an intentional manual human action, enter {WORD} into the field:',
+            'Security verification active: please input {WORD} in capital letters to authorize account destruction:',
+            'Preventing automated deletion attempts: confirm your manual consent by typing {WORD} as displayed:',
+            'For fraud protection and anti-bot validation, enter the security phrase {WORD} to continue:',
+            'To authenticate this irreversible action and ensure anti-tamper security, write {WORD} below:',
+            'Human confirmation required: type {WORD} into the verification box to proceed with data erasure:',
+            'Anti-malware protocol engaged: authorize the deletion of your records by submitting {WORD}:',
+            'Security checkpoint: type the verification code {WORD} in all capital letters to validate your request:',
+            'To certify that you are manually requesting this wipe, please enter {WORD} in the confirmation field:',
+            'Type {WORD} in the box below to authorize the irreversible removal of all your data:',
+            'Enter {WORD} precisely as highlighted to affirm your decision to permanently delete this account:',
+            'Please write {WORD} into the space provided if you truly wish to wipe your astrological vault:',
+            'Input {WORD} in capital letters below to authorize the permanent deletion of your profile:',
+            'Submit {WORD} to authenticate and execute the irreversible erasure of your customer profile:',
+            'Typing {WORD} into the confirmation box will permanently destroy all stored Kundli archives:',
+            'By entering {WORD} below, you authorize our servers to immediately wipe your consultation history:',
+            'Provide the security token {WORD} to validate your legal request for account termination:',
+            'Write {WORD} in the entry field to finalize the deletion of your account and credentials:',
+            'Key in {WORD} below to authorize the permanent disconnection of your Google authentication:',
+            'To exercise statutory erasure under Section 12 of the DPDP Act 2023, enter {WORD} below:',
+            'In accordance with DPDP statutory requirements, confirm the complete erasure of your data by typing {WORD}:',
+            'Statutory Data Principal verification: input {WORD} to execute your right to be forgotten:',
+            'Under Section 12 of India\'s DPDP Act, confirm permanent data destruction by entering {WORD}:',
+            'To finalize your statutory Data Principal erasure directive, type the verification word {WORD}:',
+            'Section 12 DPDP compliance check: authenticate the permanent deletion of your personal data by typing {WORD}:',
+            'Fiduciary erasure mandate: authorize the purging of your stored personal attributes by entering {WORD}:',
+            'Statutory audit notice acknowledged: please confirm data destruction by typing {WORD} as highlighted:',
+            'Exercising your Right to Erasure requires typing {WORD} into the confirmation field below:',
+            'To formally revoke your data fiduciary profile under Indian privacy law, enter {WORD}:',
+            'Please confirm the permanent destruction of your Vedic birth charts and calculations by typing {WORD}:',
+            'To permanently wipe your saved family Kundlis and planetary transit records, enter {WORD}:',
+            'Authorize the complete dissolution and erasure of your astrological archives by typing {WORD}:',
+            'Before we permanently wipe your Vedic profile and consultation logs, verify by entering {WORD}:',
+            'To purge all astrological birth details, planetary charts, and saved horoscopes, type {WORD}:',
+            'Your horoscope vaults and family Kundlis will be unrecoverable: confirm by submitting {WORD}:',
+            'Ensure you want to permanently discard your saved Kundlis and reports by entering {WORD}:',
+            'Dissolving your Vedic consultation vault requires you to type {WORD} into the field below:',
+            'To irreversibly clear your birth time, coordinates, and Rashi profile, please enter {WORD}:',
+            'Wiping all astrological report archives and personal records requires entering {WORD}:',
+            'Before we purge your Niyati AI conversation history and unused credits, verify by entering {WORD}:',
+            'To delete all Niyati AI astrologer chat sessions and reset your profile, write {WORD} below:',
+            'Permanently purging your AI consultation memory and wallet balance requires typing {WORD}:',
+            'To confirm that you understand this action cannot be undone, please type {WORD} into the box:',
+            'Final authorization required: type {WORD} to immediately terminate your account and wipe all records:',
+            'This action is irreversible and immediate: please type {WORD} as shown to verify:',
+            'To execute account closure and erase all linked Google OAuth tokens, enter {WORD}:',
+            'Certify that you wish to surrender all active tokens and erase your account by entering {WORD}:',
+            'Confirm the immediate and permanent termination of your MeraRashifal account by typing {WORD}:',
+            'Final verification step: enter the exact phrase {WORD} to begin the automated erasure sequence:'
+        ];
+
+        $sentence_template = $sentences[array_rand($sentences)];
+        $highlight_html = '<mark class="mr-dpdp-highlight-word">' . esc_html($random_word) . '</mark>';
+        $sentence_html  = str_replace('{WORD}', $highlight_html, esc_html($sentence_template));
+
+        // Store challenge in transient and usermeta (valid for 30 minutes)
+        if ($user_id > 0) {
+            set_transient('mr_dpdp_erase_token_' . $user_id, $random_word, 30 * MINUTE_IN_SECONDS);
+            update_user_meta($user_id, 'mr_dpdp_erase_token', $random_word);
+        }
+
+        return [
+            'word'          => $random_word,
+            'sentence_html' => $sentence_html,
+            'raw_sentence'  => str_replace('{WORD}', $random_word, $sentence_template)
+        ];
+    }
+
+    /**
+     * AJAX endpoint to fetch a fresh erasure challenge
+     */
+    public static function ajax_get_erase_challenge() {
+        check_ajax_referer('mr_account_nonce', 'nonce');
+        $user_id = get_current_user_id();
+        if (!$user_id) {
+            wp_send_json_error(['message' => 'Please log in.']);
+        }
+        $challenge = self::generate_dpdp_erase_challenge($user_id);
+        wp_send_json_success($challenge);
+    }
+
+    /**
+     * AJAX: Right to Erasure / Account Deletion (DPDP Act 2023 - Section 12)
+     */
+    public static function ajax_dpdp_erase_account() {
+        check_ajax_referer('mr_account_nonce', 'nonce');
+
+        $user_id = get_current_user_id();
+        if (!$user_id) {
+            wp_send_json_error(['message' => 'Please log in to initiate account erasure.']);
+        }
+
+        // Safety Barrier: Prevent deleting administrative accounts through frontend
+        if (current_user_can('manage_options') || current_user_can('edit_posts') || $user_id === 1) {
+            wp_send_json_error([
+                'message' => 'Administrative accounts cannot be erased via the customer portal for site security. Please perform administrative user operations from the secure management console.'
+            ]);
+        }
+
+        $phrase = trim($_POST['confirm_phrase'] ?? '');
+        $expected = get_transient('mr_dpdp_erase_token_' . $user_id) ?: get_user_meta($user_id, 'mr_dpdp_erase_token', true);
+
+        if (empty($expected) || strcasecmp($phrase, $expected) !== 0) {
+            $new_challenge = self::generate_dpdp_erase_challenge($user_id);
+            wp_send_json_error([
+                'message'       => 'Security verification phrase mismatch or expired. A fresh anti-bot verification phrase has been generated below.',
+                'new_challenge' => $new_challenge
+            ]);
+        }
+
+        $user = get_userdata($user_id);
+        $user_email = $user ? $user->user_email : '';
+
+        global $wpdb;
+
+        // 1. Purge Niyati AI Chat Files and Family Kundlis from server disk
+        if (class_exists('Niyati_Storage')) {
+            $base_dir = Niyati_Storage::get_base_dir();
+            $kundli_file = trailingslashit($base_dir) . 'kundli/user_' . $user_id . '_kundlis.json';
+            if (file_exists($kundli_file)) {
+                @unlink($kundli_file);
+            }
+
+            $chat_file = trailingslashit($base_dir) . 'chats/user_' . $user_id . '.json';
+            if (file_exists($chat_file)) {
+                @unlink($chat_file);
+            }
+
+            // Purge any archives matching user_{user_id}
+            $archive_dir = trailingslashit($base_dir) . 'archive';
+            if (is_dir($archive_dir)) {
+                $archives = glob($archive_dir . '/*user_' . $user_id . '*');
+                if (is_array($archives)) {
+                    foreach ($archives as $arch) {
+                        @unlink($arch);
+                    }
+                }
+            }
+
+            // Purge any uploaded palm images from palm-cache
+            $uploads = wp_upload_dir();
+            $palm_cache = trailingslashit($uploads['basedir']) . 'palm-cache';
+            if (is_dir($palm_cache)) {
+                $palm_files = glob($palm_cache . '/*user_' . $user_id . '*');
+                if (is_array($palm_files)) {
+                    foreach ($palm_files as $pf) {
+                        @unlink($pf);
+                    }
+                }
+            }
+        }
+
+        // 2. Anonymize Financial Records (Statutory Indian GST & Taxation audit compliance)
+        // Financial transaction rows must be retained for legal tax audit, but personal identifying data is completely anonymized.
+        $table_txns = $wpdb->prefix . 'mr_transactions';
+        $anonymized_email = 'erased_' . substr(md5($user_id . (defined('AUTH_KEY') ? AUTH_KEY : 'dpdp_salt')), 0, 10) . '@anonymized.dpdp.merarashifal.com';
+        
+        $wpdb->query($wpdb->prepare("
+            UPDATE $table_txns 
+            SET user_id = 0,
+                customer_name = 'Anonymized Data Principal',
+                customer_email = %s,
+                customer_phone = '',
+                metadata = NULL
+            WHERE user_id = %d OR customer_email = %s
+        ", $anonymized_email, $user_id, $user_email));
+
+        // 3. Purge Generated Reports Records
+        $table_reports = $wpdb->prefix . 'mr_generated_reports';
+        $wpdb->query($wpdb->prepare("
+            DELETE FROM $table_reports 
+            WHERE user_id = %d
+        ", $user_id));
+
+        // 4. Purge Niyati Wallets & Credit Ledger
+        $table_wallets = $wpdb->prefix . 'niyati_wallets';
+        if ($wpdb->get_var("SHOW TABLES LIKE '$table_wallets'") === $table_wallets) {
+            $wpdb->query($wpdb->prepare("DELETE FROM $table_wallets WHERE user_id = %d", $user_id));
+        }
+        $table_ledger = $wpdb->prefix . 'niyati_credit_ledger';
+        if ($wpdb->get_var("SHOW TABLES LIKE '$table_ledger'") === $table_ledger) {
+            $wpdb->query($wpdb->prepare("DELETE FROM $table_ledger WHERE user_id = %d", $user_id));
+        }
+
+        // 5. Delete transient & WordPress User
+        delete_transient('mr_dpdp_erase_token_' . $user_id);
+        require_once ABSPATH . 'wp-admin/includes/user.php';
+        wp_delete_user($user_id);
+
+        // 6. Terminate session
+        wp_logout();
+
+        wp_send_json_success([
+            'message'      => 'Your account and personal data have been completely erased in compliance with Section 12 of the DPDP Act 2023.',
+            'redirect_url' => add_query_arg(['mr_dpdp_erased' => '1'], self::get_account_page_url())
         ]);
     }
 
@@ -2049,5 +2827,623 @@ class MR_Account_UI {
         }
 
         return $zodiac[0];
+    }
+
+    /**
+     * Build Consolidated Unified Ledger (Orders + Niyati Credit Awards + Grouped Chat Usages)
+     */
+    public static function get_user_unified_ledger($user_id) {
+        global $wpdb;
+        $user = get_userdata($user_id);
+        if (!$user) {
+            return [];
+        }
+
+        // Fetch user financial transactions
+        $table_txns = $wpdb->prefix . 'mr_transactions';
+        $txns = $wpdb->get_results($wpdb->prepare("
+            SELECT * FROM $table_txns 
+            WHERE user_id = %d OR customer_email = %s 
+            ORDER BY id DESC
+        ", $user_id, $user->user_email));
+
+        // Fetch Niyati AI Astrologer Credit Wallet & Ledger
+        $niyati_wallet = class_exists('Niyati_Wallet') ? Niyati_Wallet::get_wallet('', $user_id) : null;
+        $niyati_visitor_id = $niyati_wallet ? $niyati_wallet->visitor_id : '';
+        $credit_ledger = class_exists('Niyati_Wallet') ? Niyati_Wallet::get_user_credit_ledger($user_id, $niyati_visitor_id) : [];
+
+        // Index credit ledger items by payment ref_id to avoid double counting
+        $credit_by_ref = [];
+        foreach ($credit_ledger as $item) {
+            if (!empty($item['ref_id'])) {
+                $credit_by_ref[$item['ref_id']] = $item;
+            }
+        }
+
+        $unified_ledger = [];
+        $consumed_payment_ids = [];
+
+        // 1. Process Financial Orders & Subscriptions
+        foreach ($txns as $t) {
+            $pay_id = !empty($t->gateway_payment_id) ? $t->gateway_payment_id : '';
+            $matched_credit = (!empty($pay_id) && isset($credit_by_ref[$pay_id])) ? $credit_by_ref[$pay_id] : null;
+
+            $meta = !empty($t->metadata) ? json_decode($t->metadata, true) : [];
+            $bonus_credits = !empty($meta['chat_credits']) ? intval($meta['chat_credits']) : 0;
+            if (!$bonus_credits && $matched_credit && $matched_credit['credits'] > 0) {
+                $bonus_credits = $matched_credit['credits'];
+            }
+
+            $channel_name = ($t->channel === 'subscription') ? 'Subscription Pack' : (($t->channel === 'chat_credit') ? 'Niyati AI Chat' : 'Report Order');
+            $groups = ['orders'];
+
+            if ($t->channel === 'chat_credit' || $bonus_credits > 0) {
+                $groups[] = 'credits';
+            }
+
+            $badge_class = 'mr-badge-muted';
+            $credits_badge = 'Included';
+            if ($bonus_credits > 0) {
+                $credits_badge = "+{$bonus_credits} Questions";
+                $badge_class = 'mr-badge-credit-plus';
+            }
+
+            $invoice_no = $t->invoice_number ?? '';
+            // Auto-assign sequential non-GST retail invoice if order was paid and missing invoice number
+            if (empty($invoice_no) && $t->status === 'success' && class_exists('MR_Invoice')) {
+                $invoice_no = MR_Invoice::assign_invoice_to_transaction($t->id);
+                $t->invoice_number = $invoice_no;
+            }
+
+            $invoice_url = '';
+            if ($t->status === 'success' || !empty($invoice_no) || !empty($t->internal_txn_id)) {
+                if (class_exists('MR_Invoice')) {
+                    $invoice_url = MR_Invoice::get_invoice_url((array)$t);
+                } else {
+                    $k = substr(md5(($t->internal_txn_id ?? '') . ($t->customer_email ?? '') . AUTH_KEY), 0, 12);
+                    $invoice_url = add_query_arg(['mr_invoice' => 1, 'id' => ($t->internal_txn_id ?? ''), 'k' => $k], home_url('/'));
+                }
+            }
+
+            $subtitle = !empty($invoice_no) ? ('Invoice: ' . $invoice_no) : (!empty($pay_id) ? $pay_id : '');
+            if ($bonus_credits > 0 && $t->channel !== 'chat_credit') {
+                $subtitle .= ' • Includes ' . $bonus_credits . ' Free Niyati Questions';
+            }
+
+            $status_class = ($t->status === 'success') ? 'mr-status-ready' : (($t->status === 'refunded') ? 'mr-status-refund' : 'mr-status-pending');
+
+            $unified_ledger[] = [
+                'id'            => 'ORD_' . $t->id,
+                'type'          => 'order',
+                'groups'        => $groups,
+                'timestamp'     => strtotime($t->created_at),
+                'date'          => date('d M Y', strtotime($t->created_at)),
+                'time'          => date('h:i A', strtotime($t->created_at)),
+                'time_window'   => date('h:i A', strtotime($t->created_at)),
+                'ref_id'        => !empty($t->internal_txn_id) ? $t->internal_txn_id : $pay_id,
+                'item_category' => $channel_name,
+                'title'         => $t->item_name,
+                'subtitle'      => $subtitle,
+                'credits_num'   => $bonus_credits,
+                'credits_badge' => $credits_badge,
+                'badge_class'   => $badge_class,
+                'amount'        => floatval($t->net_amount),
+                'amount_text'   => ($t->net_amount > 0) ? '₹' . number_format($t->net_amount, 2) : 'Free',
+                'status'        => $t->status,
+                'status_label'  => ($t->status === 'success') ? 'Success' : ucfirst($t->status),
+                'status_class'  => $status_class,
+                'invoice_no'    => $invoice_no,
+                'invoice_url'   => $invoice_url
+            ];
+
+            if (!empty($pay_id)) {
+                $consumed_payment_ids[$pay_id] = true;
+            }
+        }
+
+        // 2. Add remaining Niyati Credit Usages & standalone Credit Awards
+        foreach ($credit_ledger as $c) {
+            if (!empty($c['ref_id']) && isset($consumed_payment_ids[$c['ref_id']])) {
+                continue; // Already unified with order row
+            }
+
+            $is_usage = ($c['type'] === 'credit_usage');
+            $groups = ['credits'];
+
+            $status_class = ($c['status'] === 'completed' || $c['status'] === 'consumed') ? 'mr-status-ready' : (($c['status'] === 'refunded') ? 'mr-status-refund' : 'mr-status-pending');
+
+            $unified_ledger[] = [
+                'id'            => $c['id'],
+                'type'          => $c['type'],
+                'groups'        => $groups,
+                'timestamp'     => $c['timestamp'],
+                'date'          => $c['date_formatted'],
+                'time'          => $c['time_formatted'],
+                'time_window'   => $c['time_window'],
+                'ref_id'        => $c['ref_id'],
+                'item_category' => $is_usage ? 'Niyati AI Consultation' : 'Niyati AI Chat',
+                'title'         => $c['title'],
+                'subtitle'      => $c['subtitle'],
+                'credits_num'   => $c['credits'],
+                'credits_badge' => $c['impact_text'],
+                'badge_class'   => $c['badge_class'],
+                'amount'        => $c['amount'],
+                'amount_text'   => $c['amount_text'],
+                'status'        => $c['status'],
+                'status_label'  => $c['status_label'],
+                'status_class'  => $status_class,
+                'invoice_no'    => ''
+            ];
+        }
+
+        // Sort all entries in chronological descending order
+        usort($unified_ledger, function($a, $b) {
+            return $b['timestamp'] - $a['timestamp'];
+        });
+
+        return $unified_ledger;
+    }
+
+    /**
+     * Filter and slice ledger with 25 entries per page limit
+     */
+    public static function filter_and_paginate_ledger($ledger, $filter = 'all', $page = 1, $per_page = 25) {
+        $count_all = count($ledger);
+        $count_credits = 0;
+        $count_orders = 0;
+        $matched = [];
+
+        foreach ($ledger as $item) {
+            $is_credits = in_array('credits', $item['groups']);
+            $is_orders  = in_array('orders', $item['groups']);
+
+            if ($is_credits) $count_credits++;
+            if ($is_orders)  $count_orders++;
+
+            if ($filter === 'all' || ($filter === 'credits' && $is_credits) || ($filter === 'orders' && $is_orders)) {
+                $matched[] = $item;
+            }
+        }
+
+        $total_matched = count($matched);
+        $total_pages   = max(1, (int) ceil($total_matched / $per_page));
+        $page          = max(1, min($page, $total_pages));
+        $offset        = ($page - 1) * $per_page;
+        $slice         = array_slice($matched, $offset, $per_page);
+
+        return [
+            'items'         => $slice,
+            'total_matched' => $total_matched,
+            'total_pages'   => $total_pages,
+            'page'          => $page,
+            'per_page'      => $per_page,
+            'counts'        => [
+                'all'     => $count_all,
+                'credits' => $count_credits,
+                'orders'  => $count_orders,
+            ]
+        ];
+    }
+
+    /**
+     * Render passbook table / card rows HTML (Zero DOM Bloat - Exactly 25 items max)
+     */
+    public static function render_passbook_rows_html($items) {
+        if (empty($items)) {
+            return '<tr class="mr-empty-row"><td colspan="5"><div class="mr-empty-state-box" style="padding:30px 20px;"><h4>No Records Found</h4><p>There are no transactions matching the selected filter.</p></div></td></tr>';
+        }
+
+        ob_start();
+        foreach ($items as $t): ?>
+            <tr class="mr-txn-row">
+                <!-- Cell 1: Date & Time -->
+                <td class="mr-col-date">
+                    <div class="mr-cell-date"><strong><?php echo esc_html($t['date']); ?></strong></div>
+                    <div class="mr-cell-time"><?php echo esc_html($t['time_window']); ?></div>
+                </td>
+
+                <!-- Cell 2: Item Description, Channel, & Reference ID -->
+                <td class="mr-col-item">
+                    <div class="mr-item-top-row">
+                        <span class="mr-channel-badge mr-category-<?php echo esc_attr(sanitize_title($t['item_category'])); ?>">
+                            <?php echo esc_html($t['item_category']); ?>
+                        </span>
+                        <!-- Mobile status pill shown next to category on mobile -->
+                        <span class="mr-status-pill mr-mobile-only <?php echo esc_attr($t['status_class']); ?>">
+                            <?php echo esc_html($t['status_label']); ?>
+                        </span>
+                    </div>
+
+                    <div class="mr-item-name"><strong><?php echo esc_html($t['title']); ?></strong></div>
+
+                    <?php if (!empty($t['subtitle'])): ?>
+                        <div class="mr-item-subtitle"><?php echo esc_html($t['subtitle']); ?></div>
+                    <?php endif; ?>
+
+                    <div class="mr-item-meta-row">
+                        <code class="mr-code-badge" title="Transaction / Order Reference ID"><?php echo esc_html($t['ref_id']); ?></code>
+                        <?php if (!empty($t['invoice_no'])): ?>
+                            <span class="mr-invoice-tag" title="Official Retail Invoice"><?php echo esc_html($t['invoice_no']); ?></span>
+                        <?php endif; ?>
+                        <?php if (!empty($t['invoice_url'])): ?>
+                            <a href="<?php echo esc_url($t['invoice_url']); ?>" target="_blank" rel="noopener noreferrer" class="mr-btn-invoice-link" title="Download & Print Tax Invoice (PDF / Receipt)">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                                <span>Download Invoice &darr;</span>
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                </td>
+
+                <!-- Cell 3: Credits Impact -->
+                <td class="mr-col-credits">
+                    <span class="mr-mobile-label">Impact:</span>
+                    <span class="mr-credit-pill <?php echo esc_attr($t['badge_class']); ?>">
+                        <?php echo esc_html($t['credits_badge']); ?>
+                    </span>
+                </td>
+
+                <!-- Cell 4: Amount -->
+                <td class="mr-col-amount">
+                    <span class="mr-mobile-label">Amount:</span>
+                    <span class="mr-amount-val"><?php echo esc_html($t['amount_text']); ?></span>
+                </td>
+
+                <!-- Cell 5: Status & Invoice -->
+                <td class="mr-col-status mr-desktop-only">
+                    <div class="mr-status-cell-wrap">
+                        <span class="mr-status-pill <?php echo esc_attr($t['status_class']); ?>">
+                            <?php if ($t['status'] === 'success' || $t['status'] === 'completed' || $t['status'] === 'consumed'): ?>
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                <span><?php echo esc_html($t['status_label']); ?></span>
+                            <?php elseif ($t['status'] === 'refunded'): ?>
+                                <span>Refunded</span>
+                            <?php else: ?>
+                                <span><?php echo esc_html($t['status_label']); ?></span>
+                            <?php endif; ?>
+                        </span>
+                        <?php if (!empty($t['invoice_url'])): ?>
+                            <a href="<?php echo esc_url($t['invoice_url']); ?>" target="_blank" rel="noopener noreferrer" class="mr-btn-invoice-pill" title="Download Official Invoice">
+                                <span>Invoice &darr;</span>
+                            </a>
+                        <?php endif; ?>
+                    </div>
+                </td>
+            </tr>
+        <?php endforeach;
+        return ob_get_clean();
+    }
+
+    /**
+     * Render passbook pagination buttons HTML
+     */
+    public static function render_passbook_pagination_html($total_pages, $current_page = 1) {
+        if ($total_pages <= 1) {
+            return '';
+        }
+
+        ob_start(); ?>
+        <div class="mr-pagination-wrap" id="mr-passbook-pagination" data-total-pages="<?php echo $total_pages; ?>" data-current-page="<?php echo $current_page; ?>">
+            <button type="button" class="mr-page-btn mr-prev-page" <?php echo ($current_page <= 1) ? 'disabled' : ''; ?>>&laquo; Prev</button>
+            <div class="mr-page-numbers">
+                <?php for ($p = 1; $p <= $total_pages; $p++): ?>
+                    <button type="button" class="mr-page-num <?php echo ($p == $current_page) ? 'active' : ''; ?>" data-page="<?php echo $p; ?>"><?php echo $p; ?></button>
+                <?php endfor; ?>
+            </div>
+            <button type="button" class="mr-page-btn mr-next-page" <?php echo ($current_page >= $total_pages) ? 'disabled' : ''; ?>>&raquo; Next</button>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * AJAX: On-demand Passbook pagination and tab filtering (loads initial 25 per tab)
+     */
+    public static function ajax_get_passbook_page() {
+        check_ajax_referer('mr_account_nonce', 'nonce');
+        $user_id = get_current_user_id();
+        if (!$user_id) {
+            wp_send_json_error(['message' => 'Please log in to view transactions.']);
+        }
+
+        $filter   = isset($_POST['filter']) ? sanitize_key($_POST['filter']) : 'all';
+        $page     = isset($_POST['page']) ? max(1, intval($_POST['page'])) : 1;
+        $per_page = 25; // Strict 25 entries per page
+
+        $ledger = self::get_user_unified_ledger($user_id);
+        $data   = self::filter_and_paginate_ledger($ledger, $filter, $page, $per_page);
+
+        $rows_html       = self::render_passbook_rows_html($data['items']);
+        $pagination_html = self::render_passbook_pagination_html($data['total_pages'], $data['page']);
+
+        wp_send_json_success([
+            'rows_html'       => $rows_html,
+            'pagination_html' => $pagination_html,
+            'total_matched'   => $data['total_matched'],
+            'total_pages'     => $data['total_pages'],
+            'current_page'    => $data['page'],
+            'filter'          => $filter,
+            'counts'          => $data['counts']
+        ]);
+    }
+
+    /**
+     * AJAX: Submit Customer Support Ticket with single picture attachment
+     * Delivers inquiry and attachment directly to support@merarashifal.com
+     */
+    public static function ajax_submit_support_ticket() {
+        check_ajax_referer('mr_account_nonce', 'nonce');
+
+        $name     = sanitize_text_field($_POST['support_name'] ?? '');
+        $email    = sanitize_email($_POST['support_email'] ?? '');
+        $phone    = sanitize_text_field($_POST['support_phone'] ?? '');
+        $category = sanitize_text_field($_POST['support_category'] ?? 'Astrological Consultation & Support');
+        $subject  = sanitize_text_field($_POST['support_subject'] ?? '');
+        $message  = sanitize_textarea_field($_POST['support_message'] ?? ($_POST['support_question'] ?? ''));
+
+        $user_id = get_current_user_id();
+        if ($user_id > 0) {
+            $current_user = get_userdata($user_id);
+            if (empty($name) && $current_user) {
+                $name = $current_user->display_name;
+            }
+            if (empty($email) && $current_user) {
+                $email = $current_user->user_email;
+            }
+        }
+
+        if (empty($name)) {
+            $name = 'Valued Customer';
+        }
+        if (empty($email) || !is_email($email)) {
+            $email = 'support@merarashifal.com';
+        }
+
+        if (empty($message)) {
+            wp_send_json_error(['message' => 'Please enter your question before submitting.']);
+        }
+
+        if (empty($subject)) {
+            $trimmed = wp_trim_words($message, 8, '...');
+            $subject = 'Support Question from ' . $name . ': ' . ($trimmed ?: 'General Astro Query');
+        }
+
+        $user_id = get_current_user_id();
+        $attachments = [];
+        $temp_filepath = '';
+        $original_filename = '';
+
+        // Handle single image attachment if provided
+        if (!empty($_FILES['support_attachment']) && !empty($_FILES['support_attachment']['name'])) {
+            $file = $_FILES['support_attachment'];
+
+            if ($file['error'] !== UPLOAD_ERR_OK) {
+                wp_send_json_error(['message' => 'File upload error (Code: ' . intval($file['error']) . '). Please try again or submit without an attachment.']);
+            }
+
+            // Enforce max 5MB size limit
+            $max_bytes = 5 * 1024 * 1024;
+            if ($file['size'] > $max_bytes) {
+                wp_send_json_error(['message' => 'The uploaded picture exceeds the 5MB size limit. Please choose a smaller image.']);
+            }
+
+            // Allowed extensions & mime types - single picture only
+            $file_info = wp_check_filetype($file['name'], [
+                'jpg|jpeg|jpe' => 'image/jpeg',
+                'png'          => 'image/png',
+                'webp'         => 'image/webp',
+            ]);
+
+            if (empty($file_info['ext']) || empty($file_info['type'])) {
+                wp_send_json_error(['message' => 'Invalid file format. Only single picture attachments (JPG, JPEG, PNG, WEBP) are allowed.']);
+            }
+
+            // Double check MIME if finfo is available
+            if (function_exists('finfo_open')) {
+                $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                $mime  = finfo_file($finfo, $file['tmp_name']);
+                finfo_close($finfo);
+                $allowed_mimes = ['image/jpeg', 'image/png', 'image/webp'];
+                if (!in_array($mime, $allowed_mimes, true)) {
+                    wp_send_json_error(['message' => 'Invalid image content detected. Please upload a valid PNG, JPG, or WEBP image.']);
+                }
+            }
+
+            // Safe staging directory for email attachment
+            $upload_dir = wp_upload_dir();
+            $staging_dir = trailingslashit($upload_dir['basedir']) . 'mr-support-temp/';
+            if (!file_exists($staging_dir)) {
+                wp_mkdir_p($staging_dir);
+                @file_put_contents($staging_dir . '.htaccess', "Options -Indexes\n<Files *>\nDeny from all\n</Files>");
+            }
+
+            $original_filename = sanitize_file_name($file['name']);
+            $temp_filename = 'ticket_' . time() . '_' . wp_generate_password(8, false) . '.' . $file_info['ext'];
+            $temp_filepath = $staging_dir . $temp_filename;
+
+            if (!move_uploaded_file($file['tmp_name'], $temp_filepath)) {
+                wp_send_json_error(['message' => 'Could not save the uploaded attachment. Please try again.']);
+            }
+
+            $attachments[] = $temp_filepath;
+        }
+
+        // Support desk recipient
+        $to = 'support@merarashifal.com';
+        $email_subject = sprintf('[Support Ticket: %s] %s - %s', $category, $subject, $name);
+
+        $html_body = self::render_support_ticket_email_html([
+            'name'          => $name,
+            'email'         => $email,
+            'phone'         => $phone,
+            'category'      => $category,
+            'subject'       => $subject,
+            'message'       => $message,
+            'user_id'       => $user_id,
+            'has_file'      => !empty($temp_filepath),
+            'filename'      => $original_filename,
+            'ip'            => !empty($_SERVER['REMOTE_ADDR']) ? sanitize_text_field($_SERVER['REMOTE_ADDR']) : 'Unknown',
+            'submitted_at'  => current_time('d M Y, h:i A') . ' IST',
+        ]);
+
+        $headers = [
+            'Content-Type: text/html; charset=UTF-8',
+            'Reply-To: ' . $name . ' <' . $email . '>',
+        ];
+
+        $mail_sent = wp_mail($to, $email_subject, $html_body, $headers, $attachments);
+
+        // Clean up temporary attachment file immediately after dispatch
+        if (!empty($temp_filepath) && file_exists($temp_filepath)) {
+            @unlink($temp_filepath);
+        }
+
+        if ($mail_sent) {
+            wp_send_json_success([
+                'message' => 'Thank you! Your question has been emailed directly to support@merarashifal.com. Our astrological support team will review and reply to ' . esc_html($email) . ' shortly.'
+            ]);
+        } else {
+            wp_send_json_error([
+                'message' => 'We could not dispatch your question through the automated mailer at this moment. Please email your query directly to support@merarashifal.com.'
+            ]);
+        }
+    }
+
+    /**
+     * Render Branded HTML Email for Support Ticket
+     */
+    public static function render_support_ticket_email_html($data) {
+        $name         = esc_html($data['name']);
+        $email        = esc_html($data['email']);
+        $phone        = !empty($data['phone']) ? esc_html($data['phone']) : 'Not Provided';
+        $category     = esc_html($data['category']);
+        $subject      = esc_html($data['subject']);
+        $message      = nl2br(esc_html($data['message']));
+        $user_id      = !empty($data['user_id']) ? intval($data['user_id']) : null;
+        $has_file     = !empty($data['has_file']);
+        $filename     = esc_html($data['filename']);
+        $submitted_at = esc_html($data['submitted_at']);
+        $ip           = esc_html($data['ip']);
+
+        ob_start();
+        ?>
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Support Ticket: <?php echo $subject; ?></title>
+        </head>
+        <body style="margin: 0; padding: 0; background-color: #F8FAFC; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; color: #1E293B;">
+            <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #F8FAFC; padding: 30px 15px;">
+                <tr>
+                    <td align="center">
+                        <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 620px; background: #FFFFFF; border-radius: 14px; overflow: hidden; border: 1px solid #E2E8F0; box-shadow: 0 10px 25px rgba(0,0,0,0.06);">
+                            
+                            <!-- Header Accent Bar -->
+                            <tr>
+                                <td height="6" style="background: linear-gradient(90deg, #F58220 0%, #D9A441 50%, #7A1F3D 100%);"></td>
+                            </tr>
+
+                            <!-- Brand Header -->
+                            <tr>
+                                <td style="padding: 24px 30px 20px; border-bottom: 1px solid #F1F5F9; background: #FFFDF9;">
+                                    <table width="100%" cellspacing="0" cellpadding="0" border="0">
+                                        <tr>
+                                            <td>
+                                                <h1 style="margin: 0; font-size: 22px; color: #7A1F3D; font-weight: 800; letter-spacing: -0.3px;">MeraRashifal Support</h1>
+                                                <p style="margin: 4px 0 0 0; font-size: 13px; color: #64748B;">Official Customer Helpdesk &amp; Technical Guidance</p>
+                                            </td>
+                                            <td align="right">
+                                                <span style="display: inline-block; background: #FEF3C7; color: #92400E; font-size: 11.5px; font-weight: 700; padding: 5px 12px; border-radius: 20px; border: 1px solid #FDE68A;">
+                                                    New Ticket
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                </td>
+                            </tr>
+
+                            <!-- Ticket Category & Subject -->
+                            <tr>
+                                <td style="padding: 24px 30px 16px;">
+                                    <div style="background: #F8FAFC; border-left: 4px solid #F58220; padding: 14px 18px; border-radius: 0 8px 8px 0; margin-bottom: 20px;">
+                                        <div style="font-size: 11px; text-transform: uppercase; font-weight: 700; color: #F58220; letter-spacing: 0.5px; margin-bottom: 4px;">
+                                            Category: <?php echo $category; ?>
+                                        </div>
+                                        <h2 style="margin: 0; font-size: 17px; color: #0F172A; font-weight: 700; line-height: 1.4;">
+                                            <?php echo $subject; ?>
+                                        </h2>
+                                    </div>
+
+                                    <!-- Customer Details Grid -->
+                                    <table width="100%" cellspacing="0" cellpadding="8" border="0" style="font-size: 13.5px; background: #FFFFFF; border: 1px solid #EDF2F7; border-radius: 8px; margin-bottom: 20px;">
+                                        <tr style="border-bottom: 1px solid #F1F5F9;">
+                                            <td width="35%" style="color: #64748B; font-weight: 600; padding: 10px 14px; background: #FAFBFD;">Customer Name:</td>
+                                            <td style="color: #0F172A; font-weight: 700; padding: 10px 14px;"><?php echo $name; ?></td>
+                                        </tr>
+                                        <tr style="border-bottom: 1px solid #F1F5F9;">
+                                            <td style="color: #64748B; font-weight: 600; padding: 10px 14px; background: #FAFBFD;">Email Address:</td>
+                                            <td style="color: #0F172A; font-weight: 600; padding: 10px 14px;">
+                                                <a href="mailto:<?php echo $email; ?>" style="color: #2563EB; text-decoration: none;"><?php echo $email; ?></a>
+                                            </td>
+                                        </tr>
+                                        <tr style="border-bottom: 1px solid #F1F5F9;">
+                                            <td style="color: #64748B; font-weight: 600; padding: 10px 14px; background: #FAFBFD;">Contact Number:</td>
+                                            <td style="color: #0F172A; padding: 10px 14px;"><?php echo $phone; ?></td>
+                                        </tr>
+                                        <tr style="border-bottom: 1px solid #F1F5F9;">
+                                            <td style="color: #64748B; font-weight: 600; padding: 10px 14px; background: #FAFBFD;">Customer Account:</td>
+                                            <td style="color: #0F172A; padding: 10px 14px;">
+                                                <?php echo $user_id ? 'Logged In (User ID #' . $user_id . ')' : 'Guest Seeker'; ?>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td style="color: #64748B; font-weight: 600; padding: 10px 14px; background: #FAFBFD;">Submitted At:</td>
+                                            <td style="color: #475569; padding: 10px 14px; font-size: 12.5px;"><?php echo $submitted_at; ?> (IP: <?php echo $ip; ?>)</td>
+                                        </tr>
+                                    </table>
+
+                                    <!-- Customer Message Box -->
+                                    <div style="margin-top: 10px; margin-bottom: 20px;">
+                                        <div style="font-size: 12.5px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">
+                                            Issue Description:
+                                        </div>
+                                        <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 16px 20px; font-size: 14px; line-height: 1.65; color: #1E293B;">
+                                            <?php echo $message; ?>
+                                        </div>
+                                    </div>
+
+                                    <!-- Attachment notice -->
+                                    <?php if ($has_file): ?>
+                                    <div style="background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px; display: flex; align-items: center;">
+                                        <span style="font-size: 13px; color: #1E40AF; font-weight: 600;">
+                                            &#128206; <strong>Attached Picture:</strong> <?php echo $filename; ?> (Included as email attachment)
+                                        </span>
+                                    </div>
+                                    <?php endif; ?>
+
+                                </td>
+                            </tr>
+
+                            <!-- Footer -->
+                            <tr>
+                                <td style="background: #FAFBFD; border-top: 1px solid #F1F5F9; padding: 20px 30px; text-align: center;">
+                                    <p style="margin: 0 0 6px 0; font-size: 12px; color: #64748B; font-weight: 600;">
+                                        MeraRashifal Technologies &bull; Rishabh Cloud 9, Ahinsa Khand 2, Indirapuram, Ghaziabad, U.P., 201014
+                                    </p>
+                                    <p style="margin: 0; font-size: 11.5px; color: #94A3B8;">
+                                        Support Desk: <a href="mailto:support@merarashifal.com" style="color: #F58220; text-decoration: none;">support@merarashifal.com</a> &bull; Response SLA: under 2 hours
+                                    </p>
+                                </td>
+                            </tr>
+
+                        </table>
+                    </td>
+                </tr>
+            </table>
+        </body>
+        </html>
+        <?php
+        return ob_get_clean();
     }
 }

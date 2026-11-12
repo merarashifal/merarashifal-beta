@@ -47,11 +47,17 @@ require_once MR_PLUGIN_DIR . 'includes/class-mr-report-downloader.php';
 require_once MR_PLUGIN_DIR . 'includes/class-mr-mailer.php';
 require_once MR_PLUGIN_DIR . 'includes/class-mr-report-embed.php';
 require_once MR_PLUGIN_DIR . 'includes/class-mr-report-landing-data.php';
+require_once MR_PLUGIN_DIR . 'includes/class-mr-coupons.php';
+require_once MR_PLUGIN_DIR . 'includes/class-mr-coupons-admin.php';
+require_once MR_PLUGIN_DIR . 'includes/class-mr-bucket-discount.php';
 require_once MR_PLUGIN_DIR . 'includes/class-mr-bundles.php';
 require_once MR_PLUGIN_DIR . 'includes/class-mr-bundles-admin.php';
 require_once MR_PLUGIN_DIR . 'includes/class-mr-invoice.php';
 require_once MR_PLUGIN_DIR . 'includes/class-mr-checkout.php';
 require_once MR_PLUGIN_DIR . 'includes/class-mr-report-landing.php';
+require_once MR_PLUGIN_DIR . 'includes/class-mr-pricing-page.php';
+require_once MR_PLUGIN_DIR . 'includes/class-mr-report-pricing-admin.php';
+require_once MR_PLUGIN_DIR . 'includes/class-mr-reports-showcase.php';
 
 // Plugin Activation: Create Database Tables
 register_activation_hook(__FILE__, ['MR_DB', 'create_tables']);
@@ -60,21 +66,26 @@ register_activation_hook(__FILE__, ['MR_DB', 'create_tables']);
 add_action('plugins_loaded', function() {
     // Ensure tables exist on boot
     MR_DB::create_tables();
+    MR_Coupons::create_tables();
 
     if (is_admin()) {
         MR_Admin::init();
         MR_Bundles_Admin::init();
+        MR_Coupons_Admin::init();
     }
     MR_Frontend::init();
     MR_Passbook_UI::init();
     MR_Razorpay::init();
+    MR_Report_Pricing_Admin::init();
     MR_Catalog_Manager::init();
+    MR_Reports_Showcase::init();
     MR_Palmistry_Builder::init();
     MR_Account_UI::init();
     MR_Report_Downloader::init();
     MR_Mailer::init();
     MR_Report_Embed::init();
     MR_Report_Landing::init();
+    MR_Pricing_Page::init();
     MR_Invoice::init();
     MR_Checkout::init();
 });

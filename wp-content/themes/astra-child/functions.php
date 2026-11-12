@@ -15,3 +15,11 @@ add_action('get_header', function() {
     remove_action('wp_head', '_admin_bar_bump_cb');
 });
 
+// Load Homepage Placement & Content Manager
+require_once get_stylesheet_directory() . '/inc/class-mr-homepage-manager.php';
+
+// Ensure Reports Showcase shortcode engine is loaded
+if (!class_exists('MR_Reports_Showcase') && file_exists(WP_PLUGIN_DIR . '/mr-subscription-reports/includes/class-mr-reports-showcase.php')) {
+    require_once WP_PLUGIN_DIR . '/mr-subscription-reports/includes/class-mr-reports-showcase.php';
+    add_action('init', ['MR_Reports_Showcase', 'init']);
+}

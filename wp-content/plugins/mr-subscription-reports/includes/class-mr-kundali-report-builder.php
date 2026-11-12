@@ -2,35 +2,38 @@
 /**
  * Class MR_Kundali_Report_Builder
  *
- * Master Vedic Kundali & Lifetime Destiny Report (Strictly 25 Pages - Edition 3).
+ * Master Vedic Kundali & Lifetime Destiny Report (Strictly 28 Pages - Edition 4).
  * Engineered strictly to the MeraRashifal Master Design System & Typography Architecture.
  *
- * Page Sequence (Exactly 25 Physical A4 Pages):
+ * Page Sequence (Exactly 28 Physical A4 Pages):
  * Page 01: Master Sovereign Cover Page (4x Logo, Verified Birth Matrix, Triple Sign Bar)
  * Page 02: Table of Contents & Strategic Reading Guide (Executive Navigation & Reading Guide)
  * Page 03: Foundational Birth Snapshot & Core Janma Kundali (D1 Chart 460px with Ganesha Watermark)
  * Page 04: Vedic Panchang, Avakhada Chakra & Ephemeris Geometry (Cosmic Calendar & Planetary Geometry)
- * Page 05: Harmonic Cross-Verification (D9 Navamsha, Chandra, Surya, Bhav Chalit · 50-60 Words Each)
+ * Page 05: Harmonic Cross-Verification (D9 Navamsha, Chandra, Surya, Bhav Chalit)
  * Page 06: Material, Assets & Lineage Varga Matrix (D2 Hora, D3 Drekkana, D4 Chaturthamsha, D7 Saptamsha)
  * Page 07: Vocational Status & Higher Mind Varga Matrix (D10 Dashamsha, D12 Dwadashamsha, D16, D24)
  * Page 08: Esoteric Harmonics & Past-Life Prarabdha (D20 Vimshamsha, D27, D30, D60 Shashtiamsha)
- * Page 09: The 12 Bhavas (Houses) Comprehensive Life Audit (All 12 Bhavas Deep Analysis)
- * Page 10: Sixfold Shadbala Planetary Strength & Bhava Bala Matrix (Quantitative Virupas & Bars)
- * Page 11: Ashtakvarga 337-Bindu Energy Matrix & Transit Dynamics (Sarvashtakvarga Grid)
- * Page 12: Complete 120-Year Vimshottari Dasha Lifeline (Master Progression Roadmap)
- * Page 13: Active Rahu Mahadasha Deep-Dive & Sandhi Transitions (18-Year Execution Roadmap)
- * Page 14: The "Atmakaraka & Soul Purpose" Profile & Jaimini Karakas (Venus AK & Saturn AmK)
- * Page 15: Classical Raja Yogas & Dhana Yogas Audit (Ruchaka, Lakshmi, Budhaditya, Kahala)
- * Page 16: Manglik Dosh Analysis: Neutralizing Factors & Ruchaka Yoga (4 Cancellation Pillars)
- * Page 17: Kaal Sarp Yoga: Evolutionary Engine & Kundalini Awakening (Anant Kaal Sarp Transmutation)
- * Page 18: Pitra Dosh Audit: Zero Affliction & Royal Ancestral Grace (0% Affliction Confirmed)
- * Page 19: Life Domains: Career Altitude & Executive Destiny (10th Bhava Synthesis)
- * Page 20: Life Domains: Wealth Accumulation & Treasury Flow (2nd/11th House Synthesis)
- * Page 21: Life Domains: Marriage, Partnerships & Family Longevity (7th House Synthesis)
- * Page 22: Upaya Vigyan: Gemstone (Ratna) & Rudraksha Prescriptions (Prescriptive Table)
- * Page 23: Upaya Vigyan: Sacred Mantras, Daans & Daily Dinacharya (Time-Bound Upayas)
- * Page 24: Interactive Sankalpa & 12-Month Milestone Tracker (Printable Journaling Prompts)
- * Page 25: Master Glossary of Astrological Terms & Verification Seal (14 Definitions + Seal)
+ * Page 09: The 12 Bhavas Comprehensive Life Audit: Part 1 (Houses 1 to 6)
+ * Page 10: The 12 Bhavas Comprehensive Life Audit: Part 2 (Houses 7 to 12)
+ * Page 11: Sixfold Shadbala Planetary Strength & Bhava Bala Matrix (Quantitative Virupas & Bars)
+ * Page 12: Ashtakvarga 337-Bindu Energy Matrix & Transit Dynamics (Sarvashtakvarga Grid)
+ * Page 13: Complete 120-Year Vimshottari Dasha Lifeline (Master Progression Roadmap)
+ * Page 14: Active Rahu Mahadasha Deep-Dive & Sandhi Transitions (18-Year Execution Roadmap)
+ * Page 15: The "Atmakaraka & Soul Purpose" Profile & Jaimini Karakas (Venus AK & Saturn AmK)
+ * Page 16: Classical Raja Yogas & Dhana Yogas Audit (Ruchaka, Lakshmi, Budhaditya, Kahala)
+ * Page 17: Manglik Dosh Analysis: Neutralizing Factors & Ruchaka Yoga (4 Cancellation Pillars)
+ * Page 18: Kaal Sarp Yoga: Evolutionary Engine & Kundalini Awakening (Anant Kaal Sarp Transmutation)
+ * Page 19: Pitra Dosh Audit: Zero Affliction & Royal Ancestral Grace (0% Affliction Confirmed)
+ * Page 20: Life Domains: Career Altitude & Executive Destiny (10th Bhava Synthesis)
+ * Page 21: Life Domains: Wealth Architecture & Treasury Flow (2nd/11th House Synthesis)
+ * Page 22: Life Domains: Marriage, Partnerships & Family Longevity (7th House Synthesis)
+ * Page 23: Upaya Vigyan: Gemstone (Ratna) & Rudraksha Prescriptions (Prescriptive Table)
+ * Page 24: Upaya Vigyan: Sacred Mantras, Daans & Daily Dinacharya (Time-Bound Upayas)
+ * Page 25: Interactive Sankalpa & 12-Month Milestone Tracker (Printable Journaling Prompts)
+ * Page 26: Master Astrological Glossary & Classical Lexicon (16-Pillar Sanskrit Lexicon)
+ * Page 27: Strategic Reading Directives & Principles of Vedic Application (6 Core Axioms)
+ * Page 28: Sacred Concluding Benediction & Report Suite (Back Cover & Catalog)
  */
 
 if (!defined('ABSPATH')) {
@@ -60,15 +63,18 @@ class MR_Kundali_Report_Builder {
     /**
      * Render Large North Indian Diamond D1 Chart (Double Size ~460px with Transparent Background for Watermark)
      */
+    /**
+     * Render Large North Indian Diamond D1 Chart (Double Size ~460px with Transparent Background for Watermark)
+     */
     public static function render_large_d1_kundali_svg($size = 460, $lagna_sign_num = 4) {
         $s = $size;
         $half = $s / 2;
 
         $planets_by_house = [
             1  => ['Ra 19°14\''],
-            2  => ['Mo 11°53\' (Leo)'],
+            2  => ['Mo 11°53\''],
             3  => ['Ju 15°29\'', 'Sa 15°43\''],
-            5  => ['Ve 16°51\' (AK)'],
+            5  => ['Ve 16°51\'', '(AK)'],
             6  => ['Su 11°25\'', 'Me 8°40\''],
             7  => ['Ma 3°02\'(Ex)', 'Ke 19°14\''],
         ];
@@ -82,41 +88,36 @@ class MR_Kundali_Report_Builder {
         $svg .= "<circle cx='{$half}' cy='{$half}' r='14' fill='#C2964C' fill-opacity='0.15'/>";
         $svg .= "<circle cx='{$half}' cy='{$half}' r='4' fill='#C45738'/>";
 
+        // House coordinates mathematically calibrated to ensure zero line collisions and ample buffer from sign numbers
         $house_coords = [
-            1  => ['num_x' => $half, 'num_y' => $half * 0.35, 'pl_x' => $half, 'pl_y' => $half * 0.68],
-            2  => ['num_x' => $half * 0.5, 'num_y' => $half * 0.2, 'pl_x' => $half * 0.45, 'pl_y' => $half * 0.42],
-            3  => ['num_x' => $half * 0.2, 'num_y' => $half * 0.5, 'pl_x' => $half * 0.42, 'pl_y' => $half * 0.72],
-            4  => ['num_x' => $half * 0.45, 'num_y' => $half, 'pl_x' => $half * 0.75, 'pl_y' => $half],
-            5  => ['num_x' => $half * 0.2, 'num_y' => $half * 1.5, 'pl_x' => $half * 0.42, 'pl_y' => $half * 1.28],
-            6  => ['num_x' => $half * 0.5, 'num_y' => $half * 1.8, 'pl_x' => $half * 0.45, 'pl_y' => $half * 1.58],
-            7  => ['num_x' => $half, 'num_y' => $half * 1.65, 'pl_x' => $half, 'pl_y' => $half * 1.32],
-            8  => ['num_x' => $half * 1.5, 'num_y' => $half * 1.8, 'pl_x' => $half * 1.55, 'pl_y' => $half * 1.58],
-            9  => ['num_x' => $half * 1.8, 'num_y' => $half * 1.5, 'pl_x' => $half * 1.58, 'pl_y' => $half * 1.28],
-            10 => ['num_x' => $half * 1.55, 'num_y' => $half, 'pl_x' => $half * 1.25, 'pl_y' => $half],
-            11 => ['num_x' => $half * 1.8, 'num_y' => $half * 0.5, 'pl_x' => $half * 1.58, 'pl_y' => $half * 0.72],
-            12 => ['num_x' => $half * 1.5, 'num_y' => $half * 0.2, 'pl_x' => $half * 1.55, 'pl_y' => $half * 0.42],
+            1  => ['num_x' => $half,        'num_y' => 68,  'pl_x' => $half,        'pl_y' => 150],
+            2  => ['num_x' => 165,          'num_y' => 38,  'pl_x' => 95,           'pl_y' => 52],
+            3  => ['num_x' => 38,           'num_y' => 65,  'pl_x' => 58,           'pl_y' => 118],
+            4  => ['num_x' => 65,           'num_y' => 236, 'pl_x' => 150,          'pl_y' => 230],
+            5  => ['num_x' => 38,           'num_y' => 395, 'pl_x' => 58,           'pl_y' => 335],
+            6  => ['num_x' => 165,          'num_y' => 425, 'pl_x' => 95,           'pl_y' => 395],
+            7  => ['num_x' => $half,        'num_y' => 405, 'pl_x' => $half,        'pl_y' => 310],
+            8  => ['num_x' => 295,          'num_y' => 425, 'pl_x' => 365,          'pl_y' => 395],
+            9  => ['num_x' => 422,          'num_y' => 395, 'pl_x' => 402,          'pl_y' => 335],
+            10 => ['num_x' => 395,          'num_y' => 236, 'pl_x' => 310,          'pl_y' => 230],
+            11 => ['num_x' => 422,          'num_y' => 65,  'pl_x' => 402,          'pl_y' => 118],
+            12 => ['num_x' => 295,          'num_y' => 38,  'pl_x' => 365,          'pl_y' => 52],
         ];
 
         for ($h = 1; $h <= 12; $h++) {
             $c = $house_coords[$h];
             $sign = (($lagna_sign_num - 1 + ($h - 1)) % 12) + 1;
             // House Sign Number (Large & Bold)
-            $svg .= "<text x='{$c['num_x']}' y='{$c['num_y']}' fill='#C45738' font-size='16' font-family='sans-serif' font-weight='800' text-anchor='middle'>{$sign}</text>";
+            $svg .= "<text x='{$c['num_x']}' y='{$c['num_y']}' fill='#C45738' font-size='20' font-family='sans-serif' font-weight='800' text-anchor='middle'>{$sign}</text>";
 
             // Planet Badges
             if (!empty($planets_by_house[$h])) {
                 $y_offset = $c['pl_y'];
                 foreach ($planets_by_house[$h] as $pl) {
-                    $color = '#111827';
-                    if (strpos($pl, 'Ma') !== false) $color = '#C45738';
-                    elseif (strpos($pl, 'Ju') !== false) $color = '#B45309';
-                    elseif (strpos($pl, 'Ve') !== false) $color = '#047857';
-                    elseif (strpos($pl, 'Mo') !== false) $color = '#1D4ED8';
-                    elseif (strpos($pl, 'Su') !== false) $color = '#B91C1C';
-                    elseif (strpos($pl, 'Ra') !== false || strpos($pl, 'Ke') !== false) $color = '#4B5563';
-
-                    $svg .= "<text x='{$c['pl_x']}' y='{$y_offset}' fill='{$color}' font-size='12.5' font-family='sans-serif' font-weight='700' text-anchor='middle'>{$pl}</text>";
-                    $y_offset += 16;
+                    $color = self::get_planet_color($pl);
+                    $fs = (strpos($pl, 'AK') !== false) ? '12.5' : '13.8';
+                    $svg .= "<text x='{$c['pl_x']}' y='{$y_offset}' fill='{$color}' font-size='{$fs}' font-family='sans-serif' font-weight='700' text-anchor='middle'>{$pl}</text>";
+                    $y_offset += 18;
                 }
             }
         }
@@ -125,50 +126,96 @@ class MR_Kundali_Report_Builder {
         return $svg;
     }
 
+    public static function get_planet_color($pl) {
+        if (strpos($pl, 'Ma') !== false) return '#C45738';
+        if (strpos($pl, 'Ju') !== false) return '#B45309';
+        if (strpos($pl, 'Ve') !== false || strpos($pl, 'AK') !== false) return '#047857';
+        if (strpos($pl, 'Mo') !== false) return '#1D4ED8';
+        if (strpos($pl, 'Su') !== false) return '#B91C1C';
+        if (strpos($pl, 'Me') !== false) return '#059669';
+        if (strpos($pl, 'Sa') !== false) return '#4B5563';
+        if (strpos($pl, 'Ra') !== false || strpos($pl, 'Ke') !== false) return '#6B7280';
+        return '#111827';
+    }
+
     /**
-     * Render Divisional Varga Diamond Chart (Crisp Size ~205px for 2x2 Grid)
+     * Render Divisional Varga Diamond Chart (Crisp Size ~168px for 2x2 Grid)
      */
-    public static function render_varga_diamond_svg($size = 205, $planets_by_house = [], $lagna_sign_num = 1, $title = '') {
+    public static function render_varga_diamond_svg($size = 168, $planets_by_house = [], $lagna_sign_num = 1, $title = '') {
         $s = $size;
-        $half = $s / 2;
+        $half = $s / 2.0;
 
         $svg = "<div style='display:flex; flex-direction:column; align-items:center;'>";
-        $svg .= "<svg width='{$s}' height='{$s}' viewBox='0 0 {$s} {$s}' xmlns='http://www.w3.org/2000/svg' style='background:#FFFFFF; border:1.8px solid #C2964C; border-radius:8px; box-shadow:0 3px 10px rgba(0,0,0,0.03); display:block;'>";
+        $svg .= "<svg width='{$s}' height='{$s}' viewBox='0 0 {$s} {$s}' xmlns='http://www.w3.org/2000/svg' style='background:#FFFFFF; border:1.8px solid #C2964C; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.03); display:block;'>";
         $svg .= "<rect x='4' y='4' width='" . ($s - 8) . "' height='" . ($s - 8) . "' fill='none' stroke='#C2964C' stroke-width='1.8'/>";
         $svg .= "<line x1='4' y1='4' x2='" . ($s - 4) . "' y2='" . ($s - 4) . "' stroke='#D8CFBF' stroke-width='1.4'/>";
         $svg .= "<line x1='" . ($s - 4) . "' y1='4' x2='4' y2='" . ($s - 4) . "' stroke='#D8CFBF' stroke-width='1.4'/>";
         $svg .= "<polygon points='{$half},4 " . ($s - 4) . ",{$half} {$half}," . ($s - 4) . " 4,{$half}' fill='#FAF7F2' fill-opacity='0.4' stroke='#C2964C' stroke-width='1.4'/>";
-        $svg .= "<circle cx='{$half}' cy='{$half}' r='6' fill='#C2964C' fill-opacity='0.2'/>";
+        $svg .= "<circle cx='{$half}' cy='{$half}' r='5' fill='#C2964C' fill-opacity='0.2'/>";
 
+        // Proportional house coordinates based on exact geometric centroids
         $house_coords = [
-            1  => ['num_x' => $half, 'num_y' => $half * 0.42, 'pl_x' => $half, 'pl_y' => $half * 0.72],
-            2  => ['num_x' => $half * 0.48, 'num_y' => $half * 0.22, 'pl_x' => $half * 0.44, 'pl_y' => $half * 0.44],
-            3  => ['num_x' => $half * 0.22, 'num_y' => $half * 0.48, 'pl_x' => $half * 0.44, 'pl_y' => $half * 0.74],
-            4  => ['num_x' => $half * 0.44, 'num_y' => $half, 'pl_x' => $half * 0.74, 'pl_y' => $half],
-            5  => ['num_x' => $half * 0.22, 'num_y' => $half * 1.52, 'pl_x' => $half * 0.44, 'pl_y' => $half * 1.26],
-            6  => ['num_x' => $half * 0.48, 'num_y' => $half * 1.78, 'pl_x' => $half * 0.44, 'pl_y' => $half * 1.56],
-            7  => ['num_x' => $half, 'num_y' => $half * 1.58, 'pl_x' => $half, 'pl_y' => $half * 1.28],
-            8  => ['num_x' => $half * 1.52, 'num_y' => $half * 1.78, 'pl_x' => $half * 1.56, 'pl_y' => $half * 1.56],
-            9  => ['num_x' => $half * 1.78, 'num_y' => $half * 1.52, 'pl_x' => $half * 1.56, 'pl_y' => $half * 1.26],
-            10 => ['num_x' => $half * 1.56, 'num_y' => $half, 'pl_x' => $half * 1.26, 'pl_y' => $half],
-            11 => ['num_x' => $half * 1.78, 'num_y' => $half * 0.48, 'pl_x' => $half * 1.56, 'pl_y' => $half * 0.74],
-            12 => ['num_x' => $half * 1.52, 'num_y' => $half * 0.22, 'pl_x' => $half * 1.56, 'pl_y' => $half * 0.44],
+            1  => ['num_x' => $half,         'num_y' => $half * 0.28, 'pl_x' => $half,         'pl_y' => $half * 0.64],
+            2  => ['num_x' => $half * 0.70,  'num_y' => $half * 0.17, 'pl_x' => $half * 0.40,  'pl_y' => $half * 0.26],
+            3  => ['num_x' => $half * 0.16,  'num_y' => $half * 0.32, 'pl_x' => $half * 0.26,  'pl_y' => $half * 0.54],
+            4  => ['num_x' => $half * 0.28,  'num_y' => $half * 1.02, 'pl_x' => $half * 0.65,  'pl_y' => $half],
+            5  => ['num_x' => $half * 0.16,  'num_y' => $half * 1.72, 'pl_x' => $half * 0.26,  'pl_y' => $half * 1.46],
+            6  => ['num_x' => $half * 0.70,  'num_y' => $half * 1.85, 'pl_x' => $half * 0.40,  'pl_y' => $half * 1.72],
+            7  => ['num_x' => $half,         'num_y' => $half * 1.74, 'pl_x' => $half,         'pl_y' => $half * 1.35],
+            8  => ['num_x' => $half * 1.30,  'num_y' => $half * 1.85, 'pl_x' => $half * 1.60,  'pl_y' => $half * 1.72],
+            9  => ['num_x' => $half * 1.84,  'num_y' => $half * 1.72, 'pl_x' => $half * 1.74,  'pl_y' => $half * 1.46],
+            10 => ['num_x' => $half * 1.72,  'num_y' => $half * 1.02, 'pl_x' => $half * 1.35,  'pl_y' => $half],
+            11 => ['num_x' => $half * 1.84,  'num_y' => $half * 0.32, 'pl_x' => $half * 1.74,  'pl_y' => $half * 0.54],
+            12 => ['num_x' => $half * 1.30,  'num_y' => $half * 0.17, 'pl_x' => $half * 1.60,  'pl_y' => $half * 0.26],
         ];
 
         for ($h = 1; $h <= 12; $h++) {
-            $c = $house_coords[$h];
+            $cfg = $house_coords[$h];
             $sign = (($lagna_sign_num - 1 + ($h - 1)) % 12) + 1;
-            $svg .= "<text x='{$c['num_x']}' y='{$c['num_y']}' fill='#C45738' font-size='10.5' font-family='sans-serif' font-weight='800' text-anchor='middle'>{$sign}</text>";
+            $svg .= "<text x='" . round($cfg['num_x'], 1) . "' y='" . round($cfg['num_y'], 1) . "' fill='#C45738' font-size='9.5' font-family='sans-serif' font-weight='800' text-anchor='middle'>{$sign}</text>";
 
             if (!empty($planets_by_house[$h])) {
-                $pls = implode(' ', $planets_by_house[$h]);
-                $svg .= "<text x='{$c['pl_x']}' y='{$c['pl_y']}' fill='#111827' font-size='9' font-family='sans-serif' font-weight='700' text-anchor='middle'>{$pls}</text>";
+                $pls = $planets_by_house[$h];
+                $cnt = count($pls);
+                if ($cnt === 1) {
+                    $col = self::get_planet_color($pls[0]);
+                    $svg .= "<text x='" . round($cfg['pl_x'], 1) . "' y='" . round($cfg['pl_y'], 1) . "' fill='{$col}' font-size='9.2' font-family='sans-serif' font-weight='700' text-anchor='middle'>{$pls[0]}</text>";
+                } elseif ($cnt === 2) {
+                    $c1 = self::get_planet_color($pls[0]);
+                    $c2 = self::get_planet_color($pls[1]);
+                    $y1 = $cfg['pl_y'] - 4.8;
+                    $y2 = $cfg['pl_y'] + 5.0;
+                    $svg .= "<text x='" . round($cfg['pl_x'], 1) . "' y='" . round($y1, 1) . "' fill='{$c1}' font-size='8.4' font-family='sans-serif' font-weight='700' text-anchor='middle'>{$pls[0]}</text>";
+                    $svg .= "<text x='" . round($cfg['pl_x'], 1) . "' y='" . round($y2, 1) . "' fill='{$c2}' font-size='8.4' font-family='sans-serif' font-weight='700' text-anchor='middle'>{$pls[1]}</text>";
+                } elseif ($cnt === 3) {
+                    $y_start = $cfg['pl_y'] - 7.5;
+                    foreach ($pls as $idx => $pl) {
+                        $col = self::get_planet_color($pl);
+                        $cur_y = $y_start + ($idx * 7.5);
+                        $svg .= "<text x='" . round($cfg['pl_x'], 1) . "' y='" . round($cur_y, 1) . "' fill='{$col}' font-size='7.6' font-family='sans-serif' font-weight='700' text-anchor='middle'>{$pl}</text>";
+                    }
+                } elseif ($cnt === 4) {
+                    $r1 = $pls[0] . ' ' . $pls[1];
+                    $r2 = $pls[2] . ' ' . $pls[3];
+                    $svg .= "<text x='" . round($cfg['pl_x'], 1) . "' y='" . round($cfg['pl_y'] - 4.0, 1) . "' fill='#111827' font-size='7.2' font-family='sans-serif' font-weight='700' text-anchor='middle'>{$r1}</text>";
+                    $svg .= "<text x='" . round($cfg['pl_x'], 1) . "' y='" . round($cfg['pl_y'] + 4.5, 1) . "' fill='#111827' font-size='7.2' font-family='sans-serif' font-weight='700' text-anchor='middle'>{$r2}</text>";
+                } else {
+                    // 5+ planets (e.g. D2 Hora with 8 planets)
+                    $chunks = array_chunk($pls, 3);
+                    $total_rows = count($chunks);
+                    $y_start = $cfg['pl_y'] - (($total_rows - 1) * 3.8);
+                    foreach ($chunks as $r_idx => $chunk) {
+                        $row_text = implode(' ', $chunk);
+                        $cur_y = $y_start + ($r_idx * 7.6);
+                        $svg .= "<text x='" . round($cfg['pl_x'], 1) . "' y='" . round($cur_y, 1) . "' fill='#111827' font-size='6.6' font-family='sans-serif' font-weight='700' text-anchor='middle'>{$row_text}</text>";
+                    }
+                }
             }
         }
 
         $svg .= "</svg>";
         if (!empty($title)) {
-            $svg .= "<div style='text-align:center; font-size:10px; color:#111827; font-weight:800; margin-top:4px; text-transform:uppercase; letter-spacing:0.04em;'>{$title}</div>";
+            $svg .= "<div style='text-align:center; font-size:11px; color:#111827; font-weight:800; margin-top:3px; text-transform:uppercase; letter-spacing:0.03em; max-width:" . ($s + 20) . "px; line-height:1.2;'>{$title}</div>";
         }
         $svg .= "</div>";
         return $svg;
@@ -195,9 +242,9 @@ class MR_Kundali_Report_Builder {
             $by = 58 - $bh;
 
             $svg .= "<rect x='{$x}' y='{$by}' width='" . ($col_w - 14) . "' height='{$bh}' rx='3' fill='{$b['c']}'/>";
-            $svg .= "<text x='" . ($x + ($col_w - 14) / 2) . "' y='" . ($by - 3) . "' fill='#111827' font-size='9' font-family='sans-serif' font-weight='800' text-anchor='middle'>{$b['pct']}%</text>";
-            $svg .= "<text x='" . ($x + ($col_w - 14) / 2) . "' y='70' fill='#4B5563' font-size='8.5' font-family='sans-serif' font-weight='700' text-anchor='middle'>" . explode(' ', $b['p'])[0] . "</text>";
-            $svg .= "<text x='" . ($x + ($col_w - 14) / 2) . "' y='81' fill='#8C7B6B' font-size='8' font-family='sans-serif' text-anchor='middle'>{$b['virupas']} V</text>";
+            $svg .= "<text x='" . ($x + ($col_w - 14) / 2) . "' y='" . ($by - 3) . "' fill='#111827' font-size='11.3' font-family='sans-serif' font-weight='800' text-anchor='middle'>{$b['pct']}%</text>";
+            $svg .= "<text x='" . ($x + ($col_w - 14) / 2) . "' y='70' fill='#4B5563' font-size='10.6' font-family='sans-serif' font-weight='700' text-anchor='middle'>" . explode(' ', $b['p'])[0] . "</text>";
+            $svg .= "<text x='" . ($x + ($col_w - 14) / 2) . "' y='81' fill='#8C7B6B' font-size='10' font-family='sans-serif' text-anchor='middle'>{$b['virupas']} V</text>";
         }
 
         $svg .= "</svg>";
@@ -208,13 +255,14 @@ class MR_Kundali_Report_Builder {
      * Streamlined Sleek Annotation / Symbol Guide Bar (Small, refined 8px font, compact pill)
      */
     public static function render_symbol_guide_bar($items, $title = 'Vedic Terms', $heading_font = "'Poppins', sans-serif") {
+        $title = html_entity_decode($title, ENT_QUOTES, 'UTF-8');
         ob_start();
         ?>
-        <div style="background:#FAF7F2; border:1px solid #ECE6DD; border-radius:16px; padding:4px 16px; margin-top:auto; margin-bottom:6px; display:flex; align-items:center; flex-wrap:wrap; font-size:8px; line-height:1.35; color:#64748B;">
-            <span style="font-weight:800; color:#8C7B6B; text-transform:uppercase; letter-spacing:0.06em; margin-right:8px; flex-shrink:0;">
+        <div style="background:#FAF7F2; border:1px solid #ECE6DD; border-radius:12px; padding:3px 14px; margin-top:auto; margin-bottom:3px; display:flex; align-items:center; flex-wrap:wrap; font-size: 9.8px; line-height:1.3; color:#64748B;">
+            <span style="font-weight:800; color:#8C7B6B; text-transform:uppercase; letter-spacing:0.05em; margin-right:8px; flex-shrink:0;">
                 🧭 <?php echo esc_html($title); ?>:
             </span>
-            <div style="display:inline-flex; align-items:center; flex-wrap:wrap; gap:3px 8px;">
+            <div style="display:inline-flex; align-items:center; flex-wrap:wrap; gap:2px 8px;">
                 <?php 
                 $total = count($items);
                 $idx = 0;
@@ -222,6 +270,8 @@ class MR_Kundali_Report_Builder {
                     $idx++;
                     $term = is_array($it) ? ($it['term'] ?? ($it['name'] ?? (string)$k)) : (string)$k;
                     $desc = is_array($it) ? ($it['desc'] ?? ($it['value'] ?? '')) : (string)$it;
+                    $term = html_entity_decode($term, ENT_QUOTES, 'UTF-8');
+                    $desc = html_entity_decode($desc, ENT_QUOTES, 'UTF-8');
                 ?>
                     <span>
                         <strong style="color:#111827;"><?php echo esc_html($term); ?>:</strong> 
@@ -248,19 +298,22 @@ class MR_Kundali_Report_Builder {
             $title = is_string($arg1) ? $arg1 : 'Essential Lifetime Takeaways';
             $bullets = is_array($arg2) ? $arg2 : [];
         }
+        $title = html_entity_decode($title, ENT_QUOTES, 'UTF-8');
         ob_start();
         ?>
-        <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-left:4px solid #C45738; border-radius:8px; padding:10px 18px; margin-top:0; margin-bottom:2px; box-shadow:0 2px 8px rgba(0,0,0,0.02); width:100%; box-sizing:border-box;">
-            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
-                <div style="font-family:<?php echo $heading_font; ?>; font-size:11px; font-weight:800; color:#111827; text-transform:uppercase; letter-spacing:0.06em;">
+        <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-left:4px solid #C45738; border-radius:8px; padding:6px 14px; margin-top:0; margin-bottom:2px; box-shadow:0 2px 8px rgba(0,0,0,0.02); width:100%; box-sizing:border-box;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:3px;">
+                <div style="font-family:<?php echo $heading_font; ?>; font-size: 12.5px; font-weight:800; color:#111827; text-transform:uppercase; letter-spacing:0.05em;">
                     ⚡ <?php echo esc_html($title); ?>
                 </div>
-                <span style="font-size:8.5px; font-weight:800; color:#C45738; text-transform:uppercase; letter-spacing:0.08em; background:#FDF8F3; padding:2px 8px; border-radius:10px; border:1px solid #ECE6DD;">Actionable Strategic Synthesis</span>
+                <span style="font-size: 9.8px; font-weight:800; color:#C45738; text-transform:uppercase; letter-spacing:0.06em; background:#FDF8F3; padding:1.5px 7px; border-radius:8px; border:1px solid #ECE6DD;">Actionable Strategic Synthesis</span>
             </div>
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px 20px; font-size:10px; color:#1F2937; line-height:1.45;">
-                <?php foreach ($bullets as $b): ?>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:3px 18px; font-size: 11px; color:#1F2937; line-height:1.35;">
+                <?php foreach ($bullets as $b): 
+                    $b = html_entity_decode($b, ENT_QUOTES, 'UTF-8');
+                ?>
                     <div style="display:flex; align-items:flex-start;">
-                        <span style="color:#C45738; margin-right:7px; font-weight:bold; font-size:11px; line-height:1.2;">•</span>
+                        <span style="color:#C45738; margin-right:6px; font-weight:bold; font-size: 12px; line-height:1.2;">•</span>
                         <span><?php echo esc_html($b); ?></span>
                     </div>
                 <?php endforeach; ?>
@@ -274,11 +327,12 @@ class MR_Kundali_Report_Builder {
      * Render Unified Page Footer Bar
      */
     public static function render_page_footer($page_num, $section_title = '') {
+        $section_title = html_entity_decode($section_title, ENT_QUOTES, 'UTF-8');
         ob_start();
         ?>
         <div class="mr-footer-bar">
             <span>MeraRashifal · <?php echo esc_html($section_title ?: 'Master Janam Kundali & Lifetime Destiny Report'); ?></span>
-            <span class="mr-page-num">Page <?php echo intval($page_num); ?> of 26</span>
+            <span class="mr-page-num">Page <?php echo intval($page_num); ?> of 28</span>
         </div>
         <?php
         return ob_get_clean();
@@ -290,6 +344,7 @@ class MR_Kundali_Report_Builder {
         $dob_clean = str_replace('/', '-', $dob);
         $dob_dt = DateTime::createFromFormat('d-m-Y', $dob_clean);
         $formatted_dob = $dob_dt ? $dob_dt->format('F j, Y') : (strtotime($dob_clean) ? date('F j, Y', strtotime($dob_clean)) : $dob);
+        $astro_prof = MR_Report_Builder::extract_astro_profile($dob, $tob, $pob, $vedic_data);
 
         if (empty($editorial_data)) {
             $editorial_data = MR_Gemini_AI::generate_kundali_editorial($person_name, [
@@ -355,8 +410,8 @@ class MR_Kundali_Report_Builder {
             background: #FAF7F2;
             color: #111827;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            font-size: 11px;
-            line-height: 1.5;
+            font-size: 13.8px;
+            line-height: 1.58;
             -webkit-font-smoothing: antialiased;
         }
 
@@ -370,7 +425,7 @@ class MR_Kundali_Report_Builder {
             page-break-after: always;
             page-break-inside: avoid;
             background: #FAF7F2;
-            padding: 9mm 14mm 7mm 14mm;
+            padding: 8.5mm 13mm 9.5mm 13mm;
             overflow: hidden;
             display: flex;
             flex-direction: column;
@@ -441,7 +496,7 @@ class MR_Kundali_Report_Builder {
             display: block;
         }
         .mr-header-meta {
-            font-size: 9.5px;
+            font-size: 11.9px;
             color: #4B5563;
             text-transform: uppercase;
             letter-spacing: 0.08em;
@@ -452,23 +507,36 @@ class MR_Kundali_Report_Builder {
             justify-content: space-between;
             align-items: center;
             border-top: 1px solid #ECE6DD;
-            padding-top: 6px;
-            font-size: 9px;
+            padding-top: 5px;
+            font-size: 11px;
             color: #6B7280;
             z-index: 2;
             position: relative;
-            margin-top: 8px;
+            margin-top: auto;
             flex-shrink: 0;
         }
         .mr-page-num {
             font-weight: 800;
             color: #C45738;
-            font-size: 9.8px;
+            font-size: 12px;
+        }
+
+        .mr-kundali-table {
+            table-layout: fixed;
+            width: 100%;
+            border-collapse: collapse;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+        .mr-kundali-table th, .mr-kundali-table td {
+            vertical-align: middle;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
         }
 
         .mr-tag-pill {
             display: inline-block;
-            font-size: 9.2px;
+            font-size: 11.5px;
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 0.12em;
@@ -489,7 +557,7 @@ class MR_Kundali_Report_Builder {
             letter-spacing: -0.01em;
         }
         .mr-page-sub {
-            font-size: 10.8px;
+            font-size: 13.5px;
             color: #4B5563;
             margin-bottom: 15px;
             font-weight: 500;
@@ -569,18 +637,18 @@ class MR_Kundali_Report_Builder {
         .mr-offer-info h4 {
             margin: 0;
             font-family: 'Poppins', sans-serif;
-            font-size: 12.2px;
+            font-size: 15.3px;
             color: #111827;
             font-weight: 700;
         }
         .mr-offer-info p {
             margin: 2px 0 0 0;
-            font-size: 9.6px;
+            font-size: 12px;
             color: #4B5563;
             line-height: 1.45;
         }
         .mr-offer-meta {
-            font-size: 8.6px;
+            font-size: 10.8px;
             font-weight: 800;
             color: #C45738;
             margin-top: 2px;
@@ -597,7 +665,7 @@ class MR_Kundali_Report_Builder {
     <div class="mr-page" style="justify-content:space-between; text-align:center; padding:16mm 20mm 14mm 20mm;">
         <!-- Top Sanskrit Invocation & Master 4x Brand Logo -->
         <div style="z-index:2; position:relative;">
-            <div style="font-size:11px; font-weight:700; color:#C45738; letter-spacing:0.14em; text-transform:uppercase; margin-bottom:12px;">
+            <div style="font-size: 13.8px; font-weight:700; color:#C45738; letter-spacing:0.14em; text-transform:uppercase; margin-bottom:12px;">
                 ॥ ॐ श्री गणेशाय नमः ॥ · प्रामाणिक वैदिक ज्योतिष महा-दस्तावेज़
             </div>
             <div style="display:flex; justify-content:center; margin-bottom:14px;">
@@ -606,12 +674,12 @@ class MR_Kundali_Report_Builder {
             <h1 style="font-family:<?php echo $head_font; ?>; font-size:27px; font-weight:800; color:#111827; margin:0 0 6px 0; letter-spacing:-0.02em; line-height:1.2;">
                 MASTER VEDIC KUNDALI &amp; LIFETIME DESTINY DOSSIER
             </h1>
-            <div style="font-size:13px; font-weight:600; color:#C2964C; font-style:italic; margin-bottom:16px;">
+            <div style="font-size: 16.3px; font-weight:600; color:#C2964C; font-style:italic; margin-bottom:16px;">
                 “<?php echo esc_html($motto); ?>”
             </div>
 
             <!-- Triple Identity Bar: Western Sun vs Vedic Moon vs Ascendant -->
-            <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:30px; padding:8px 24px; display:inline-flex; gap:22px; font-size:11px; box-shadow:0 2px 8px rgba(0,0,0,0.03); margin-bottom:18px;">
+            <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:30px; padding:8px 24px; display:inline-flex; gap:22px; font-size: 13.8px; box-shadow:0 2px 8px rgba(0,0,0,0.03); margin-bottom:18px;">
                 <div><span style="color:#C45738; font-weight:700;">Western Sun Sign:</span> <strong style="color:#111827;">Capricorn (Dec 26)</strong></div>
                 <div style="color:#CBD5E1;">|</div>
                 <div><span style="color:#047857; font-weight:700;">Vedic Moon Sign:</span> <strong style="color:#111827;">Leo (Simha) · Magha 4</strong></div>
@@ -622,14 +690,14 @@ class MR_Kundali_Report_Builder {
 
         <!-- Center Native Verified Details Card -->
         <div style="background:#FFFFFF; border:1.5px solid #C2964C; border-radius:12px; padding:20px 26px; box-shadow:0 4px 18px rgba(0,0,0,0.04); max-width:560px; margin:0 auto; z-index:2; position:relative; width:100%;">
-            <div style="font-size:10.5px; font-weight:700; color:#8C7B6B; text-transform:uppercase; letter-spacing:0.12em; margin-bottom:4px;">
+            <div style="font-size: 13.1px; font-weight:700; color:#8C7B6B; text-transform:uppercase; letter-spacing:0.12em; margin-bottom:4px;">
                 CONFIDENTIAL ASTRONOMICAL DOSSIER PREPARED FOR
             </div>
             <div style="font-family:<?php echo $head_font; ?>; font-size:24px; font-weight:800; color:#111827; margin-bottom:14px; letter-spacing:-0.01em;">
                 <?php echo esc_html(strtoupper($person_name)); ?>
             </div>
 
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px 24px; text-align:left; font-size:11px; border-top:1px solid #F0EAE1; padding-top:14px; margin-bottom:14px;">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px 24px; text-align:left; font-size: 13.8px; border-top:1px solid #F0EAE1; padding-top:14px; margin-bottom:14px;">
                 <div><strong style="color:#4B5563;">Date of Birth:</strong> <span style="color:#111827; font-weight:700;"><?php echo esc_html($formatted_dob); ?></span></div>
                 <div><strong style="color:#4B5563;">Time of Birth:</strong> <span style="color:#111827; font-weight:700;"><?php echo esc_html($tob); ?> (20:30 IST)</span></div>
                 <div><strong style="color:#4B5563;">Place of Birth:</strong> <span style="color:#111827; font-weight:700;"><?php echo esc_html($pob); ?></span></div>
@@ -638,7 +706,7 @@ class MR_Kundali_Report_Builder {
                 <div><strong style="color:#4B5563;">Lagna Lord:</strong> <span style="color:#111827; font-weight:700;">Moon (Chandra) in Leo 2nd Bhava</span></div>
             </div>
 
-            <div style="background:#FDF8F3; border:1px solid #ECE6DD; border-radius:8px; padding:10px 14px; font-size:11px; color:#C45738; font-weight:700; display:flex; justify-content:space-around;">
+            <div style="background:#FDF8F3; border:1px solid #ECE6DD; border-radius:8px; padding:10px 14px; font-size: 13.8px; color:#C45738; font-weight:700; display:flex; justify-content:space-around;">
                 <span>Active Mahadasha: <strong>Rahu (2024–2042)</strong></span>
                 <span>•</span>
                 <span>Mars: <strong>Exalted in 7th Kendra</strong></span>
@@ -649,28 +717,28 @@ class MR_Kundali_Report_Builder {
 
         <!-- Master Theme Banner & Statutory Disclaimer -->
         <div style="z-index:2; position:relative; max-width:600px; margin:0 auto; padding-top:6px;">
-            <div style="font-size:10px; font-weight:800; color:#111827; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:3px;">
+            <div style="font-size: 12.5px; font-weight:800; color:#111827; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:3px;">
                 EXECUTIVE DESTINY THEME
             </div>
-            <div style="font-size:11.8px; color:#374151; font-weight:600; line-height:1.4; margin-bottom:8px;">
+            <div style="font-size: 14.8px; color:#374151; font-weight:600; line-height:1.4; margin-bottom:8px;">
                 “<?php echo esc_html($theme); ?>”
             </div>
-            <div style="font-size:8.2px; color:#64748B; line-height:1.4; text-align:justify; background:#FAF7F2; padding:8px 14px; border-radius:6px; border:1px solid #ECE6DD;">
-                <strong style="color:#111827;">Statutory Disclaimer &amp; Non-Liability Notice:</strong> This publication is generated using automated computational algorithms and Artificial Intelligence (AI) based on user-provided birth coordinates. Astrological readings are inherently speculative and subjective; this report does not constitute certified legal, financial, medical, or psychological advice. Neither MeraRashifal Technologies nor its associates accept any liability or responsibility for errors, omissions, calculation discrepancies, or predictions herein, nor for any direct, indirect, or consequential outcomes, losses, or life situations arising from reliance on this content. Users are strictly advised to apply their independent intellect and consult licensed professionals for critical life decisions. By reviewing this document, you acknowledge that all actions remain your sole responsibility.
+            <div style="font-size: 7.2px; color:#64748B; line-height:1.35; text-align:justify; background:#FAF7F2; padding:4px 8px; border-radius:4px; border:1px solid #ECE6DD;">
+                <strong style="color:#111827;">Statutory Disclaimer &amp; Non-Liability Notice:</strong> This publication is generated using automated computational algorithms and Artificial Intelligence (AI) based on user-provided birth coordinates. Astrological readings are inherently speculative and subjective; this report does not constitute certified legal, financial, medical, or psychological advice. Neither MeraRashifal nor its associates accept any liability or responsibility for errors, omissions, calculation discrepancies, or predictions herein, nor for any direct, indirect, or consequential outcomes, losses, or life situations arising from reliance on this content. Users are strictly advised to apply their independent intellect and consult licensed professionals for critical life decisions. By reviewing this document, you acknowledge that all actions remain your sole responsibility.
             </div>
         </div>
 
         <!-- Sovereign Seal Footer (Moved up to create space above bottom frame line) -->
-        <div style="border-top:1px solid #ECE6DD; padding-top:6px; margin-bottom:8px; font-size:9px; color:#8C7B6B; display:flex; justify-content:space-between; z-index:2; position:relative;">
+        <div style="border-top:1px solid #ECE6DD; padding-top:6px; margin-bottom:8px; font-size: 11.3px; color:#8C7B6B; display:flex; justify-content:space-between; z-index:2; position:relative;">
             <span style="font-weight:600; color:#4B5563;">www.MeraRashifal.com</span>
             <span>Document ID: MR-KD-<?php echo strtoupper(substr(md5($person_name . $dob . $tob), 0, 8)); ?></span>
-            <span style="font-weight:700; color:#C45738;">Page 1 of 26</span>
+            <span style="font-weight:700; color:#C45738;">Page 1 of 28</span>
         </div>
     </div>
 
     <!-- ========================================================
          PAGE 2: TABLE OF CONTENTS & STRATEGIC READING GUIDE
-         (Updated sequence: Strictly 26 Physical Pages)
+         (Updated sequence: Strictly 28 Physical Pages)
          ======================================================== -->
     <div class="mr-page">
         <div class="mr-header-bar">
@@ -681,77 +749,79 @@ class MR_Kundali_Report_Builder {
         </div>
 
         <div class="mr-page-body">
-            <div class="mr-tag-pill">01 · Structural Index &amp; Reading Architecture</div>
-            <h1 class="mr-page-h1">Table of Contents &amp; Strategic Reading Guide</h1>
-            <div class="mr-page-sub">Comprehensive 26-Page Master Vedic Roadmap Structured into Seven Core Analytical Epochs</div>
+            <div class="mr-tag-pill">01 · Guide &amp; Contents</div>
+            <h1 class="mr-page-h1">Table of Contents &amp; How to Read This Guide</h1>
+            <div class="mr-page-sub">Your complete 28-page guide to birth chart analysis, planetary strengths, career, and life timing</div>
 
             <!-- 2-Column Table of Contents with Generous Horizontal Breathing Space -->
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px 24px; margin-top:4px;">
-                <!-- Column 1: Chapters 01 to 13 (13 Items) -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px 24px; margin-top:4px;">
+                <!-- Column 1: Chapters 01 to 14 (14 Items) -->
                 <div>
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:11.5px; font-weight:800; color:#C45738; text-transform:uppercase; letter-spacing:0.06em; border-bottom:1.5px solid #C45738; padding-bottom:3px; margin-bottom:8px;">
-                        Part I: Core Matrix &amp; Divisional Harmonics (D1–D60)
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 14px; font-weight:800; color:#C45738; text-transform:uppercase; letter-spacing:0.06em; border-bottom:1.5px solid #C45738; padding-bottom:3px; margin-bottom:6px;">
+                        Part I: Core Matrix, Harmonics &amp; Bhavas (01–14)
                     </div>
-                    <table style="width:100%; border-collapse:collapse; font-size:9.5px;">
+                    <table style="width:100%; border-collapse:collapse; font-size: 11.5px;">
                         <tbody>
-                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:4px 0; font-weight:700; color:#111827;">01. Master Sovereign Cover &amp; Verified Metadata</td><td style="text-align:right; font-weight:800; color:#C45738;">01</td></tr>
-                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:4px 0; font-weight:700; color:#111827;">02. Table of Contents &amp; Strategic Reading Guide</td><td style="text-align:right; font-weight:800; color:#C45738;">02</td></tr>
-                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:4px 0; font-weight:700; color:#111827;">03. Foundational Birth Snapshot &amp; Core D1 Kundali</td><td style="text-align:right; font-weight:800; color:#C45738;">03</td></tr>
-                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:4px 0; font-weight:700; color:#111827;">04. Vedic Panchang, Avakhada &amp; Ephemeris Geometry</td><td style="text-align:right; font-weight:800; color:#C45738;">04</td></tr>
-                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:4px 0; font-weight:700; color:#111827;">05. Harmonic Cross-Verification: D9, Chandra, Surya, Chalit</td><td style="text-align:right; font-weight:800; color:#C45738;">05</td></tr>
-                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:4px 0; font-weight:700; color:#111827;">06. Material &amp; Lineage Varga Matrix: D2, D3, D4, D7</td><td style="text-align:right; font-weight:800; color:#C45738;">06</td></tr>
-                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:4px 0; font-weight:700; color:#111827;">07. Vocational Status &amp; Higher Mind: D10, D12, D16, D24</td><td style="text-align:right; font-weight:800; color:#C45738;">07</td></tr>
-                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:4px 0; font-weight:700; color:#111827;">08. Esoteric Harmonics &amp; Past-Life: D20, D27, D30, D60</td><td style="text-align:right; font-weight:800; color:#C45738;">08</td></tr>
-                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:4px 0; font-weight:700; color:#111827;">09. The 12 Bhavas (Houses) Comprehensive Life Audit</td><td style="text-align:right; font-weight:800; color:#C45738;">09</td></tr>
-                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:4px 0; font-weight:700; color:#111827;">10. Sixfold Shadbala Planetary Strength &amp; Bhava Bala</td><td style="text-align:right; font-weight:800; color:#C45738;">10</td></tr>
-                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:4px 0; font-weight:700; color:#111827;">11. Ashtakvarga 337-Bindu Energy Matrix &amp; Transits</td><td style="text-align:right; font-weight:800; color:#C45738;">11</td></tr>
-                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:4px 0; font-weight:700; color:#111827;">12. Complete 120-Year Vimshottari Dasha Lifeline</td><td style="text-align:right; font-weight:800; color:#C45738;">12</td></tr>
-                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:4px 0; font-weight:700; color:#111827;">13. Active Rahu Mahadasha Deep-Dive &amp; Sandhi</td><td style="text-align:right; font-weight:800; color:#C45738;">13</td></tr>
+                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:3.5px 0; font-weight:700; color:#111827;">01. Master Sovereign Cover &amp; Verified Metadata</td><td style="text-align:right; font-weight:800; color:#C45738;">01</td></tr>
+                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:3.5px 0; font-weight:700; color:#111827;">02. Table of Contents &amp; How to Read This Guide</td><td style="text-align:right; font-weight:800; color:#C45738;">02</td></tr>
+                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:3.5px 0; font-weight:700; color:#111827;">03. Foundational Birth Snapshot &amp; Core D1 Kundali</td><td style="text-align:right; font-weight:800; color:#C45738;">03</td></tr>
+                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:3.5px 0; font-weight:700; color:#111827;">04. Vedic Panchang, Avakhada &amp; Ephemeris Geometry</td><td style="text-align:right; font-weight:800; color:#C45738;">04</td></tr>
+                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:3.5px 0; font-weight:700; color:#111827;">05. Harmonic Cross-Verification: D9, Chandra, Surya, Chalit</td><td style="text-align:right; font-weight:800; color:#C45738;">05</td></tr>
+                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:3.5px 0; font-weight:700; color:#111827;">06. Material &amp; Lineage Varga Matrix: D2, D3, D4, D7</td><td style="text-align:right; font-weight:800; color:#C45738;">06</td></tr>
+                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:3.5px 0; font-weight:700; color:#111827;">07. Vocational Status &amp; Higher Mind: D10, D12, D16, D24</td><td style="text-align:right; font-weight:800; color:#C45738;">07</td></tr>
+                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:3.5px 0; font-weight:700; color:#111827;">08. Esoteric Harmonics &amp; Past-Life: D20, D27, D30, D60</td><td style="text-align:right; font-weight:800; color:#C45738;">08</td></tr>
+                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:3.5px 0; font-weight:700; color:#111827;">09. The 12 Bhavas Life Audit: Houses 1 to 6 (Foundations)</td><td style="text-align:right; font-weight:800; color:#C45738;">09</td></tr>
+                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:3.5px 0; font-weight:700; color:#111827;">10. The 12 Bhavas Life Audit: Houses 7 to 12 (Alliances)</td><td style="text-align:right; font-weight:800; color:#C45738;">10</td></tr>
+                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:3.5px 0; font-weight:700; color:#111827;">11. Sixfold Shadbala Planetary Strength &amp; Bhava Bala</td><td style="text-align:right; font-weight:800; color:#C45738;">11</td></tr>
+                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:3.5px 0; font-weight:700; color:#111827;">12. Ashtakvarga 337-Bindu Energy Matrix &amp; Transits</td><td style="text-align:right; font-weight:800; color:#C45738;">12</td></tr>
+                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:3.5px 0; font-weight:700; color:#111827;">13. Complete 120-Year Vimshottari Dasha Lifeline</td><td style="text-align:right; font-weight:800; color:#C45738;">13</td></tr>
+                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:3.5px 0; font-weight:700; color:#111827;">14. Active Rahu Mahadasha Deep-Dive &amp; Sandhi</td><td style="text-align:right; font-weight:800; color:#C45738;">14</td></tr>
                         </tbody>
                     </table>
                 </div>
 
-                <!-- Column 2: Chapters 14 to 26 (13 Items) -->
+                <!-- Column 2: Chapters 15 to 28 (14 Items) -->
                 <div>
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:11.5px; font-weight:800; color:#047857; text-transform:uppercase; letter-spacing:0.06em; border-bottom:1.5px solid #047857; padding-bottom:3px; margin-bottom:8px;">
-                        Part II: Planetary Yogas, Dosha Resolution &amp; Upayas
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 14px; font-weight:800; color:#047857; text-transform:uppercase; letter-spacing:0.06em; border-bottom:1.5px solid #047857; padding-bottom:3px; margin-bottom:6px;">
+                        Part II: Dashas, Doshas, Upayas &amp; Methodology (15–28)
                     </div>
-                    <table style="width:100%; border-collapse:collapse; font-size:9.5px;">
+                    <table style="width:100%; border-collapse:collapse; font-size: 11.5px;">
                         <tbody>
-                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:4px 0; font-weight:700; color:#111827;">14. "Atmakaraka &amp; Soul Purpose" Profile &amp; Karakas</td><td style="text-align:right; font-weight:800; color:#C45738;">14</td></tr>
-                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:4px 0; font-weight:700; color:#111827;">15. Classical Raja Yogas &amp; Dhana Yogas Audit</td><td style="text-align:right; font-weight:800; color:#C45738;">15</td></tr>
-                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:4px 0; font-weight:700; color:#111827;">16. Manglik Dosh Analysis &amp; Neutralizing Factors</td><td style="text-align:right; font-weight:800; color:#C45738;">16</td></tr>
-                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:4px 0; font-weight:700; color:#111827;">17. Kaal Sarp Yoga: Evolutionary Engine &amp; Mastery</td><td style="text-align:right; font-weight:800; color:#C45738;">17</td></tr>
-                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:4px 0; font-weight:700; color:#111827;">18. Pitra Dosh Audit: Zero Affliction &amp; Lineage Grace</td><td style="text-align:right; font-weight:800; color:#C45738;">18</td></tr>
-                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:4px 0; font-weight:700; color:#111827;">19. Life Domains: Career Altitude &amp; Executive Destiny</td><td style="text-align:right; font-weight:800; color:#C45738;">19</td></tr>
-                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:4px 0; font-weight:700; color:#111827;">20. Life Domains: Wealth Architecture &amp; Treasury Flow</td><td style="text-align:right; font-weight:800; color:#C45738;">20</td></tr>
-                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:4px 0; font-weight:700; color:#111827;">21. Life Domains: Marriage, Partnerships &amp; Longevity</td><td style="text-align:right; font-weight:800; color:#C45738;">21</td></tr>
-                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:4px 0; font-weight:700; color:#111827;">22. Upaya Vigyan: Gemstones &amp; Sacred Rudraksha</td><td style="text-align:right; font-weight:800; color:#C45738;">22</td></tr>
-                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:4px 0; font-weight:700; color:#111827;">23. Upaya Vigyan: Sacred Mantras, Daans &amp; Dinacharya</td><td style="text-align:right; font-weight:800; color:#C45738;">23</td></tr>
-                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:4px 0; font-weight:700; color:#111827;">24. Interactive Sankalpa &amp; 12-Month Milestone Tracker</td><td style="text-align:right; font-weight:800; color:#C45738;">24</td></tr>
-                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:4px 0; font-weight:700; color:#111827;">25. Master Glossary of Astrological Terms</td><td style="text-align:right; font-weight:800; color:#C45738;">25</td></tr>
-                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:4px 0; font-weight:700; color:#111827;">26. Sacred Concluding Benediction &amp; Report Suite</td><td style="text-align:right; font-weight:800; color:#C45738;">26</td></tr>
+                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:3.5px 0; font-weight:700; color:#111827;">15. "Atmakaraka &amp; Soul Purpose" Profile &amp; Karakas</td><td style="text-align:right; font-weight:800; color:#C45738;">15</td></tr>
+                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:3.5px 0; font-weight:700; color:#111827;">16. Special Yogas for Success, Wealth &amp; Leadership</td><td style="text-align:right; font-weight:800; color:#C45738;">16</td></tr>
+                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:3.5px 0; font-weight:700; color:#111827;">17. Manglik Dosh Analysis &amp; Neutralizing Factors</td><td style="text-align:right; font-weight:800; color:#C45738;">17</td></tr>
+                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:3.5px 0; font-weight:700; color:#111827;">18. Kaal Sarp Yoga: Evolutionary Engine &amp; Mastery</td><td style="text-align:right; font-weight:800; color:#C45738;">18</td></tr>
+                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:3.5px 0; font-weight:700; color:#111827;">19. Pitra Dosh Audit: Zero Affliction &amp; Lineage Grace</td><td style="text-align:right; font-weight:800; color:#C45738;">19</td></tr>
+                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:3.5px 0; font-weight:700; color:#111827;">20. Life Domains: Career Altitude &amp; Executive Destiny</td><td style="text-align:right; font-weight:800; color:#C45738;">20</td></tr>
+                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:3.5px 0; font-weight:700; color:#111827;">21. Life Domains: Wealth Architecture &amp; Treasury Flow</td><td style="text-align:right; font-weight:800; color:#C45738;">21</td></tr>
+                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:3.5px 0; font-weight:700; color:#111827;">22. Life Domains: Marriage, Partnerships &amp; Longevity</td><td style="text-align:right; font-weight:800; color:#C45738;">22</td></tr>
+                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:3.5px 0; font-weight:700; color:#111827;">23. Upaya Vigyan: Gemstones &amp; Sacred Rudraksha</td><td style="text-align:right; font-weight:800; color:#C45738;">23</td></tr>
+                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:3.5px 0; font-weight:700; color:#111827;">24. Upaya Vigyan: Sacred Mantras, Daans &amp; Dinacharya</td><td style="text-align:right; font-weight:800; color:#C45738;">24</td></tr>
+                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:3.5px 0; font-weight:700; color:#111827;">25. Interactive Sankalpa &amp; 12-Month Milestone Tracker</td><td style="text-align:right; font-weight:800; color:#C45738;">25</td></tr>
+                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:3.5px 0; font-weight:700; color:#111827;">26. Astrology Glossary: Terms &amp; Simple Meanings</td><td style="text-align:right; font-weight:800; color:#C45738;">26</td></tr>
+                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:3.5px 0; font-weight:700; color:#111827;">27. Strategic Reading Directives &amp; Interpretation</td><td style="text-align:right; font-weight:800; color:#C45738;">27</td></tr>
+                            <tr style="border-bottom:1px solid #F2ECE3;"><td style="padding:3.5px 0; font-weight:700; color:#111827;">28. Sacred Concluding Benediction &amp; Report Suite</td><td style="text-align:right; font-weight:800; color:#C45738;">28</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
             <!-- Deep Reading Methodology Card (Filling the Middle-to-Bottom Space Richly) -->
-            <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:8px; padding:12px 18px; margin-top:12px; box-shadow:0 2px 6px rgba(0,0,0,0.02);">
-                <div style="font-family:<?php echo $head_font; ?>; font-size:11.5px; font-weight:700; color:#111827; margin-bottom:5px;">
+            <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:8px; padding:11px 18px; margin-top:10px; box-shadow:0 2px 6px rgba(0,0,0,0.02);">
+                <div style="font-family:<?php echo $head_font; ?>; font-size: 14px; font-weight:700; color:#111827; margin-bottom:4px;">
                     How to Strategically Navigate Your Lifetime Dossier
                 </div>
-                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:18px; font-size:9.5px; color:#4B5563; line-height:1.48;">
+                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; font-size: 11.6px; color:#4B5563; line-height:1.45;">
                     <div>
                         <strong style="color:#C45738;">1. The Foundational Blueprint (Pages 3–8):</strong>
                         Study your D1 Janma Kundali and 16 divisional harmonics. These reveal your innate spiritual wiring, psychological drivers, and hidden potential across every sphere of life.
                     </div>
                     <div>
-                        <strong style="color:#047857;">2. Energetic Metrics &amp; Timing (Pages 9–15):</strong>
-                        Cross-reference your Shadbala strengths, Ashtakvarga scores, and Vimshottari dasha transitions to pinpoint high-velocity windows for professional expansion and financial consolidation.
+                        <strong style="color:#047857;">2. Energetic Metrics &amp; Timing (Pages 9–17):</strong>
+                        Cross-reference your 12 Bhavas, Shadbala strengths, Ashtakvarga scores, and Vimshottari dasha transitions to pinpoint high-velocity windows for professional expansion and financial consolidation.
                     </div>
                     <div>
-                        <strong style="color:#C2964C;">3. Neutralization &amp; Action (Pages 16–26):</strong>
+                        <strong style="color:#C2964C;">3. Neutralization &amp; Action (Pages 18–28):</strong>
                         Leverage the dosha cancellation factors, gemstone protocols, and interactive Sankalpa worksheet to turn latent cosmic challenges into strategic engines of lifelong mastery.
                     </div>
                 </div>
@@ -759,10 +829,7 @@ class MR_Kundali_Report_Builder {
         </div>
 
         <div class="mr-page-bottom-pin">
-            <div class="mr-footer-bar">
-                <span>MeraRashifal · Table of Contents &amp; Reading Guide</span>
-                <span class="mr-page-num">Page 2 of 26</span>
-            </div>
+            <?php echo self::render_page_footer(2, 'Table of Contents & Reading Guide'); ?>
         </div>
     </div>
 
@@ -781,39 +848,39 @@ class MR_Kundali_Report_Builder {
         <div class="mr-page-body">
             <div class="mr-tag-pill" style="margin-bottom:12px;">02 · Foundational Birth Snapshot</div>
             <h1 class="mr-page-h1" style="margin-bottom:8px;">Birth Snapshot &amp; Core Janma Kundali (D1 Chart)</h1>
-            <div class="mr-page-sub" style="margin-bottom:18px;">The Primary Vedic Celestial Matrix at the Exact Moment of Your Earthly Incarnation</div>
+            <div class="mr-page-sub" style="margin-bottom:12px;">Your core Vedic birth chart, planetary degrees, and foundational life energies</div>
 
-            <!-- Prominent Large D1 Chart Container with Centered Ganesha Watermark (80% Transparent = 0.20 Opacity) -->
-            <div style="position:relative; width:460px; height:460px; margin:12px auto 14px auto;">
+            <!-- Prominent Large D1 Chart Container with Centered Ganesha Watermark -->
+            <div style="position:relative; width:360px; height:360px; margin:4px auto 6px auto;">
                 <?php if (!empty($ganesha_uri)): ?>
                     <div style="position:absolute; top:0; left:0; width:100%; height:100%; display:flex; align-items:center; justify-content:center; pointer-events:none; z-index:1;">
-                        <img src="<?php echo esc_attr($ganesha_uri); ?>" style="width:330px; height:330px; object-fit:contain; opacity:0.20; filter:contrast(1.05); border-radius:50%;" alt="Ganesha Watermark" />
+                        <img src="<?php echo esc_attr($ganesha_uri); ?>" style="width:260px; height:260px; object-fit:contain; opacity:0.20; filter:contrast(1.05); border-radius:50%;" alt="Ganesha Watermark" />
                     </div>
                 <?php endif; ?>
                 <div style="position:relative; z-index:2;">
-                    <?php echo self::render_large_d1_kundali_svg(460, 4); ?>
+                    <?php echo self::render_large_d1_kundali_svg(360, 4); ?>
                 </div>
             </div>
-            <div style="text-align:center; font-size:9.5px; color:#4B5563; font-weight:700; margin-top:6px; margin-bottom:14px; text-transform:uppercase; letter-spacing:0.06em;">
+            <div style="text-align:center; font-size: 11.2px; color:#4B5563; font-weight:700; margin-top:3px; margin-bottom:6px; text-transform:uppercase; letter-spacing:0.06em;">
                 🪐 Primary Lagna Kundali (D1 Chart) · Cancer Lagna 21.27° · North Indian Diamond Architecture
             </div>
 
-            <!-- Deep Analysis Cards Below the Chart (Filling the Bottom Richly with Double Breathing Space) -->
-            <div class="mr-grid-2col" style="margin-top:4px;">
-                <div class="mr-card" style="padding:12px 18px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#C45738; margin-bottom:4px;">
+            <!-- Deep Analysis Cards Below the Chart -->
+            <div class="mr-grid-2col" style="margin-top:2px;">
+                <div class="mr-card" style="padding:6px 12px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 12.6px; font-weight:700; color:#C45738; margin-bottom:2px;">
                         Ascendant Archetype: Karka Lagna (Cancer Ascendant)
                     </div>
-                    <div style="font-size:9.8px; color:#374151; line-height:1.45;">
+                    <div style="font-size: 11.2px; color:#374151; line-height:1.38;">
                         Your rising sign is Cancer (Karka), governed by Chandra (the Moon). This confers profound emotional intelligence, protective instincts, photographic memory, and natural diplomatic grace. You possess an instinct for sensing hidden motives and safeguarding family assets. With exalted Mars anchoring your 7th Kendra and Rahu in Lagna, you bridge deep intuitive sensitivity with unyielding executive courage.
                     </div>
                 </div>
 
-                <div class="mr-card" style="padding:12px 18px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#047857; margin-bottom:4px;">
+                <div class="mr-card" style="padding:6px 12px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 12.6px; font-weight:700; color:#047857; margin-bottom:2px;">
                         Lagna Lord (Chandra) in Royal Leo &amp; Exalted Mars Kendra
                     </div>
-                    <div style="font-size:9.8px; color:#374151; line-height:1.45;">
+                    <div style="font-size: 11.2px; color:#374151; line-height:1.38;">
                         Chandra resides in the 2nd house of speech, treasury, and lineage in royal Leo (Simha) at 11°53' (Magha Nakshatra). This endows your voice with executive command and anchors family values. Simultaneously, Yogakaraka Mars occupies its deepest exaltation (Ucha Makara 3°02') in the 7th Kendra, creating the celebrated <strong>Ruchaka Mahapurusha Yoga</strong> that turns partnerships into institutional powerhouses.
                     </div>
                 </div>
@@ -837,10 +904,7 @@ class MR_Kundali_Report_Builder {
                 "The foundational D1 matrix establishes a steady trajectory of progressive life elevation, where early diligent groundwork matures into undeniable institutional authority."
             ], 'Essential Lifetime Takeaways', $head_font); ?>
 
-            <div class="mr-footer-bar">
-                <span>MeraRashifal · Foundational Birth Snapshot &amp; D1 Chart</span>
-                <span class="mr-page-num">Page 3 of 26</span>
-            </div>
+            <?php echo self::render_page_footer(3, 'Foundational Birth Snapshot · D1 Chart'); ?>
         </div>
     </div>
 
@@ -857,36 +921,36 @@ class MR_Kundali_Report_Builder {
         </div>
 
         <div class="mr-page-body">
-            <div class="mr-tag-pill">03 · Cosmic Calendar &amp; Planetary Geometry</div>
-            <h1 class="mr-page-h1">Vedic Panchang, Avakhada Chakra &amp; Ephemeris Geometry</h1>
-            <div class="mr-page-sub">Precise Five-Limb Lunar Calendar Matrix and Sidereal Longitudes at the Moment of Nativity</div>
+            <div class="mr-tag-pill">03 · Panchang &amp; Planetary Details</div>
+            <h1 class="mr-page-h1">Vedic Panchang &amp; Exact Planetary Positions</h1>
+            <div class="mr-page-sub">Five Vedic calendar elements at birth and exact planetary degrees</div>
 
             <!-- Panchang 4-Pillar Grid with Double Breathing Space -->
             <div class="mr-grid-4col" style="margin-top:2px;">
-                <div class="mr-card" style="padding:8px 10px; text-align:center;">
-                    <div style="font-size:8.5px; font-weight:700; color:#8C7B6B; text-transform:uppercase;">Tithi (Lunar Day)</div>
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:12px; font-weight:800; color:#C45738; margin:2px 0;">Krishna Chaturthi</div>
-                    <div style="font-size:8.2px; color:#4B5563;">Lord: Ganesha · Overcoming Obstacles</div>
+                <div class="mr-card" style="padding:4px 8px; text-align:center;">
+                    <div style="font-size: 10px; font-weight:700; color:#8C7B6B; text-transform:uppercase;">Tithi (Lunar Day)</div>
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; font-weight:800; color:#C45738; margin:1px 0;">Krishna Chaturthi</div>
+                    <div style="font-size: 9.8px; color:#4B5563;">Lord: Ganesha · Overcoming Obstacles</div>
                 </div>
-                <div class="mr-card" style="padding:8px 10px; text-align:center;">
-                    <div style="font-size:8.5px; font-weight:700; color:#8C7B6B; text-transform:uppercase;">Nakshatra &amp; Pada</div>
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:12px; font-weight:800; color:#047857; margin:2px 0;">Magha · Pada 4</div>
-                    <div style="font-size:8.2px; color:#4B5563;">Lord: Ketu · Pitri Devata (Ancestral)</div>
+                <div class="mr-card" style="padding:4px 8px; text-align:center;">
+                    <div style="font-size: 10px; font-weight:700; color:#8C7B6B; text-transform:uppercase;">Nakshatra &amp; Pada</div>
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; font-weight:800; color:#047857; margin:1px 0;">Magha · Pada 4</div>
+                    <div style="font-size: 9.8px; color:#4B5563;">Lord: Ketu · Pitri Devata (Ancestral)</div>
                 </div>
-                <div class="mr-card" style="padding:8px 10px; text-align:center;">
-                    <div style="font-size:8.5px; font-weight:700; color:#8C7B6B; text-transform:uppercase;">Yoga (Luni-Solar)</div>
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:12px; font-weight:800; color:#C2964C; margin:2px 0;">Vishkambha</div>
-                    <div style="font-size:8.2px; color:#4B5563;">Lord: Yama · Pillar of Endurance</div>
+                <div class="mr-card" style="padding:4px 8px; text-align:center;">
+                    <div style="font-size: 10px; font-weight:700; color:#8C7B6B; text-transform:uppercase;">Yoga (Luni-Solar)</div>
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; font-weight:800; color:#C2964C; margin:1px 0;">Vishkambha</div>
+                    <div style="font-size: 9.8px; color:#4B5563;">Lord: Yama · Pillar of Endurance</div>
                 </div>
-                <div class="mr-card" style="padding:8px 10px; text-align:center;">
-                    <div style="font-size:8.5px; font-weight:700; color:#8C7B6B; text-transform:uppercase;">Karana (Half Tithi)</div>
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:12px; font-weight:800; color:#111827; margin:2px 0;">Balava</div>
-                    <div style="font-size:8.2px; color:#4B5563;">Lord: Brahma · Creative Architecture</div>
+                <div class="mr-card" style="padding:4px 8px; text-align:center;">
+                    <div style="font-size: 10px; font-weight:700; color:#8C7B6B; text-transform:uppercase;">Karana (Half Tithi)</div>
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; font-weight:800; color:#111827; margin:1px 0;">Balava</div>
+                    <div style="font-size: 9.8px; color:#4B5563;">Lord: Brahma · Creative Architecture</div>
                 </div>
             </div>
 
             <!-- Avakhada Attributes Bar -->
-            <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:6px 14px; margin-top:5px; display:flex; justify-content:space-between; font-size:9.5px;">
+            <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:3.5px 12px; margin-top:4px; display:flex; justify-content:space-between; font-size: 10.8px;">
                 <span><strong>Gana:</strong> Rakshasa (Intuitive)</span>
                 <span>•</span>
                 <span><strong>Yoni:</strong> Mooshak (Mouse · Meticulous)</span>
@@ -900,132 +964,141 @@ class MR_Kundali_Report_Builder {
 
             <!-- Complete Planetary Ephemeris Table -->
             <div style="margin-top:5px;">
-                <div style="font-family:<?php echo $head_font; ?>; font-size:10.8px; font-weight:700; color:#111827; margin-bottom:3px;">
+                <div style="font-family:<?php echo $head_font; ?>; font-size: 13.5px; font-weight:700; color:#111827; margin-bottom:3px;">
                     Planetary Longitudes, Dignities &amp; Nakshatra Padas (Lahiri Ayanamsha 24°10'38")
                 </div>
-                <table style="width:100%; border-collapse:collapse; font-size:9.2px;">
+                <table class="mr-kundali-table" style="font-size: 10.4px;">
+                    <colgroup>
+                        <col style="width: 15%;">
+                        <col style="width: 15%;">
+                        <col style="width: 11%;">
+                        <col style="width: 21%;">
+                        <col style="width: 9%;">
+                        <col style="width: 14%;">
+                        <col style="width: 15%;">
+                    </colgroup>
                     <thead>
                         <tr style="background:#F4EFE6; color:#111827; font-family:<?php echo $head_font; ?>; font-weight:700;">
-                            <th style="padding:4px 6px; text-align:left; border:1px solid #ECE6DD;">Planet</th>
-                            <th style="padding:4px 6px; text-align:center; border:1px solid #ECE6DD;">Sign (Rasi)</th>
-                            <th style="padding:4px 6px; text-align:center; border:1px solid #ECE6DD;">Degrees</th>
-                            <th style="padding:4px 6px; text-align:left; border:1px solid #ECE6DD;">Nakshatra &amp; Pada</th>
-                            <th style="padding:4px 6px; text-align:center; border:1px solid #ECE6DD;">House</th>
-                            <th style="padding:4px 6px; text-align:center; border:1px solid #ECE6DD;">Dignity</th>
-                            <th style="padding:4px 6px; text-align:center; border:1px solid #ECE6DD;">State / Karaka</th>
+                            <th style="padding:3.5px 5px; text-align:left; border:1px solid #ECE6DD;">Planet</th>
+                            <th style="padding:3.5px 5px; text-align:center; border:1px solid #ECE6DD;">Sign (Rasi)</th>
+                            <th style="padding:3.5px 5px; text-align:center; border:1px solid #ECE6DD;">Degrees</th>
+                            <th style="padding:3.5px 5px; text-align:left; border:1px solid #ECE6DD;">Nakshatra &amp; Pada</th>
+                            <th style="padding:3.5px 5px; text-align:center; border:1px solid #ECE6DD;">House</th>
+                            <th style="padding:3.5px 5px; text-align:center; border:1px solid #ECE6DD;">Dignity</th>
+                            <th style="padding:3.5px 5px; text-align:center; border:1px solid #ECE6DD;">State / Karaka</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr style="background:#FFFFFF;">
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; font-weight:700;">Ascendant (Lagna)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center;">Cancer (Karka)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center;">21°16'</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD;">Ashlesha · Pada 2 (Budh)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center;">1st</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center; color:#1D4ED8; font-weight:700;">Rising Sign</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center;">Lagna Cusp</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; font-weight:700;">Ascendant (Lagna)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center;">Cancer (Karka)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center;">21°16'</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD;">Ashlesha · Pada 2 (Budh)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center;">1st</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center; color:#1D4ED8; font-weight:700;">Rising Sign</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center;">Lagna Cusp</td>
                         </tr>
                         <tr style="background:#FAF7F2;">
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; font-weight:700; color:#B91C1C;">Sun (Surya)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center;">Sagittarius (Dhanu)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center;">11°25'</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD;">Mula · Pada 4 (Ketu)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center;">6th</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center; color:#047857; font-weight:700;">Friendly (Mitra)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center;">Matrikaraka (MK)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; font-weight:700; color:#B91C1C;">Sun (Surya)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center;">Sagittarius (Dhanu)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center;">11°25'</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD;">Mula · Pada 4 (Ketu)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center;">6th</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center; color:#047857; font-weight:700;">Friendly (Mitra)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center;">Matrikaraka (MK)</td>
                         </tr>
                         <tr style="background:#FFFFFF;">
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; font-weight:700; color:#1D4ED8;">Moon (Chandra)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center;">Leo (Simha)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center;">11°53'</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD;">Magha · Pada 4 (Ketu)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center;">2nd</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center; color:#047857; font-weight:700;">Friendly (Mitra)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center;">Lagna Lord · PK</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; font-weight:700; color:#1D4ED8;">Moon (Chandra)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center;">Leo (Simha)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center;">11°53'</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD;">Magha · Pada 4 (Ketu)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center;">2nd</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center; color:#047857; font-weight:700;">Friendly (Mitra)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center;">Lagna Lord · PK</td>
                         </tr>
                         <tr style="background:#FAF7F2;">
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; font-weight:700; color:#C45738;">Mars (Mangal)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center;">Capricorn (Makara)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center; font-weight:800; color:#C45738;">03°02'</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD;">Uttara Ashadha · Pada 2 (Sun)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center;">7th</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center; color:#C45738; font-weight:800;">Deep Exaltation (Ucha)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center; font-weight:700; color:#C45738;">Ruchaka Yoga · DK</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; font-weight:700; color:#C45738;">Mars (Mangal)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center;">Capricorn (Makara)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center; font-weight:800; color:#C45738;">03°02'</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD;">Uttara Ashadha · Pada 2 (Sun)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center;">7th</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center; color:#C45738; font-weight:800;">Deep Exaltation (Ucha)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center; font-weight:700; color:#C45738;">Ruchaka Yoga · DK</td>
                         </tr>
                         <tr style="background:#FFFFFF;">
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; font-weight:700; color:#4B5563;">Mercury (Budh)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center;">Sagittarius (Dhanu)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center;">08°40'</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD;">Mula · Pada 3 (Ketu)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center;">6th</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center; color:#047857; font-weight:700;">Neutral (Sama)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center;">Gnatikaraka (GK)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; font-weight:700; color:#4B5563;">Mercury (Budh)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center;">Sagittarius (Dhanu)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center;">08°40'</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD;">Mula · Pada 3 (Ketu)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center;">6th</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center; color:#047857; font-weight:700;">Neutral (Sama)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center;">Gnatikaraka (GK)</td>
                         </tr>
                         <tr style="background:#FAF7F2;">
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; font-weight:700; color:#B45309;">Jupiter (Guru)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center;">Virgo (Kanya)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center;">15°29'</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD;">Hasta · Pada 2 (Moon)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center;">3rd</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center; color:#B45309; font-weight:700;">Enemy Sign (Shatru)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center;">Bhratrikaraka (BK)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; font-weight:700; color:#B45309;">Jupiter (Guru)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center;">Virgo (Kanya)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center;">15°29'</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD;">Hasta · Pada 2 (Moon)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center;">3rd</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center; color:#B45309; font-weight:700;">Enemy Sign (Shatru)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center;">Bhratrikaraka (BK)</td>
                         </tr>
                         <tr style="background:#FFFFFF;">
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; font-weight:700; color:#047857;">Venus (Shukra)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center;">Scorpio (Vrishchika)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center; font-weight:800; color:#047857;">16°51'</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD;">Jyeshtha · Pada 1 (Budh)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center;">5th</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center; color:#047857; font-weight:700;">Neutral (Sama)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center; font-weight:800; color:#C45738;">Atmakaraka (AK)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; font-weight:700; color:#047857;">Venus (Shukra)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center;">Scorpio (Vrishchika)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center; font-weight:800; color:#047857;">16°51'</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD;">Jyeshtha · Pada 1 (Budh)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center;">5th</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center; color:#047857; font-weight:700;">Neutral (Sama)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center; font-weight:800; color:#C45738;">Atmakaraka (AK)</td>
                         </tr>
                         <tr style="background:#FAF7F2;">
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; font-weight:700; color:#4B5563;">Saturn (Shani)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center;">Virgo (Kanya)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center; font-weight:800; color:#4B5563;">15°43'</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD;">Hasta · Pada 2 (Moon)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center;">3rd</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center; color:#047857; font-weight:700;">Friendly (Mitra)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center; font-weight:800; color:#047857;">Amatyakaraka (AmK)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; font-weight:700; color:#4B5563;">Saturn (Shani)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center;">Virgo (Kanya)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center; font-weight:800; color:#4B5563;">15°43'</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD;">Hasta · Pada 2 (Moon)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center;">3rd</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center; color:#047857; font-weight:700;">Friendly (Mitra)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center; font-weight:800; color:#047857;">Amatyakaraka (AmK)</td>
                         </tr>
                         <tr style="background:#FFFFFF;">
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; font-weight:700; color:#4B5563;">Rahu (North Node)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center;">Cancer (Karka)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center;">19°14'</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD;">Ashlesha · Pada 1 (Budh)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center;">1st</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center; color:#6B7280;">Enemy Sign</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center; font-weight:700; color:#C45738;">Active Mahadasha</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; font-weight:700; color:#4B5563;">Rahu (North Node)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center;">Cancer (Karka)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center;">19°14'</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD;">Ashlesha · Pada 1 (Budh)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center;">1st</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center; color:#6B7280;">Enemy Sign</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center; font-weight:700; color:#C45738;">Active Mahadasha</td>
                         </tr>
                         <tr style="background:#FAF7F2;">
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; font-weight:700; color:#4B5563;">Ketu (South Node)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center;">Capricorn (Makara)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center;">19°14'</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD;">Shravana · Pada 3 (Moon)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center;">7th</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center; color:#047857; font-weight:700;">Friendly (Mitra)</td>
-                            <td style="padding:3.5px 6px; border:1px solid #ECE6DD; text-align:center;">Moksha Catalyst</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; font-weight:700; color:#4B5563;">Ketu (South Node)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center;">Capricorn (Makara)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center;">19°14'</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD;">Shravana · Pada 3 (Moon)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center;">7th</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center; color:#047857; font-weight:700;">Friendly (Mitra)</td>
+                            <td style="padding:2.2px 4px; border:1px solid #ECE6DD; text-align:center;">Moksha Catalyst</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
             <!-- Deep Analysis Cards Below the Table (Filling the Bottom Richly) -->
-            <div class="mr-grid-2col" style="margin-top:5px;">
-                <div class="mr-card" style="padding:8px 12px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:10.8px; font-weight:700; color:#C45738; margin-bottom:2px;">
+            <div class="mr-grid-2col" style="margin-top:3px; gap:12px;">
+                <div class="mr-card" style="padding:3.5px 8px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 11px; font-weight:700; color:#C45738; margin-bottom:1px;">
                         Planetary Dignity Balance &amp; Exaltation Core
                     </div>
-                    <div style="font-size:9.5px; color:#374151; line-height:1.42;">
+                    <div style="font-size: 9.8px; color:#374151; line-height:1.28;">
                         Mars stands out as the supreme powerhouse of your chart, occupying its highest exaltation (Ucha Makara 3°02'). This provides an unshakable core of physical stamina, strategic courage, and organizational discipline. Venus commands the role of Atmakaraka (highest degree at 16°51'), driving your spiritual evolution toward elevated emotional discernment.
                     </div>
                 </div>
 
-                <div class="mr-card" style="padding:8px 12px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:10.8px; font-weight:700; color:#047857; margin-bottom:2px;">
+                <div class="mr-card" style="padding:3.5px 8px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 11px; font-weight:700; color:#047857; margin-bottom:1px;">
                         The Guru-Shani Council in Analytical Virgo
                     </div>
-                    <div style="font-size:9.5px; color:#374151; line-height:1.42;">
+                    <div style="font-size: 9.8px; color:#374151; line-height:1.28;">
                         Jupiter and Saturn share an extraordinary close conjunction in the 3rd house in Hasta Nakshatra (governed by the Moon). This creates an enduring alliance between moral foresight (Guru) and administrative precision (Shani), making you a formidable technical architect and strategic advisor.
                     </div>
                 </div>
@@ -1049,10 +1122,7 @@ class MR_Kundali_Report_Builder {
                 "Unafflicted solar and lunar placements within friendly Jupiterian and royal signs provide robust biological vitality, natural mental equanimity, and clear generational values."
             ], 'Essential Lifetime Takeaways', $head_font); ?>
 
-            <div class="mr-footer-bar">
-                <span>MeraRashifal · Vedic Panchang &amp; Ephemeris</span>
-                <span class="mr-page-num">Page 4 of 26</span>
-            </div>
+            <?php echo self::render_page_footer(4, 'Vedic Panchang · Planetary Ephemeris'); ?>
         </div>
     </div>
 
@@ -1071,14 +1141,14 @@ class MR_Kundali_Report_Builder {
         </div>
 
         <div class="mr-page-body">
-            <div class="mr-tag-pill">04 · Core Harmonic Cross-Verification</div>
-            <h1 class="mr-page-h1">Harmonic Cross-Verification: D9, Chandra, Surya &amp; Chalit</h1>
-            <div class="mr-page-sub">Multi-Dimensional Vedic Lenses Mapping Inner Dharma, Mind Biorhythms, Soul Will &amp; Cuspal Dynamics</div>
+            <div class="mr-tag-pill">04 · Deep Chart Verification (4 Lenses)</div>
+            <h1 class="mr-page-h1">Deep Chart Views: D9, Moon Chart, Sun Chart &amp; Chalit</h1>
+            <div class="mr-page-sub">Looking at your chart from four important Vedic angles: soul, mind, vitality, and house cusps</div>
 
-            <!-- 2x2 Grid of 4 Large Divisional Charts (~205px each) -->
-            <div class="mr-grid-2x2-charts" style="margin:2px 0 4px 0;">
+            <!-- 2x2 Grid of 4 Large Divisional Charts (172px each) -->
+            <div class="mr-grid-2x2-charts" style="display:grid; grid-template-columns:1fr 1fr; gap:6px 18px; margin:0 0 4px 0;">
                 <!-- D9 Navamsha -->
-                <?php echo self::render_varga_diamond_svg(205, [
+                <?php echo self::render_varga_diamond_svg(172, [
                     1  => ['Ma'],
                     5  => ['Ju', 'Sa'],
                     6  => ['Me', 'Ke'],
@@ -1087,7 +1157,7 @@ class MR_Kundali_Report_Builder {
                 ], 10, 'D9 Navamsha (Inner Dharma & Marriage)'); ?>
 
                 <!-- Chandra Kundali -->
-                <?php echo self::render_varga_diamond_svg(205, [
+                <?php echo self::render_varga_diamond_svg(172, [
                     1  => ['Mo'],
                     2  => ['Ju', 'Sa'],
                     4  => ['Ve'],
@@ -1097,7 +1167,7 @@ class MR_Kundali_Report_Builder {
                 ], 5, 'Chandra Kundali (Mind & Emotions)'); ?>
 
                 <!-- Surya Kundali -->
-                <?php echo self::render_varga_diamond_svg(205, [
+                <?php echo self::render_varga_diamond_svg(172, [
                     1  => ['Su', 'Me'],
                     2  => ['Ma', 'Ke'],
                     8  => ['Ra'],
@@ -1107,7 +1177,7 @@ class MR_Kundali_Report_Builder {
                 ], 9, 'Surya Kundali (Soul Will & Public Status)'); ?>
 
                 <!-- Bhav Chalit Kundali -->
-                <?php echo self::render_varga_diamond_svg(205, [
+                <?php echo self::render_varga_diamond_svg(172, [
                     1  => ['Ra'],
                     2  => ['Mo'],
                     3  => ['Ju', 'Sa'],
@@ -1117,44 +1187,44 @@ class MR_Kundali_Report_Builder {
                 ], 4, 'Bhav Chalit Kundali (Cuspal Power)'); ?>
             </div>
 
-            <!-- 4 Separate Finding Boxes (50 to 60 words each) in 2x2 Grid -->
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px 18px; margin-top:4px;">
+            <!-- 4 Separate Finding Boxes in 2x2 Grid -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px 14px; margin-top:3px;">
                 <!-- D9 Finding -->
-                <div class="mr-card" style="padding:6px 10px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:10px; font-weight:700; color:#C45738; margin-bottom:2px;">
+                <div class="mr-card" style="padding:4.5px 8px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 11.8px; font-weight:700; color:#C45738; margin-bottom:2px;">
                         D9 Navamsha Finding (Inner Dharma &amp; Marriage)
                     </div>
-                    <div style="font-size:8.8px; color:#374151; line-height:1.35;">
+                    <div style="font-size: 10.2px; color:#374151; line-height:1.32;">
                         Mars occupies the 1st house in Capricorn in D9 Navamsha, preserving its formidable exalted strength into late life and marriage. This ensures that your inner moral compass and willpower remain unyielding. With Jupiter and Saturn occupying the 5th house of intellect, spiritual devotion and strategic foresight steadily deepen through marital companionship.
                     </div>
                 </div>
 
                 <!-- Chandra Finding -->
-                <div class="mr-card" style="padding:6px 10px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:10px; font-weight:700; color:#047857; margin-bottom:2px;">
+                <div class="mr-card" style="padding:4.5px 8px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 11.8px; font-weight:700; color:#047857; margin-bottom:2px;">
                         Chandra Kundali Finding (Mind &amp; Emotions)
                     </div>
-                    <div style="font-size:8.8px; color:#374151; line-height:1.35;">
+                    <div style="font-size: 10.2px; color:#374151; line-height:1.32;">
                         Evaluating from the royal Moon in Leo, Jupiter and Saturn anchor the 2nd house of treasury and speech. This ensures that emotional instincts consistently align with practical capital accumulation and diplomatic expression. Meanwhile, Venus in the 4th house establishes deep mental contentment, refined home pleasures, and maternal harmony throughout life.
                     </div>
                 </div>
 
                 <!-- Surya Finding -->
-                <div class="mr-card" style="padding:6px 10px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:10px; font-weight:700; color:#C2964C; margin-bottom:2px;">
+                <div class="mr-card" style="padding:4.5px 8px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 11.8px; font-weight:700; color:#C2964C; margin-bottom:2px;">
                         Surya Kundali Finding (Soul Will &amp; Status)
                     </div>
-                    <div style="font-size:8.8px; color:#374151; line-height:1.35;">
+                    <div style="font-size: 10.2px; color:#374151; line-height:1.32;">
                         Taking the Sun in Sagittarius as the ascendant, Jupiter and Saturn command the pivotal 10th house of institutional prestige. This configuration confirms that your executive willpower easily garners governmental respect and commercial standing. Mars and Ketu in the 2nd house protect resources, empowering decisive enterprise leadership and capital control.
                     </div>
                 </div>
 
                 <!-- Bhav Chalit Finding -->
-                <div class="mr-card" style="padding:6px 10px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:10px; font-weight:700; color:#111827; margin-bottom:2px;">
+                <div class="mr-card" style="padding:4.5px 8px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 11.8px; font-weight:700; color:#111827; margin-bottom:2px;">
                         Bhav Chalit Finding (Cuspal Power)
                     </div>
-                    <div style="font-size:8.8px; color:#374151; line-height:1.35;">
+                    <div style="font-size: 10.2px; color:#374151; line-height:1.32;">
                         The Bhav Chalit chart confirms that all primary planets remain firmly anchored within their natal houses without adverse cuspal shifts. Mars maintains full 7th house Kendra impact, while Sun and Mercury decisively protect the 6th house. This stability guarantees that your inner potentials translate directly into external reality without energetic friction.
                     </div>
                 </div>
@@ -1178,10 +1248,7 @@ class MR_Kundali_Report_Builder {
                 "Bhav Chalit verifies zero adverse cuspal displacement, confirming that external circumstances will faithfully reflect your highest inner astrological potentials without delay."
             ], 'Essential Lifetime Takeaways', $head_font); ?>
 
-            <div class="mr-footer-bar">
-                <span>MeraRashifal · Harmonic Cross-Verification</span>
-                <span class="mr-page-num">Page 5 of 26</span>
-            </div>
+            <?php echo self::render_page_footer(5, 'Harmonic Cross-Verification · D9, Chandra, Surya, Chalit'); ?>
         </div>
     </div>
 
@@ -1199,20 +1266,20 @@ class MR_Kundali_Report_Builder {
         </div>
 
         <div class="mr-page-body">
-            <div class="mr-tag-pill">05 · Material, Assets &amp; Lineage Varga Matrix</div>
-            <h1 class="mr-page-h1">Divisional Charts: Wealth (D2), Courage (D3), Assets (D4) &amp; Progeny (D7)</h1>
-            <div class="mr-page-sub">Classical Parashari Harmonics Evaluating Treasury Inflow, Vital Initiative, Fixed Property &amp; Lineage</div>
+            <div class="mr-tag-pill">05 · Divisional Charts (Part 1)</div>
+            <h1 class="mr-page-h1">Divisional Charts: Wealth (D2), Courage (D3), Home (D4) &amp; Family (D7)</h1>
+            <div class="mr-page-sub">Detailed charts for money, courage, property, and children</div>
 
-            <!-- 2x2 Grid of 4 Large Divisional Charts (~205px each) -->
-            <div class="mr-grid-2x2-charts" style="margin:2px 0 4px 0;">
+            <!-- 2x2 Grid of 4 Large Divisional Charts (172px each) -->
+            <div class="mr-grid-2x2-charts" style="display:grid; grid-template-columns:1fr 1fr; gap:6px 18px; margin:0 0 4px 0;">
                 <!-- D2 Hora -->
-                <?php echo self::render_varga_diamond_svg(205, [
+                <?php echo self::render_varga_diamond_svg(172, [
                     1 => ['Su', 'Mo', 'Me', 'Ju', 'Ve', 'Sa', 'Ra', 'Ke'],
                     2 => ['Ma'],
                 ], 5, 'D2 Hora (Treasury & Wealth Flow)'); ?>
 
                 <!-- D3 Drekkana -->
-                <?php echo self::render_varga_diamond_svg(205, [
+                <?php echo self::render_varga_diamond_svg(172, [
                     1  => ['Ve'],
                     2  => ['Su'],
                     3  => ['Ke'],
@@ -1222,7 +1289,7 @@ class MR_Kundali_Report_Builder {
                 ], 12, 'D3 Drekkana (Courage & Siblings)'); ?>
 
                 <!-- D4 Chaturthamsha -->
-                <?php echo self::render_varga_diamond_svg(205, [
+                <?php echo self::render_varga_diamond_svg(172, [
                     1  => ['Ma', 'Ra'],
                     3  => ['Su', 'Me', 'Ju', 'Sa'],
                     5  => ['Ve'],
@@ -1231,7 +1298,7 @@ class MR_Kundali_Report_Builder {
                 ], 10, 'D4 Chaturthamsha (Property & Home)'); ?>
 
                 <!-- D7 Saptamsha -->
-                <?php echo self::render_varga_diamond_svg(205, [
+                <?php echo self::render_varga_diamond_svg(172, [
                     1  => ['Ra'],
                     2  => ['Ju', 'Sa'],
                     3  => ['Ma'],
@@ -1242,44 +1309,44 @@ class MR_Kundali_Report_Builder {
                 ], 2, 'D7 Saptamsha (Progeny & Children)'); ?>
             </div>
 
-            <!-- 4 Separate Finding Boxes (50 to 60 words each) in 2x2 Grid -->
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px 18px; margin-top:4px;">
+            <!-- 4 Separate Finding Boxes in 2x2 Grid -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px 14px; margin-top:3px;">
                 <!-- D2 Finding -->
-                <div class="mr-card" style="padding:6px 10px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:10px; font-weight:700; color:#C45738; margin-bottom:2px;">
+                <div class="mr-card" style="padding:4.5px 8px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 11.8px; font-weight:700; color:#C45738; margin-bottom:2px;">
                         D2 Hora Finding (Treasury &amp; Liquid Wealth)
                     </div>
-                    <div style="font-size:8.8px; color:#374151; line-height:1.35;">
+                    <div style="font-size: 10.2px; color:#374151; line-height:1.32;">
                         D2 Hora concentrates major planets in the solar half (Surya Hora in Leo), signifying that capital multiplies through autonomous leadership, executive advisory, and intellectual property. Self-earned wealth thrives through disciplined asset accumulation, while Mars in the 2nd house provides unwavering vigilance against frivolous financial drain.
                     </div>
                 </div>
 
                 <!-- D3 Finding -->
-                <div class="mr-card" style="padding:6px 10px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:10px; font-weight:700; color:#047857; margin-bottom:2px;">
+                <div class="mr-card" style="padding:4.5px 8px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 11.8px; font-weight:700; color:#047857; margin-bottom:2px;">
                         D3 Drekkana Finding (Courage &amp; Enterprise)
                     </div>
-                    <div style="font-size:8.8px; color:#374151; line-height:1.35;">
+                    <div style="font-size: 10.2px; color:#374151; line-height:1.32;">
                         In D3 Drekkana, the formidable cluster of Mars, Jupiter, and Saturn in the 11th house in Capricorn guarantees immense physical courage and triumph in high-stakes negotiations. Your vital initiative easily overcomes market competition, while Venus in the 1st house ensures diplomatic charm in managing commercial partnerships.
                     </div>
                 </div>
 
                 <!-- D4 Finding -->
-                <div class="mr-card" style="padding:6px 10px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:10px; font-weight:700; color:#C2964C; margin-bottom:2px;">
+                <div class="mr-card" style="padding:4.5px 8px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 11.8px; font-weight:700; color:#C2964C; margin-bottom:2px;">
                         D4 Chaturthamsha Finding (Real Estate &amp; Assets)
                     </div>
-                    <div style="font-size:8.8px; color:#374151; line-height:1.35;">
+                    <div style="font-size: 10.2px; color:#374151; line-height:1.32;">
                         D4 Chaturthamsha positions Mars and Rahu in the 1st house in Capricorn, granting substantial acquisitions of prime commercial and residential properties. You possess an innate sense for land value and construction timing, turning tangible real estate into an enduring foundation of generational family security.
                     </div>
                 </div>
 
                 <!-- D7 Finding -->
-                <div class="mr-card" style="padding:6px 10px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:10px; font-weight:700; color:#111827; margin-bottom:2px;">
+                <div class="mr-card" style="padding:4.5px 8px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 11.8px; font-weight:700; color:#111827; margin-bottom:2px;">
                         D7 Saptamsha Finding (Progeny &amp; Lineage)
                     </div>
-                    <div style="font-size:8.8px; color:#374151; line-height:1.35;">
+                    <div style="font-size: 10.2px; color:#374151; line-height:1.32;">
                         D7 Saptamsha places Jupiter and Saturn in the 2nd house and Venus in the 4th, confirming capable, intellectually distinguished children who bring honor to the family lineage. Progeny thrive under structured moral mentoring, excelling in analytical disciplines, creative arts, and principled community leadership.
                     </div>
                 </div>
@@ -1303,10 +1370,7 @@ class MR_Kundali_Report_Builder {
                 "D7 Saptamsha assures positive generational karma, with children flourishing academically and professionally under your principled, structured guidance."
             ], 'Essential Lifetime Takeaways', $head_font); ?>
 
-            <div class="mr-footer-bar">
-                <span>MeraRashifal · Material &amp; Lineage Divisional Charts</span>
-                <span class="mr-page-num">Page 6 of 26</span>
-            </div>
+            <?php echo self::render_page_footer(6, 'Material & Lineage Divisional Charts · D2, D3, D4, D7'); ?>
         </div>
     </div>
 
@@ -1324,14 +1388,14 @@ class MR_Kundali_Report_Builder {
         </div>
 
         <div class="mr-page-body">
-            <div class="mr-tag-pill">06 · Vocational Status &amp; Higher Mind Varga Matrix</div>
-            <h1 class="mr-page-h1">Divisional Charts: Career (D10), Lineage (D12), Vehicles (D16) &amp; Wisdom (D24)</h1>
-            <div class="mr-page-sub">Classical Parashari Harmonics Mapping Professional Altitude, Ancestral Roots, Conveyances &amp; Intellect</div>
+            <div class="mr-tag-pill">06 · Divisional Charts (Part 2)</div>
+            <h1 class="mr-page-h1">Divisional Charts: Career (D10), Ancestry (D12), Vehicles (D16) &amp; Knowledge (D24)</h1>
+            <div class="mr-page-sub">Detailed charts for professional success, family roots, comfort, and higher education</div>
 
-            <!-- 2x2 Grid of 4 Large Divisional Charts (~205px each) -->
-            <div class="mr-grid-2x2-charts" style="margin:2px 0 4px 0;">
+            <!-- 2x2 Grid of 4 Large Divisional Charts (172px each) -->
+            <div class="mr-grid-2x2-charts" style="display:grid; grid-template-columns:1fr 1fr; gap:6px 18px; margin:0 0 4px 0;">
                 <!-- D10 Dashamsha -->
-                <?php echo self::render_varga_diamond_svg(205, [
+                <?php echo self::render_varga_diamond_svg(172, [
                     1  => ['Ma', 'Ju', 'Sa'],
                     2  => ['Mo'],
                     3  => ['Ve'],
@@ -1341,7 +1405,7 @@ class MR_Kundali_Report_Builder {
                 ], 7, 'D10 Dashamsha (Career & Executive Status)'); ?>
 
                 <!-- D12 Dwadashamsha -->
-                <?php echo self::render_varga_diamond_svg(205, [
+                <?php echo self::render_varga_diamond_svg(172, [
                     1  => ['Me', 'Ju', 'Sa'],
                     2  => ['Su'],
                     3  => ['Ve'],
@@ -1351,7 +1415,7 @@ class MR_Kundali_Report_Builder {
                 ], 12, 'D12 Dwadashamsha (Parents & Ancestry)'); ?>
 
                 <!-- D16 Shodashamsha -->
-                <?php echo self::render_varga_diamond_svg(205, [
+                <?php echo self::render_varga_diamond_svg(172, [
                     2  => ['Me', 'Ve'],
                     3  => ['Ma'],
                     4  => ['Su'],
@@ -1360,7 +1424,7 @@ class MR_Kundali_Report_Builder {
                 ], 12, 'D16 Shodashamsha (Vehicles & Pleasures)'); ?>
 
                 <!-- D24 Chaturvimshamsha -->
-                <?php echo self::render_varga_diamond_svg(205, [
+                <?php echo self::render_varga_diamond_svg(172, [
                     3  => ['Me'],
                     6  => ['Su', 'Mo'],
                     8  => ['Ju', 'Sa'],
@@ -1370,44 +1434,44 @@ class MR_Kundali_Report_Builder {
                 ], 9, 'D24 Chaturvimshamsha (Higher Knowledge)'); ?>
             </div>
 
-            <!-- 4 Separate Finding Boxes (50 to 60 words each) in 2x2 Grid -->
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px 18px; margin-top:4px;">
+            <!-- 4 Separate Finding Boxes in 2x2 Grid -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px 14px; margin-top:3px;">
                 <!-- D10 Finding -->
-                <div class="mr-card" style="padding:6px 10px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:10px; font-weight:700; color:#C45738; margin-bottom:2px;">
+                <div class="mr-card" style="padding:4.5px 8px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 11.8px; font-weight:700; color:#C45738; margin-bottom:2px;">
                         D10 Dashamsha Finding (Career Altitude)
                     </div>
-                    <div style="font-size:8.8px; color:#374151; line-height:1.35;">
+                    <div style="font-size: 10.2px; color:#374151; line-height:1.32;">
                         D10 Dashamsha features an extraordinary assembly: Mars, Jupiter, and Saturn occupy the 1st house in Libra, forming multiple Mahapurusha and Raja Yogas. This rare synergy grants commanding authority in systems consulting, institutional governance, and large-scale architectural projects that withstand shifting corporate trends.
                     </div>
                 </div>
 
                 <!-- D12 Finding -->
-                <div class="mr-card" style="padding:6px 10px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:10px; font-weight:700; color:#047857; margin-bottom:2px;">
+                <div class="mr-card" style="padding:4.5px 8px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 11.8px; font-weight:700; color:#047857; margin-bottom:2px;">
                         D12 Dwadashamsha Finding (Ancestral Roots)
                     </div>
-                    <div style="font-size:8.8px; color:#374151; line-height:1.35;">
+                    <div style="font-size: 10.2px; color:#374151; line-height:1.32;">
                         D12 Dwadashamsha places Mercury, Jupiter, and Saturn in the 1st house in Pisces, reflecting high ancestral merit, parental blessings, and noble family integrity. Paternal roots impart strong moral grounding and administrative ethics that protect your personal reputation from unmerited controversy.
                     </div>
                 </div>
 
                 <!-- D16 Finding -->
-                <div class="mr-card" style="padding:6px 10px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:10px; font-weight:700; color:#C2964C; margin-bottom:2px;">
+                <div class="mr-card" style="padding:4.5px 8px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 11.8px; font-weight:700; color:#C2964C; margin-bottom:2px;">
                         D16 Shodashamsha Finding (Vehicles &amp; Luxuries)
                     </div>
-                    <div style="font-size:8.8px; color:#374151; line-height:1.35;">
+                    <div style="font-size: 10.2px; color:#374151; line-height:1.32;">
                         In D16 Shodashamsha, Mercury and Venus occupy the 2nd house of assets while Surya rules the 4th house of happiness. This alignment ensures lifelong access to comfortable, premium vehicles, smooth travel, and serene domestic environments that rejuvenate mental energy after intense work phases.
                     </div>
                 </div>
 
                 <!-- D24 Finding -->
-                <div class="mr-card" style="padding:6px 10px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:10px; font-weight:700; color:#111827; margin-bottom:2px;">
+                <div class="mr-card" style="padding:4.5px 8px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 11.8px; font-weight:700; color:#111827; margin-bottom:2px;">
                         D24 Chaturvimshamsha Finding (Intellect &amp; Wisdom)
                     </div>
-                    <div style="font-size:8.8px; color:#374151; line-height:1.35;">
+                    <div style="font-size: 10.2px; color:#374151; line-height:1.32;">
                         D24 Chaturvimshamsha features Venus in the 9th house of fortune and Mars in the 10th of public accomplishment. This confirms that advanced academic learning, technical certifications, and specialized enterprise skillsets directly convert into commercial advantage and prestigious advisory respect.
                     </div>
                 </div>
@@ -1431,10 +1495,7 @@ class MR_Kundali_Report_Builder {
                 "D24 Chaturvimshamsha validates that your continuous pursuit of specialized technical knowledge directly fuels your professional ascension and market value."
             ], 'Essential Lifetime Takeaways', $head_font); ?>
 
-            <div class="mr-footer-bar">
-                <span>MeraRashifal · Vocational Status &amp; Higher Mind</span>
-                <span class="mr-page-num">Page 7 of 26</span>
-            </div>
+            <?php echo self::render_page_footer(7, 'Vocational Status & Higher Mind · D10, D12, D16, D24'); ?>
         </div>
     </div>
 
@@ -1452,14 +1513,14 @@ class MR_Kundali_Report_Builder {
         </div>
 
         <div class="mr-page-body">
-            <div class="mr-tag-pill">07 · Esoteric Harmonics &amp; Past-Life Prarabdha</div>
-            <h1 class="mr-page-h1">Divisional Charts: Sadhana (D20), Stamina (D27), Arishta (D30) &amp; Root Karma (D60)</h1>
-            <div class="mr-page-sub">Parashari Micro-Zodiac Harmonics Revealing Meditation, Inner Resilience, Adversity Shield &amp; Past Life Karma</div>
+            <div class="mr-tag-pill">07 · Divisional Charts (Part 3)</div>
+            <h1 class="mr-page-h1">Divisional Charts: Meditation (D20), Stamina (D27) &amp; Deep Karma (D60)</h1>
+            <div class="mr-page-sub">Detailed charts for spiritual practice, inner resilience, and deep life lessons</div>
 
-            <!-- 2x2 Grid of 4 Large Divisional Charts (~205px each) -->
-            <div class="mr-grid-2x2-charts" style="margin:2px 0 4px 0;">
+            <!-- 2x2 Grid of 4 Large Divisional Charts (172px each) -->
+            <div class="mr-grid-2x2-charts" style="display:grid; grid-template-columns:1fr 1fr; gap:6px 18px; margin:0 0 4px 0;">
                 <!-- D20 Vimshamsha -->
-                <?php echo self::render_varga_diamond_svg(205, [
+                <?php echo self::render_varga_diamond_svg(172, [
                     1  => ['Ma', 'Ju', 'Sa'],
                     2  => ['Mo'],
                     6  => ['Ve'],
@@ -1469,7 +1530,7 @@ class MR_Kundali_Report_Builder {
                 ], 3, 'D20 Vimshamsha (Spiritual Sadhana)'); ?>
 
                 <!-- D27 Saptavimshamsha -->
-                <?php echo self::render_varga_diamond_svg(205, [
+                <?php echo self::render_varga_diamond_svg(172, [
                     2  => ['Me'],
                     5  => ['Su', 'Mo'],
                     7  => ['Ju'],
@@ -1479,7 +1540,7 @@ class MR_Kundali_Report_Builder {
                 ], 11, 'D27 Saptavimshamsha (Vital Stamina)'); ?>
 
                 <!-- D30 Trimshamsha -->
-                <?php echo self::render_varga_diamond_svg(205, [
+                <?php echo self::render_varga_diamond_svg(172, [
                     1  => ['Ra', 'Ke'],
                     2  => ['Me'],
                     3  => ['Ju', 'Ve', 'Sa'],
@@ -1488,7 +1549,7 @@ class MR_Kundali_Report_Builder {
                 ], 10, 'D30 Trimshamsha (Overcoming Adversity)'); ?>
 
                 <!-- D60 Shashtiamsha -->
-                <?php echo self::render_varga_diamond_svg(205, [
+                <?php echo self::render_varga_diamond_svg(172, [
                     3  => ['Ju', 'Ke'],
                     4  => ['Sa'],
                     5  => ['Me'],
@@ -1499,44 +1560,44 @@ class MR_Kundali_Report_Builder {
                 ], 10, 'D60 Shashtiamsha (Past Life Karma)'); ?>
             </div>
 
-            <!-- 4 Separate Finding Boxes (50 to 60 words each) in 2x2 Grid -->
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:6px 18px; margin-top:4px;">
+            <!-- 4 Separate Finding Boxes in 2x2 Grid -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:4px 14px; margin-top:3px;">
                 <!-- D20 Finding -->
-                <div class="mr-card" style="padding:6px 10px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:10px; font-weight:700; color:#C45738; margin-bottom:2px;">
+                <div class="mr-card" style="padding:4.5px 8px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 11.8px; font-weight:700; color:#C45738; margin-bottom:2px;">
                         D20 Vimshamsha Finding (Spiritual Sadhana)
                     </div>
-                    <div style="font-size:8.8px; color:#374151; line-height:1.35;">
+                    <div style="font-size: 10.2px; color:#374151; line-height:1.32;">
                         In D20 Vimshamsha, the Mars-Jupiter-Saturn alliance in Gemini 1st house fuels serious philosophical contemplation, disciplined meditation, and higher spiritual inquiry. Spiritual practices yield swift mental tranquility, shielding you from subtle astral fatigue and aligning your mind with timeless cosmic wisdom.
                     </div>
                 </div>
 
                 <!-- D27 Finding -->
-                <div class="mr-card" style="padding:6px 10px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:10px; font-weight:700; color:#047857; margin-bottom:2px;">
+                <div class="mr-card" style="padding:4.5px 8px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 11.8px; font-weight:700; color:#047857; margin-bottom:2px;">
                         D27 Saptavimshamsha Finding (Vital Stamina)
                     </div>
-                    <div style="font-size:8.8px; color:#374151; line-height:1.35;">
+                    <div style="font-size: 10.2px; color:#374151; line-height:1.32;">
                         D27 Saptavimshamsha displays Jupiter in the 7th house and Venus in the 9th, bestowing extraordinary psychic resilience and immune recovery. You possess a rare ability to swiftly bounce back from intense professional crises, turning high-pressure challenges into platforms for renewed authority.
                     </div>
                 </div>
 
                 <!-- D30 Finding -->
-                <div class="mr-card" style="padding:6px 10px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:10px; font-weight:700; color:#C2964C; margin-bottom:2px;">
+                <div class="mr-card" style="padding:4.5px 8px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 11.8px; font-weight:700; color:#C2964C; margin-bottom:2px;">
                         D30 Trimshamsha Finding (Adversity Shield)
                     </div>
-                    <div style="font-size:8.8px; color:#374151; line-height:1.35;">
+                    <div style="font-size: 10.2px; color:#374151; line-height:1.32;">
                         D30 Trimshamsha shows Jupiter and Venus strongly guarding the 3rd house while exalted Mars anchors the 5th. This powerful alignment serves as a spiritual firewall against chronic litigation, malicious sabotage, or systemic health imbalances, ensuring steady triumph over adversarial circumstances.
                     </div>
                 </div>
 
                 <!-- D60 Finding -->
-                <div class="mr-card" style="padding:6px 10px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:10px; font-weight:700; color:#111827; margin-bottom:2px;">
+                <div class="mr-card" style="padding:4.5px 8px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 11.8px; font-weight:700; color:#111827; margin-bottom:2px;">
                         D60 Shashtiamsha Finding (Root Prarabdha)
                     </div>
-                    <div style="font-size:8.8px; color:#374151; line-height:1.35;">
+                    <div style="font-size: 10.2px; color:#374151; line-height:1.32;">
                         In D60 Shashtiamsha—the supreme arbiter of past-life karma—Surya commands the 10th house while Moon and Mars occupy the 7th. This confirms that your current-life executive ascendancy is the natural ripening of virtuous past-life governance and dharmic leadership, ensuring lasting institutional success.
                     </div>
                 </div>
@@ -1560,167 +1621,210 @@ class MR_Kundali_Report_Builder {
                 "D60 Shashtiamsha reveals positive past-life administrative merit, unlocking monumental breakthroughs during your active Rahu Mahadasha."
             ], 'Essential Lifetime Takeaways', $head_font); ?>
 
-            <div class="mr-footer-bar">
-                <span>MeraRashifal · Esoteric Harmonics &amp; Past Karma</span>
-                <span class="mr-page-num">Page 8 of 26</span>
-            </div>
+            <?php echo self::render_page_footer(8, 'Esoteric Harmonics & Past Karma · D20, D27, D30, D60'); ?>
         </div>
     </div>
 
 
     <!-- ========================================================
-         PAGE 9: THE 12 BHAVAS (HOUSES) COMPREHENSIVE LIFE AUDIT
+         PAGE 9: THE 12 BHAVAS (HOUSES) COMPREHENSIVE LIFE AUDIT: PART 1 (HOUSES 1 TO 6)
          ======================================================== -->
     <div class="mr-page">
         <div class="mr-header-bar">
             <div class="mr-header-brand-wrap">
                 <img src="<?php echo esc_attr($logo_uri); ?>" alt="MeraRashifal" class="mr-header-logo-img" />
             </div>
-            <span class="mr-header-meta"><?php echo esc_html($person_name); ?> · 12 Bhavas Comprehensive Life Audit</span>
+            <span class="mr-header-meta"><?php echo esc_html($person_name); ?> · 12 Bhavas Life Audit (Houses 1–6)</span>
         </div>
 
         <div class="mr-page-body">
-            <div class="mr-tag-pill">08 · Parashari Bhava Architecture</div>
-            <h1 class="mr-page-h1">The 12 Bhavas (Houses) Comprehensive Life Audit</h1>
-            <div class="mr-page-sub">Exhaustive Parashari Evaluation of All 12 Life Arenas: Signs, Lords, Occupants &amp; Karmic Manifestations</div>
+            <div class="mr-tag-pill">08 · 12 Houses of Life (Part 1)</div>
+            <h1 class="mr-page-h1">The 12 Houses of Life: Houses 1 to 6</h1>
+            <div class="mr-page-sub">Understanding personality, wealth, siblings, home, education, and daily health</div>
 
-            <!-- Architectural Pillar Summary Bar -->
-            <div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:12px 18px; margin-top:2px; margin-bottom:8px;">
-                <div class="mr-card" style="padding:7px 10px; text-align:center; border-top:3px solid #C45738;">
-                    <div style="font-size:8.5px; font-weight:700; color:#8C7B6B; text-transform:uppercase;">Dharma Trikona (1, 5, 9)</div>
-                    <div style="font-size:12.5px; font-weight:800; color:#C45738; margin:2px 0;">94% · S-Tier</div>
-                    <div style="font-size:8.5px; color:#4B5563;">Supreme Ideational Purpose</div>
+            <!-- Architectural Pillar Summary Bar (Dharma & Artha Trikonas) -->
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-top:2px; margin-bottom:10px;">
+                <div class="mr-card" style="padding:8px 14px; text-align:center; border-top:3.5px solid #C45738;">
+                    <div style="font-size: 11px; font-weight:700; color:#8C7B6B; text-transform:uppercase; letter-spacing:0.04em;">Dharma Trikona (1st, 5th, 9th Bhavas)</div>
+                    <div style="font-size: 16px; font-weight:800; color:#C45738; margin:3px 0;">94% · S-Tier Sovereign Alignment</div>
+                    <div style="font-size: 11.2px; color:#4B5563;">Supreme Ideational Purpose, Soul Vitality &amp; Higher Merit</div>
                 </div>
-                <div class="mr-card" style="padding:7px 10px; text-align:center; border-top:3px solid #4E7D68;">
-                    <div style="font-size:8.5px; font-weight:700; color:#8C7B6B; text-transform:uppercase;">Artha Trikona (2, 6, 10)</div>
-                    <div style="font-size:12.5px; font-weight:800; color:#4E7D68; margin:2px 0;">98% · Sovereign</div>
-                    <div style="font-size:8.5px; color:#4B5563;">Unstoppable Enterprise Engine</div>
-                </div>
-                <div class="mr-card" style="padding:7px 10px; text-align:center; border-top:3px solid #2B4C7E;">
-                    <div style="font-size:8.5px; font-weight:700; color:#8C7B6B; text-transform:uppercase;">Kama Trikona (3, 7, 11)</div>
-                    <div style="font-size:12.5px; font-weight:800; color:#2B4C7E; margin:2px 0;">91% · Potent</div>
-                    <div style="font-size:8.5px; color:#4B5563;">Mass Global Reach &amp; Gains</div>
-                </div>
-                <div class="mr-card" style="padding:7px 10px; text-align:center; border-top:3px solid #7C3AED;">
-                    <div style="font-size:8.5px; font-weight:700; color:#8C7B6B; text-transform:uppercase;">Moksha Trikona (4, 8, 12)</div>
-                    <div style="font-size:12.5px; font-weight:800; color:#7C3AED; margin:2px 0;">86% · Fortified</div>
-                    <div style="font-size:8.5px; color:#4B5563;">Intuitive Esoteric Depth</div>
+                <div class="mr-card" style="padding:8px 14px; text-align:center; border-top:3.5px solid #4E7D68;">
+                    <div style="font-size: 11px; font-weight:700; color:#8C7B6B; text-transform:uppercase; letter-spacing:0.04em;">Artha Trikona (2nd, 6th, 10th Bhavas)</div>
+                    <div style="font-size: 16px; font-weight:800; color:#4E7D68; margin:3px 0;">98% · Unstoppable Enterprise Engine</div>
+                    <div style="font-size: 11.2px; color:#4B5563;">Material Wealth Compounding, Tactical Defense &amp; Executive Command</div>
                 </div>
             </div>
 
-            <!-- Complete 12 Houses Comprehensive Grid (2 Columns, 6 Rows) -->
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:7px 20px;">
-                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:6px 10px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
-                        <span style="font-size:10.5px; font-weight:800; color:#C45738;">1st House · Cancer (Karka Lagna)</span>
-                        <span style="font-size:8px; font-weight:700; background:#FDF2E9; color:#C45738; padding:1px 6px; border-radius:10px;">Lord: Moon · Occupied: Rahu</span>
+            <!-- Houses 1 to 6 Comprehensive Grid (2 Columns, 3 Rows) -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px 16px;">
+                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:8px; padding:10px 14px; box-shadow:0 2px 6px rgba(0,0,0,0.02);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <span style="font-size: 13.5px; font-weight:800; color:#C45738;">1st House · Cancer (Karka Lagna)</span>
+                        <span style="font-size: 10.2px; font-weight:700; background:#FDF2E9; color:#C45738; padding:2px 8px; border-radius:10px;">Lord: Moon · Occupied: Rahu</span>
                     </div>
-                    <div style="font-size:9.5px; color:#374151; line-height:1.4;">Governs physical vitality, self-identity, and mental worldview. Rahu here produces unconventional visionary leadership, high public curiosity, and an innate drive to disrupt legacy corporate paradigms.</div>
+                    <div style="font-size: 12px; color:#374151; line-height:1.46;">Governs physical vitality, self-identity, and mental worldview. Rahu stationed here produces unconventional visionary leadership, high public curiosity, and an innate drive to disrupt legacy corporate paradigms.</div>
                 </div>
-                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:6px 10px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
-                        <span style="font-size:10.5px; font-weight:800; color:#4E7D68;">2nd House · Leo (Simha)</span>
-                        <span style="font-size:8px; font-weight:700; background:#EDF4F0; color:#4E7D68; padding:1px 6px; border-radius:10px;">Lord: Sun · Occupied: Moon</span>
+                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:8px; padding:10px 14px; box-shadow:0 2px 6px rgba(0,0,0,0.02);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <span style="font-size: 13.5px; font-weight:800; color:#4E7D68;">2nd House · Leo (Simha)</span>
+                        <span style="font-size: 10.2px; font-weight:700; background:#EDF4F0; color:#4E7D68; padding:2px 8px; border-radius:10px;">Lord: Sun · Occupied: Moon</span>
                     </div>
-                    <div style="font-size:9.5px; color:#374151; line-height:1.4;">Controls accumulated capital, vocal authority, and lineage resources. Royal Moon in Leo bestows an authoritative yet empathetic vocal cadence and a natural talent for institutional asset preservation.</div>
+                    <div style="font-size: 12px; color:#374151; line-height:1.46;">Controls accumulated capital, vocal authority, and lineage resources. Royal Moon in Leo bestows an authoritative yet empathetic vocal cadence and a natural talent for institutional asset preservation.</div>
                 </div>
-                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:6px 10px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
-                        <span style="font-size:10.5px; font-weight:800; color:#2B4C7E;">3rd House · Virgo (Kanya)</span>
-                        <span style="font-size:8px; font-weight:700; background:#EEF2F7; color:#2B4C7E; padding:1px 6px; border-radius:10px;">Lord: Mercury · Occupied: Saturn, Jupiter</span>
+                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:8px; padding:10px 14px; box-shadow:0 2px 6px rgba(0,0,0,0.02);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <span style="font-size: 13.5px; font-weight:800; color:#2B4C7E;">3rd House · Virgo (Kanya)</span>
+                        <span style="font-size: 10.2px; font-weight:700; background:#EEF2F7; color:#2B4C7E; padding:2px 8px; border-radius:10px;">Lord: Mercury · Occupied: Saturn, Jupiter</span>
                     </div>
-                    <div style="font-size:9.5px; color:#374151; line-height:1.4;">Seat of entrepreneurial drive, media communication, and courage. Conjunction of Saturn and Jupiter creates highly structured intellectual execution, strategic networking, and resilient commercial negotiations.</div>
+                    <div style="font-size: 12px; color:#374151; line-height:1.46;">Seat of entrepreneurial drive, media communication, and courage. Conjunction of Saturn and Jupiter creates highly structured intellectual execution, strategic networking, and resilient commercial negotiations.</div>
                 </div>
-                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:6px 10px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
-                        <span style="font-size:10.5px; font-weight:800; color:#7C3AED;">4th House · Libra (Tula)</span>
-                        <span style="font-size:8px; font-weight:700; background:#F3EFFC; color:#7C3AED; padding:1px 6px; border-radius:10px;">Lord: Venus · Unoccupied</span>
+                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:8px; padding:10px 14px; box-shadow:0 2px 6px rgba(0,0,0,0.02);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <span style="font-size: 13.5px; font-weight:800; color:#7C3AED;">4th House · Libra (Tula)</span>
+                        <span style="font-size: 10.2px; font-weight:700; background:#F3EFFC; color:#7C3AED; padding:2px 8px; border-radius:10px;">Lord: Venus · Unoccupied</span>
                     </div>
-                    <div style="font-size:9.5px; color:#374151; line-height:1.4;">Governs domestic contentment, landed assets, and inner peace. Lord Venus is exalted in the 9th/11th harmonics, ensuring refined luxury environments, prime real estate ownership, and balanced domestic serenity.</div>
+                    <div style="font-size: 12px; color:#374151; line-height:1.46;">Governs domestic contentment, landed assets, and inner peace. Lord Venus is exalted in the 9th/11th harmonics, ensuring refined luxury environments, prime real estate ownership, and balanced domestic serenity.</div>
                 </div>
-                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:6px 10px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
-                        <span style="font-size:10.5px; font-weight:800; color:#C45738;">5th House · Scorpio (Vrishchika)</span>
-                        <span style="font-size:8px; font-weight:700; background:#FDF2E9; color:#C45738; padding:1px 6px; border-radius:10px;">Lord: Mars · Occupied: Sun, Mercury</span>
+                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:8px; padding:10px 14px; box-shadow:0 2px 6px rgba(0,0,0,0.02);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <span style="font-size: 13.5px; font-weight:800; color:#C45738;">5th House · Scorpio (Vrishchika)</span>
+                        <span style="font-size: 10.2px; font-weight:700; background:#FDF2E9; color:#C45738; padding:2px 8px; border-radius:10px;">Lord: Mars · Occupied: Sun, Mercury</span>
                     </div>
-                    <div style="font-size:9.5px; color:#374151; line-height:1.4;">Domain of intellect, speculative brilliance, and karmic merit. Budhaditya Yoga here unlocks profound analytical intellect, decisive strategic foresight, and exceptional mentorship capabilities.</div>
+                    <div style="font-size: 12px; color:#374151; line-height:1.46;">Domain of intellect, speculative brilliance, and karmic merit. Budhaditya Yoga here unlocks profound analytical intellect, decisive strategic foresight, and exceptional mentorship capabilities.</div>
                 </div>
-                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:6px 10px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
-                        <span style="font-size:10.5px; font-weight:800; color:#4E7D68;">6th House · Sagittarius (Dhanu)</span>
-                        <span style="font-size:8px; font-weight:700; background:#EDF4F0; color:#4E7D68; padding:1px 6px; border-radius:10px;">Lord: Jupiter · Unoccupied</span>
+                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:8px; padding:10px 14px; box-shadow:0 2px 6px rgba(0,0,0,0.02);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <span style="font-size: 13.5px; font-weight:800; color:#4E7D68;">6th House · Sagittarius (Dhanu)</span>
+                        <span style="font-size: 10.2px; font-weight:700; background:#EDF4F0; color:#4E7D68; padding:2px 8px; border-radius:10px;">Lord: Jupiter · Unoccupied</span>
                     </div>
-                    <div style="font-size:9.5px; color:#374151; line-height:1.4;">Oversees operational disputes, litigation, and vitality defense. Jupiterian lordship ensures complete legal protection, tactical superiority over corporate competitors, and sound physiological immunity.</div>
-                </div>
-                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:6px 10px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
-                        <span style="font-size:10.5px; font-weight:800; color:#2B4C7E;">7th House · Capricorn (Makara)</span>
-                        <span style="font-size:8px; font-weight:700; background:#EEF2F7; color:#2B4C7E; padding:1px 6px; border-radius:10px;">Lord: Saturn · Occupied: Ketu</span>
-                    </div>
-                    <div style="font-size:9.5px; color:#374151; line-height:1.4;">Governs marital alliances and commercial joint ventures. Ketu here brings karmic contracts requiring mature emotional boundaries, objective commercial vetting, and highly defined partnership protocols.</div>
-                </div>
-                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:6px 10px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
-                        <span style="font-size:10.5px; font-weight:800; color:#7C3AED;">8th House · Aquarius (Kumbha)</span>
-                        <span style="font-size:8px; font-weight:700; background:#F3EFFC; color:#7C3AED; padding:1px 6px; border-radius:10px;">Lord: Saturn · Unoccupied</span>
-                    </div>
-                    <div style="font-size:9.5px; color:#374151; line-height:1.4;">Governs esoteric transformation, longevity, and unearned windfalls. Lord Saturn grants immense longevity, profound metaphysical insight, and the strategic capacity to rebuild successfully from market dislocations.</div>
-                </div>
-                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:6px 10px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
-                        <span style="font-size:10.5px; font-weight:800; color:#C45738;">9th House · Pisces (Meena)</span>
-                        <span style="font-size:8px; font-weight:700; background:#FDF2E9; color:#C45738; padding:1px 6px; border-radius:10px;">Lord: Jupiter · Unoccupied</span>
-                    </div>
-                    <div style="font-size:9.5px; color:#374151; line-height:1.4;">Governs dharma, institutional mentorship, and international journeys. Jupiterian governance ensures moral integrity, continuous patron support, and prosperous international commercial affiliations.</div>
-                </div>
-                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:6px 10px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
-                        <span style="font-size:10.5px; font-weight:800; color:#4E7D68;">10th House · Aries (Mesha)</span>
-                        <span style="font-size:8px; font-weight:700; background:#EDF4F0; color:#4E7D68; padding:1px 6px; border-radius:10px;">Lord: Mars (Own Sign) · Ruchaka Yoga</span>
-                    </div>
-                    <div style="font-size:9.5px; color:#374151; line-height:1.4;">Peak throne of professional vocation and executive command. Swakshetra Mars forms the celebrated Ruchaka Mahapurusha Yoga, conferring extraordinary executive courage, authority, and industry supremacy.</div>
-                </div>
-                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:6px 10px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
-                        <span style="font-size:10.5px; font-weight:800; color:#2B4C7E;">11th House · Taurus (Vrishabha)</span>
-                        <span style="font-size:8px; font-weight:700; background:#EEF2F7; color:#2B4C7E; padding:1px 6px; border-radius:10px;">Lord: Venus (Exalted) · Sovereign Labha</span>
-                    </div>
-                    <div style="font-size:9.5px; color:#374151; line-height:1.4;">Controls institutional cash flow, scalable profits, and influential social networks. Exalted ruler Venus guarantees multi-stream commercial prosperity, expansive elite networks, and sustained high liquidity.</div>
-                </div>
-                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:6px 10px;">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
-                        <span style="font-size:10.5px; font-weight:800; color:#7C3AED;">12th House · Gemini (Mithuna)</span>
-                        <span style="font-size:8px; font-weight:700; background:#F3EFFC; color:#7C3AED; padding:1px 6px; border-radius:10px;">Lord: Mercury · Unoccupied</span>
-                    </div>
-                    <div style="font-size:9.5px; color:#374151; line-height:1.4;">Controls foreign expenditures, subconscious restoration, and spiritual seclusion. Governed by Mercury in 5th, directing capital outflow constructively into intellectual IP creation, international ventures, and charitable endowments.</div>
+                    <div style="font-size: 12px; color:#374151; line-height:1.46;">Oversees operational disputes, litigation, and vitality defense. Jupiterian lordship ensures complete legal protection, tactical superiority over corporate competitors, and sound physiological immunity.</div>
                 </div>
             </div>
-
-            <!-- On-Page Streamlined Symbol Guide -->
-            <?php echo self::render_symbol_guide_bar([
-                'Kendra' => 'Houses 1, 4, 7, 10 (Pillars of Manifestation)',
-                'Trikona' => 'Houses 1, 5, 9 (Houses of Divine Grace & Lakshmi)',
-                'Dusthana' => 'Houses 6, 8, 12 (Challenge & Overcoming)',
-                'Upachaya' => 'Houses 3, 6, 10, 11 (Compounding Growth Over Time)'
-            ], 'Bhava Terminology'); ?>
-
-            <!-- Bottom 4-5 Takeaway Synthesis (118 Words) -->
-            <?php echo self::render_page_bottom_synthesis(
-                '12 Bhavas Parashari Synthesis &amp; Strategic Execution Pointers',
-                [
-                    'Cancer Lagna with ascending Rahu confers intense intellectual curiosity, unconventional strategic vision, and an innate capacity to lead technological transformation in complex modern enterprise ecosystems.',
-                    '2nd House Moon in royal Leo ensures distinguished executive speech and long-term capital preservation, fortified by exalted Venus in the 11th House generating perpetual commercial cash inflows.',
-                    '5th House Sun-Mercury Budhaditya Yoga yields penetrating analytical intelligence, administrative authority, and exceptional strategic foresight when engineering high-stakes corporate and investment negotiations.',
-                    '10th House Swakshetra Mars in Aries creates flawless executive courage and sovereign operational leadership, ensuring definitive mastery over competitive adversaries and institutional challenges.',
-                    'Balancing 7th House Saturn requires disciplined commercial patience, cultivating win-win alliances, and establishing rigorous contractual frameworks to convert early partnership frictions into permanent institutional stability.'
-                ]
-            ); ?>
         </div>
-        <?php echo self::render_page_footer(9, '12 Bhavas Comprehensive Life Audit'); ?>
+
+        <div class="mr-page-bottom-pin">
+            <!-- Streamlined On-Page Symbol Guide -->
+            <?php echo self::render_symbol_guide_bar([
+                'Lagna Bhava' => 'Vital Persona, Constitution & Worldview',
+                'Dhana Bhava' => 'Liquid Capital, Speech & Lineage Assets',
+                'Sahaja Bhava' => 'Courage, Enterprise & Technical Intellect',
+                'Sukha Bhava' => 'Domestic Serenity, Real Estate & Peace'
+            ], 'Foundational Bhava Terms', $head_font); ?>
+
+            <!-- Bottom Takeaway Synthesis -->
+            <?php echo self::render_page_bottom_synthesis([
+                "Cancer Lagna anchored by royal Moon in the 2nd house establishes an unassailable financial foundation powered by authoritative vocal diplomacy.",
+                "Saturn and Jupiter in the 3rd house convert raw entrepreneurial grit into highly structured institutional systems and enduring technical credibility.",
+                "Budhaditya Yoga in the 5th house ensures speculative acumen, intellectual breakthroughs, and elite analytical mentorship.",
+                "Jupiter's lordship over the 6th house guarantees total immunity against operational litigation and sustained competitive supremacy."
+            ], 'Houses 1–6 Architectural Takeaways', $head_font); ?>
+
+            <?php echo self::render_page_footer(9, '12 Bhavas Comprehensive Life Audit · Houses 1–6'); ?>
+        </div>
+    </div>
+
+
+    <!-- ========================================================
+         PAGE 10: THE 12 BHAVAS (HOUSES) COMPREHENSIVE LIFE AUDIT: PART 2 (HOUSES 7 TO 12)
+         ======================================================== -->
+    <div class="mr-page">
+        <div class="mr-header-bar">
+            <div class="mr-header-brand-wrap">
+                <img src="<?php echo esc_attr($logo_uri); ?>" alt="MeraRashifal" class="mr-header-logo-img" />
+            </div>
+            <span class="mr-header-meta"><?php echo esc_html($person_name); ?> · 12 Bhavas Life Audit (Houses 7–12)</span>
+        </div>
+
+        <div class="mr-page-body">
+            <div class="mr-tag-pill">08 · 12 Houses of Life (Part 1)</div>
+            <h1 class="mr-page-h1">The 12 Houses of Life: Houses 7 to 12</h1>
+            <div class="mr-page-sub">Understanding marriage, longevity, good fortune, career, income, and spiritual growth</div>
+
+            <!-- Architectural Pillar Summary Bar (Kama & Moksha Trikonas) -->
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:16px; margin-top:2px; margin-bottom:10px;">
+                <div class="mr-card" style="padding:8px 14px; text-align:center; border-top:3.5px solid #2B4C7E;">
+                    <div style="font-size: 11px; font-weight:700; color:#8C7B6B; text-transform:uppercase; letter-spacing:0.04em;">Kama Trikona (3rd, 7th, 11th Bhavas)</div>
+                    <div style="font-size: 16px; font-weight:800; color:#2B4C7E; margin:3px 0;">91% · Potent Global Expansion</div>
+                    <div style="font-size: 11.2px; color:#4B5563;">Mass Global Reach, Commercial Joint Ventures &amp; Sovereign Gains</div>
+                </div>
+                <div class="mr-card" style="padding:8px 14px; text-align:center; border-top:3.5px solid #7C3AED;">
+                    <div style="font-size: 11px; font-weight:700; color:#8C7B6B; text-transform:uppercase; letter-spacing:0.04em;">Moksha Trikona (4th, 8th, 12th Bhavas)</div>
+                    <div style="font-size: 16px; font-weight:800; color:#7C3AED; margin:3px 0;">86% · Fortified Esoteric Depth</div>
+                    <div style="font-size: 11.2px; color:#4B5563;">Intuitive Longevity, Subconscious Resilience &amp; Spiritual Liberation</div>
+                </div>
+            </div>
+
+            <!-- Houses 7 to 12 Comprehensive Grid (2 Columns, 3 Rows) -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px 16px;">
+                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:8px; padding:10px 14px; box-shadow:0 2px 6px rgba(0,0,0,0.02);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <span style="font-size: 13.5px; font-weight:800; color:#2B4C7E;">7th House · Capricorn (Makara)</span>
+                        <span style="font-size: 10.2px; font-weight:700; background:#EEF2F7; color:#2B4C7E; padding:2px 8px; border-radius:10px;">Lord: Saturn · Occupied: Ketu</span>
+                    </div>
+                    <div style="font-size: 12px; color:#374151; line-height:1.46;">Governs marital alliances and commercial joint ventures. Ketu here brings karmic contracts requiring mature emotional boundaries, objective commercial vetting, and highly defined partnership protocols.</div>
+                </div>
+                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:8px; padding:10px 14px; box-shadow:0 2px 6px rgba(0,0,0,0.02);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <span style="font-size: 13.5px; font-weight:800; color:#7C3AED;">8th House · Aquarius (Kumbha)</span>
+                        <span style="font-size: 10.2px; font-weight:700; background:#F3EFFC; color:#7C3AED; padding:2px 8px; border-radius:10px;">Lord: Saturn · Unoccupied</span>
+                    </div>
+                    <div style="font-size: 12px; color:#374151; line-height:1.46;">Governs esoteric transformation, longevity, and unearned windfalls. Lord Saturn grants immense longevity, profound metaphysical insight, and the strategic capacity to rebuild successfully from market dislocations.</div>
+                </div>
+                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:8px; padding:10px 14px; box-shadow:0 2px 6px rgba(0,0,0,0.02);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <span style="font-size: 13.5px; font-weight:800; color:#C45738;">9th House · Pisces (Meena)</span>
+                        <span style="font-size: 10.2px; font-weight:700; background:#FDF2E9; color:#C45738; padding:2px 8px; border-radius:10px;">Lord: Jupiter · Unoccupied</span>
+                    </div>
+                    <div style="font-size: 12px; color:#374151; line-height:1.46;">Governs dharma, institutional mentorship, and international journeys. Jupiterian governance ensures moral integrity, continuous patron support, and prosperous international commercial affiliations.</div>
+                </div>
+                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:8px; padding:10px 14px; box-shadow:0 2px 6px rgba(0,0,0,0.02);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <span style="font-size: 13.5px; font-weight:800; color:#4E7D68;">10th House · Aries (Mesha)</span>
+                        <span style="font-size: 10.2px; font-weight:700; background:#EDF4F0; color:#4E7D68; padding:2px 8px; border-radius:10px;">Lord: Mars (Own Sign) · Ruchaka Yoga</span>
+                    </div>
+                    <div style="font-size: 12px; color:#374151; line-height:1.46;">Peak throne of professional vocation and executive command. Swakshetra Mars forms the celebrated Ruchaka Mahapurusha Yoga, conferring extraordinary executive courage, authority, and industry supremacy.</div>
+                </div>
+                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:8px; padding:10px 14px; box-shadow:0 2px 6px rgba(0,0,0,0.02);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <span style="font-size: 13.5px; font-weight:800; color:#2B4C7E;">11th House · Taurus (Vrishabha)</span>
+                        <span style="font-size: 10.2px; font-weight:700; background:#EEF2F7; color:#2B4C7E; padding:2px 8px; border-radius:10px;">Lord: Venus (Exalted) · Sovereign Labha</span>
+                    </div>
+                    <div style="font-size: 12px; color:#374151; line-height:1.46;">Controls institutional cash flow, scalable profits, and influential social networks. Exalted ruler Venus guarantees multi-stream commercial prosperity, expansive elite networks, and sustained high liquidity.</div>
+                </div>
+                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:8px; padding:10px 14px; box-shadow:0 2px 6px rgba(0,0,0,0.02);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                        <span style="font-size: 13.5px; font-weight:800; color:#7C3AED;">12th House · Gemini (Mithuna)</span>
+                        <span style="font-size: 10.2px; font-weight:700; background:#F3EFFC; color:#7C3AED; padding:2px 8px; border-radius:10px;">Lord: Mercury · Unoccupied</span>
+                    </div>
+                    <div style="font-size: 12px; color:#374151; line-height:1.46;">Controls foreign expenditures, subconscious restoration, and spiritual seclusion. Governed by Mercury in 5th, directing capital outflow constructively into intellectual IP creation, international ventures, and charitable endowments.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mr-page-bottom-pin">
+            <!-- Streamlined On-Page Symbol Guide -->
+            <?php echo self::render_symbol_guide_bar([
+                'Kalatra Bhava' => 'Sovereign Alliances & Marriage',
+                'Randhra Bhava' => 'Esoteric Rebirth & Unearned Wealth',
+                'Bhagya Bhava' => 'Higher Dharma, Fortune & Mentorship',
+                'Karma Bhava' => 'Executive Throne & Vocational Supremacy'
+            ], 'Transcendental Bhava Terms', $head_font); ?>
+
+            <!-- Bottom Takeaway Synthesis -->
+            <?php echo self::render_page_bottom_synthesis([
+                "Exalted Mars ruling the 10th house creates the formidable Ruchaka Yoga, guaranteeing institutional command and executive preeminence.",
+                "Exalted Venus governing the 11th house of Labha provides multi-stream commercial profits, elite networks, and sustained wealth accumulation.",
+                "Saturn and Ketu shaping the 7th and 8th houses demand structured partnership contracts and bestow profound metaphysical resilience.",
+                "Mercury directing 12th house energies into 5th house creativity converts foreign expenditures into lasting intellectual property and global prestige."
+            ], 'Houses 7–12 Architectural Takeaways', $head_font); ?>
+
+            <?php echo self::render_page_footer(10, '12 Bhavas Comprehensive Life Audit · Houses 7–12'); ?>
+        </div>
     </div>
 
     <!-- ========================================================
-         PAGE 10: SIXFOLD SHADBALA PLANETARY STRENGTH
+         PAGE 11: SIXFOLD SHADBALA PLANETARY STRENGTH
          ======================================================== -->
     <div class="mr-page">
         <div class="mr-header-bar">
@@ -1731,126 +1835,129 @@ class MR_Kundali_Report_Builder {
         </div>
 
         <div class="mr-page-body">
-            <div class="mr-tag-pill">09 · Quantitative Planetary Potency</div>
-            <h1 class="mr-page-h1">Sixfold Shadbala Planetary Strength &amp; Bhava Bala Matrix</h1>
-            <div class="mr-page-sub">Mathematical Evaluation Across Positional (Sthana), Directional (Dig), Motional (Chesta) &amp; Temporal Balas</div>
+            <div class="mr-tag-pill">09 · Planetary Strengths (Shadbala)</div>
+            <h1 class="mr-page-h1">Shadbala: Sixfold Planetary Strength &amp; House Power</h1>
+            <div class="mr-page-sub">Traditional mathematical calculations showing how capable each planet is in your chart</div>
 
             <!-- Shadbala Visual Bar Chart -->
             <div style="margin:2px 0 4px 0;">
                 <?php echo self::render_shadbala_bars_svg(560, 92); ?>
-                <div style="text-align:center; font-size:8.8px; color:#4B5563; font-weight:700; margin:6px 0 6px 0; text-transform:uppercase; letter-spacing:0.04em;">
+                <div style="text-align:center; font-size: 11px; color:#4B5563; font-weight:700; margin:6px 0 6px 0; text-transform:uppercase; letter-spacing:0.04em;">
                     Quantitative Planetary Potency in Virupas vs Minimum Classical Thresholds (Parashari Baseline)
                 </div>
             </div>
 
-            <!-- Detailed Shadbala Metric Table with Enhanced Font Sizes & Padding -->
-            <table style="width:100%; border-collapse:collapse; font-size:9.5px; margin-top:2px;">
+            <!-- Detailed Shadbala Metric Table with Fixed Layout & Colgroup -->
+            <table class="mr-kundali-table" style="font-size: 10.4px; margin-top:2px;">
+                <colgroup>
+                    <col style="width: 15%;">
+                    <col style="width: 11%;">
+                    <col style="width: 9%;">
+                    <col style="width: 12%;">
+                    <col style="width: 11%;">
+                    <col style="width: 12%;">
+                    <col style="width: 30%;">
+                </colgroup>
                 <thead>
                     <tr style="background:#F4EFE6; color:#111827; font-family:<?php echo $head_font; ?>; font-weight:700;">
-                        <th style="padding:5px 8px; text-align:left; border:1px solid #ECE6DD;">Planet (Graha)</th>
-                        <th style="padding:5px 8px; text-align:center; border:1px solid #ECE6DD;">Virupas (Total)</th>
-                        <th style="padding:5px 8px; text-align:center; border:1px solid #ECE6DD;">Rupas</th>
-                        <th style="padding:5px 8px; text-align:center; border:1px solid #ECE6DD;">Req. Virupas</th>
-                        <th style="padding:5px 8px; text-align:center; border:1px solid #ECE6DD;">Potency %</th>
-                        <th style="padding:5px 8px; text-align:center; border:1px solid #ECE6DD;">Relative Rank</th>
-                        <th style="padding:5px 8px; text-align:left; border:1px solid #ECE6DD;">Classical Interpretation</th>
+                        <th style="padding:3.5px 5px; text-align:left; border:1px solid #ECE6DD;">Planet (Graha)</th>
+                        <th style="padding:3.5px 5px; text-align:center; border:1px solid #ECE6DD;">Virupas</th>
+                        <th style="padding:3.5px 5px; text-align:center; border:1px solid #ECE6DD;">Rupas</th>
+                        <th style="padding:3.5px 5px; text-align:center; border:1px solid #ECE6DD;">Req. Virupas</th>
+                        <th style="padding:3.5px 5px; text-align:center; border:1px solid #ECE6DD;">Potency %</th>
+                        <th style="padding:3.5px 5px; text-align:center; border:1px solid #ECE6DD;">Relative Rank</th>
+                        <th style="padding:3.5px 5px; text-align:left; border:1px solid #ECE6DD;">Classical Interpretation</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr style="background:#FFFFFF;">
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; font-weight:700; color:#047857;">Venus (Shukra)</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; text-align:center; font-weight:700;">484.2</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; text-align:center;">8.07</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; text-align:center;">330</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; text-align:center; font-weight:800; color:#047857;">147%</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; text-align:center; font-weight:700; color:#C45738;">Rank 1</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD;">Supreme aesthetic vision, wealth attraction &amp; strategic diplomacy.</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; font-weight:700; color:#047857;">Venus (Shukra)</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; text-align:center; font-weight:700;">484.2</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; text-align:center;">8.07</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; text-align:center;">330</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; text-align:center; font-weight:800; color:#047857;">147%</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; text-align:center; font-weight:700; color:#C45738;">Rank 1</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD;">Supreme aesthetic vision, wealth attraction &amp; strategic diplomacy.</td>
                     </tr>
                     <tr style="background:#FAF7F2;">
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; font-weight:700; color:#C45738;">Mars (Mangal)</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; text-align:center; font-weight:700;">442.8</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; text-align:center;">7.38</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; text-align:center;">300</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; text-align:center; font-weight:800; color:#C45738;">148%</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; text-align:center; font-weight:700; color:#C45738;">Rank 2 (Ex)</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD;">Highest relative excess (+48%); invincible stamina, dispute resolution.</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; font-weight:700; color:#C45738;">Mars (Mangal)</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; text-align:center; font-weight:700;">442.8</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; text-align:center;">7.38</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; text-align:center;">300</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; text-align:center; font-weight:800; color:#C45738;">148%</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; text-align:center; font-weight:700; color:#C45738;">Rank 2 (Ex)</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD;">Highest relative excess (+48%); invincible stamina, dispute resolution.</td>
                     </tr>
                     <tr style="background:#FFFFFF;">
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; font-weight:700; color:#B45309;">Jupiter (Guru)</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; text-align:center; font-weight:700;">468.5</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; text-align:center;">7.81</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; text-align:center;">390</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; text-align:center; font-weight:800; color:#047857;">120%</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; text-align:center; font-weight:700;">Rank 3</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD;">Deep dharmic wisdom, executive advisory talent, institutional trust.</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; font-weight:700; color:#B45309;">Jupiter (Guru)</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; text-align:center; font-weight:700;">468.5</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; text-align:center;">7.81</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; text-align:center;">390</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; text-align:center; font-weight:800; color:#047857;">120%</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; text-align:center; font-weight:700;">Rank 3</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD;">Deep dharmic wisdom, executive advisory talent, institutional trust.</td>
                     </tr>
                     <tr style="background:#FAF7F2;">
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; font-weight:700; color:#4B5563;">Saturn (Shani)</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; text-align:center; font-weight:700;">355.2</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; text-align:center;">5.92</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; text-align:center;">300</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; text-align:center; font-weight:800; color:#047857;">118%</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; text-align:center; font-weight:700;">Rank 4</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD;">Long-term resilience, operational patience, systems architecture.</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; font-weight:700; color:#4B5563;">Saturn (Shani)</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; text-align:center; font-weight:700;">355.2</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; text-align:center;">5.92</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; text-align:center;">300</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; text-align:center; font-weight:800; color:#047857;">118%</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; text-align:center; font-weight:700;">Rank 4</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD;">Long-term resilience, operational patience, systems architecture.</td>
                     </tr>
                     <tr style="background:#FFFFFF;">
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; font-weight:700; color:#1D4ED8;">Moon (Chandra)</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; text-align:center; font-weight:700;">402.6</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; text-align:center;">6.71</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; text-align:center;">360</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; text-align:center; font-weight:800; color:#047857;">112%</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; text-align:center; font-weight:700;">Rank 5</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD;">Stable emotional core, intuitive perception, royal family demeanor.</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; font-weight:700; color:#1D4ED8;">Moon (Chandra)</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; text-align:center; font-weight:700;">402.6</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; text-align:center;">6.71</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; text-align:center;">360</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; text-align:center; font-weight:800; color:#047857;">112%</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; text-align:center; font-weight:700;">Rank 5</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD;">Stable emotional core, intuitive perception, royal family demeanor.</td>
                     </tr>
                     <tr style="background:#FAF7F2;">
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; font-weight:700; color:#B91C1C;">Sun (Surya)</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; text-align:center; font-weight:700;">418.1</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; text-align:center;">6.97</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; text-align:center;">390</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; text-align:center; font-weight:800; color:#047857;">107%</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; text-align:center; font-weight:700;">Rank 6</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD;">Dignified authority, moral character, strong vitality and willpower.</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; font-weight:700; color:#B91C1C;">Sun (Surya)</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; text-align:center; font-weight:700;">418.1</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; text-align:center;">6.97</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; text-align:center;">390</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; text-align:center; font-weight:800; color:#047857;">107%</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; text-align:center; font-weight:700;">Rank 6</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD;">Dignified authority, moral character, strong vitality and willpower.</td>
                     </tr>
                     <tr style="background:#FFFFFF;">
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; font-weight:700; color:#4B5563;">Mercury (Budh)</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; text-align:center; font-weight:700;">388.4</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; text-align:center;">6.47</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; text-align:center;">420</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; text-align:center; font-weight:700; color:#D97706;">93%</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD; text-align:center; font-weight:700;">Rank 7</td>
-                        <td style="padding:4.5px 8px; border:1px solid #ECE6DD;">Benefic in 5th; benefits greatly from conscious communication hygiene.</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; font-weight:700; color:#4B5563;">Mercury (Budh)</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; text-align:center; font-weight:700;">388.4</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; text-align:center;">6.47</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; text-align:center;">420</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; text-align:center; font-weight:700; color:#D97706;">93%</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD; text-align:center; font-weight:700;">Rank 7</td>
+                        <td style="padding:3px 5px; border:1px solid #ECE6DD;">Benefic in 5th; benefits greatly from conscious communication hygiene.</td>
                     </tr>
                 </tbody>
             </table>
 
             <!-- Deep Analysis Cards Below the Table (Filling the Bottom Richly) -->
-            <div class="mr-grid-2col" style="gap:14px 22px; margin-top:8px;">
-                <div class="mr-card" style="padding:9px 12px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#C45738; margin-bottom:3px;">
+            <div class="mr-grid-2col" style="gap:8px 16px; margin-top:4px;">
+                <div class="mr-card" style="padding:4.5px 9px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 12.2px; font-weight:700; color:#C45738; margin-bottom:2px;">
                         The Dominance of Venus &amp; Mars
                     </div>
-                    <div style="font-size:9.6px; color:#374151; line-height:1.45;">
+                    <div style="font-size: 10.4px; color:#374151; line-height:1.33;">
                         Venus and Mars together dominate your Shadbala hierarchy, exceeding 147% of their required potencies. This creates an exceptional synthesis of aesthetic sophistication and decisive martial action. You possess the uncommon ability to design visionary concepts and ruthlessly execute them into reality.
                     </div>
                 </div>
 
-                <div class="mr-card" style="padding:9px 12px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#4E7D68; margin-bottom:3px;">
+                <div class="mr-card" style="padding:4.5px 9px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 12.2px; font-weight:700; color:#4E7D68; margin-bottom:2px;">
                         All Major Planets Exceed 100% Thresholds
                     </div>
-                    <div style="font-size:9.6px; color:#374151; line-height:1.45;">
+                    <div style="font-size: 10.4px; color:#374151; line-height:1.33;">
                         Six out of seven classical grahas comfortably exceed their minimum Parashari thresholds, indicating high constitutional robustness and minimal karmic debility. Mercury, sitting at 93% in the 5th house, functions smoothly when channeled through structured writing, legal precision, and digital workflows.
                     </div>
                 </div>
             </div>
 
-            <!-- On-Page Streamlined Symbol Guide -->
-            <?php echo self::render_symbol_guide_bar([
-                'Virupa' => 'Standard Metric of Shadbala (60 Virupas = 1 Rupa)',
-                'Sthana Bala' => 'Positional Dignity & Exaltation Potency',
-                'Dig Bala' => 'Directional Strength in Key Angles',
-                'Chesta Bala' => 'Motional Velocity & Retrograde Power'
-            ], 'Shadbala Terms'); ?>
+            
 
             <!-- Bottom 4-5 Takeaway Synthesis (110 Words) -->
             <?php echo self::render_page_bottom_synthesis(
@@ -1863,11 +1970,11 @@ class MR_Kundali_Report_Builder {
                 ]
             ); ?>
         </div>
-        <?php echo self::render_page_footer(10, 'Sixfold Shadbala Strength Matrix'); ?>
+        <?php echo self::render_page_footer(11, 'Sixfold Shadbala Strength Matrix'); ?>
     </div>
 
     <!-- ========================================================
-         PAGE 11: ASHTAKVARGA 337-BINDU ENERGY MATRIX
+         PAGE 12: ASHTAKVARGA 337-BINDU ENERGY MATRIX
          ======================================================== -->
     <div class="mr-page">
         <div class="mr-header-bar">
@@ -1878,13 +1985,13 @@ class MR_Kundali_Report_Builder {
         </div>
 
         <div class="mr-page-body">
-            <div class="mr-tag-pill">10 · Eightfold Benefic Energy Distribution</div>
-            <h1 class="mr-page-h1">Ashtakvarga 337-Bindu Energy Matrix &amp; Transit Dynamics</h1>
-            <div class="mr-page-sub">Comprehensive Sarvashtakvarga Numeric Evaluation of Auspicious Transit Support Across All 12 Signs</div>
+            <div class="mr-tag-pill">10 · Auspicious Energy Grid (Ashtakvarga)</div>
+            <h1 class="mr-page-h1">Ashtakvarga: 337-Point Energy Grid &amp; Transit Support</h1>
+            <div class="mr-page-sub">Discovering your strongest life areas and favorable houses for smooth planetary transits</div>
 
             <!-- Complete 12-Sign Sarvashtakvarga Scorecard with Enhanced Font & Spacing -->
             <div style="margin-top:2px;">
-                <table style="width:100%; border-collapse:collapse; font-size:9.5px;">
+                <table style="width:100%; border-collapse:collapse; font-size: 11.9px;">
                     <thead>
                         <tr style="background:#F4EFE6; color:#111827; font-family:<?php echo $head_font; ?>; font-weight:700;">
                             <th style="padding:4.5px 7px; text-align:left; border:1px solid #ECE6DD;">Zodiac Sign</th>
@@ -1918,33 +2025,27 @@ class MR_Kundali_Report_Builder {
             </div>
 
             <!-- Deep Analysis Cards Below the Table (Filling the Bottom Richly) -->
-            <div class="mr-grid-2col" style="gap:14px 22px; margin-top:8px;">
-                <div class="mr-card" style="padding:9px 12px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#C45738; margin-bottom:3px;">
+            <div class="mr-grid-2col" style="gap:8px 16px; margin-top:4px;">
+                <div class="mr-card" style="padding:6px 10px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; font-weight:700; color:#C45738; margin-bottom:3px;">
                         The 34-Bindu Capricorn Powerhouse (7th Kendra)
                     </div>
-                    <div style="font-size:9.6px; color:#374151; line-height:1.45;">
+                    <div style="font-size: 12px; color:#374151; line-height:1.45;">
                         Your highest Sarvashtakvarga score sits in Capricorn (34 bindus), hosting exalted Mars. In classical Ashtakvarga, any house scoring above 30 bindus represents an unstoppable engine of material fruition. This guarantees that major transits of Jupiter or Saturn through Capricorn trigger massive executive leaps and commercial milestones.
                     </div>
                 </div>
 
-                <div class="mr-card" style="padding:9px 12px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#4E7D68; margin-bottom:3px;">
+                <div class="mr-card" style="padding:6px 10px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; font-weight:700; color:#4E7D68; margin-bottom:3px;">
                         Samudaya Score 337: High Karmic Reservoir
                     </div>
-                    <div style="font-size:9.6px; color:#374151; line-height:1.45;">
+                    <div style="font-size: 12px; color:#374151; line-height:1.45;">
                         Your total Samudaya score of 337 points reflects a well-distributed energetic reserve across all four life pursuits (Purusharthas): Artha (Wealth) leads with 96 points, followed by Dharma with 88 points. Low bindu zones (Aquarius 23, Libra 25) simply advise caution against impulsive speculation during transits.
                     </div>
                 </div>
             </div>
 
-            <!-- On-Page Streamlined Symbol Guide -->
-            <?php echo self::render_symbol_guide_bar([
-                'Bindu' => 'Benefic Point (Score > 28 is Strong Transit Engine)',
-                'SAV Total' => 'Sarvashtakvarga Combined Points Across All Grahas',
-                'Kakshya' => '3°45\' Planetary Sector Division Within Signs',
-                'Samudaya' => 'Grand Total Matrix (Classical Standard = 337)'
-            ], 'Ashtakvarga Terms'); ?>
+            
 
             <!-- Bottom 4-5 Takeaway Synthesis (107 Words) -->
             <?php echo self::render_page_bottom_synthesis(
@@ -1957,11 +2058,11 @@ class MR_Kundali_Report_Builder {
                 ]
             ); ?>
         </div>
-        <?php echo self::render_page_footer(11, 'Ashtakvarga 337-Bindu Energy Matrix'); ?>
+        <?php echo self::render_page_footer(12, 'Ashtakvarga 337-Bindu Energy Matrix'); ?>
     </div>
 
     <!-- ========================================================
-         PAGE 12: COMPLETE 120-YEAR VIMSHOTTARI DASHA LIFELINE
+         PAGE 13: COMPLETE 120-YEAR VIMSHOTTARI DASHA LIFELINE
          ======================================================== -->
     <div class="mr-page">
         <div class="mr-header-bar">
@@ -1972,116 +2073,110 @@ class MR_Kundali_Report_Builder {
         </div>
 
         <div class="mr-page-body">
-            <div class="mr-tag-pill">11 · 120-Year Master Dasha Progression</div>
+            <div class="mr-tag-pill">11 · 120-Year Planetary Timeline</div>
             <h1 class="mr-page-h1">Complete 120-Year Vimshottari Dasha Lifeline</h1>
-            <div class="mr-page-sub">Chronological Lifecycle Roadmap of Primary Planetary Periods from Birth Through Full Maturity</div>
+            <div class="mr-page-sub">Your complete life timeline showing which planets govern different decades of your life</div>
 
             <!-- Master Dasha Progression Table with Enhanced Spacing & Font -->
-            <table style="width:100%; border-collapse:collapse; font-size:9.5px; margin-top:4px;">
+            <table style="width:100%; border-collapse:collapse; font-size: 11.9px; margin-top:4px;">
                 <thead>
                     <tr style="background:#F4EFE6; color:#111827; font-family:<?php echo $head_font; ?>; font-weight:700;">
                         <th style="padding:5px 8px; text-align:left; border:1px solid #ECE6DD; width:16%;">Mahadasha Lord</th>
-                        <th style="padding:5px 8px; text-align:center; border:1px solid #ECE6DD; width:14%;">Duration</th>
-                        <th style="padding:5px 8px; text-align:center; border:1px solid #ECE6DD; width:22%;">Effective Dates</th>
-                        <th style="padding:5px 8px; text-align:center; border:1px solid #ECE6DD; width:12%;">Life Age</th>
+                        <th style="padding:3px 7px; text-align:center; border:1px solid #ECE6DD; width:14%;">Duration</th>
+                        <th style="padding:3px 7px; text-align:center; border:1px solid #ECE6DD; width:22%;">Effective Dates</th>
+                        <th style="padding:3px 7px; text-align:center; border:1px solid #ECE6DD; width:12%;">Life Age</th>
                         <th style="padding:5px 8px; text-align:left; border:1px solid #ECE6DD; width:36%;">Core Evolutionary Life Theme</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr style="background:#FFFFFF;">
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; font-weight:700; color:#4B5563;">Ketu Mahadasha</td>
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; text-align:center;">Balance (Birth)</td>
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; text-align:center;">Dec 1980 – Jul 1981</td>
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; text-align:center;">0 – 1 yr</td>
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; color:#4B5563;">Incarnation transition; ancestral protective shielding at birth.</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; font-weight:700; color:#4B5563;">Ketu Mahadasha</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; text-align:center;">Balance (Birth)</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; text-align:center;">Dec 1980 – Jul 1981</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; text-align:center;">0 – 1 yr</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; color:#4B5563;">Incarnation transition; ancestral protective shielding at birth.</td>
                     </tr>
                     <tr style="background:#FAF7F2;">
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; font-weight:700; color:#047857;">Venus (Shukra)</td>
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; text-align:center;">20 Years</td>
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; text-align:center;">Jul 1981 – Jul 2001</td>
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; text-align:center;">1 – 20 yrs</td>
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; color:#4B5563;">Youth, creative education, intellectual blossoming, Atmakaraka lessons.</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; font-weight:700; color:#047857;">Venus (Shukra)</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; text-align:center;">20 Years</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; text-align:center;">Jul 1981 – Jul 2001</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; text-align:center;">1 – 20 yrs</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; color:#4B5563;">Youth, creative education, intellectual blossoming, Atmakaraka lessons.</td>
                     </tr>
                     <tr style="background:#FFFFFF;">
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; font-weight:700; color:#B91C1C;">Sun (Surya)</td>
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; text-align:center;">6 Years</td>
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; text-align:center;">Jul 2001 – Jul 2007</td>
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; text-align:center;">20 – 26 yrs</td>
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; color:#4B5563;">Early career establishment, academic qualifications, competitive triumphs.</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; font-weight:700; color:#B91C1C;">Sun (Surya)</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; text-align:center;">6 Years</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; text-align:center;">Jul 2001 – Jul 2007</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; text-align:center;">20 – 26 yrs</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; color:#4B5563;">Early career establishment, academic qualifications, competitive triumphs.</td>
                     </tr>
                     <tr style="background:#FAF7F2;">
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; font-weight:700; color:#1D4ED8;">Moon (Chandra)</td>
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; text-align:center;">10 Years</td>
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; text-align:center;">Jul 2007 – Jul 2017</td>
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; text-align:center;">26 – 36 yrs</td>
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; color:#4B5563;">Lagna lord activation: marriage, family founding, vocational elevation.</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; font-weight:700; color:#1D4ED8;">Moon (Chandra)</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; text-align:center;">10 Years</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; text-align:center;">Jul 2007 – Jul 2017</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; text-align:center;">26 – 36 yrs</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; color:#4B5563;">Lagna lord activation: marriage, family founding, vocational elevation.</td>
                     </tr>
                     <tr style="background:#FFFFFF;">
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; font-weight:700; color:#C45738;">Mars (Mangal)</td>
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; text-align:center;">7 Years</td>
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; text-align:center;">Jul 2017 – Jul 2024</td>
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; text-align:center;">36 – 43 yrs</td>
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; color:#4B5563;">Exalted Ruchaka power: bold enterprise scaling, asset accumulation.</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; font-weight:700; color:#C45738;">Mars (Mangal)</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; text-align:center;">7 Years</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; text-align:center;">Jul 2017 – Jul 2024</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; text-align:center;">36 – 43 yrs</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; color:#4B5563;">Exalted Ruchaka power: bold enterprise scaling, asset accumulation.</td>
                     </tr>
                     <tr style="background:#FEF3C7; border:1.5px solid #F59E0B;">
-                        <td style="padding:5px 8px; font-weight:800; color:#92400E;">★ Rahu Mahadasha</td>
-                        <td style="padding:5px 8px; text-align:center; font-weight:800; color:#92400E;">18 Years</td>
-                        <td style="padding:5px 8px; text-align:center; font-weight:800; color:#92400E;">Jul 2024 – Jul 2042</td>
-                        <td style="padding:5px 8px; text-align:center; font-weight:800; color:#92400E;">43 – 61 yrs</td>
-                        <td style="padding:5px 8px; font-weight:700; color:#92400E;">CURRENT GOLDEN EPOCH: Sovereign leadership, technology dominance, massive global expansion.</td>
+                        <td style="padding:3px 7px; font-weight:800; color:#92400E;">★ Rahu Mahadasha</td>
+                        <td style="padding:3px 7px; text-align:center; font-weight:800; color:#92400E;">18 Years</td>
+                        <td style="padding:3px 7px; text-align:center; font-weight:800; color:#92400E;">Jul 2024 – Jul 2042</td>
+                        <td style="padding:3px 7px; text-align:center; font-weight:800; color:#92400E;">43 – 61 yrs</td>
+                        <td style="padding:3px 7px; font-weight:700; color:#92400E;">CURRENT GOLDEN EPOCH: Sovereign leadership, technology dominance, massive global expansion.</td>
                     </tr>
                     <tr style="background:#FFFFFF;">
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; font-weight:700; color:#B45309;">Jupiter (Guru)</td>
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; text-align:center;">16 Years</td>
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; text-align:center;">Jul 2042 – Jul 2058</td>
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; text-align:center;">61 – 77 yrs</td>
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; color:#4B5563;">Dharmic mentorship, philosophical legacy, institutional stewardship.</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; font-weight:700; color:#B45309;">Jupiter (Guru)</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; text-align:center;">16 Years</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; text-align:center;">Jul 2042 – Jul 2058</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; text-align:center;">61 – 77 yrs</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; color:#4B5563;">Dharmic mentorship, philosophical legacy, institutional stewardship.</td>
                     </tr>
                     <tr style="background:#FAF7F2;">
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; font-weight:700; color:#4B5563;">Saturn (Shani)</td>
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; text-align:center;">19 Years</td>
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; text-align:center;">Jul 2058 – Jul 2077</td>
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; text-align:center;">77 – 96 yrs</td>
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; color:#4B5563;">Amatyakaraka fulfillment, detached contemplation, generational wealth trusts.</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; font-weight:700; color:#4B5563;">Saturn (Shani)</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; text-align:center;">19 Years</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; text-align:center;">Jul 2058 – Jul 2077</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; text-align:center;">77 – 96 yrs</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; color:#4B5563;">Amatyakaraka fulfillment, detached contemplation, generational wealth trusts.</td>
                     </tr>
                     <tr style="background:#FFFFFF;">
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; font-weight:700; color:#4B5563;">Mercury (Budh)</td>
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; text-align:center;">17 Years</td>
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; text-align:center;">Jul 2077 – Jul 2094</td>
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; text-align:center;">96 – 113 yrs</td>
-                        <td style="padding:4px 8px; border:1px solid #ECE6DD; color:#4B5563;">Intellectual serenity, family patriarch, transmission of sacred wisdom.</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; font-weight:700; color:#4B5563;">Mercury (Budh)</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; text-align:center;">17 Years</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; text-align:center;">Jul 2077 – Jul 2094</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; text-align:center;">96 – 113 yrs</td>
+                        <td style="padding:2.5px 7px; border:1px solid #ECE6DD; color:#4B5563;">Intellectual serenity, family patriarch, transmission of sacred wisdom.</td>
                     </tr>
                 </tbody>
             </table>
 
             <!-- Deep Analysis Cards Below the Table (Filling the Bottom Richly) -->
-            <div class="mr-grid-2col" style="gap:14px 22px; margin-top:8px;">
-                <div class="mr-card" style="padding:9px 12px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#C45738; margin-bottom:3px;">
+            <div class="mr-grid-2col" style="gap:8px 16px; margin-top:4px;">
+                <div class="mr-card" style="padding:6px 10px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; font-weight:700; color:#C45738; margin-bottom:3px;">
                         The Transition into Rahu Mahadasha (2024–2042)
                     </div>
-                    <div style="font-size:9.6px; color:#374151; line-height:1.45;">
+                    <div style="font-size: 12px; color:#374151; line-height:1.45;">
                         Having completed the disciplined, action-oriented Mars Mahadasha in mid-2024, you have stepped into the expansive 18-year Rahu Mahadasha. Rahu in Cancer Lagna acts as an ambitious accelerant, pushing your enterprise into new digital arenas, high-altitude advisory, and international visibility.
                     </div>
                 </div>
 
-                <div class="mr-card" style="padding:9px 12px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#4E7D68; margin-bottom:3px;">
+                <div class="mr-card" style="padding:6px 10px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; font-weight:700; color:#4E7D68; margin-bottom:3px;">
                         Dasha Sandhi Navigation Protocols
                     </div>
-                    <div style="font-size:9.6px; color:#374151; line-height:1.45;">
+                    <div style="font-size: 12px; color:#374151; line-height:1.45;">
                         The transitional cusp between major dashas (Dasha Sandhi) requires conscious recalibration. As Rahu settles its roots over 2024–2026, ground your expansion in dependable operational frameworks and prioritize physical hydration, sleep, and restorative meditation.
                     </div>
                 </div>
             </div>
 
-            <!-- On-Page Streamlined Symbol Guide -->
-            <?php echo self::render_symbol_guide_bar([
-                'Mahadasha' => 'Major Multi-Year Planetary Progression Cycle',
-                'Antardasha' => 'Sub-Period Governing Immediate Operational Events',
-                'Dasha Sandhi' => 'Vulnerable Cusp Window Between Successive Rulers',
-                'Kala Chakra' => 'Cosmic Wheel of Time & Karmic Ripening Engine'
-            ], 'Dasha Terminology'); ?>
+            
 
             <!-- Bottom 4-5 Takeaway Synthesis (109 Words) -->
             <?php echo self::render_page_bottom_synthesis(
@@ -2094,11 +2189,11 @@ class MR_Kundali_Report_Builder {
                 ]
             ); ?>
         </div>
-        <?php echo self::render_page_footer(12, '120-Year Vimshottari Lifeline'); ?>
+        <?php echo self::render_page_footer(13, '120-Year Vimshottari Lifeline'); ?>
     </div>
 
     <!-- ========================================================
-         PAGE 13: ACTIVE RAHU MAHADASHA DEEP-DIVE & SANDHI
+         PAGE 14: ACTIVE RAHU MAHADASHA DEEP-DIVE & SANDHI
          ======================================================== -->
     <div class="mr-page">
         <div class="mr-header-bar">
@@ -2109,30 +2204,30 @@ class MR_Kundali_Report_Builder {
         </div>
 
         <div class="mr-page-body">
-            <div class="mr-tag-pill">12 · Active Mahadasha Roadmap</div>
-            <h1 class="mr-page-h1">Active Rahu Mahadasha Deep-Dive &amp; Sandhi Transitions</h1>
-            <div class="mr-page-sub">Comprehensive 18-Year Execution Blueprint (2024–2042): Sub-Period Timelines &amp; Strategic Leaps</div>
+            <div class="mr-tag-pill">12 · Current Planetary Period (Rahu)</div>
+            <h1 class="mr-page-h1">Rahu Mahadasha: Detailed Guide &amp; Key Phases (2024–2042)</h1>
+            <div class="mr-page-sub">18-Year roadmap: navigating big ambitions, career breakthroughs, and steady life habits</div>
 
             <!-- Current Active Sub-Period Hero Card with Double Breathing Space -->
             <div style="background:#FDF8F3; border:1.8px solid #C2964C; border-radius:8px; padding:11px 16px; margin-top:2px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
                     <div>
-                        <span style="font-size:8.5px; font-weight:800; color:#C45738; text-transform:uppercase; letter-spacing:0.08em;">ACTIVE TIME WINDOW</span>
-                        <div style="font-family:<?php echo $head_font; ?>; font-size:13.5px; font-weight:800; color:#111827;">Rahu Mahadasha · Rahu Antardasha (2024 – 2027)</div>
+                        <span style="font-size: 10.6px; font-weight:800; color:#C45738; text-transform:uppercase; letter-spacing:0.08em;">ACTIVE TIME WINDOW</span>
+                        <div style="font-family:<?php echo $head_font; ?>; font-size: 16.9px; font-weight:800; color:#111827;">Rahu Mahadasha · Rahu Antardasha (2024 – 2027)</div>
                     </div>
-                    <span style="background:#FEF3C7; color:#92400E; font-size:9px; font-weight:700; padding:3px 10px; border-radius:12px; border:1px solid #FDE68A;">Foundational Scaling Window</span>
+                    <span style="background:#FEF3C7; color:#92400E; font-size: 11.3px; font-weight:700; padding:3px 10px; border-radius:12px; border:1px solid #FDE68A;">Foundational Scaling Window</span>
                 </div>
-                <div style="font-size:9.8px; color:#374151; line-height:1.45;">
+                <div style="font-size: 12.3px; color:#374151; line-height:1.45;">
                     Rahu in Cancer Lagna awakens intense ambition, strategic modernization, and a hunger to build an enduring independent enterprise. Governed by a royal Leo Moon, this initial sub-period establishes your institutional authority, high-altitude advisory footprint, and innovative digital architectures.
                 </div>
             </div>
 
             <!-- Complete 9 Sub-Period Progression Table -->
             <div style="margin-top:6px;">
-                <div style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#111827; margin-bottom:4px;">
+                <div style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; font-weight:700; color:#111827; margin-bottom:4px;">
                     Chronological Breakdown of All 9 Rahu Antardashas (2024–2042)
                 </div>
-                <table style="width:100%; border-collapse:collapse; font-size:9.2px;">
+                <table style="width:100%; border-collapse:collapse; font-size: 11.5px;">
                     <thead>
                         <tr style="background:#F4EFE6; color:#111827; font-family:<?php echo $head_font; ?>; font-weight:700;">
                             <th style="padding:4.5px 7px; text-align:left; border:1px solid #ECE6DD; width:22%;">Sub-Period (Antar)</th>
@@ -2201,51 +2296,36 @@ class MR_Kundali_Report_Builder {
             </div>
 
             <!-- Deep Analysis Cards Below the Table (Filling the Space Richly) -->
-            <div class="mr-grid-2col" style="gap:14px 22px; margin-top:8px;">
-                <div class="mr-card" style="padding:9px 12px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#C45738; margin-bottom:3px;">
+            <div class="mr-grid-2col" style="gap:8px 16px; margin-top:4px;">
+                <div class="mr-card" style="padding:6px 10px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; font-weight:700; color:#C45738; margin-bottom:3px;">
                         The Rahu-Jupiter Golden Window (2027–2029)
                     </div>
-                    <div style="font-size:9.6px; color:#374151; line-height:1.45;">
+                    <div style="font-size: 12px; color:#374151; line-height:1.45;">
                         The upcoming Rahu-Jupiter sub-period stands out as the single most auspicious expansion window of the decade. Jupiter’s benefic 9th aspect injects dharmic wisdom into Rahu’s worldly ambitions, opening doors to lucrative executive contracts, prestigious advisory board appointments, and major capital gains.
                     </div>
                 </div>
 
-                <div class="mr-card" style="padding:9px 12px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#4E7D68; margin-bottom:3px;">
+                <div class="mr-card" style="padding:6px 10px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; font-weight:700; color:#4E7D68; margin-bottom:3px;">
                         Preserving Physical &amp; Mental Equilibrium
                     </div>
-                    <div style="font-size:9.6px; color:#374151; line-height:1.45;">
+                    <div style="font-size: 12px; color:#374151; line-height:1.45;">
                         Rahu in Cancer tends to stimulate late-night visionary work and racing thoughts. Counterbalance this kinetic energy through regular Pranayama, evening walks, copper-water hydration, and disciplined screen cutoffs to ensure your executive stamina remains uncompromised.
                     </div>
                 </div>
             </div>
 
-            <!-- On-Page Streamlined Symbol Guide -->
-            <?php echo self::render_symbol_guide_bar([
-                'Rahu-Rahu' => 'Foundational Epoch of Nodal Awakening',
-                'Rahu-Jupiter' => 'Golden Window of Wisdom & Expansion',
-                'Rahu-Venus' => 'Apex Material Wealth & Lakshmi Yoga',
-                'Sandhi Cusp' => 'Sub-Period Recalibration Window'
-            ], 'Antardasha Terms'); ?>
+            
 
-            <!-- Bottom 4-5 Takeaway Synthesis (110 Words) -->
-            <?php echo self::render_page_bottom_synthesis(
-                'Active Rahu Mahadasha Multi-Year Tactical Roadmap',
-                [
-                    'The foundational Rahu-Rahu opening phase active through March 2027 represents the essential window to construct robust digital infrastructures, define proprietary frameworks, and establish sovereign commercial independence.',
-                    'The imminent Rahu-Jupiter sub-period running from 2027 to 2029 will unlock peak career velocity, combining innovative ambition with dharmic wisdom to deliver monumental financial and institutional windfalls.',
-                    'The subsequent Rahu-Venus era from 2036 to 2039 activates your chart\'s prime Lakshmi Yogas, creating unmatched opportunities for premium real estate acquisitions and generational wealth crystallization.',
-                    'Systematically counterbalance Rahu\'s intense kinetic nervous energy through disciplined copper-water hydration, daily pranayama, and structured evening wind-down rituals to maintain peak executive clarity.'
-                ]
-            ); ?>
+<!-- Note: Synthesis omitted on Page 13 for optimal layout -->
         </div>
-        <?php echo self::render_page_footer(13, 'Active Rahu Mahadasha Roadmap'); ?>
+        <?php echo self::render_page_footer(14, 'Active Rahu Mahadasha Roadmap'); ?>
     </div>
 
 
     <!-- ========================================================
-         PAGE 14: THE ATMAKARAKA & SOUL PURPOSE PROFILE
+         PAGE 15: THE ATMAKARAKA & SOUL PURPOSE PROFILE
          ======================================================== -->
     <div class="mr-page">
         <div class="mr-header-bar">
@@ -2256,155 +2336,145 @@ class MR_Kundali_Report_Builder {
         </div>
 
         <div class="mr-page-body">
-            <div class="mr-tag-pill">13 · Jaimini Chara Karaka Architecture</div>
-            <h1 class="mr-page-h1">The "Atmakaraka &amp; Soul Purpose" Profile &amp; Jaimini Karakas</h1>
-            <div class="mr-page-sub">The Highest Degree Planets Revealing Your Soul's Primary Evolutionary Lesson &amp; Vocational Compass</div>
+            <div class="mr-tag-pill">13 · Soul Purpose &amp; Guiding Planets</div>
+            <h1 class="mr-page-h1">Your Soul Purpose &amp; Guiding Planet (Atmakaraka)</h1>
+            <div class="mr-page-sub">Your key guiding planet and what it reveals about your core life mission</div>
 
             <!-- Two Spotlight Hero Boxes with Double Breathing Space -->
-            <div class="mr-grid-2col" style="gap:14px 22px; margin-top:2px;">
+            <div class="mr-grid-2col" style="gap:10px 18px; margin-top:2px;">
                 <!-- Atmakaraka Box -->
-                <div style="background:#FDF8F3; border:1.8px solid #C2964C; border-radius:8px; padding:11px 16px; box-shadow:0 3px 10px rgba(0,0,0,0.03);">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                        <span style="font-size:8.5px; font-weight:800; color:#C45738; text-transform:uppercase; letter-spacing:0.08em;">ATMAKARAKA (SOUL PLANET)</span>
-                        <span style="background:#FEE2E2; color:#991B1B; font-size:8.5px; font-weight:700; padding:2px 8px; border-radius:10px;">Highest Longitude: 16°51'</span>
+                <div style="background:#FDF8F3; border:1.8px solid #C2964C; border-radius:8px; padding:7px 12px; box-shadow:0 3px 10px rgba(0,0,0,0.03);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
+                        <span style="font-size: 10.2px; font-weight:800; color:#C45738; text-transform:uppercase; letter-spacing:0.08em;">ATMAKARAKA (SOUL PLANET)</span>
+                        <span style="background:#FEE2E2; color:#991B1B; font-size: 10.2px; font-weight:700; padding:1.5px 7px; border-radius:10px;">Highest: 16°51'</span>
                     </div>
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:12.5px; font-weight:800; color:#111827; margin-bottom:4px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 14.2px; font-weight:800; color:#111827; margin-bottom:3px;">
                         Venus in Scorpio (5th House of Intellect)
                     </div>
-                    <div style="font-size:9.6px; color:#374151; line-height:1.45;">
+                    <div style="font-size: 10.8px; color:#374151; line-height:1.35;">
                         As your <strong>Atmakaraka (AK)</strong>, Shukra in Scorpio challenges your soul to master the alchemy of desire. Your evolutionary growth unfolds not by rejecting worldly wealth or beauty, but by elevating transient passions into profound loyalty, aesthetic mastery, and unconditional integrity. Whenever you choose ethical clarity over shortcuts, your entire horoscope unlocks immense fortune.
                     </div>
                 </div>
 
                 <!-- Amatyakaraka Box -->
-                <div style="background:#FDF8F3; border:1.8px solid #4E7D68; border-radius:8px; padding:11px 16px; box-shadow:0 3px 10px rgba(0,0,0,0.03);">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                        <span style="font-size:8.5px; font-weight:800; color:#4E7D68; text-transform:uppercase; letter-spacing:0.08em;">AMATYAKARAKA (CAREER COMPASS)</span>
-                        <span style="background:#ECFDF5; color:#065F46; font-size:8.5px; font-weight:700; padding:2px 8px; border-radius:10px;">2nd Highest: 15°43'</span>
+                <div style="background:#FDF8F3; border:1.8px solid #4E7D68; border-radius:8px; padding:7px 12px; box-shadow:0 3px 10px rgba(0,0,0,0.03);">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
+                        <span style="font-size: 10.2px; font-weight:800; color:#4E7D68; text-transform:uppercase; letter-spacing:0.08em;">AMATYAKARAKA (CAREER COMPASS)</span>
+                        <span style="background:#ECFDF5; color:#065F46; font-size: 10.2px; font-weight:700; padding:1.5px 7px; border-radius:10px;">2nd Highest: 15°43'</span>
                     </div>
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:12.5px; font-weight:800; color:#111827; margin-bottom:4px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 14.2px; font-weight:800; color:#111827; margin-bottom:3px;">
                         Saturn in Virgo (3rd House of Systems)
                     </div>
-                    <div style="font-size:9.6px; color:#374151; line-height:1.45;">
+                    <div style="font-size: 10.8px; color:#374151; line-height:1.35;">
                         As your <strong>Amatyakaraka (AmK)</strong>, Shani in analytical Virgo functions as your vocational compass. Your greatest career triumphs arrive through structural engineering, operational metrics, reliable systems, and patient institution building. You are naturally built to design frameworks that endure, earning deep authority through dependable craftsmanship.
                     </div>
                 </div>
             </div>
 
-            <!-- Complete 7 Jaimini Chara Karakas Table with Enhanced Spacing & Font -->
-            <div style="margin-top:6px;">
-                <div style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#111827; margin-bottom:4px;">
+            <!-- Complete 7 Jaimini Chara Karakas Table with Fixed Layout & Colgroup -->
+            <div style="margin-top:5px;">
+                <div style="font-family:<?php echo $head_font; ?>; font-size: 13.5px; font-weight:700; color:#111827; margin-bottom:3px;">
                     Complete 7-Fold Jaimini Chara Karaka Hierarchy
                 </div>
-                <table style="width:100%; border-collapse:collapse; font-size:9.2px;">
+                <table class="mr-kundali-table" style="font-size: 10.4px;">
+                    <colgroup>
+                        <col style="width: 17%;">
+                        <col style="width: 15%;">
+                        <col style="width: 11%;">
+                        <col style="width: 17%;">
+                        <col style="width: 40%;">
+                    </colgroup>
                     <thead>
                         <tr style="background:#F4EFE6; color:#111827; font-family:<?php echo $head_font; ?>; font-weight:700;">
-                            <th style="padding:4.5px 7px; text-align:left; border:1px solid #ECE6DD;">Karaka Title</th>
-                            <th style="padding:4.5px 7px; text-align:left; border:1px solid #ECE6DD;">Planet</th>
-                            <th style="padding:4.5px 7px; text-align:center; border:1px solid #ECE6DD;">Degree</th>
-                            <th style="padding:4.5px 7px; text-align:center; border:1px solid #ECE6DD;">Sign &amp; House</th>
-                            <th style="padding:4.5px 7px; text-align:left; border:1px solid #ECE6DD;">Life Role &amp; Significance</th>
+                            <th style="padding:3.5px 6px; text-align:left; border:1px solid #ECE6DD;">Karaka Title</th>
+                            <th style="padding:3.5px 6px; text-align:left; border:1px solid #ECE6DD;">Planet</th>
+                            <th style="padding:3.5px 6px; text-align:center; border:1px solid #ECE6DD;">Degree</th>
+                            <th style="padding:3.5px 6px; text-align:center; border:1px solid #ECE6DD;">Sign &amp; House</th>
+                            <th style="padding:3.5px 6px; text-align:left; border:1px solid #ECE6DD;">Life Role &amp; Significance</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr style="background:#FEF3C7; font-weight:700;">
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; color:#92400E;">Atmakaraka (AK)</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; color:#92400E;">Venus (Shukra)</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; text-align:center; color:#92400E;">16°51'</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; text-align:center; color:#92400E;">Scorpio · 5th</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; color:#92400E;">Soul's core evolution; transmuting passion into spiritual devotion.</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; color:#92400E;">Atmakaraka (AK)</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; color:#92400E;">Venus (Shukra)</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; text-align:center; color:#92400E;">16°51'</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; text-align:center; color:#92400E;">Scorpio · 5th</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; color:#92400E;">Soul's core evolution; transmuting passion into spiritual devotion.</td>
                         </tr>
                         <tr style="background:#FFFFFF;">
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; font-weight:700; color:#4E7D68;">Amatyakaraka (AmK)</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; font-weight:700;">Saturn (Shani)</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; text-align:center;">15°43'</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; text-align:center;">Virgo · 3rd</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; color:#4B5563;">Career execution; architectural systems, precision metrics, leadership.</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; font-weight:700; color:#4E7D68;">Amatyakaraka (AmK)</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; font-weight:700;">Saturn (Shani)</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; text-align:center;">15°43'</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; text-align:center;">Virgo · 3rd</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; color:#4B5563;">Career execution; architectural systems, precision metrics, leadership.</td>
                         </tr>
                         <tr style="background:#FAF7F2;">
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; font-weight:700; color:#B45309;">Bhratrikaraka (BK)</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; font-weight:700;">Jupiter (Guru)</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; text-align:center;">15°29'</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; text-align:center;">Virgo · 3rd</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; color:#4B5563;">Guru, mentors &amp; brethren; moral guidance and intellectual expansion.</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; font-weight:700; color:#B45309;">Bhratrikaraka (BK)</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; font-weight:700;">Jupiter (Guru)</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; text-align:center;">15°29'</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; text-align:center;">Virgo · 3rd</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; color:#4B5563;">Guru, mentors &amp; brethren; moral guidance and intellectual expansion.</td>
                         </tr>
                         <tr style="background:#FFFFFF;">
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; font-weight:700; color:#B91C1C;">Matrikaraka (MK)</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; font-weight:700;">Sun (Surya)</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; text-align:center;">11°25'</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; text-align:center;">Sagittarius · 6th</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; color:#4B5563;">Mother, home &amp; emotional foundation; rooted in dharmic strength.</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; font-weight:700; color:#B91C1C;">Matrikaraka (MK)</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; font-weight:700;">Sun (Surya)</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; text-align:center;">11°25'</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; text-align:center;">Sagittarius · 6th</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; color:#4B5563;">Mother, home &amp; emotional foundation; rooted in dharmic strength.</td>
                         </tr>
                         <tr style="background:#FAF7F2;">
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; font-weight:700; color:#1D4ED8;">Putrakaraka (PK)</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; font-weight:700;">Moon (Chandra)</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; text-align:center;">11°53'</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; text-align:center;">Leo · 2nd</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; color:#4B5563;">Progeny, creativity &amp; disciples; family lineage honor and wealth.</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; font-weight:700; color:#1D4ED8;">Putrakaraka (PK)</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; font-weight:700;">Moon (Chandra)</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; text-align:center;">11°53'</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; text-align:center;">Leo · 2nd</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; color:#4B5563;">Progeny, creativity &amp; disciples; family lineage honor and wealth.</td>
                         </tr>
                         <tr style="background:#FFFFFF;">
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; font-weight:700; color:#4B5563;">Gnatikaraka (GK)</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; font-weight:700;">Mercury (Budh)</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; text-align:center;">08°40'</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; text-align:center;">Sagittarius · 6th</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; color:#4B5563;">Kinsmen &amp; obstacles; overcoming legal / competitive disputes.</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; font-weight:700; color:#4B5563;">Gnatikaraka (GK)</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; font-weight:700;">Mercury (Budh)</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; text-align:center;">08°40'</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; text-align:center;">Sagittarius · 6th</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; color:#4B5563;">Kinsmen &amp; obstacles; overcoming legal / competitive disputes.</td>
                         </tr>
                         <tr style="background:#FAF7F2;">
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; font-weight:700; color:#C45738;">Darakaraka (DK)</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; font-weight:700;">Mars (Mangal)</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; text-align:center;">03°02'</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; text-align:center;">Capricorn · 7th</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; color:#4B5563;">Spouse &amp; business partners; exalted partner possessing executive dignity.</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; font-weight:700; color:#C45738;">Darakaraka (DK)</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; font-weight:700;">Mars (Mangal)</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; text-align:center;">03°02'</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; text-align:center;">Capricorn · 7th</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; color:#4B5563;">Spouse &amp; business partners; exalted partner possessing executive dignity.</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
             <!-- Deep Analysis Cards Below the Table (Filling the Bottom Richly) -->
-            <div class="mr-grid-2col" style="gap:14px 22px; margin-top:8px;">
-                <div class="mr-card" style="padding:9px 12px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#C45738; margin-bottom:3px;">
+            <div class="mr-grid-2col" style="gap:8px 16px; margin-top:4px;">
+                <div class="mr-card" style="padding:5px 10px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 12.2px; font-weight:700; color:#C45738; margin-bottom:2px;">
                         Karakamsha in Taurus (Vrishabha)
                     </div>
-                    <div style="font-size:9.6px; color:#374151; line-height:1.45;">
+                    <div style="font-size: 10.4px; color:#374151; line-height:1.33;">
                         In Jaimini astrology, the Navamsha sign occupied by Atmakaraka Venus is known as the Karakamsha. In your chart, this falls in Taurus (Vrishabha)—the natural 2nd house of treasury and physical architecture. This confirms that your soul’s highest creative potential manifests through tangible, high-value assets and beautiful living environments.
                     </div>
                 </div>
 
-                <div class="mr-card" style="padding:9px 12px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#4E7D68; margin-bottom:3px;">
+                <div class="mr-card" style="padding:5px 10px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 12.2px; font-weight:700; color:#4E7D68; margin-bottom:2px;">
                         The DK-AmK Alignment (Mars &amp; Saturn)
                     </div>
-                    <div style="font-size:9.6px; color:#374151; line-height:1.45;">
+                    <div style="font-size: 10.4px; color:#374151; line-height:1.33;">
                         Darakaraka Mars is exalted in Capricorn, while Amatyakaraka Saturn rules Capricorn. This rare mutual resonance between career indicator and spouse indicator ensures that your life partner acts as an indispensable sounding board and steady pillar in your executive decisions.
                     </div>
                 </div>
             </div>
 
-            <!-- On-Page Streamlined Symbol Guide -->
-            <?php echo self::render_symbol_guide_bar([
-                'Atmakaraka (AK)' => 'Soul’s Primary Evolutionary Indicator',
-                'Amatyakaraka (AmK)' => 'Career & Strategic Compass Planet',
-                'Darakaraka (DK)' => 'Spouse & Relational Mirror Planet',
-                'Karakamsha' => 'Navamsha Sign of Soul Planet (Dharma)'
-            ], 'Jaimini Terms'); ?>
-
-            <!-- Bottom 4-5 Takeaway Synthesis (106 Words) -->
-            <?php echo self::render_page_bottom_synthesis(
-                'Atmakaraka &amp; Jaimini Karaka Operational Synthesis',
-                [
-                    'Venus as Atmakaraka in Scorpio tasks your soul with mastering desire by elevating transient worldly ambitions into profound personal loyalty, refined aesthetic craftsmanship, and absolute commercial integrity.',
-                    'Saturn as Amatyakaraka in analytical Virgo serves as your reliable vocational compass, confirming that meticulous systems engineering, operational discipline, and patient institution building will yield permanent executive authority.',
-                    'Jupiter as Bhratrikaraka in the 3rd house connects you with noble mentors, intellectual peers, and strategic advisors whose wisdom continually illuminates your highest corporate and investment decisions.',
-                    'Exalted Mars as Darakaraka guarantees an exceptionally capable, executive-minded life partner whose operational acumen and fierce domestic loyalty form an indispensable foundation for your multi-decade life trajectory.'
-                ]
-            ); ?>
+<!-- Note: Synthesis omitted on Page 14 for optimal layout -->
         </div>
-        <?php echo self::render_page_footer(14, 'Atmakaraka &amp; Soul Purpose'); ?>
+        <?php echo self::render_page_footer(15, 'Atmakaraka · Soul Purpose & Jaimini Karakas'); ?>
     </div>
 
     <!-- ========================================================
-         PAGE 15: CLASSICAL RAJA YOGAS & DHANA YOGAS AUDIT
+         PAGE 16: CLASSICAL RAJA YOGAS & DHANA YOGAS AUDIT
          ======================================================== -->
     <div class="mr-page">
         <div class="mr-header-bar">
@@ -2415,12 +2485,12 @@ class MR_Kundali_Report_Builder {
         </div>
 
         <div class="mr-page-body">
-            <div class="mr-tag-pill">14 · Classical Prosperity &amp; Power Yogas</div>
-            <h1 class="mr-page-h1">Classical Raja Yogas &amp; Dhana Yogas Audit</h1>
-            <div class="mr-page-sub">Exhaustive Parashari Verification of Mahapurusha, Wealth-Generating &amp; Sovereign Authority Alignments</div>
+            <div class="mr-tag-pill">14 · Powerful Combinations (Raja &amp; Dhana Yogas)</div>
+            <h1 class="mr-page-h1">Special Yogas for Success, Wealth &amp; Leadership</h1>
+            <div class="mr-page-sub">Checking favorable planetary combinations that bring respect, authority, and financial growth</div>
 
             <!-- Top Yoga Table with Double Breathing Space -->
-            <table style="width:100%; border-collapse:collapse; font-size:9.2px; margin-top:2px;">
+            <table style="width:100%; border-collapse:collapse; font-size: 11.5px; margin-top:2px;">
                 <thead>
                     <tr style="background:#F4EFE6; color:#111827; font-family:<?php echo $head_font; ?>; font-weight:700;">
                         <th style="padding:4.5px 7px; text-align:left; border:1px solid #ECE6DD; width:20%;">Yoga Formation</th>
@@ -2470,21 +2540,21 @@ class MR_Kundali_Report_Builder {
             </table>
 
             <!-- Deep Analysis Cards Below the Table (Filling the Bottom Richly) -->
-            <div class="mr-grid-2col" style="gap:14px 22px; margin-top:8px;">
-                <div class="mr-card" style="padding:9px 12px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#C45738; margin-bottom:3px;">
+            <div class="mr-grid-2col" style="gap:8px 16px; margin-top:4px;">
+                <div class="mr-card" style="padding:6px 10px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; font-weight:700; color:#C45738; margin-bottom:3px;">
                         The Supreme Crown: Ruchaka Mahapurusha Yoga (98%)
                     </div>
-                    <div style="font-size:9.6px; color:#374151; line-height:1.45;">
+                    <div style="font-size: 12px; color:#374151; line-height:1.45;">
                         When Mars is exalted in a Kendra house, it creates the celebrated Ruchaka Yoga—one of the five sovereign Pancha Mahapurusha alignments described in classical text <em>Phaladeepika</em>. This confers exceptional executive grit, administrative authority, victory in competitive legal matters, and unbending integrity.
                     </div>
                 </div>
 
-                <div class="mr-card" style="padding:9px 12px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#4E7D68; margin-bottom:3px;">
+                <div class="mr-card" style="padding:6px 10px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; font-weight:700; color:#4E7D68; margin-bottom:3px;">
                         The Wealth Engine: Lakshmi-Dhana Yoga (92%)
                     </div>
-                    <div style="font-size:9.6px; color:#374151; line-height:1.45;">
+                    <div style="font-size: 12px; color:#374151; line-height:1.45;">
                         The placement of 11th lord Venus in the 5th house of intellect forms an authentic Dhana Yoga linking mental creativity directly to revenue inflow. Your wealth multiplies through scalable enterprise architectures, real estate compounding, and intellectual property rather than routine salaried labor.
                     </div>
                 </div>
@@ -2509,11 +2579,11 @@ class MR_Kundali_Report_Builder {
                 ]
             ); ?>
         </div>
-        <?php echo self::render_page_footer(15, 'Classical Raja Yogas &amp; Dhana Yogas'); ?>
+        <?php echo self::render_page_footer(16, 'Classical Raja Yogas &amp; Dhana Yogas'); ?>
     </div>
 
     <!-- ========================================================
-         PAGE 16: MANGLIK DOSH & CANCELLATION MATRIX
+         PAGE 17: MANGLIK DOSH & CANCELLATION MATRIX
          ======================================================== -->
     <div class="mr-page">
         <div class="mr-header-bar">
@@ -2524,24 +2594,24 @@ class MR_Kundali_Report_Builder {
         </div>
 
         <div class="mr-page-body">
-            <div class="mr-tag-pill">15 · Manglik Audit &amp; Neutralization</div>
-            <h1 class="mr-page-h1">Manglik Dosh Analysis: Neutralizing Factors &amp; Ruchaka Yoga</h1>
-            <div class="mr-page-sub">Classical Parashari Audit of 7th House Mars: Why Exaltation Nullifies Afflictions and Yields Leadership</div>
+            <div class="mr-tag-pill">15 · Mars Energy &amp; Manglik Analysis</div>
+            <h1 class="mr-page-h1">Manglik Dosh Analysis: Natural Cancellations &amp; Ruchaka Yoga</h1>
+            <div class="mr-page-sub">Why exalted Mars in Capricorn turns relationship challenges into a source of courage and drive</div>
 
             <!-- Top Grid: Meter vs Classical Cancellation Verdict with Double Breathing Space -->
             <div class="mr-grid-2col" style="gap:14px 22px; margin-top:2px;">
                 <!-- Status & Meter Card -->
-                <div class="mr-card" style="padding:9px 12px;">
+                <div class="mr-card" style="padding:6px 10px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                        <strong style="font-family:<?php echo $head_font; ?>; font-size:11px; color:#111827;">Technical Placement Status</strong>
-                        <span style="background:#FEF3C7; color:#92400E; font-size:8.5px; font-weight:700; padding:2px 8px; border-radius:12px;">Anshik Manglik (Mitigated)</span>
+                        <strong style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; color:#111827;">Technical Placement Status</strong>
+                        <span style="background:#FEF3C7; color:#92400E; font-size: 10.6px; font-weight:700; padding:2px 8px; border-radius:12px;">Anshik Manglik (Mitigated)</span>
                     </div>
-                    <div style="font-size:9.5px; color:#4B5563; line-height:1.42;">
+                    <div style="font-size: 11.9px; color:#4B5563; line-height:1.42;">
                         Mars resides in the <strong>7th House (Capricorn at 3°02')</strong>. Under elementary rules, 7th house Mars flags Manglik consideration; however, rigorous Parashari Siddhanta mandates immediate cancellation evaluation.
                     </div>
                     <!-- Meter Bar -->
                     <div style="margin-top:6px;">
-                        <div style="display:flex; justify-content:space-between; font-size:9px; font-weight:700; color:#111827; margin-bottom:2px;">
+                        <div style="display:flex; justify-content:space-between; font-size: 11.3px; font-weight:700; color:#111827; margin-bottom:2px;">
                             <span>Raw Affliction: 47.5%</span>
                             <span style="color:#047857;">Effective Post-Cancellation: &lt; 5%</span>
                         </div>
@@ -2557,9 +2627,9 @@ class MR_Kundali_Report_Builder {
                 <div class="mr-card-accent" style="padding:9px 12px;">
                     <div style="display:flex; align-items:center; gap:6px; margin-bottom:3px;">
                         <span style="color:#C45738; font-size:14px;">🛡️</span>
-                        <strong style="font-family:<?php echo $head_font; ?>; font-size:11px; color:#C45738;">Supreme Cancellation Rule: Exaltation</strong>
+                        <strong style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; color:#C45738;">Supreme Cancellation Rule: Exaltation</strong>
                     </div>
-                    <div style="font-size:9.2px; color:#1F2937; line-height:1.42;">
+                    <div style="font-size: 11.5px; color:#1F2937; line-height:1.42;">
                         <em>“Ucha Sthite Bhaume Dosho Na Vidyate”</em> — Classical Vedic astrology confirms that when Mars is placed in its highest exaltation (Ucha Makara), all disruptive Martian heat is transmuted into <strong>Ruchaka Mahapurusha Yoga</strong>: unyielding perseverance, executive courage, and institutional defense.
                     </div>
                 </div>
@@ -2567,31 +2637,31 @@ class MR_Kundali_Report_Builder {
 
             <!-- 4 Specific Neutralizing Pillars with Double Breathing Space -->
             <div style="margin-top:6px;">
-                <div style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#111827; margin-bottom:4px;">
+                <div style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; font-weight:700; color:#111827; margin-bottom:4px;">
                     Four Classical Vedic Neutralization Pillars in Your Chart
                 </div>
                 <div class="mr-grid-2col" style="gap:10px 20px;">
                     <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:7px 11px;">
-                        <div style="font-size:9.6px; font-weight:700; color:#C45738; margin-bottom:2px;">1. Exalted Status in Kendra</div>
-                        <div style="font-size:9px; color:#4B5563; line-height:1.4;">
+                        <div style="font-size: 12px; font-weight:700; color:#C45738; margin-bottom:2px;">1. Exalted Status in Kendra</div>
+                        <div style="font-size: 11.3px; color:#4B5563; line-height:1.4;">
                             Mars occupies Makara at 3°02' in the 7th Kendra. Exalted planets never act as petty disruptors; instead, Mars functions as an anchor of moral discipline and strategic focus.
                         </div>
                     </div>
                     <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:7px 11px;">
-                        <div style="font-size:9.6px; font-weight:700; color:#4E7D68; margin-bottom:2px;">2. Harmonious Jupiter Trine Aspect</div>
-                        <div style="font-size:9px; color:#4B5563; line-height:1.4;">
+                        <div style="font-size: 12px; font-weight:700; color:#4E7D68; margin-bottom:2px;">2. Harmonious Jupiter Trine Aspect</div>
+                        <div style="font-size: 11.3px; color:#4B5563; line-height:1.4;">
                             Benefic Jupiter in Virgo casts its benevolent 5th aspect upon Mars and the 7th house, infusing dharmic temperance, ethical judgment, and divine grace into matrimonial matters.
                         </div>
                     </div>
                     <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:7px 11px;">
-                        <div style="font-size:9.6px; font-weight:700; color:#C2964C; margin-bottom:2px;">3. Chronological Maturation (&gt; 28 Years)</div>
-                        <div style="font-size:9px; color:#4B5563; line-height:1.4;">
+                        <div style="font-size: 12px; font-weight:700; color:#C2964C; margin-bottom:2px;">3. Chronological Maturation (&gt; 28 Years)</div>
+                        <div style="font-size: 11.3px; color:#4B5563; line-height:1.4;">
                             Mars reaches full planetary maturity at age 28. At 45 years of age, fiery youthful reactivity has permanently evolved into grounded patience, emotional self-mastery, and protective leadership.
                         </div>
                     </div>
                     <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:7px 11px;">
-                        <div style="font-size:9.6px; font-weight:700; color:#111827; margin-bottom:2px;">4. Spousal Archetype Alignment</div>
-                        <div style="font-size:9px; color:#4B5563; line-height:1.4;">
+                        <div style="font-size: 12px; font-weight:700; color:#111827; margin-bottom:2px;">4. Spousal Archetype Alignment</div>
+                        <div style="font-size: 11.3px; color:#4B5563; line-height:1.4;">
                             Exalted Mars in the 7th house attracts a partner who is intellectually formidable, capable of shared enterprise, and deeply loyal, completely eliminating conventional marital friction.
                         </div>
                     </div>
@@ -2600,10 +2670,10 @@ class MR_Kundali_Report_Builder {
 
             <!-- Deep Analysis Editorial Box -->
             <div class="mr-callout-box" style="border-left-color:#4E7D68; margin-top:6px; padding:8px 12px;">
-                <div style="font-family:<?php echo $head_font; ?>; font-size:10.5px; font-weight:700; color:#111827; margin-bottom:2px;">
+                <div style="font-family:<?php echo $head_font; ?>; font-size: 13.1px; font-weight:700; color:#111827; margin-bottom:2px;">
                     Expert Astrological Verdict: Converting Martian Energy into Marital Strength
                 </div>
-                <div style="font-size:9.2px; color:#374151; line-height:1.45;">
+                <div style="font-size: 11.5px; color:#374151; line-height:1.45;">
                     <?php echo esc_html($karmic_mat['manglik_cancellation'] ?? 'While Mars in the 7th house flags Anshik Manglik status (47.5%), classical Parashari Siddhanta confirms powerful neutralizing factors: Mars is positioned in its highest planetary exaltation (Ucha Makara), transforming potential marital friction into unwavering fidelity and shared ambition. Furthermore, benefic Jupiter casts its mitigating trine aspect, while chronological maturity beyond age 28 permanently grounds fiery impulses into domestic steadfastness.'); ?>
                 </div>
             </div>
@@ -2627,11 +2697,11 @@ class MR_Kundali_Report_Builder {
                 ]
             ); ?>
         </div>
-        <?php echo self::render_page_footer(16, 'Manglik Dosh &amp; Cancellation Matrix'); ?>
+        <?php echo self::render_page_footer(17, 'Manglik Dosh &amp; Cancellation Matrix'); ?>
     </div>
 
     <!-- ========================================================
-         PAGE 17: KAAL SARP DOSH & EVOLUTIONARY TRANSMUTATION
+         PAGE 18: KAAL SARP DOSH & EVOLUTIONARY TRANSMUTATION
          ======================================================== -->
     <div class="mr-page">
         <div class="mr-header-bar">
@@ -2642,33 +2712,33 @@ class MR_Kundali_Report_Builder {
         </div>
 
         <div class="mr-page-body">
-            <div class="mr-tag-pill">16 · Kaal Sarp Alignment &amp; Mastery</div>
-            <h1 class="mr-page-h1">Kaal Sarp Yoga: Evolutionary Engine &amp; Kundalini Awakening</h1>
-            <div class="mr-page-sub">Anant Kaal Sarp Structure (1st–7th Nodal Axis): Unlocking Late-Life Authority &amp; Strategic Resilience</div>
+            <div class="mr-tag-pill">16 · Rahu-Ketu Alignment (Kaal Sarp)</div>
+            <h1 class="mr-page-h1">Kaal Sarp Yoga: Turning Ambition into Great Achievement</h1>
+            <div class="mr-page-sub">Why this intense planetary pattern creates deep focus and brings remarkable success over time</div>
 
             <!-- Top Grid: Configuration & Evolutionary Paradigm with Double Breathing Space -->
             <div class="mr-grid-2col" style="gap:14px 22px; margin-top:2px;">
-                <div class="mr-card" style="padding:9px 12px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#111827; margin-bottom:3px;">
+                <div class="mr-card" style="padding:6px 10px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; font-weight:700; color:#111827; margin-bottom:3px;">
                         Anant Kaal Sarp Configuration
                     </div>
-                    <div style="font-size:9.5px; color:#4B5563; line-height:1.42;">
+                    <div style="font-size: 11.9px; color:#4B5563; line-height:1.42;">
                         Rahu is seated in the <strong>1st House (Cancer at 19°14')</strong> while Ketu occupies the <strong>7th House (Capricorn at 19°14')</strong>. All planetary longitudes are hemmed between the nodal axis, creating the dynamic <em>Anant Kaal Sarp Yoga</em>.
                     </div>
                     <div style="display:flex; gap:10px; margin-top:6px;">
-                        <span style="background:#FDF8F3; border:1px solid #C2964C; color:#C45738; font-size:8.5px; font-weight:700; padding:2px 8px; border-radius:4px;">Nodal Axis: 1st / 7th Bhava</span>
-                        <span style="background:#ECFDF5; border:1px solid #A7F3D0; color:#065F46; font-size:8.5px; font-weight:700; padding:2px 8px; border-radius:4px;">Nature: Evolutionary Driver</span>
+                        <span style="background:#FDF8F3; border:1px solid #C2964C; color:#C45738; font-size: 10.6px; font-weight:700; padding:2px 8px; border-radius:4px;">Nodal Axis: 1st / 7th Bhava</span>
+                        <span style="background:#ECFDF5; border:1px solid #A7F3D0; color:#065F46; font-size: 10.6px; font-weight:700; padding:2px 8px; border-radius:4px;">Nature: Evolutionary Driver</span>
                     </div>
                 </div>
 
-                <div class="mr-card" style="padding:9px 12px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#4E7D68; margin-bottom:3px;">
+                <div class="mr-card" style="padding:6px 10px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; font-weight:700; color:#4E7D68; margin-bottom:3px;">
                         Vedic Transmutation: The Dispositor Shield
                     </div>
-                    <div style="font-size:9.5px; color:#4B5563; line-height:1.42;">
+                    <div style="font-size: 11.9px; color:#4B5563; line-height:1.42;">
                         Rahu’s dispositor is the <strong>Moon</strong>, which sits gloriously in the <strong>2nd house of royal speech in Leo (Magha)</strong>. This guarantees that Rahu’s eccentric drive is governed by ancestral dignity, preventing psychological disorientation.
                     </div>
-                    <div style="font-size:9px; color:#C2964C; font-weight:700; margin-top:5px;">
+                    <div style="font-size: 11.3px; color:#C2964C; font-weight:700; margin-top:5px;">
                         ★ Jupiter casts its 9th house drishti onto Rahu/Ascendant, bestowing divine protection.
                     </div>
                 </div>
@@ -2676,53 +2746,59 @@ class MR_Kundali_Report_Builder {
 
             <!-- 4 Evolutionary Epochs Table -->
             <div style="margin-top:6px;">
-                <div style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#111827; margin-bottom:4px;">
+                <div style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; font-weight:700; color:#111827; margin-bottom:4px;">
                     The 4 Phases of Nodal Transmutation: From Tension to Sovereign Mastery
                 </div>
-                <table style="width:100%; border-collapse:collapse; font-size:9.2px;">
+                <table class="mr-kundali-table" style="font-size: 10.4px;">
+                    <colgroup>
+                        <col style="width: 15%;">
+                        <col style="width: 18%;">
+                        <col style="width: 38%;">
+                        <col style="width: 29%;">
+                    </colgroup>
                     <thead>
                         <tr style="background:#F4EFE6; color:#111827; font-family:<?php echo $head_font; ?>; font-weight:700;">
-                            <th style="padding:4.5px 7px; text-align:left; border:1px solid #ECE6DD; width:18%;">Life Epoch</th>
-                            <th style="padding:4.5px 7px; text-align:left; border:1px solid #ECE6DD; width:22%;">Nodal Expression</th>
-                            <th style="padding:4.5px 7px; text-align:left; border:1px solid #ECE6DD; width:38%;">Psychological &amp; Practical Reality</th>
-                            <th style="padding:4.5px 7px; text-align:center; border:1px solid #ECE6DD; width:22%;">Actionable Strategy</th>
+                            <th style="padding:3.5px 6px; text-align:left; border:1px solid #ECE6DD;">Life Epoch</th>
+                            <th style="padding:3.5px 6px; text-align:left; border:1px solid #ECE6DD;">Nodal Expression</th>
+                            <th style="padding:3.5px 6px; text-align:left; border:1px solid #ECE6DD;">Psychological &amp; Practical Reality</th>
+                            <th style="padding:3.5px 6px; text-align:center; border:1px solid #ECE6DD;">Actionable Strategy</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr style="background:#FFFFFF;">
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; font-weight:700; color:#C45738;">Ages 0 – 21</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD;">Rahu Pressure</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; color:#4B5563;">Restlessness, searching for unique identity, feeling distinct from peers.</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; text-align:center; font-weight:600; color:#111827;">Foundational learning</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; font-weight:700; color:#C45738;">Ages 0 – 21</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD;">Rahu Pressure</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; color:#4B5563;">Restlessness, searching for unique identity, feeling distinct from peers.</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; text-align:center; font-weight:600; color:#111827;">Foundational learning</td>
                         </tr>
                         <tr style="background:#FAF7F2;">
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; font-weight:700; color:#C2964C;">Ages 22 – 35</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD;">Trial &amp; Architecture</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; color:#4B5563;">Navigating complex corporate environments, building commercial stamina.</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; text-align:center; font-weight:600; color:#111827;">Systemic mastery</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; font-weight:700; color:#C2964C;">Ages 22 – 35</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD;">Trial &amp; Architecture</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; color:#4B5563;">Navigating complex corporate environments, building commercial stamina.</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; text-align:center; font-weight:600; color:#111827;">Systemic mastery</td>
                         </tr>
                         <tr style="background:#FFFFFF;">
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; font-weight:700; color:#047857;">Ages 36 – 48 (Current)</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD;">Breakout &amp; Expansion</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; color:#4B5563;">Rahu Mahadasha active; sudden opportunities, enterprise leaps, scaling.</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; text-align:center; font-weight:700; color:#047857;">Bold execution &amp; clarity</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; font-weight:700; color:#047857;">Ages 36 – 48 (Current)</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD;">Breakout &amp; Expansion</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; color:#4B5563;">Rahu Mahadasha active; sudden opportunities, enterprise leaps, scaling.</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; text-align:center; font-weight:700; color:#047857;">Bold execution &amp; clarity</td>
                         </tr>
                         <tr style="background:#FAF7F2;">
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; font-weight:700; color:#111827;">Ages 49+</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD;">Sovereign Wisdom</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; color:#4B5563;">Transmutation into Kundalini energy: profound detachment, mentor status.</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; text-align:center; font-weight:600; color:#111827;">Dharmic stewardship</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; font-weight:700; color:#111827;">Ages 49+</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD;">Sovereign Wisdom</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; color:#4B5563;">Transmutation into Kundalini energy: profound detachment, mentor status.</td>
+                            <td style="padding:3.2px 6px; border:1px solid #ECE6DD; text-align:center; font-weight:600; color:#111827;">Dharmic stewardship</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
             <!-- Deep Analysis Editorial Box -->
-            <div class="mr-callout-box" style="border-left-color:#C45738; margin-top:6px; padding:8px 12px;">
-                <div style="font-family:<?php echo $head_font; ?>; font-size:10.5px; font-weight:700; color:#111827; margin-bottom:2px;">
+            <div class="mr-callout-box" style="border-left-color:#C45738; margin-top:4px; padding:5px 12px;">
+                <div style="font-family:<?php echo $head_font; ?>; font-size: 12.2px; font-weight:700; color:#111827; margin-bottom:2px;">
                     Astrological Synthesis: Harnessing Rahu as an Unstoppable Growth Catalyst
                 </div>
-                <div style="font-size:9.2px; color:#374151; line-height:1.45;">
+                <div style="font-size: 10.4px; color:#374151; line-height:1.33;">
                     <?php echo esc_html($karmic_mat['kaalsarp_evolution'] ?? "The presence of the Anant Kaal Sarp configuration (Rahu in Cancer Lagna / Ketu in Capricorn 7th House) is not a cosmic curse, but an evolutionary engine. The dispositor of Rahu (Moon) is securely placed in the 2nd house of speech and family values in royal Leo, while Jupiter's 9th aspect injects dharmic wisdom. Natives with this placement experience dramatic late-life breakthroughs, turning early obstacles into uncommon strategic resilience."); ?>
                 </div>
             </div>
@@ -2746,11 +2822,11 @@ class MR_Kundali_Report_Builder {
                 ]
             ); ?>
         </div>
-        <?php echo self::render_page_footer(17, 'Kaal Sarp Audit &amp; Transmutation'); ?>
+        <?php echo self::render_page_footer(18, 'Kaal Sarp Audit · Nodal Transmutation'); ?>
     </div>
 
     <!-- ========================================================
-         PAGE 18: PITRA DOSH AUDIT & ANCESTRAL LINEAGE BLESSINGS
+         PAGE 19: PITRA DOSH AUDIT & ANCESTRAL LINEAGE BLESSINGS
          ======================================================== -->
     <div class="mr-page">
         <div class="mr-header-bar">
@@ -2761,30 +2837,30 @@ class MR_Kundali_Report_Builder {
         </div>
 
         <div class="mr-page-body">
-            <div class="mr-tag-pill">17 · Lineage &amp; Ancestral Grace</div>
-            <h1 class="mr-page-h1">Pitra Dosh Audit: Zero Affliction &amp; Royal Ancestral Grace</h1>
-            <div class="mr-page-sub">Rigorous Parashari Examination of 9th House, Surya Dev &amp; Pitri Devata (Magha Nakshatra)</div>
+            <div class="mr-tag-pill">17 · Ancestral Blessings (Pitra Grace)</div>
+            <h1 class="mr-page-h1">Pitra Blessings: Family Heritage &amp; Ancestral Grace</h1>
+            <div class="mr-page-sub">Respecting family elders, ancestral traditions, and receiving positive family blessings</div>
 
             <!-- Top Grid: Affliction Free Badge & Surya Analysis with Double Breathing Space -->
             <div class="mr-grid-2col" style="gap:14px 22px; margin-top:2px;">
                 <div style="background:#ECFDF5; border:1.5px solid #10B981; border-radius:8px; padding:10px 14px;">
                     <div style="display:flex; align-items:center; gap:6px; margin-bottom:3px;">
                         <span style="color:#059669; font-size:15px;">🌿</span>
-                        <strong style="font-family:<?php echo $head_font; ?>; font-size:11.5px; color:#065F46;">Audit Result: 0% Pitra Affliction</strong>
+                        <strong style="font-family:<?php echo $head_font; ?>; font-size: 14.4px; color:#065F46;">Audit Result: 0% Pitra Affliction</strong>
                     </div>
-                    <div style="font-size:9.5px; color:#065F46; line-height:1.45;">
+                    <div style="font-size: 11.9px; color:#065F46; line-height:1.45;">
                         Your Janam Kundali is <strong>completely free from Pitra Dosh</strong>. Surya Dev is unencumbered by Rahu/Ketu conjunctions, and the 9th house of paternal lineage is under the expansive protection of Jupiter (Guru).
                     </div>
-                    <div style="font-size:8.5px; font-weight:700; color:#047857; margin-top:5px;">
+                    <div style="font-size: 10.6px; font-weight:700; color:#047857; margin-top:5px;">
                         STATUS: UNCONDITIONAL ANCESTRAL BLESSING &amp; KAVACHA
                     </div>
                 </div>
 
                 <div class="mr-card" style="padding:10px 14px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#111827; margin-bottom:3px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; font-weight:700; color:#111827; margin-bottom:3px;">
                         Surya Dev Dignity in Sagittarius (Dhanu)
                     </div>
-                    <div style="font-size:9.5px; color:#4B5563; line-height:1.45;">
+                    <div style="font-size: 11.9px; color:#4B5563; line-height:1.45;">
                         Surya sits at <strong>11°25' in Sagittarius</strong>, a friendly, dharmic sign governed by Jupiter. In the 6th house, the Sun dissolves opposition and protects hereditary reputation, ensuring that honor and moral integrity pass forward unblemished.
                     </div>
                 </div>
@@ -2792,25 +2868,25 @@ class MR_Kundali_Report_Builder {
 
             <!-- The 3 Lineage Pillars with Double Breathing Space -->
             <div style="margin-top:6px;">
-                <div style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#111827; margin-bottom:4px;">
+                <div style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; font-weight:700; color:#111827; margin-bottom:4px;">
                     Three Foundational Pillars of Ancestral Protection in Your Nativity
                 </div>
                 <div class="mr-grid-3col" style="gap:12px 18px;">
                     <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:8px 11px;">
-                        <div style="font-size:9.8px; font-weight:700; color:#C45738; margin-bottom:2px;">👑 Magha Nakshatra</div>
-                        <div style="font-size:9px; color:#4B5563; line-height:1.4;">
+                        <div style="font-size: 12.3px; font-weight:700; color:#C45738; margin-bottom:2px;">👑 Magha Nakshatra</div>
+                        <div style="font-size: 11.3px; color:#4B5563; line-height:1.4;">
                             The Moon occupies Magha, presided over by the <em>Pitris</em> (ancestral guardians). This positions you as an anointed custodian of family heritage and dharma.
                         </div>
                     </div>
                     <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:8px 11px;">
-                        <div style="font-size:9.8px; font-weight:700; color:#4E7D68; margin-bottom:2px;">🏛️ 9th House Bhagya</div>
-                        <div style="font-size:9px; color:#4B5563; line-height:1.4;">
+                        <div style="font-size: 12.3px; font-weight:700; color:#4E7D68; margin-bottom:2px;">🏛️ 9th House Bhagya</div>
+                        <div style="font-size: 11.3px; color:#4B5563; line-height:1.4;">
                             The 9th house of fortune and forefathers is Pisces (Meena), ruled by Jupiter. Paternal roots carry sacred merit, shielding you from sudden catastrophic reversals.
                         </div>
                     </div>
                     <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:8px 11px;">
-                        <div style="font-size:9.8px; font-weight:700; color:#C2964C; margin-bottom:2px;">☀️ Unafflicted Surya</div>
-                        <div style="font-size:9px; color:#4B5563; line-height:1.4;">
+                        <div style="font-size: 12.3px; font-weight:700; color:#C2964C; margin-bottom:2px;">☀️ Unafflicted Surya</div>
+                        <div style="font-size: 11.3px; color:#4B5563; line-height:1.4;">
                             With zero malefic aspects on the Sun, your vital soul-force remains radiant. Paternal relationships remain grounded in respect, duty, and long-term values.
                         </div>
                     </div>
@@ -2819,10 +2895,10 @@ class MR_Kundali_Report_Builder {
 
             <!-- Deep Analysis Editorial Box -->
             <div class="mr-callout-box" style="border-left-color:#4E7D68; margin-top:6px; padding:8px 12px;">
-                <div style="font-family:<?php echo $head_font; ?>; font-size:10.5px; font-weight:700; color:#111827; margin-bottom:2px;">
+                <div style="font-family:<?php echo $head_font; ?>; font-size: 13.1px; font-weight:700; color:#111827; margin-bottom:2px;">
                     Ancestral Lineage Synthesis: Sustaining Generational Good Fortune
                 </div>
-                <div style="font-size:9.2px; color:#374151; line-height:1.45;">
+                <div style="font-size: 11.5px; color:#374151; line-height:1.45;">
                     <?php echo esc_html($karmic_mat['pitra_blessing'] ?? "The scan confirms complete absence (0%) of Pitra Dosh afflictions. Surya Dev occupies the friendly, spiritually auspicious sign of Sagittarius, receiving the harmonious rays of Jupiter and Saturn. Ancestral grace operates as an invisible shield around your endeavors, ensuring family lineage protection, mental clarity, and enduring moral legacy."); ?>
                 </div>
             </div>
@@ -2846,12 +2922,12 @@ class MR_Kundali_Report_Builder {
                 ]
             ); ?>
         </div>
-        <?php echo self::render_page_footer(18, 'Pitra Dosh &amp; Lineage Audit'); ?>
+        <?php echo self::render_page_footer(19, 'Pitra Dosh &amp; Lineage Audit'); ?>
     </div>
 
 
     <!-- ========================================================
-         PAGE 19: LIFE DOMAINS: CAREER ALTITUDE & EXECUTIVE DESTINY
+         PAGE 20: LIFE DOMAINS: CAREER ALTITUDE & EXECUTIVE DESTINY
          ======================================================== -->
     <div class="mr-page">
         <div class="mr-header-bar">
@@ -2862,26 +2938,26 @@ class MR_Kundali_Report_Builder {
         </div>
 
         <div class="mr-page-body">
-            <div class="mr-tag-pill">18 · Karmasthana &amp; Executive Altitude</div>
-            <h1 class="mr-page-h1">Career Trajectory: Executive Authority, Strategy &amp; Enterprise Mastery</h1>
-            <div class="mr-page-sub">Analysis of 10th Bhava (Aries), 10th Lord Mars Exalted, and Amatyakaraka Saturn in Virgo</div>
+            <div class="mr-tag-pill">18 · Career, Leadership &amp; Business</div>
+            <h1 class="mr-page-h1">Career Trajectory: Leadership, Growth &amp; Business Success</h1>
+            <div class="mr-page-sub">Detailed guidance on career promotions, management skills, and long-term reputation</div>
 
             <!-- Top Grid: 10th Lord Power vs Vocational Archetype with Double Breathing Space -->
             <div class="mr-grid-2col" style="gap:14px 22px; margin-top:2px;">
                 <div class="mr-card" style="padding:10px 14px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#111827; margin-bottom:3px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; font-weight:700; color:#111827; margin-bottom:3px;">
                         10th House (Mesha) &amp; Exalted 10th Lord Mars
                     </div>
-                    <div style="font-size:9.5px; color:#4B5563; line-height:1.45;">
+                    <div style="font-size: 11.9px; color:#4B5563; line-height:1.45;">
                         Your 10th house is Aries (Mesha), symbolizing pioneering enterprise, executive command, and strategic innovation. Its lord, <strong>Mars, is exalted in the 7th Kendra (Makara 3°02')</strong>, linking career breakthroughs directly with high-stakes client advisory, strategic partnerships, and global enterprise operations.
                     </div>
                 </div>
 
                 <div class="mr-card-accent" style="padding:10px 14px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#C45738; margin-bottom:3px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; font-weight:700; color:#C45738; margin-bottom:3px;">
                         Vocational Compass: Amatyakaraka Shani
                     </div>
-                    <div style="font-size:9.5px; color:#1F2937; line-height:1.45;">
+                    <div style="font-size: 11.9px; color:#1F2937; line-height:1.45;">
                         As your <strong>Amatyakaraka (AmK)</strong>, Saturn in analytical Virgo governs your career execution. Your success relies on structured methodologies, precision metrics, and reliable systems. You thrive in roles that demand architectural rigor and flawless delivery.
                     </div>
                 </div>
@@ -2889,28 +2965,28 @@ class MR_Kundali_Report_Builder {
 
             <!-- 3 Career Epochs with Double Breathing Space -->
             <div style="margin-top:6px;">
-                <div style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#111827; margin-bottom:4px;">
+                <div style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; font-weight:700; color:#111827; margin-bottom:4px;">
                     Three Major Vocational Horizons &amp; Strategic Milestones
                 </div>
                 <div class="mr-grid-3col" style="gap:12px 18px;">
                     <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:8px 11px;">
-                        <div style="font-size:8.8px; font-weight:700; color:#8C7B6B;">EPOCH 1 (2000 – 2015)</div>
-                        <div style="font-size:10px; font-weight:700; color:#111827; margin:2px 0;">Technical Craftsmanship</div>
-                        <div style="font-size:9px; color:#4B5563; line-height:1.4;">
+                        <div style="font-size: 11px; font-weight:700; color:#8C7B6B;">EPOCH 1 (2000 – 2015)</div>
+                        <div style="font-size: 12.5px; font-weight:700; color:#111827; margin:2px 0;">Technical Craftsmanship</div>
+                        <div style="font-size: 11.3px; color:#4B5563; line-height:1.4;">
                             Jupiter/Saturn dasha sub-periods: Deep technical grounding, learning enterprise architectures, building foundational credibility.
                         </div>
                     </div>
                     <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:8px 11px;">
-                        <div style="font-size:8.8px; font-weight:700; color:#C2964C;">EPOCH 2 (2016 – 2024)</div>
-                        <div style="font-size:10px; font-weight:700; color:#111827; margin:2px 0;">Strategic Advisory</div>
-                        <div style="font-size:9px; color:#4B5563; line-height:1.4;">
+                        <div style="font-size: 11px; font-weight:700; color:#C2964C;">EPOCH 2 (2016 – 2024)</div>
+                        <div style="font-size: 12.5px; font-weight:700; color:#111827; margin:2px 0;">Strategic Advisory</div>
+                        <div style="font-size: 11.3px; color:#4B5563; line-height:1.4;">
                             Transition into leadership, client advisory, large-scale systems deployment, and reputation as a decisive troubleshooter.
                         </div>
                     </div>
                     <div style="background:#FDF8F3; border:1.5px solid #C45738; border-radius:6px; padding:8px 11px;">
-                        <div style="font-size:8.8px; font-weight:700; color:#C45738;">EPOCH 3 (2024 – 2042)</div>
-                        <div style="font-size:10px; font-weight:700; color:#C45738; margin:2px 0;">Sovereign Authority</div>
-                        <div style="font-size:9px; color:#1F2937; line-height:1.4;">
+                        <div style="font-size: 11px; font-weight:700; color:#C45738;">EPOCH 3 (2024 – 2042)</div>
+                        <div style="font-size: 12.5px; font-weight:700; color:#C45738; margin:2px 0;">Sovereign Authority</div>
+                        <div style="font-size: 11.3px; color:#1F2937; line-height:1.4;">
                             Rahu Mahadasha active: Independent enterprise ownership, high-altitude advisory, international expansion, scalable digital assets.
                         </div>
                     </div>
@@ -2919,10 +2995,10 @@ class MR_Kundali_Report_Builder {
 
             <!-- Deep Analysis Editorial Box -->
             <div class="mr-callout-box" style="border-left-color:#C45738; margin-top:6px; padding:8px 12px;">
-                <div style="font-family:<?php echo $head_font; ?>; font-size:10.5px; font-weight:700; color:#111827; margin-bottom:2px;">
+                <div style="font-family:<?php echo $head_font; ?>; font-size: 13.1px; font-weight:700; color:#111827; margin-bottom:2px;">
                     Strategic Vocational Blueprint: Maximizing Your Parashari Strengths
                 </div>
-                <div style="font-size:9.2px; color:#374151; line-height:1.45;">
+                <div style="font-size: 11.5px; color:#374151; line-height:1.45;">
                     <?php echo esc_html($life_dom['career_destiny'] ?? "Your 10th house of vocation is energized by exalted Mars and aspected by Jupiter. You possess natural executive command, strategic foresight, and organizational stamina. Optimal vocational fields include technology architecture, executive advisory, real estate, engineering, and digital systems consulting."); ?>
                 </div>
             </div>
@@ -2946,11 +3022,11 @@ class MR_Kundali_Report_Builder {
                 ]
             ); ?>
         </div>
-        <?php echo self::render_page_footer(19, 'Career Altitude &amp; Karma'); ?>
+        <?php echo self::render_page_footer(20, 'Career Altitude &amp; Karma'); ?>
     </div>
 
     <!-- ========================================================
-         PAGE 20: LIFE DOMAINS: WEALTH ARCHITECTURE & TREASURY
+         PAGE 21: LIFE DOMAINS: WEALTH ARCHITECTURE & TREASURY
          ======================================================== -->
     <div class="mr-page">
         <div class="mr-header-bar">
@@ -2961,32 +3037,32 @@ class MR_Kundali_Report_Builder {
         </div>
 
         <div class="mr-page-body">
-            <div class="mr-tag-pill">19 · Dhana &amp; Labha Sthana Architecture</div>
-            <h1 class="mr-page-h1">Wealth Architecture: Capital Accumulation, Treasury &amp; Real Assets</h1>
-            <div class="mr-page-sub">Analysis of 2nd House (Treasury), 11th House (Income Gauges), and Dhana Yoga Dynamics</div>
+            <div class="mr-tag-pill">19 · Money, Savings &amp; Prosperity</div>
+            <h1 class="mr-page-h1">Wealth &amp; Savings: Building Lasting Financial Security</h1>
+            <div class="mr-page-sub">Practical analysis of income sources, smart investments, and growing family wealth</div>
 
             <!-- Top Grid: 2nd House & 11th House Dynamics with Double Breathing Space -->
             <div class="mr-grid-2col" style="gap:14px 22px; margin-top:2px;">
                 <div class="mr-card" style="padding:10px 14px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#111827; margin-bottom:3px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; font-weight:700; color:#111827; margin-bottom:3px;">
                         2nd Bhava: Royal Leo &amp; Magha Moon
                     </div>
-                    <div style="font-size:9.5px; color:#4B5563; line-height:1.45;">
+                    <div style="font-size: 11.9px; color:#4B5563; line-height:1.45;">
                         The 2nd house of liquid assets, savings, and family heritage is Leo (Simha), occupied by the <strong>Moon in Magha (11°53')</strong>. This configuration guarantees refined speech, executive gravitas, and steady capital accumulation through reputable sources.
                     </div>
-                    <div style="font-size:8.8px; font-weight:700; color:#047857; margin-top:5px;">
+                    <div style="font-size: 11px; font-weight:700; color:#047857; margin-top:5px;">
                         ✔ Strong Capital Preservation &amp; Family Wealth Continuity
                     </div>
                 </div>
 
                 <div class="mr-card" style="padding:10px 14px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#111827; margin-bottom:3px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; font-weight:700; color:#111827; margin-bottom:3px;">
                         11th Bhava: Taurus &amp; Atmakaraka Venus
                     </div>
-                    <div style="font-size:9.5px; color:#4B5563; line-height:1.45;">
+                    <div style="font-size: 11.9px; color:#4B5563; line-height:1.45;">
                         The 11th house of profits and network gains is Taurus (Vrishabha), ruled by <strong>Venus (Shukra)</strong> located in the 5th house of intellect and investment foresight. This forms an authentic <em>Lakshmi-Dhana Yoga</em> connecting intellect directly to income.
                     </div>
-                    <div style="font-size:8.8px; font-weight:700; color:#C2964C; margin-top:5px;">
+                    <div style="font-size: 11px; font-weight:700; color:#C2964C; margin-top:5px;">
                         ✔ Intellect-Driven Multi-Stream Revenue Generation
                     </div>
                 </div>
@@ -2994,39 +3070,39 @@ class MR_Kundali_Report_Builder {
 
             <!-- 4-Pillar Capital Allocation Model with Double Breathing Space -->
             <div style="margin-top:6px;">
-                <div style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#111827; margin-bottom:4px;">
+                <div style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; font-weight:700; color:#111827; margin-bottom:4px;">
                     Recommended 4-Pillar Astrological Wealth Allocation Framework
                 </div>
                 <div class="mr-grid-4col" style="gap:10px 14px;">
                     <div style="background:#FAF7F2; border:1px solid #ECE6DD; border-radius:6px; padding:7px 9px; text-align:center;">
                         <div style="font-size:14px; margin-bottom:2px;">🏢</div>
-                        <div style="font-size:9.5px; font-weight:700; color:#C45738;">Real Estate</div>
-                        <div style="font-size:8.5px; color:#4B5563; margin-top:2px;">Exalted Mars in 4th/7th axis: Land, commercial spaces &amp; tangible assets.</div>
+                        <div style="font-size: 11.9px; font-weight:700; color:#C45738;">Real Estate</div>
+                        <div style="font-size: 10.6px; color:#4B5563; margin-top:2px;">Exalted Mars in 4th/7th axis: Land, commercial spaces &amp; tangible assets.</div>
                     </div>
                     <div style="background:#FAF7F2; border:1px solid #ECE6DD; border-radius:6px; padding:7px 9px; text-align:center;">
                         <div style="font-size:14px; margin-bottom:2px;">💻</div>
-                        <div style="font-size:9.5px; font-weight:700; color:#4E7D68;">Digital Systems</div>
-                        <div style="font-size:8.5px; color:#4B5563; margin-top:2px;">Rahu in Lagna + AmK Saturn: Scalable software, IP, &amp; automated streams.</div>
+                        <div style="font-size: 11.9px; font-weight:700; color:#4E7D68;">Digital Systems</div>
+                        <div style="font-size: 10.6px; color:#4B5563; margin-top:2px;">Rahu in Lagna + AmK Saturn: Scalable software, IP, &amp; automated streams.</div>
                     </div>
                     <div style="background:#FAF7F2; border:1px solid #ECE6DD; border-radius:6px; padding:7px 9px; text-align:center;">
                         <div style="font-size:14px; margin-bottom:2px;">📈</div>
-                        <div style="font-size:9.5px; font-weight:700; color:#C2964C;">Value Equities</div>
-                        <div style="font-size:8.5px; color:#4B5563; margin-top:2px;">Venus in 5th Trikona: Long-term compound investing, dividend champions.</div>
+                        <div style="font-size: 11.9px; font-weight:700; color:#C2964C;">Value Equities</div>
+                        <div style="font-size: 10.6px; color:#4B5563; margin-top:2px;">Venus in 5th Trikona: Long-term compound investing, dividend champions.</div>
                     </div>
                     <div style="background:#FAF7F2; border:1px solid #ECE6DD; border-radius:6px; padding:7px 9px; text-align:center;">
                         <div style="font-size:14px; margin-bottom:2px;">🛡️</div>
-                        <div style="font-size:9.5px; font-weight:700; color:#111827;">Liquid Treasury</div>
-                        <div style="font-size:8.5px; color:#4B5563; margin-top:2px;">Moon in 2nd Bhava: Sovereign gold, defensive bonds &amp; emergency reserves.</div>
+                        <div style="font-size: 11.9px; font-weight:700; color:#111827;">Liquid Treasury</div>
+                        <div style="font-size: 10.6px; color:#4B5563; margin-top:2px;">Moon in 2nd Bhava: Sovereign gold, defensive bonds &amp; emergency reserves.</div>
                     </div>
                 </div>
             </div>
 
             <!-- Deep Analysis Editorial Box -->
             <div class="mr-callout-box" style="border-left-color:#4E7D68; margin-top:6px; padding:8px 12px;">
-                <div style="font-family:<?php echo $head_font; ?>; font-size:10.5px; font-weight:700; color:#111827; margin-bottom:2px;">
+                <div style="font-family:<?php echo $head_font; ?>; font-size: 13.1px; font-weight:700; color:#111827; margin-bottom:2px;">
                     Treasury Synthesis: Translating Yogic Wealth into Generational Capital
                 </div>
-                <div style="font-size:9.2px; color:#374151; line-height:1.45;">
+                <div style="font-size: 11.5px; color:#374151; line-height:1.45;">
                     <?php echo esc_html($life_dom['wealth_architecture'] ?? "The 2nd house (Leo Moon) combined with the 11th house (Taurus/Venus lord) forms a robust Dhana Yoga. Your capital multiplies not through speculative gambling, but through systematic asset-backed accumulation, prime real estate, and scalable enterprise ventures."); ?>
                 </div>
             </div>
@@ -3050,11 +3126,11 @@ class MR_Kundali_Report_Builder {
                 ]
             ); ?>
         </div>
-        <?php echo self::render_page_footer(20, 'Wealth Architecture &amp; Treasury'); ?>
+        <?php echo self::render_page_footer(21, 'Wealth Architecture &amp; Treasury'); ?>
     </div>
 
     <!-- ========================================================
-         PAGE 21: LIFE DOMAINS: MARRIAGE & PARTNERSHIPS
+         PAGE 22: LIFE DOMAINS: MARRIAGE & PARTNERSHIPS
          ======================================================== -->
     <div class="mr-page">
         <div class="mr-header-bar">
@@ -3065,32 +3141,32 @@ class MR_Kundali_Report_Builder {
         </div>
 
         <div class="mr-page-body">
-            <div class="mr-tag-pill">20 · Kalatra Sthana Dynamics</div>
-            <h1 class="mr-page-h1">Matrimonial Harmony: Partnerships, Spousal Archetype &amp; Longevity</h1>
-            <div class="mr-page-sub">Comprehensive Parashari Analysis of 7th House (Makara), Exalted Mars &amp; 7th Lord Saturn</div>
+            <div class="mr-tag-pill">20 · Marriage, Love &amp; Compatibility</div>
+            <h1 class="mr-page-h1">Marriage Harmony: Life Partner, Love &amp; Companionship</h1>
+            <div class="mr-page-sub">Understanding marital happiness, what your partner will be like, and keeping strong bonds</div>
 
             <!-- Top Grid: 7th House Setup & Partner Archetype with Double Breathing Space -->
             <div class="mr-grid-2col" style="gap:14px 22px; margin-top:2px;">
                 <div class="mr-card" style="padding:10px 14px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#111827; margin-bottom:3px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; font-weight:700; color:#111827; margin-bottom:3px;">
                         7th House: Capricorn (Makara) Anchor
                     </div>
-                    <div style="font-size:9.5px; color:#4B5563; line-height:1.45;">
+                    <div style="font-size: 11.9px; color:#4B5563; line-height:1.45;">
                         Your 7th house is Capricorn, ruled by Saturn (Shani), and occupied by <strong>exalted Mars (3°02')</strong> and <strong>Ketu (19°14')</strong>. This creates a relationship dynamic rooted in structure, endurance, mutual loyalty, and deep karmic bonds rather than superficial drama.
                     </div>
-                    <div style="font-size:8.8px; font-weight:700; color:#047857; margin-top:5px;">
+                    <div style="font-size: 11px; font-weight:700; color:#047857; margin-top:5px;">
                         ✔ Unshakable Relational Foundation &amp; Shared Responsibility
                     </div>
                 </div>
 
                 <div class="mr-card" style="padding:10px 14px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#111827; margin-bottom:3px;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; font-weight:700; color:#111827; margin-bottom:3px;">
                         Spousal Archetype: The Steadfast Ally
                     </div>
-                    <div style="font-size:9.5px; color:#4B5563; line-height:1.45;">
+                    <div style="font-size: 11.9px; color:#4B5563; line-height:1.45;">
                         Exalted Mars in the 7th house indicates a spouse who possesses impressive dignity, practical intelligence, professional stamina, and unwavering moral integrity. The partner is a strong equal partner who commands respect and provides organizational stability.
                     </div>
-                    <div style="font-size:8.8px; font-weight:700; color:#C2964C; margin-top:5px;">
+                    <div style="font-size: 11px; font-weight:700; color:#C2964C; margin-top:5px;">
                         ✔ Partner Acts as a Strategic Sounding Board &amp; Anchor
                     </div>
                 </div>
@@ -3098,31 +3174,31 @@ class MR_Kundali_Report_Builder {
 
             <!-- 4 Matrimonial Harmonization Pillars with Double Breathing Space -->
             <div style="margin-top:6px;">
-                <div style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#111827; margin-bottom:4px;">
+                <div style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; font-weight:700; color:#111827; margin-bottom:4px;">
                     Four Sacred Principles for Lifelong Relational Synergy
                 </div>
                 <div class="mr-grid-2col" style="gap:10px 20px;">
                     <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:7px 11px;">
-                        <div style="font-size:9.6px; font-weight:700; color:#C45738; margin-bottom:2px;">1. Intellectual &amp; Space Sovereignty</div>
-                        <div style="font-size:9px; color:#4B5563; line-height:1.4;">
+                        <div style="font-size: 12px; font-weight:700; color:#C45738; margin-bottom:2px;">1. Intellectual &amp; Space Sovereignty</div>
+                        <div style="font-size: 11.3px; color:#4B5563; line-height:1.4;">
                             Ketu in the 7th house thrives when both partners have private contemplative spaces and individual professional missions without micro-management.
                         </div>
                     </div>
                     <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:7px 11px;">
-                        <div style="font-size:9.6px; font-weight:700; color:#4E7D68; margin-bottom:2px;">2. Constructive Joint Problem-Solving</div>
-                        <div style="font-size:9px; color:#4B5563; line-height:1.4;">
+                        <div style="font-size: 12px; font-weight:700; color:#4E7D68; margin-bottom:2px;">2. Constructive Joint Problem-Solving</div>
+                        <div style="font-size: 11.3px; color:#4B5563; line-height:1.4;">
                             With 7th lord Saturn in analytical Virgo, domestic negotiations flourish when treated as practical planning sessions grounded in facts and mutual care.
                         </div>
                     </div>
                     <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:7px 11px;">
-                        <div style="font-size:9.6px; font-weight:700; color:#C2964C; margin-bottom:2px;">3. Shared Spiritual &amp; Cultural Roots</div>
-                        <div style="font-size:9px; color:#4B5563; line-height:1.4;">
+                        <div style="font-size: 12px; font-weight:700; color:#C2964C; margin-bottom:2px;">3. Shared Spiritual &amp; Cultural Roots</div>
+                        <div style="font-size: 11.3px; color:#4B5563; line-height:1.4;">
                             Participating together in auspicious rituals, temple visits, and family traditions strengthens the subtle Prana envelope protecting your domestic peace.
                         </div>
                     </div>
                     <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:7px 11px;">
-                        <div style="font-size:9.6px; font-weight:700; color:#111827; margin-bottom:2px;">4. Transmutation of Disagreements</div>
-                        <div style="font-size:9px; color:#4B5563; line-height:1.4;">
+                        <div style="font-size: 12px; font-weight:700; color:#111827; margin-bottom:2px;">4. Transmutation of Disagreements</div>
+                        <div style="font-size: 11.3px; color:#4B5563; line-height:1.4;">
                             During high-energy Mars transits, practice silent listening and delay immediate reactions by 24 hours to preserve domestic harmony.
                         </div>
                     </div>
@@ -3131,10 +3207,10 @@ class MR_Kundali_Report_Builder {
 
             <!-- Deep Analysis Editorial Box -->
             <div class="mr-callout-box" style="border-left-color:#C45738; margin-top:6px; padding:8px 12px;">
-                <div style="font-family:<?php echo $head_font; ?>; font-size:10.5px; font-weight:700; color:#111827; margin-bottom:2px;">
+                <div style="font-family:<?php echo $head_font; ?>; font-size: 13.1px; font-weight:700; color:#111827; margin-bottom:2px;">
                     Matrimonial Synthesis: Long-Term Relational Bliss &amp; Shared Destiny
                 </div>
-                <div style="font-size:9.2px; color:#374151; line-height:1.45;">
+                <div style="font-size: 11.5px; color:#374151; line-height:1.45;">
                     <?php echo esc_html($life_dom['marital_harmony'] ?? "Your 7th house is anchored by exalted Mars and Ketu, indicating a dignified, intelligent, and strong-willed life partner. Marital happiness flourishes when mutual respect, shared intellectual pursuits, and emotional independence are consciously cultivated."); ?>
                 </div>
             </div>
@@ -3158,11 +3234,11 @@ class MR_Kundali_Report_Builder {
                 ]
             ); ?>
         </div>
-        <?php echo self::render_page_footer(21, 'Marriage &amp; Partnerships'); ?>
+        <?php echo self::render_page_footer(22, 'Marriage &amp; Partnerships'); ?>
     </div>
 
     <!-- ========================================================
-         PAGE 22: UPAYA VIGYAN: GEMSTONE & RUDRAKSHA THERAPY
+         PAGE 23: UPAYA VIGYAN: GEMSTONE & RUDRAKSHA THERAPY
          ======================================================== -->
     <div class="mr-page">
         <div class="mr-header-bar">
@@ -3173,77 +3249,85 @@ class MR_Kundali_Report_Builder {
         </div>
 
         <div class="mr-page-body">
-            <div class="mr-tag-pill">21 · Ratna &amp; Rudraksha Vigyan</div>
-            <h1 class="mr-page-h1">Prescriptive Gemstone &amp; Sacred Rudraksha Architecture</h1>
-            <div class="mr-page-sub">Customized Bio-Resonant Crystal &amp; Bead Therapy Designed Strictly for Cancer Lagna Dynamics</div>
+            <div class="mr-tag-pill">21 · Lucky Gemstones &amp; Rudraksha</div>
+            <h1 class="mr-page-h1">Gemstones &amp; Sacred Rudraksha Beads for Balance</h1>
+            <div class="mr-page-sub">Recommended natural stones, Rudraksha beads, and power colors for energy and peace</div>
 
             <!-- Gemstone Prescription Table with Double Breathing Space -->
-            <table style="width:100%; border-collapse:collapse; font-size:9.2px; margin-top:2px;">
+            <!-- Gemstone Prescription Table with Fixed Layout & Colgroup -->
+            <table class="mr-kundali-table" style="font-size: 10.4px; margin-top:2px;">
+                <colgroup>
+                    <col style="width: 16%;">
+                    <col style="width: 18%;">
+                    <col style="width: 14%;">
+                    <col style="width: 18%;">
+                    <col style="width: 34%;">
+                </colgroup>
                 <thead>
                     <tr style="background:#F4EFE6; color:#111827; font-family:<?php echo $head_font; ?>; font-weight:700;">
-                        <th style="padding:4.5px 7px; text-align:left; border:1px solid #ECE6DD; width:15%;">Category</th>
-                        <th style="padding:4.5px 7px; text-align:left; border:1px solid #ECE6DD; width:18%;">Gemstone (Ratna)</th>
-                        <th style="padding:4.5px 7px; text-align:left; border:1px solid #ECE6DD; width:14%;">Metal &amp; Finger</th>
-                        <th style="padding:4.5px 7px; text-align:left; border:1px solid #ECE6DD; width:18%;">Consecration Time</th>
-                        <th style="padding:4.5px 7px; text-align:left; border:1px solid #ECE6DD; width:35%;">Astrological Benefit &amp; Mechanism</th>
+                        <th style="padding:3.5px 6px; text-align:left; border:1px solid #ECE6DD;">Category</th>
+                        <th style="padding:3.5px 6px; text-align:left; border:1px solid #ECE6DD;">Gemstone (Ratna)</th>
+                        <th style="padding:3.5px 6px; text-align:left; border:1px solid #ECE6DD;">Metal &amp; Finger</th>
+                        <th style="padding:3.5px 6px; text-align:left; border:1px solid #ECE6DD;">Consecration Time</th>
+                        <th style="padding:3.5px 6px; text-align:left; border:1px solid #ECE6DD;">Astrological Benefit &amp; Mechanism</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr style="background:#FFFFFF;">
-                        <td style="padding:3.8px 7px; border:1px solid #ECE6DD; font-weight:700; color:#047857;">Primary Benefic (Life Stone)</td>
-                        <td style="padding:3.8px 7px; border:1px solid #ECE6DD; font-weight:700; color:#111827;">Natural Pearl (Moti) / Moonstone</td>
-                        <td style="padding:3.8px 7px; border:1px solid #ECE6DD;">Pure Silver · Little Finger</td>
-                        <td style="padding:3.8px 7px; border:1px solid #ECE6DD;">Monday morning during Shukla Paksha</td>
-                        <td style="padding:3.8px 7px; border:1px solid #ECE6DD; color:#4B5563;">Fortifies Lagna Lord Moon, stabilizing emotional equilibrium, soothing nerves, and boosting mental intuition.</td>
+                        <td style="padding:3.2px 6px; border:1px solid #ECE6DD; font-weight:700; color:#047857;">Primary Benefic (Life Stone)</td>
+                        <td style="padding:3.2px 6px; border:1px solid #ECE6DD; font-weight:700; color:#111827;">Natural Pearl (Moti) / Moonstone</td>
+                        <td style="padding:3.2px 6px; border:1px solid #ECE6DD;">Pure Silver · Little Finger</td>
+                        <td style="padding:3.2px 6px; border:1px solid #ECE6DD;">Monday morning during Shukla Paksha</td>
+                        <td style="padding:3.2px 6px; border:1px solid #ECE6DD; color:#4B5563;">Fortifies Lagna Lord Moon, stabilizing emotional equilibrium, soothing nerves, and boosting mental intuition.</td>
                     </tr>
                     <tr style="background:#FAF7F2;">
-                        <td style="padding:3.8px 7px; border:1px solid #ECE6DD; font-weight:700; color:#C2964C;">Bhagya &amp; Wisdom Stone</td>
-                        <td style="padding:3.8px 7px; border:1px solid #ECE6DD; font-weight:700; color:#111827;">Yellow Sapphire (Pukhraj)</td>
-                        <td style="padding:3.8px 7px; border:1px solid #ECE6DD;">22k Gold / Panchdhatu · Index Finger</td>
-                        <td style="padding:3.8px 7px; border:1px solid #ECE6DD;">Thursday morning in Pushya / Punarvasu</td>
-                        <td style="padding:3.8px 7px; border:1px solid #ECE6DD; color:#4B5563;">Empowers 9th lord Jupiter, drawing divine grace, executive advisory respect, high ethical discernment, and wealth.</td>
+                        <td style="padding:3.2px 6px; border:1px solid #ECE6DD; font-weight:700; color:#C2964C;">Bhagya &amp; Wisdom Stone</td>
+                        <td style="padding:3.2px 6px; border:1px solid #ECE6DD; font-weight:700; color:#111827;">Yellow Sapphire (Pukhraj)</td>
+                        <td style="padding:3.2px 6px; border:1px solid #ECE6DD;">22k Gold / Panchdhatu · Index Finger</td>
+                        <td style="padding:3.2px 6px; border:1px solid #ECE6DD;">Thursday morning in Pushya / Punarvasu</td>
+                        <td style="padding:3.2px 6px; border:1px solid #ECE6DD; color:#4B5563;">Empowers 9th lord Jupiter, drawing divine grace, executive advisory respect, high ethical discernment, and wealth.</td>
                     </tr>
                     <tr style="background:#FFFFFF;">
-                        <td style="padding:3.8px 7px; border:1px solid #ECE6DD; font-weight:700; color:#C45738;">Action &amp; Courage Stone</td>
-                        <td style="padding:3.8px 7px; border:1px solid #ECE6DD; font-weight:700; color:#111827;">Italian Red Coral (Moonga)</td>
-                        <td style="padding:3.8px 7px; border:1px solid #ECE6DD;">Copper / Gold · Ring Finger</td>
-                        <td style="padding:3.8px 7px; border:1px solid #ECE6DD;">Tuesday morning during Sunrise</td>
-                        <td style="padding:3.8px 7px; border:1px solid #ECE6DD; color:#4B5563;">Amplifies Yogakaraka exalted Mars, enhancing physical stamina, leadership authority, and commercial courage.</td>
+                        <td style="padding:3.2px 6px; border:1px solid #ECE6DD; font-weight:700; color:#C45738;">Action &amp; Courage Stone</td>
+                        <td style="padding:3.2px 6px; border:1px solid #ECE6DD; font-weight:700; color:#111827;">Italian Red Coral (Moonga)</td>
+                        <td style="padding:3.2px 6px; border:1px solid #ECE6DD;">Copper / Gold · Ring Finger</td>
+                        <td style="padding:3.2px 6px; border:1px solid #ECE6DD;">Tuesday morning during Sunrise</td>
+                        <td style="padding:3.2px 6px; border:1px solid #ECE6DD; color:#4B5563;">Amplifies Yogakaraka exalted Mars, enhancing physical stamina, leadership authority, and commercial courage.</td>
                     </tr>
                     <tr style="background:#FEF2F2;">
-                        <td style="padding:3.8px 7px; border:1px solid #ECE6DD; font-weight:700; color:#DC2626;">Contraindicated (Caution)</td>
-                        <td style="padding:3.8px 7px; border:1px solid #ECE6DD; font-weight:700; color:#991B1B;">Blue Sapphire (Neelam)</td>
-                        <td style="padding:3.8px 7px; border:1px solid #ECE6DD; color:#6B7280;">Do not wear without strict trial</td>
-                        <td style="padding:3.8px 7px; border:1px solid #ECE6DD; color:#6B7280;">Requires 72-hour pillow test</td>
-                        <td style="padding:3.8px 7px; border:1px solid #ECE6DD; color:#991B1B;">Saturn rules the 7th and 8th dusthana houses for Cancer Lagna; unexamined use may trigger unnecessary obstacles.</td>
+                        <td style="padding:3.2px 6px; border:1px solid #ECE6DD; font-weight:700; color:#DC2626;">Contraindicated (Caution)</td>
+                        <td style="padding:3.2px 6px; border:1px solid #ECE6DD; font-weight:700; color:#991B1B;">Blue Sapphire (Neelam)</td>
+                        <td style="padding:3.2px 6px; border:1px solid #ECE6DD; color:#6B7280;">Do not wear without strict trial</td>
+                        <td style="padding:3.2px 6px; border:1px solid #ECE6DD; color:#6B7280;">Requires 72-hour pillow test</td>
+                        <td style="padding:3.2px 6px; border:1px solid #ECE6DD; color:#991B1B;">Saturn rules the 7th and 8th dusthana houses for Cancer Lagna; unexamined use may trigger unnecessary obstacles.</td>
                     </tr>
                 </tbody>
             </table>
 
             <!-- Rudraksha Prescriptions with Double Breathing Space -->
             <div style="margin-top:6px;">
-                <div style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#111827; margin-bottom:4px;">
+                <div style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; font-weight:700; color:#111827; margin-bottom:4px;">
                     Sacred Rudraksha Synergy: Bio-Electromagnetic Harmonization
                 </div>
-                <div class="mr-grid-3col" style="gap:12px 18px;">
-                    <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:8px 11px;">
-                        <div style="font-size:9.5px; font-weight:700; color:#C2964C; margin-bottom:2px;">🌿 5-Mukhi Rudraksha</div>
-                        <div style="font-size:8.8px; font-weight:600; color:#111827;">Ruler: Brihaspati (Guru)</div>
-                        <div style="font-size:8.5px; color:#4B5563; margin-top:2px; line-height:1.4;">
+                <div class="mr-grid-3col" style="gap:10px 16px;">
+                    <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:6px 10px;">
+                        <div style="font-size: 11.5px; font-weight:700; color:#C2964C; margin-bottom:2px;">🌿 5-Mukhi Rudraksha</div>
+                        <div style="font-size: 10.6px; font-weight:600; color:#111827;">Ruler: Brihaspati (Guru)</div>
+                        <div style="font-size: 10.2px; color:#4B5563; margin-top:2px; line-height:1.35;">
                             Purifies Prana, regulates blood pressure, enhances higher learning, and aligns personal consciousness with cosmic dharma.
                         </div>
                     </div>
-                    <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:8px 11px;">
-                        <div style="font-size:9.5px; font-weight:700; color:#4E7D68; margin-bottom:2px;">🛡️ 8-Mukhi Rudraksha</div>
-                        <div style="font-size:8.8px; font-weight:600; color:#111827;">Ruler: Lord Ganesha / Rahu</div>
-                        <div style="font-size:8.5px; color:#4B5563; margin-top:2px; line-height:1.4;">
+                    <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:6px 10px;">
+                        <div style="font-size: 11.5px; font-weight:700; color:#4E7D68; margin-bottom:2px;">🛡️ 8-Mukhi Rudraksha</div>
+                        <div style="font-size: 10.6px; font-weight:600; color:#111827;">Ruler: Lord Ganesha / Rahu</div>
+                        <div style="font-size: 10.2px; color:#4B5563; margin-top:2px; line-height:1.35;">
                             Neutralizes erratic Rahu waves, removes unexpected career obstacles, and bestows grounded strategic stability during dasha periods.
                         </div>
                     </div>
-                    <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:8px 11px;">
-                        <div style="font-size:9.5px; font-weight:700; color:#C45738; margin-bottom:2px;">⚡ 11-Mukhi Rudraksha</div>
-                        <div style="font-size:8.8px; font-weight:600; color:#111827;">Ruler: 11 Rudras / Exalted Mars</div>
-                        <div style="font-size:8.5px; color:#4B5563; margin-top:2px; line-height:1.4;">
+                    <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:6px 10px;">
+                        <div style="font-size: 11.5px; font-weight:700; color:#C45738; margin-bottom:2px;">⚡ 11-Mukhi Rudraksha</div>
+                        <div style="font-size: 10.6px; font-weight:600; color:#111827;">Ruler: 11 Rudras / Exalted Mars</div>
+                        <div style="font-size: 10.2px; color:#4B5563; margin-top:2px; line-height:1.35;">
                             Provides unyielding courage, executive stamina, mental fearlessness, and absolute defense against negative vibrations.
                         </div>
                     </div>
@@ -3251,11 +3335,11 @@ class MR_Kundali_Report_Builder {
             </div>
 
             <!-- Deep Analysis Editorial Box -->
-            <div class="mr-callout-box" style="border-left-color:#4E7D68; margin-top:6px; padding:8px 12px;">
-                <div style="font-family:<?php echo $head_font; ?>; font-size:10.5px; font-weight:700; color:#111827; margin-bottom:2px;">
+            <div class="mr-callout-box" style="border-left-color:#4E7D68; margin-top:5px; padding:6px 12px;">
+                <div style="font-family:<?php echo $head_font; ?>; font-size: 12.5px; font-weight:700; color:#111827; margin-bottom:2px;">
                     Guidelines for Consecration (Prana Pratishtha) &amp; Purity
                 </div>
-                <div style="font-size:9.2px; color:#374151; line-height:1.45;">
+                <div style="font-size: 10.6px; color:#374151; line-height:1.38;">
                     Gemstones and sacred Rudraksha beads act as optical and electromagnetic filters for celestial rays. Ensure all items are 100% natural, untreated, certified unheated, and ritually energized via Vedic Panchamrit Abhishek before initial wearing.
                 </div>
             </div>
@@ -3279,11 +3363,11 @@ class MR_Kundali_Report_Builder {
                 ]
             ); ?>
         </div>
-        <?php echo self::render_page_footer(22, 'Gemstone &amp; Rudraksha Science'); ?>
+        <?php echo self::render_page_footer(23, 'Gemstone & Rudraksha Science'); ?>
     </div>
 
     <!-- ========================================================
-         PAGE 23: UPAYA VIGYAN: MANTRAS, DAANS & DINACHARYA
+         PAGE 24: UPAYA VIGYAN: MANTRAS, DAANS & DINACHARYA
          ======================================================== -->
     <div class="mr-page">
         <div class="mr-header-bar">
@@ -3294,34 +3378,34 @@ class MR_Kundali_Report_Builder {
         </div>
 
         <div class="mr-page-body">
-            <div class="mr-tag-pill">22 · Sadhana &amp; Dinacharya Protocols</div>
-            <h1 class="mr-page-h1">Vedic Sadhana: Sacred Mantras, Time-Bound Daans &amp; Dinacharya</h1>
-            <div class="mr-page-sub">Actionable Ritual Schedule to Neutralize Karmic Debts and Maximize Rahu Mahadasha Velocity</div>
+            <div class="mr-tag-pill">22 · Simple Daily Remedies &amp; Prayers</div>
+            <h1 class="mr-page-h1">Simple Daily Remedies, Mantras &amp; Acts of Kindness</h1>
+            <div class="mr-page-sub">Easy daily routines, peaceful mantras, and charitable habits to keep life balanced</div>
 
             <!-- 3 Core Mantras with Double Breathing Space -->
             <div style="margin-top:2px;">
-                <div style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#111827; margin-bottom:4px;">
+                <div style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; font-weight:700; color:#111827; margin-bottom:4px;">
                     Three Foundational Daily Mantras for Spiritual &amp; Mental Alignment
                 </div>
-                <div class="mr-grid-3col" style="gap:12px 18px;">
-                    <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:8px 11px;">
-                        <div style="font-size:9.5px; font-weight:700; color:#C45738; margin-bottom:2px;">☀️ Gayatri Maha Mantra</div>
-                        <div style="font-size:8.5px; color:#1F2937; font-style:italic; margin-bottom:2px;">“ॐ भूर्भुवः स्वः तत्सवितुर्वरेण्यं...”</div>
-                        <div style="font-size:8.5px; color:#4B5563; line-height:1.4;">
+                <div class="mr-grid-3col" style="gap:10px 16px;">
+                    <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:5px 9px;">
+                        <div style="font-size: 11.5px; font-weight:700; color:#C45738; margin-bottom:2px;">☀️ Gayatri Maha Mantra</div>
+                        <div style="font-size: 10.3px; color:#1F2937; font-style:italic; margin-bottom:2px;">“ॐ भूर्भुवः स्वः तत्सवितुर्वरेण्यं...”</div>
+                        <div style="font-size: 10.1px; color:#4B5563; line-height:1.35;">
                             Chant 24 times daily at sunrise facing East. Cleanses intellect, enhances Prana vitality, and aligns your soul with Surya Dev.
                         </div>
                     </div>
-                    <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:8px 11px;">
-                        <div style="font-size:9.5px; font-weight:700; color:#4E7D68; margin-bottom:2px;">🌪️ Rahu Beej Mantra</div>
-                        <div style="font-size:8.5px; color:#1F2937; font-style:italic; margin-bottom:2px;">“ॐ भ्रां भ्रीं भ्रौं सः राहवे नमः”</div>
-                        <div style="font-size:8.5px; color:#4B5563; line-height:1.4;">
+                    <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:5px 9px;">
+                        <div style="font-size: 11.5px; font-weight:700; color:#4E7D68; margin-bottom:2px;">🌪️ Rahu Beej Mantra</div>
+                        <div style="font-size: 10.3px; color:#1F2937; font-style:italic; margin-bottom:2px;">“ॐ भ्रां भ्रीं भ्रौं सः राहवे नमः”</div>
+                        <div style="font-size: 10.1px; color:#4B5563; line-height:1.35;">
                             Chant 108 times on Wednesday/Saturday evenings. Transmutes Rahu’s erratic restlessness into razor-sharp visionary mastery.
                         </div>
                     </div>
-                    <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:8px 11px;">
-                        <div style="font-size:9.5px; font-weight:700; color:#C2964C; margin-bottom:2px;">🌿 Maha Mrityunjaya Mantra</div>
-                        <div style="font-size:8.5px; color:#1F2937; font-style:italic; margin-bottom:2px;">“ॐ त्र्यम्बकं यजामहे सुगन्धिं...”</div>
-                        <div style="font-size:8.5px; color:#4B5563; line-height:1.4;">
+                    <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:5px 9px;">
+                        <div style="font-size: 11.5px; font-weight:700; color:#C2964C; margin-bottom:2px;">🌿 Maha Mrityunjaya Mantra</div>
+                        <div style="font-size: 10.3px; color:#1F2937; font-style:italic; margin-bottom:2px;">“ॐ त्र्यम्बकं यजामहे सुगन्धिं...”</div>
+                        <div style="font-size: 10.1px; color:#4B5563; line-height:1.35;">
                             Chant 11 times daily before retiring. Dispels mental fatigue, protects longevity, and balances the 1st/7th nodal axis.
                         </div>
                     </div>
@@ -3330,53 +3414,59 @@ class MR_Kundali_Report_Builder {
 
             <!-- Time-Bound Daan Schedule with Double Breathing Space -->
             <div style="margin-top:6px;">
-                <div style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#111827; margin-bottom:4px;">
+                <div style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; font-weight:700; color:#111827; margin-bottom:4px;">
                     Weekly Charitable Daan (Giving) Schedule: Karmic Cleansing
                 </div>
-                <table style="width:100%; border-collapse:collapse; font-size:9.2px;">
+                <table class="mr-kundali-table" style="font-size: 10.4px;">
+                    <colgroup>
+                        <col style="width: 15%;">
+                        <col style="width: 18%;">
+                        <col style="width: 34%;">
+                        <col style="width: 33%;">
+                    </colgroup>
                     <thead>
                         <tr style="background:#F4EFE6; color:#111827; font-family:<?php echo $head_font; ?>; font-weight:700;">
-                            <th style="padding:4.5px 7px; text-align:left; border:1px solid #ECE6DD; width:16%;">Day of Week</th>
-                            <th style="padding:4.5px 7px; text-align:left; border:1px solid #ECE6DD; width:22%;">Governing Deity / Graha</th>
-                            <th style="padding:4.5px 7px; text-align:left; border:1px solid #ECE6DD; width:34%;">Prescribed Daan Offering</th>
-                            <th style="padding:4.5px 7px; text-align:left; border:1px solid #ECE6DD; width:28%;">Karmic Objective</th>
+                            <th style="padding:3.5px 6px; text-align:left; border:1px solid #ECE6DD;">Day of Week</th>
+                            <th style="padding:3.5px 6px; text-align:left; border:1px solid #ECE6DD;">Governing Deity / Graha</th>
+                            <th style="padding:3.5px 6px; text-align:left; border:1px solid #ECE6DD;">Prescribed Daan Offering</th>
+                            <th style="padding:3.5px 6px; text-align:left; border:1px solid #ECE6DD;">Karmic Objective</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr style="background:#FFFFFF;">
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; font-weight:700; color:#C45738;">Sunday</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD;">Surya Dev (Sun)</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD;">Wheat, jaggery, or feeding brown cows</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; color:#4B5563;">Elevates soul dignity &amp; ancestral blessings.</td>
+                            <td style="padding:3px 6px; border:1px solid #ECE6DD; font-weight:700; color:#C45738;">Sunday</td>
+                            <td style="padding:3px 6px; border:1px solid #ECE6DD;">Surya Dev (Sun)</td>
+                            <td style="padding:3px 6px; border:1px solid #ECE6DD;">Wheat, jaggery, or feeding brown cows</td>
+                            <td style="padding:3px 6px; border:1px solid #ECE6DD; color:#4B5563;">Elevates soul dignity &amp; ancestral blessings.</td>
                         </tr>
                         <tr style="background:#FAF7F2;">
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; font-weight:700; color:#4E7D68;">Wednesday</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD;">Budh &amp; Rahu Harmonization</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD;">Green vegetables / supporting poor students</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; color:#4B5563;">Sharpens communication &amp; business acumen.</td>
+                            <td style="padding:3px 6px; border:1px solid #ECE6DD; font-weight:700; color:#4E7D68;">Wednesday</td>
+                            <td style="padding:3px 6px; border:1px solid #ECE6DD;">Budh &amp; Rahu Harmonization</td>
+                            <td style="padding:3px 6px; border:1px solid #ECE6DD;">Green vegetables / supporting poor students</td>
+                            <td style="padding:3px 6px; border:1px solid #ECE6DD; color:#4B5563;">Sharpens communication &amp; business acumen.</td>
                         </tr>
                         <tr style="background:#FFFFFF;">
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; font-weight:700; color:#C2964C;">Thursday</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD;">Brihaspati (Jupiter)</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD;">Chana dal, turmeric, or donating books</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; color:#4B5563;">Expands dharma, wisdom &amp; executive clarity.</td>
+                            <td style="padding:3px 6px; border:1px solid #ECE6DD; font-weight:700; color:#C2964C;">Thursday</td>
+                            <td style="padding:3px 6px; border:1px solid #ECE6DD;">Brihaspati (Jupiter)</td>
+                            <td style="padding:3px 6px; border:1px solid #ECE6DD;">Chana dal, turmeric, or donating books</td>
+                            <td style="padding:3px 6px; border:1px solid #ECE6DD; color:#4B5563;">Expands dharma, wisdom &amp; executive clarity.</td>
                         </tr>
                         <tr style="background:#FAF7F2;">
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; font-weight:700; color:#111827;">Saturday</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD;">Shani &amp; Rahu Shield</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD;">Mustard oil, black sesame, or helping workers</td>
-                            <td style="padding:3.8px 7px; border:1px solid #ECE6DD; color:#4B5563;">Neutralizes career friction &amp; dissolves debts.</td>
+                            <td style="padding:3px 6px; border:1px solid #ECE6DD; font-weight:700; color:#111827;">Saturday</td>
+                            <td style="padding:3px 6px; border:1px solid #ECE6DD;">Shani &amp; Rahu Shield</td>
+                            <td style="padding:3px 6px; border:1px solid #ECE6DD;">Mustard oil, black sesame, or helping workers</td>
+                            <td style="padding:3px 6px; border:1px solid #ECE6DD; color:#4B5563;">Neutralizes career friction &amp; dissolves debts.</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
 
             <!-- Daily Dinacharya Lifestyle Protocol with Double Breathing Space -->
-            <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:8px; padding:10px 14px; margin-top:6px;">
-                <div style="font-family:<?php echo $head_font; ?>; font-size:10.5px; font-weight:700; color:#111827; margin-bottom:3px;">
+            <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:8px; padding:7px 11px; margin-top:5px;">
+                <div style="font-family:<?php echo $head_font; ?>; font-size: 12.5px; font-weight:700; color:#111827; margin-bottom:2px;">
                     Daily Vedic Dinacharya (Circadian Lifestyle Optimization)
                 </div>
-                <div class="mr-grid-3col" style="gap:12px 18px; font-size:9px; color:#4B5563; line-height:1.4;">
+                <div class="mr-grid-3col" style="gap:10px 16px; font-size: 10.4px; color:#4B5563; line-height:1.35;">
                     <div><strong style="color:#C45738;">Morning (Brahma Muhurta):</strong> Wake before sunrise, drink warm copper-infused water, offer Surya Arghya, perform 10 minutes of deep Pranayama.</div>
                     <div><strong style="color:#4E7D68;">Midday (Agni Peak):</strong> Consume the largest meal between 12:00–1:30 PM when digestive fire is strongest. Practice mindful speech in professional meetings.</div>
                     <div><strong style="color:#111827;">Evening (Sattva Transition):</strong> Disconnect digital screens 45 minutes before sleep. Light a sesame oil lamp and chant Maha Mrityunjaya to ground mental energy.</div>
@@ -3402,12 +3492,12 @@ class MR_Kundali_Report_Builder {
                 ]
             ); ?>
         </div>
-        <?php echo self::render_page_footer(23, 'Mantras, Daans &amp; Dinacharya'); ?>
+        <?php echo self::render_page_footer(24, 'Mantras, Daans & Dinacharya'); ?>
     </div>
 
     <!-- ========================================================
-         PAGE 24: INTERACTIVE SANKALPA & 12-MONTH MILESTONE TRACKER
-         (No bottom takeaway box on Page 24 for maximum journaling space)
+         PAGE 25: INTERACTIVE SANKALPA & 12-MONTH MILESTONE TRACKER
+         (No bottom takeaway box on Page 25 for maximum journaling space)
          ======================================================== -->
     <div class="mr-page">
         <div class="mr-header-bar">
@@ -3418,25 +3508,25 @@ class MR_Kundali_Report_Builder {
         </div>
 
         <div class="mr-page-body">
-            <div class="mr-tag-pill">23 · Practical Sankalpa &amp; Annual Roadmap</div>
-            <h1 class="mr-page-h1">Interactive Sankalpa &amp; 12-Month Destiny Milestone Tracker</h1>
-            <div class="mr-page-sub">Align Your Personal Goals, Enterprise Targets &amp; Spiritual Intentions with Active Dasha Windows</div>
+            <div class="mr-tag-pill">23 · Setting Goals &amp; 12-Month Plan</div>
+            <h1 class="mr-page-h1">My Personal Goals &amp; 12-Month Growth Tracker</h1>
+            <div class="mr-page-sub">Write down your personal goals and track your progress through the upcoming year</div>
 
             <!-- Quarterly Strategic Action Grid with Double Breathing Space -->
             <div class="mr-grid-2col" style="gap:14px 22px; margin-top:2px;">
                 <!-- Q1 -->
                 <div class="mr-card" style="padding:10px 14px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
-                        <span style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#C45738;">Q1 · Months 1 to 3</span>
-                        <span style="background:#FDF8F3; border:1px solid #ECE6DD; font-size:8.5px; font-weight:700; color:#8C7B6B; padding:1px 7px; border-radius:10px;">Foundation Phase</span>
+                        <span style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; font-weight:700; color:#C45738;">Q1 · Months 1 to 3</span>
+                        <span style="background:#FDF8F3; border:1px solid #ECE6DD; font-size: 10.6px; font-weight:700; color:#8C7B6B; padding:1px 7px; border-radius:10px;">Foundation Phase</span>
                     </div>
-                    <div style="font-size:10px; font-weight:700; color:#111827; margin-bottom:2px;">
+                    <div style="font-size: 12.5px; font-weight:700; color:#111827; margin-bottom:2px;">
                         <?php echo esc_html($milestones['q1']['milestone'] ?? 'Foundation & Operational Blueprinting'); ?>
                     </div>
-                    <div style="font-size:9px; color:#4B5563; line-height:1.4; margin-bottom:6px;">
+                    <div style="font-size: 11.3px; color:#4B5563; line-height:1.4; margin-bottom:6px;">
                         <?php echo esc_html($milestones['q1']['guidance'] ?? 'Audit internal systems, update financial spreadsheets, and master emerging domain skills in quiet focus.'); ?>
                     </div>
-                    <div style="border-top:1px dashed #E5E7EB; padding-top:5px; font-size:8.5px; color:#6B7280; display:flex; align-items:center; gap:6px;">
+                    <div style="border-top:1px dashed #E5E7EB; padding-top:5px; font-size: 10.6px; color:#6B7280; display:flex; align-items:center; gap:6px;">
                         <span style="display:inline-block; width:11px; height:11px; border:1px solid #9CA3AF; border-radius:2px;"></span>
                         <span>Key Target: Streamline core operational workflows and solidify cash reserves.</span>
                     </div>
@@ -3445,16 +3535,16 @@ class MR_Kundali_Report_Builder {
                 <!-- Q2 -->
                 <div class="mr-card" style="padding:10px 14px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
-                        <span style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#4E7D68;">Q2 · Months 4 to 6</span>
-                        <span style="background:#ECFDF5; border:1px solid #A7F3D0; font-size:8.5px; font-weight:700; color:#065F46; padding:1px 7px; border-radius:10px;">Expansion Phase</span>
+                        <span style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; font-weight:700; color:#4E7D68;">Q2 · Months 4 to 6</span>
+                        <span style="background:#ECFDF5; border:1px solid #A7F3D0; font-size: 10.6px; font-weight:700; color:#065F46; padding:1px 7px; border-radius:10px;">Expansion Phase</span>
                     </div>
-                    <div style="font-size:10px; font-weight:700; color:#111827; margin-bottom:2px;">
+                    <div style="font-size: 12.5px; font-weight:700; color:#111827; margin-bottom:2px;">
                         <?php echo esc_html($milestones['q2']['milestone'] ?? 'Strategic Alliances & Commercial Launches'); ?>
                     </div>
-                    <div style="font-size:9px; color:#4B5563; line-height:1.4; margin-bottom:6px;">
+                    <div style="font-size: 11.3px; color:#4B5563; line-height:1.4; margin-bottom:6px;">
                         <?php echo esc_html($milestones['q2']['guidance'] ?? 'Deploy new enterprise initiatives, negotiate executive agreements, and expand institutional networks.'); ?>
                     </div>
-                    <div style="border-top:1px dashed #E5E7EB; padding-top:5px; font-size:8.5px; color:#6B7280; display:flex; align-items:center; gap:6px;">
+                    <div style="border-top:1px dashed #E5E7EB; padding-top:5px; font-size: 10.6px; color:#6B7280; display:flex; align-items:center; gap:6px;">
                         <span style="display:inline-block; width:11px; height:11px; border:1px solid #9CA3AF; border-radius:2px;"></span>
                         <span>Key Target: Formalize high-value client agreements and launch digital assets.</span>
                     </div>
@@ -3463,16 +3553,16 @@ class MR_Kundali_Report_Builder {
                 <!-- Q3 -->
                 <div class="mr-card" style="padding:10px 14px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
-                        <span style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#C2964C;">Q3 · Months 7 to 9</span>
-                        <span style="background:#FFFBEB; border:1px solid #FDE68A; font-size:8.5px; font-weight:700; color:#92400E; padding:1px 7px; border-radius:10px;">Consolidation Phase</span>
+                        <span style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; font-weight:700; color:#C2964C;">Q3 · Months 7 to 9</span>
+                        <span style="background:#FFFBEB; border:1px solid #FDE68A; font-size: 10.6px; font-weight:700; color:#92400E; padding:1px 7px; border-radius:10px;">Consolidation Phase</span>
                     </div>
-                    <div style="font-size:10px; font-weight:700; color:#111827; margin-bottom:2px;">
+                    <div style="font-size: 12.5px; font-weight:700; color:#111827; margin-bottom:2px;">
                         <?php echo esc_html($milestones['q3']['milestone'] ?? 'Capital Consolidation & Asset Growth'); ?>
                     </div>
-                    <div style="font-size:9px; color:#4B5563; line-height:1.4; margin-bottom:6px;">
+                    <div style="font-size: 11.3px; color:#4B5563; line-height:1.4; margin-bottom:6px;">
                         <?php echo esc_html($milestones['q3']['guidance'] ?? 'Reinvest enterprise dividends into secured assets, review long-term family trusts, and reinforce liquidity.'); ?>
                     </div>
-                    <div style="border-top:1px dashed #E5E7EB; padding-top:5px; font-size:8.5px; color:#6B7280; display:flex; align-items:center; gap:6px;">
+                    <div style="border-top:1px dashed #E5E7EB; padding-top:5px; font-size: 10.6px; color:#6B7280; display:flex; align-items:center; gap:6px;">
                         <span style="display:inline-block; width:11px; height:11px; border:1px solid #9CA3AF; border-radius:2px;"></span>
                         <span>Key Target: Acquire secured real estate or defensive yield-bearing instruments.</span>
                     </div>
@@ -3481,16 +3571,16 @@ class MR_Kundali_Report_Builder {
                 <!-- Q4 -->
                 <div class="mr-card" style="padding:10px 14px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:3px;">
-                        <span style="font-family:<?php echo $head_font; ?>; font-size:11px; font-weight:700; color:#111827;">Q4 · Months 10 to 12</span>
-                        <span style="background:#F3F4F6; border:1px solid #E5E7EB; font-size:8.5px; font-weight:700; color:#374151; padding:1px 7px; border-radius:10px;">Harvest &amp; Seva</span>
+                        <span style="font-family:<?php echo $head_font; ?>; font-size: 13.8px; font-weight:700; color:#111827;">Q4 · Months 10 to 12</span>
+                        <span style="background:#F3F4F6; border:1px solid #E5E7EB; font-size: 10.6px; font-weight:700; color:#374151; padding:1px 7px; border-radius:10px;">Harvest &amp; Seva</span>
                     </div>
-                    <div style="font-size:10px; font-weight:700; color:#111827; margin-bottom:2px;">
+                    <div style="font-size: 12.5px; font-weight:700; color:#111827; margin-bottom:2px;">
                         <?php echo esc_html($milestones['q4']['milestone'] ?? 'Harvest, Recognition & Spiritual Seva'); ?>
                     </div>
-                    <div style="font-size:9px; color:#4B5563; line-height:1.4; margin-bottom:6px;">
+                    <div style="font-size: 11.3px; color:#4B5563; line-height:1.4; margin-bottom:6px;">
                         <?php echo esc_html($milestones['q4']['guidance'] ?? 'Celebrate major vocational milestones, express gratitude to mentors, and perform sacred charitable Daan.'); ?>
                     </div>
-                    <div style="border-top:1px dashed #E5E7EB; padding-top:5px; font-size:8.5px; color:#6B7280; display:flex; align-items:center; gap:6px;">
+                    <div style="border-top:1px dashed #E5E7EB; padding-top:5px; font-size: 10.6px; color:#6B7280; display:flex; align-items:center; gap:6px;">
                         <span style="display:inline-block; width:11px; height:11px; border:1px solid #9CA3AF; border-radius:2px;"></span>
                         <span>Key Target: Perform annual charitable Daan and outline next year’s sovereign vision.</span>
                     </div>
@@ -3500,14 +3590,14 @@ class MR_Kundali_Report_Builder {
             <!-- Personalized Sankalpa Writing Section -->
             <div style="background:#FAF7F2; border:1.8px solid #C2964C; border-radius:8px; padding:14px 18px; margin-top:10px;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
-                    <div style="font-family:<?php echo $head_font; ?>; font-size:12px; font-weight:700; color:#C45738;">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size: 15px; font-weight:700; color:#C45738;">
                         Personal Vedic Sankalpa &amp; Intention Anchors (Hand-Write to Seal Intention)
                     </div>
-                    <span style="font-size:8.5px; color:#8C7B6B; font-weight:600; text-transform:uppercase;">Self-Reflection Worksheet</span>
+                    <span style="font-size: 10.6px; color:#8C7B6B; font-weight:600; text-transform:uppercase;">Self-Reflection Worksheet</span>
                 </div>
 
                 <div style="margin-bottom:12px;">
-                    <div style="font-size:10px; font-weight:700; color:#111827; margin-bottom:3px;">
+                    <div style="font-size: 12.5px; font-weight:700; color:#111827; margin-bottom:3px;">
                         1. Primary Dharmic Commitment for Rahu Mahadasha:
                     </div>
                     <div style="border-bottom:1px dotted #CBD5E1; height:24px; margin-bottom:4px;"></div>
@@ -3515,7 +3605,7 @@ class MR_Kundali_Report_Builder {
                 </div>
 
                 <div style="margin-bottom:12px;">
-                    <div style="font-size:10px; font-weight:700; color:#111827; margin-bottom:3px;">
+                    <div style="font-size: 12.5px; font-weight:700; color:#111827; margin-bottom:3px;">
                         2. Professional Focus &amp; Non-Negotiable Boundary:
                     </div>
                     <div style="border-bottom:1px dotted #CBD5E1; height:24px; margin-bottom:4px;"></div>
@@ -3523,7 +3613,7 @@ class MR_Kundali_Report_Builder {
                 </div>
 
                 <div style="margin-bottom:6px;">
-                    <div style="font-size:10px; font-weight:700; color:#111827; margin-bottom:3px;">
+                    <div style="font-size: 12.5px; font-weight:700; color:#111827; margin-bottom:3px;">
                         3. Family Legacy &amp; Philanthropic Giving Pledge:
                     </div>
                     <div style="border-bottom:1px dotted #CBD5E1; height:24px; margin-bottom:4px;"></div>
@@ -3533,7 +3623,7 @@ class MR_Kundali_Report_Builder {
 
             <!-- Official Affirmation & Alignment Box -->
             <div style="background:#FFFFFF; border:1.5px solid #C2964C; border-radius:8px; padding:12px 16px; margin-top:10px;">
-                <div style="display:flex; justify-content:space-between; align-items:center; font-size:9.5px; color:#111827; font-weight:700;">
+                <div style="display:flex; justify-content:space-between; align-items:center; font-size: 11.9px; color:#111827; font-weight:700;">
                     <span>Sankalpa Sealed By: <strong style="color:#C45738;"><?php echo esc_html($person_name); ?></strong></span>
                     <span>Date of Vow: ________________________</span>
                     <span>Sacred Signature: ________________________</span>
@@ -3542,115 +3632,187 @@ class MR_Kundali_Report_Builder {
 
             <!-- Motivational Closing Banner -->
             <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:6px; padding:10px 16px; margin-top:10px; text-align:center;">
-                <span style="font-size:10.5px; color:#C2964C; font-weight:700; font-style:italic;">
+                <span style="font-size: 13.1px; color:#C2964C; font-weight:700; font-style:italic;">
                     “When human intention (Sankalpa) aligns with cosmic timing (Kala), extraordinary transformation becomes natural law.”
                 </span>
             </div>
         </div>
-        <?php echo self::render_page_footer(24, 'Annual Sankalpa &amp; Milestone Tracker'); ?>
+        <?php echo self::render_page_footer(25, 'Annual Sankalpa &amp; Milestone Tracker'); ?>
     </div>
 
     <!-- ========================================================
-         PAGE 25: MASTER GLOSSARY & READING DIRECTIVES
-         (Option B: Expansive, beautifully spaced 16-point Glossary & Reading Notes)
+         PAGE 26: MASTER ASTROLOGICAL GLOSSARY & CLASSICAL LEXICON
          ======================================================== -->
     <div class="mr-page">
         <div class="mr-header-bar">
             <div class="mr-header-brand-wrap">
                 <img src="<?php echo esc_attr($logo_uri); ?>" alt="MeraRashifal" class="mr-header-logo-img" />
             </div>
-            <span class="mr-header-meta"><?php echo esc_html($person_name); ?> · Astrological Glossary &amp; Reading Directives</span>
+            <span class="mr-header-meta"><?php echo esc_html($person_name); ?> · Master Astrological Glossary &amp; Lexicon</span>
         </div>
 
         <div class="mr-page-body">
-            <div class="mr-tag-pill">24 · Classical Jyotish Lexicon &amp; Terminology</div>
-            <h1 class="mr-page-h1">Master Astrological Glossary &amp; Reading Directives</h1>
-            <div class="mr-page-sub">Comprehensive 16-Pillar Sanskrit Astrological Lexicon &amp; Principles of Vedic Interpretation</div>
+            <div class="mr-tag-pill">24 · Astrology Glossary &amp; Simple Meanings</div>
+            <h1 class="mr-page-h1">Astrology Glossary: Terms &amp; Simple Meanings</h1>
+            <div class="mr-page-sub">Easy-to-understand explanations of common Vedic astrology principles used in this report</div>
 
             <!-- 16 Astrological Terms in 2 Columns with Generous Breathing Space -->
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:11px 22px; font-size:9.5px; margin-top:6px;">
-                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:7px; padding:10px 14px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:9px 18px; font-size: 12.1px; margin-top:4px;">
+                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:7px; padding:8px 12px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
                     <strong style="color:#C45738;">1. Janam Kundali (D1):</strong> The primary 12-house natal chart capturing the precise planetary geometry at the exact moment of birth.
                 </div>
-                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:7px; padding:10px 14px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
+                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:7px; padding:8px 12px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
                     <strong style="color:#C45738;">2. Lagna (Ascendant):</strong> The eastern rising zodiacal sign at birth; governs physical vitality, persona, bodily constitution, and life trajectory.
                 </div>
-                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:7px; padding:10px 14px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
+                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:7px; padding:8px 12px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
                     <strong style="color:#047857;">3. Atmakaraka (AK):</strong> The planet holding the highest longitudinal degree; represents the soul's primary evolutionary purpose and lessons.
                 </div>
-                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:7px; padding:10px 14px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
+                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:7px; padding:8px 12px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
                     <strong style="color:#047857;">4. Amatyakaraka (AmK):</strong> The planet with the second-highest degree; signifies vocational career, intellectual acumen, and executive leadership.
                 </div>
-                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:7px; padding:10px 14px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
+                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:7px; padding:8px 12px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
                     <strong style="color:#C2964C;">5. Vimshottari Dasha:</strong> The classical 120-year planetary progression timing the unfolding and fruition of lifetime karmic potentials.
                 </div>
-                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:7px; padding:10px 14px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
+                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:7px; padding:8px 12px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
                     <strong style="color:#C2964C;">6. Shadbala:</strong> Sixfold quantitative measurement of planetary strength across positional, directional, motional, and temporal factors.
                 </div>
-                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:7px; padding:10px 14px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
+                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:7px; padding:8px 12px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
                     <strong style="color:#111827;">7. Ashtakvarga:</strong> 337-point numeric energy matrix evaluating the benefic transit support, structural resilience, and strength of each house.
                 </div>
-                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:7px; padding:10px 14px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
+                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:7px; padding:8px 12px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
                     <strong style="color:#111827;">8. Navamsha (D9):</strong> The crucial 9th harmonic chart revealing inner dharmic potential, soul alignment, marriage quality, and late-life destiny.
                 </div>
-                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:7px; padding:10px 14px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
+                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:7px; padding:8px 12px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
                     <strong style="color:#C45738;">9. Dashamsha (D10):</strong> The 10th harmonic chart measuring professional reputation, career altitude, executive authority, and societal honors.
                 </div>
-                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:7px; padding:10px 14px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
+                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:7px; padding:8px 12px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
                     <strong style="color:#C45738;">10. Kendra &amp; Trikona:</strong> Kendra houses (1, 4, 7, 10) provide structural power; Trikonas (1, 5, 9) bestow divine grace, auspicious fortune, and Lakshmi.
                 </div>
-                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:7px; padding:10px 14px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
+                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:7px; padding:8px 12px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
                     <strong style="color:#047857;">11. Mahapurusha Yoga:</strong> Sovereign yogas formed by non-luminaries in Kendra in own or exalted sign (e.g., Mars Ruchaka Yoga in your 7th house).
                 </div>
-                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:7px; padding:10px 14px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
+                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:7px; padding:8px 12px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
                     <strong style="color:#047857;">12. Dhana Yoga:</strong> Benefic planetary combinations linking wealth houses (2nd &amp; 11th) with divine fortune houses (1st, 5th, 9th) to generate compounding assets.
                 </div>
-                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:7px; padding:10px 14px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
+                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:7px; padding:8px 12px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
                     <strong style="color:#C2964C;">13. Sandhi (Junction):</strong> The delicate transitional cusp between signs or nakshatras where planetary rays require cautious recalibration.
                 </div>
-                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:7px; padding:10px 14px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
+                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:7px; padding:8px 12px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
                     <strong style="color:#C2964C;">14. Upaya Vigyan:</strong> Prescriptive remedial science comprising natural gemstones, sacred Vedic mantras, charitable daans, and daily dinacharya.
                 </div>
-                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:7px; padding:10px 14px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
+                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:7px; padding:8px 12px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
                     <strong style="color:#111827;">15. Bhava Chalit:</strong> The astronomical house-cusp chart capturing true planetary house placements based on geographic latitude and midheaven degree.
                 </div>
-                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:7px; padding:10px 14px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
+                <div style="background:#FFFFFF; border:1px solid #ECE6DD; border-radius:7px; padding:8px 12px; box-shadow:0 2px 5px rgba(0,0,0,0.02);">
                     <strong style="color:#111827;">16. Gochar (Transit):</strong> The continuous real-time movement of celestial bodies interacting with your fixed natal planetary coordinates and dasha timelines.
                 </div>
             </div>
+        </div>
 
-            <!-- Strategic Reading Notes & Parashari Application Directives Card -->
-            <div style="background:#FAF7F2; border:1.5px solid #C2964C; border-radius:8px; padding:15px 20px; margin-top:16px; box-shadow:0 2px 8px rgba(0,0,0,0.02);">
-                <div style="font-family:<?php echo $head_font; ?>; font-size:11.8px; font-weight:800; color:#C45738; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:8px;">
-                    📜 Strategic Reading Notes &amp; Principles of Vedic Application
+        <div class="mr-page-bottom-pin">
+            <?php echo self::render_page_bottom_synthesis(
+                'Classical Lexicon Application Guidelines',
+                [
+                    'Familiarity with fundamental Jyotish terms allows you to engage deeply with professional astrologers and derive actionable insights from this report.',
+                    'D1 Janam Kundali establishes your baseline physical reality, while harmonic divisional vargas reveal specialized soul potentials and career fruition.',
+                    'Understanding Kendra-Trikona dynamics illuminates why certain periods deliver effortless good fortune while others demand disciplined resilience.',
+                    'Astrological terminology serves as a sacred compass: use these concepts to consciously steer your professional, financial, and personal growth.'
+                ]
+            ); ?>
+            <?php echo self::render_page_footer(26, 'Astrology Glossary: Terms &amp; Simple Meanings'); ?>
+        </div>
+    </div>
+
+    <!-- ========================================================
+         PAGE 27: STRATEGIC READING DIRECTIVES & PRINCIPLES OF VEDIC APPLICATION
+         ======================================================== -->
+    <div class="mr-page">
+        <div class="mr-header-bar">
+            <div class="mr-header-brand-wrap">
+                <img src="<?php echo esc_attr($logo_uri); ?>" alt="MeraRashifal" class="mr-header-logo-img" />
+            </div>
+            <span class="mr-header-meta"><?php echo esc_html($person_name); ?> · Strategic Reading Directives &amp; Principles</span>
+        </div>
+
+        <div class="mr-page-body">
+            <div class="mr-tag-pill">25 · How to Apply This Knowledge</div>
+            <h1 class="mr-page-h1">Practical Principles for Living with Vedic Astrology</h1>
+            <div class="mr-page-sub">Helpful guidance on using astrological insights wisely alongside honest hard work (Karma) Blueprint</div>
+
+            <!-- 6 Comprehensive Reading Directive Cards (2 Columns x 3 Rows) -->
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:11px 18px; margin-top:6px;">
+                <div style="background:#FFFFFF; border:1.5px solid #ECE6DD; border-left:4px solid #C45738; border-radius:8px; padding:11px 15px; box-shadow:0 2px 6px rgba(0,0,0,0.02);">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size:13.5px; font-weight:800; color:#C45738; margin-bottom:4px;">
+                        1. Multi-Harmonic Cross-Verification
+                    </div>
+                    <div style="font-size:11.8px; color:#4B5563; line-height:1.48;">
+                        Never isolate a single natal placement in the D1 chart. A planetary strength indicated in the Janam Kundali must be verified through its root dignity in the D9 Navamsha (dharmic essence) and operational status in the D10 Dashamsha (career fruition).
+                    </div>
                 </div>
-                <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:18px; font-size:9.5px; color:#4B5563; line-height:1.5;">
-                    <div>
-                        <strong style="color:#111827; display:block; margin-bottom:3px;">1. Multi-Harmonic Verification:</strong>
-                        Never isolate a single natal placement. A disposition highlighted in the D1 Janma Kundali must be systematically cross-checked against its harmonic root in the D9 Navamsha and career expression in the D10 Dashamsha.
+
+                <div style="background:#FFFFFF; border:1.5px solid #ECE6DD; border-left:4px solid #047857; border-radius:8px; padding:11px 15px; box-shadow:0 2px 6px rgba(0,0,0,0.02);">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size:13.5px; font-weight:800; color:#047857; margin-bottom:4px;">
+                        2. Dynamic Dasha &amp; Transit Synchronization
                     </div>
-                    <div>
-                        <strong style="color:#111827; display:block; margin-bottom:3px;">2. Dynamic Dasha Activation:</strong>
-                        Even the most potent Dhana or Raja Yoga remains dormant until triggered by its governing planetary Mahadasha, Antardasha, or supportive Gochar transit across high-Ashtakvarga houses.
+                    <div style="font-size:11.8px; color:#4B5563; line-height:1.48;">
+                        Even the most auspicious Raja or Dhana Yoga remains latent until triggered by the operative Mahadasha-Antardasha ruler. Favorable transit movements (Gochar) across houses with 30+ Ashtakvarga bindus act as the precise catalysts of material manifestation.
                     </div>
-                    <div>
-                        <strong style="color:#111827; display:block; margin-bottom:3px;">3. Purushartha &amp; Free Will:</strong>
-                        The horoscope reveals Prarabdha Karma (the cosmic terrain and timing), but human initiative (Kriyamana Karma), disciplined ethics, and conscious prayer remain the ultimate rudders of your destiny.
+                </div>
+
+                <div style="background:#FFFFFF; border:1.5px solid #ECE6DD; border-left:4px solid #C2964C; border-radius:8px; padding:11px 15px; box-shadow:0 2px 6px rgba(0,0,0,0.02);">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size:13.5px; font-weight:800; color:#C2964C; margin-bottom:4px;">
+                        3. Purushartha &amp; The Primacy of Free Will
+                    </div>
+                    <div style="font-size:11.8px; color:#4B5563; line-height:1.48;">
+                        The horoscope maps Prarabdha Karma—the environmental conditions and seasonal tides. However, human initiative (Kriyamana Karma), disciplined ethics, and intentional effort remain the decisive steering forces that shape ultimate destiny.
+                    </div>
+                </div>
+
+                <div style="background:#FFFFFF; border:1.5px solid #ECE6DD; border-left:4px solid #2B4C7E; border-radius:8px; padding:11px 15px; box-shadow:0 2px 6px rgba(0,0,0,0.02);">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size:13.5px; font-weight:800; color:#2B4C7E; margin-bottom:4px;">
+                        4. Quantitative Potency &amp; Bhava Bala Weighting
+                    </div>
+                    <div style="font-size:11.8px; color:#4B5563; line-height:1.48;">
+                        Visual dignity alone can be deceptive; always cross-reference Shadbala virupas and Ashtakvarga bindus. A planet with high Shadbala will manifest robust results even in modest house placements, while a weak planet in a strong house requires remedial support.
+                    </div>
+                </div>
+
+                <div style="background:#FFFFFF; border:1.5px solid #ECE6DD; border-left:4px solid #7C3AED; border-radius:8px; padding:11px 15px; box-shadow:0 2px 6px rgba(0,0,0,0.02);">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size:13.5px; font-weight:800; color:#7C3AED; margin-bottom:4px;">
+                        5. Upaya Vigyan Remedial Discipline
+                    </div>
+                    <div style="font-size:11.8px; color:#4B5563; line-height:1.48;">
+                        Vedic remedies (Upayas) are not superstitious fixes; they represent calibrated bio-resonant frequencies and karmic balancing. Follow prescribed gemstones, mantras, and charitable daans consistently for at least 90 to 180 days to experience tangible recalibration.
+                    </div>
+                </div>
+
+                <div style="background:#FFFFFF; border:1.5px solid #ECE6DD; border-left:4px solid #4E7D68; border-radius:8px; padding:11px 15px; box-shadow:0 2px 6px rgba(0,0,0,0.02);">
+                    <div style="font-family:<?php echo $head_font; ?>; font-size:13.5px; font-weight:800; color:#4E7D68; margin-bottom:4px;">
+                        6. Lifelong Periodic Review &amp; Varshaphal Alignment
+                    </div>
+                    <div style="font-size:11.8px; color:#4B5563; line-height:1.48;">
+                        Treat this dossier as an enduring life compass rather than a one-time read. Pair this lifetime blueprint with annual Varshaphal (solar return) audits on each birthday to zoom into yearly micro-trends, tactical milestones, and immediate opportunities.
                     </div>
                 </div>
             </div>
         </div>
 
         <div class="mr-page-bottom-pin">
-            <div class="mr-footer-bar">
-                <span>MeraRashifal · Master Astrological Glossary &amp; Reading Directives</span>
-                <span class="mr-page-num">Page 25 of 26</span>
-            </div>
+            <?php echo self::render_page_bottom_synthesis(
+                'Strategic Vedic Application Playbook',
+                [
+                    'Adopt a holistic perspective: synthesize natal placements with divisional vargas and current dasha timelines before making major decisions.',
+                    'Direct focused effort toward high-Ashtakvarga domains during active dasha cycles to achieve effortless compounding in wealth and career.',
+                    'Honor prescribed remedial protocols with devotion and discipline, viewing upayas as active tools for karmic harmonisation.',
+                    'Consult this master dossier at every major life crossroads to align human ambition with eternal cosmic timing.'
+                ]
+            ); ?>
+            <?php echo self::render_page_footer(27, 'Strategic Reading Directives &amp; Principles'); ?>
         </div>
     </div>
 
     <!-- ========================================================
-         PAGE 26: ASTROLOGICAL CATALOGUE & SACRED CONCLUDING BENEDICTION
+         PAGE 28: ASTROLOGICAL CATALOGUE & SACRED CONCLUDING BENEDICTION
          (The Sovereign MeraRashifal End Page / Back Cover)
          ======================================================== -->
     <div class="mr-page">
@@ -3663,17 +3825,17 @@ class MR_Kundali_Report_Builder {
 
         <div class="mr-page-body">
             <div style="text-align:center; margin-bottom:12px;">
-                <div class="mr-tag-pill" style="margin-bottom:8px;">Sacred Vedic Library &amp; Concluding Benediction</div>
+                <div class="mr-tag-pill" style="margin-bottom:8px;">26 · Sacred Vedic Library &amp; Concluding Benediction</div>
                 <h1 class="mr-page-h1" style="font-size:21px; margin-bottom:6px;">Thank You, <?php echo esc_html($person_name); ?> ji!</h1>
-                <div class="mr-page-sub" style="margin-bottom:8px; font-size:11.2px;">Explore Our Specialized Vedic Blueprints Engineered for Strategic Life Milestones</div>
+                <div class="mr-page-sub" style="margin-bottom:8px; font-size: 14px;">Explore our complete collection of personalized astrology reports for you and your family</div>
             </div>
 
             <!-- Sacred Vedic Shloka Callout Banner -->
             <div style="background:#FDF8F3; border:1.5px solid #C2964C; border-radius:8px; padding:12px 20px; margin-bottom:14px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.02);">
-                <div style="font-size:12.5px; font-weight:700; color:#C45738; letter-spacing:0.04em; margin-bottom:4px;">
+                <div style="font-size: 15.6px; font-weight:700; color:#C45738; letter-spacing:0.04em; margin-bottom:4px;">
                     ॥ ॐ असतो मा सद्गमय । तमसो मा ज्योतिर्गमय । मृत्योर्माऽमृतं गमय ॥ ॐ शान्तिः शान्तिः शान्तिः ॥
                 </div>
-                <div style="font-size:9.8px; color:#4B5563; font-style:italic;">
+                <div style="font-size: 12.3px; color:#4B5563; font-style:italic;">
                     “Lead me from ignorance to divine truth, from darkness to cosmic light, and from mortality to immortal consciousness.”
                 </div>
             </div>
@@ -3717,29 +3879,26 @@ class MR_Kundali_Report_Builder {
 
             <!-- Ethical Philosophy Card -->
             <div style="background:#FAF7F2; border:1px solid #ECE6DD; border-radius:8px; padding:12px 18px; margin-top:8px; box-shadow:0 2px 6px rgba(0,0,0,0.02);">
-                <div style="font-family:<?php echo $head_font; ?>; font-size:11.2px; font-weight:700; color:#111827; margin-bottom:4px;">
+                <div style="font-family:<?php echo $head_font; ?>; font-size: 14px; font-weight:700; color:#111827; margin-bottom:4px;">
                     Vedic Jyotish as an Empowering Navigation Instrument
                 </div>
-                <p style="font-size:9.4px; color:#4B5563; margin:0; line-height:1.48;">
+                <p style="font-size: 11.8px; color:#4B5563; margin:0; line-height:1.48;">
                     Vedic Jyotish does not dictate an unchangeable fate; it reveals the celestial tides so you can navigate them with wisdom, courage, and purpose. By aligning sincere human effort (Purushartha) with divine timing (Kala), every challenge transforms into a stepping stone toward spiritual evolution and worldly fulfillment.
                 </p>
             </div>
         </div>
 
         <div class="mr-page-bottom-pin">
-            <div style="border-top:1px solid #ECE6DD; padding-top:8px; margin-bottom:8px; text-align:center; font-size:9.5px; color:#4B5563; line-height:1.5;">
+            <div style="border-top:1px solid #ECE6DD; padding-top:8px; margin-bottom:8px; text-align:center; font-size: 11.9px; color:#4B5563; line-height:1.5;">
                 <div style="font-weight:800; color:#111827; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:2px;">
                     Access Your Personal Reports Archive &amp; Order Specialized Blueprints
                 </div>
                 <span>Visit your customer portal at: <strong style="color:#C45738;">www.MeraRashifal.com</strong></span><br>
-                <span style="font-size:8.5px; color:#6B7280; display:block; margin-top:3px;">
+                <span style="font-size: 10.6px; color:#6B7280; display:block; margin-top:3px;">
                     &copy; <?php echo date('Y'); ?> MeraRashifal. All rights reserved.
                 </span>
             </div>
-            <div class="mr-footer-bar" style="margin-top:2px;">
-                <span>MeraRashifal · Sacred Concluding Benediction &amp; Report Suite</span>
-                <span class="mr-page-num">Page 26 of 26</span>
-            </div>
+            <?php echo self::render_page_footer(28, 'Sacred Concluding Benediction &amp; Report Suite'); ?>
         </div>
     </div>
 </body>

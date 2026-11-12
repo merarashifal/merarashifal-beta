@@ -602,10 +602,18 @@ body.niyati-body-fullscreen-lock {
     padding: 24px 32px;
 }
 
+.niyati-widget-container.niyati-fullscreen .niyati-msg.bot {
+    max-width: 85%;
+}
+
+.niyati-widget-container.niyati-fullscreen .niyati-msg.user {
+    max-width: 80%;
+}
+
 .niyati-widget-container.niyati-fullscreen .niyati-msg-bubble {
-    font-size: 14px;
+    font-size: 14.5px;
     line-height: 1.65;
-    max-width: 75%;
+    max-width: 100%;
 }
 
 .niyati-widget-container.niyati-fullscreen .niyati-input-bar {
@@ -974,35 +982,59 @@ body.niyati-body-fullscreen-lock {
 
 .niyati-msg.user {
     align-self: flex-end;
-    flex-direction: row-reverse;
+    display: flex;
+    justify-content: flex-end;
+    width: auto;
+    max-width: 80%;
+    margin-left: auto;
 }
 
 .niyati-msg-bubble {
-    padding: 10px 14px;
-    border-radius: 14px;
-    word-break: break-word;
+    padding: 12px 18px;
+    border-radius: 16px;
+    word-break: normal;
+    overflow-wrap: break-word;
+    box-sizing: border-box;
 }
 
 .niyati-msg.bot .niyati-msg-bubble {
     background: #ffffff !important;
-    color: #101820;
+    color: #1e293b;
     border-top-left-radius: 4px;
-    border: 1.5px solid #FED7AA !important;
-    box-shadow: 0 2px 6px rgba(179, 84, 30, 0.06) !important;
+    border-radius: 4px 18px 18px 18px;
+    border: 1px solid #FED7AA !important;
+    box-shadow: 0 2px 8px rgba(179, 84, 30, 0.05) !important;
+    font-size: 14px;
+    line-height: 1.6;
 }
 
 .niyati-msg.bot .niyati-msg-bubble strong {
     color: #0f172a;
 }
 
+.niyati-msg-para + .niyati-msg-para {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed #FDE68A;
+}
+
 .niyati-msg.user .niyati-msg-bubble {
-    background: var(--niyati-primary);
-    color: #ffffff;
-    border-bottom-right-radius: 4px;
+    background: linear-gradient(135deg, #F58220 0%, #E6680D 100%) !important;
+    color: #ffffff !important;
+    border-radius: 18px 18px 4px 18px;
+    box-shadow: 0 2px 8px rgba(245, 130, 32, 0.22);
+    font-weight: 500;
+    font-size: 14px;
+    line-height: 1.5;
+    letter-spacing: 0.01em;
+    width: auto;
+    max-width: 100%;
+    white-space: normal;
+    text-align: left;
 }
 
 .niyati-msg.bot .niyati-msg-bubble.niyati-msg-bubble-followup {
-    margin-top: 2px;
+    margin-top: 6px;
     border-top-left-radius: 14px;
 }
 
@@ -1806,55 +1838,79 @@ button.niyati-chip:active,
     animation: niyati-fadeIn 0.3s;
 }
 
-/* Contextual Auto-Hyperlinks (Anti-Spam Subtle Links) */
+/* Contextual Inline Hyperlinks (Smooth, Non-Overlapping In-Text Links) */
+.niyati-inline-link,
 .niyati-auto-link {
-    color: var(--niyati-primary-dark, #b45309);
-    font-weight: 600;
-    text-decoration: underline;
-    text-decoration-style: dotted;
-    text-underline-offset: 3px;
-    text-decoration-color: var(--niyati-primary, #d97706);
-    padding: 0 3px;
-    border-radius: 4px;
-    transition: all 0.2s ease;
-    cursor: pointer;
-    display: inline;
-    word-break: break-word;
+    color: #c2410c !important;
+    font-weight: 600 !important;
+    text-decoration: underline !important;
+    text-decoration-style: dotted !important;
+    text-underline-offset: 3px !important;
+    text-decoration-color: rgba(234, 88, 12, 0.45) !important;
+    padding: 1px 6px !important;
+    margin: 0 2px !important;
+    border-radius: 4px !important;
+    background: rgba(249, 115, 22, 0.08) !important;
+    border: 1px solid rgba(249, 115, 22, 0.22) !important;
+    transition: all 0.18s ease !important;
+    cursor: pointer !important;
+    display: inline !important;
+    line-height: inherit !important;
+    word-break: break-word !important;
+    vertical-align: baseline !important;
 }
 
+.niyati-inline-link:hover,
 .niyati-auto-link:hover {
     color: #ffffff !important;
-    background: var(--niyati-primary, #d97706);
-    text-decoration: none;
+    background: #ea580c !important;
+    border-color: #ea580c !important;
+    text-decoration: none !important;
 }
 
+.niyati-inline-link .niyati-inline-icon,
+.niyati-inline-link .niyati-link-icon,
 .niyati-auto-link .niyati-link-icon {
-    font-size: 11px;
-    font-weight: 700;
-    margin-left: 2px;
-    display: inline-block;
-    line-height: 1;
+    font-size: 10px !important;
+    font-weight: 700 !important;
+    margin-left: 3px !important;
+    display: inline-block !important;
+    line-height: 1 !important;
+    vertical-align: baseline !important;
 }
 
-/* Prominent Navigation Action Buttons for Reports & Tools */
+/* Strategic Standalone Cross-Promotion & Upsell Action Cards */
+.niyati-cta-container {
+    display: block !important;
+    margin: 10px 0 8px 0 !important;
+    clear: both !important;
+    width: 100% !important;
+}
+
+.niyati-action-btn,
 .niyati-auto-link.niyati-action-btn {
     display: inline-flex !important;
     align-items: center !important;
+    justify-content: center !important;
     gap: 8px !important;
-    margin: 8px 0 4px 0 !important;
-    padding: 9px 16px !important;
+    margin: 0 !important;
+    padding: 8px 16px !important;
     background: linear-gradient(135deg, #f97316 0%, #ea580c 100%) !important;
     color: #ffffff !important;
     font-size: 13px !important;
     font-weight: 700 !important;
     text-decoration: none !important;
-    border-radius: 10px !important;
+    border-radius: 8px !important;
     box-shadow: 0 3px 8px rgba(234, 88, 12, 0.28) !important;
     border: 1px solid rgba(255, 255, 255, 0.25) !important;
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
     line-height: 1.3 !important;
+    cursor: pointer !important;
+    max-width: 100% !important;
+    word-break: break-word !important;
 }
 
+.niyati-action-btn:hover,
 .niyati-auto-link.niyati-action-btn:hover {
     background: linear-gradient(135deg, #fb923c 0%, #f97316 100%) !important;
     color: #ffffff !important;
@@ -1863,18 +1919,22 @@ button.niyati-chip:active,
     text-decoration: none !important;
 }
 
+.niyati-action-btn:active,
 .niyati-auto-link.niyati-action-btn:active {
     transform: translateY(0) scale(0.99) !important;
 }
 
+.niyati-action-btn .niyati-link-icon,
 .niyati-auto-link.niyati-action-btn .niyati-link-icon {
     font-size: 13px !important;
     margin-left: 4px !important;
     transition: transform 0.2s ease !important;
+    display: inline-block !important;
 }
 
+.niyati-action-btn:hover .niyati-link-icon,
 .niyati-auto-link.niyati-action-btn:hover .niyati-link-icon {
-    transform: translate(2px, -2px) !important;
+    transform: translateX(3px) !important;
 }
 
 /* Chatbot Initializing Disabled State & Toast */
@@ -2628,5 +2688,345 @@ button.niyati-chip:active,
     .niyati-prompt-chips {
         justify-content: center;
     }
+}
+
+/* ==========================================================================
+   PAST CONSULTATIONS HISTORY DRAWER & TRANSCRIPT VIEWER
+   ========================================================================== */
+.niyati-history-drawer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 100;
+    background: #FFFBEB;
+    border-radius: 20px;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    animation: niyatiSlideDrawerIn 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes niyatiSlideDrawerIn {
+    from {
+        opacity: 0;
+        transform: translateX(100%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.niyati-widget-container.niyati-fullscreen .niyati-history-drawer {
+    border-radius: 0;
+}
+
+.niyati-widget-container.niyati-fullscreen .niyati-history-content {
+    max-width: 920px;
+    width: 100%;
+    margin: 0 auto;
+    border-left: 1px solid #FED7AA;
+    border-right: 1px solid #FED7AA;
+}
+
+.niyati-history-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, #7A1F3D 0%, #B3541E 100%);
+    color: #ffffff;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    flex-shrink: 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.niyati-fullscreen .niyati-history-header {
+    border-radius: 0;
+}
+
+.niyati-history-back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+    padding: 5px 11px;
+    border-radius: 14px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.niyati-history-back-btn:hover {
+    background: rgba(255, 255, 255, 0.28);
+    transform: translateX(-1px);
+}
+
+.niyati-history-header-title {
+    font-size: 14.5px;
+    font-weight: 700;
+    color: #FED7AA;
+    letter-spacing: 0.2px;
+}
+
+.niyati-history-content {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    padding: 14px 16px;
+    box-sizing: border-box;
+    background: #FFFBEB;
+}
+
+.niyati-history-subhead {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #FED7AA;
+}
+
+#niyati-history-count-text {
+    font-size: 13px;
+    font-weight: 700;
+    color: #7A1F3D;
+}
+
+.niyati-btn-new-consultation {
+    background: #FFF7ED;
+    border: 1px solid #F58220;
+    color: #B3541E;
+    font-size: 12px;
+    font-weight: 700;
+    border-radius: 16px;
+    padding: 4px 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.niyati-btn-new-consultation:hover {
+    background: #F58220;
+    color: #ffffff;
+}
+
+.niyati-history-items {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.niyati-history-card {
+    background: #ffffff;
+    border: 1px solid #FED7AA;
+    border-radius: 14px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(179, 84, 30, 0.04);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.niyati-history-card:hover, .niyati-history-card:focus {
+    border-color: #F58220;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 14px rgba(179, 84, 30, 0.12);
+    outline: none;
+}
+
+.niyati-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.niyati-card-date {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #475569;
+}
+
+.niyati-card-badges {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.niyati-card-profile {
+    background: #FEF3C7;
+    color: #92400E;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 10px;
+    border: 1px solid #FDE68A;
+}
+
+.niyati-card-qcount {
+    background: #FEE2E2;
+    color: #991B1B;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 10px;
+    border: 1px solid #FECACA;
+}
+
+.niyati-card-preview {
+    font-size: 12.8px;
+    color: #334155;
+    line-height: 1.45;
+    font-style: italic;
+    background: #FFFDF9;
+    padding: 6px 10px;
+    border-radius: 8px;
+    border-left: 3px solid #F58220;
+}
+
+.niyati-card-footer {
+    display: flex;
+    justify-content: flex-end;
+}
+
+.niyati-card-view-btn {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: #B3541E;
+    transition: color 0.15s;
+}
+
+.niyati-history-card:hover .niyati-card-view-btn {
+    color: #7A1F3D;
+    text-decoration: underline;
+}
+
+.niyati-history-empty, .niyati-history-login-prompt {
+    text-align: center;
+    padding: 40px 20px;
+    color: #475569;
+}
+
+.niyati-history-empty-icon {
+    font-size: 38px;
+    margin-bottom: 10px;
+}
+
+.niyati-history-empty h4, .niyati-history-login-prompt h4 {
+    font-size: 15.5px;
+    color: #7A1F3D;
+    margin: 0 0 6px 0;
+    font-weight: 700;
+}
+
+.niyati-history-empty p, .niyati-history-login-prompt p {
+    font-size: 13px;
+    color: #64748B;
+    margin: 0;
+    line-height: 1.5;
+}
+
+.niyati-history-loading {
+    text-align: center;
+    padding: 35px 20px;
+}
+
+.niyati-transcript-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #FED7AA;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.niyati-transcript-nav-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #FFF7ED;
+    border: 1px solid #FDBA74;
+    color: #B3541E;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11.5px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.niyati-transcript-nav-btn:hover {
+    background: #F58220;
+    color: #ffffff;
+}
+
+.niyati-transcript-meta-badges {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.niyati-transcript-date {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #64748B;
+}
+
+.niyati-transcript-banner {
+    background: #FEF3C7;
+    border: 1px solid #FDE68A;
+    color: #92400E;
+    padding: 7px 12px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.niyati-transcript-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px 4px;
+}
+
+.niyati-transcript-footer {
+    padding-top: 10px;
+    border-top: 1px solid #FED7AA;
+    display: flex;
+    justify-content: center;
+}
+
+.niyati-btn-transcript-return {
+    background: linear-gradient(135deg, #F58220 0%, #B3541E 100%);
+    color: #ffffff;
+    border: none;
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(179, 84, 30, 0.25);
+    transition: all 0.2s ease;
+}
+
+.niyati-btn-transcript-return:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 5px 14px rgba(179, 84, 30, 0.35);
 }
 

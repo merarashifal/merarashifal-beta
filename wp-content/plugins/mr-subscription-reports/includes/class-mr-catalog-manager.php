@@ -41,6 +41,15 @@ class MR_Catalog_Manager {
             }
             return $data;
         }, 99);
+
+        // Allow administrators to upload .html and .htm sample reports in addition to .pdf
+        add_filter('upload_mimes', function($mimes) {
+            if (current_user_can('manage_options')) {
+                $mimes['html'] = 'text/html';
+                $mimes['htm']  = 'text/html';
+            }
+            return $mimes;
+        });
     }
 
     public static function register_admin_submenu() {
@@ -363,10 +372,13 @@ class MR_Catalog_Manager {
             unset($c);
         }
 
-        // Normalize preview_text across all cards
+        // Normalize preview_text and sample_report_url across all cards
         foreach ($saved as $k => &$c) {
             if (empty($c['preview_text']) || stripos($c['preview_text'], 'Sample Pages') !== false) {
                 $c['preview_text'] = 'Preview Sample Report';
+            }
+            if (!isset($c['sample_report_url'])) {
+                $c['sample_report_url'] = '';
             }
         }
         unset($c);
@@ -375,25 +387,42 @@ class MR_Catalog_Manager {
         if (function_exists('mr_get_report_catalog_config')) {
             $cat_config = mr_get_report_catalog_config();
             foreach ($saved as $k => &$c) {
-                if (isset($cat_config[$k])) {
-                    if (isset($cat_config[$k]['sale_price'])) {
-                        $c['price_sale'] = $cat_config[$k]['sale_price'];
+                $matched_cfg = $cat_config[$k] ?? null;
+                if (!$matched_cfg) {
+                    if ($k === 'numerology' && isset($cat_config['numerology_report'])) {
+                        $matched_cfg = $cat_config['numerology_report'];
+                    } elseif ($k === 'numerology_report' && isset($cat_config['numerology'])) {
+                        $matched_cfg = $cat_config['numerology'];
+                    } elseif ($k === 'palm_reading' && isset($cat_config['palmistry_report'])) {
+                        $matched_cfg = $cat_config['palmistry_report'];
+                    } elseif ($k === 'palmistry_report' && isset($cat_config['palm_reading'])) {
+                        $matched_cfg = $cat_config['palm_reading'];
                     }
-                    if (isset($cat_config[$k]['list_price'])) {
-                        $c['price_regular'] = $cat_config[$k]['list_price'];
-                        if ($c['price_regular'] > $c['price_sale'] && $c['price_regular'] > 0) {
-                            $pct = round((($c['price_regular'] - $c['price_sale']) / $c['price_regular']) * 100);
-                            $c['discount_text'] = 'Save ' . $pct . '%';
-                        }
+                }
+                if ($matched_cfg) {
+                    if (isset($matched_cfg['sale_price'])) {
+                        $c['price_sale'] = $matched_cfg['sale_price'];
                     }
-                    if (isset($cat_config[$k]['active'])) {
-                        $c['is_active'] = $cat_config[$k]['active'];
+                    if (isset($matched_cfg['list_price'])) {
+                        $c['price_regular'] = $matched_cfg['list_price'];
                     }
-                    if (!empty($cat_config[$k]['name'])) {
-                        $c['name'] = $cat_config[$k]['name'];
+                    // Auto-calculate discount tag
+                    if ($c['price_sale'] <= 0) {
+                        $c['discount_text'] = '100% FREE';
+                    } elseif ($c['price_regular'] > $c['price_sale'] && $c['price_regular'] > 0) {
+                        $pct = round((($c['price_regular'] - $c['price_sale']) / $c['price_regular']) * 100);
+                        $c['discount_text'] = 'Save ' . $pct . '%';
+                    } else {
+                        $c['discount_text'] = '';
                     }
-                    if (!empty($cat_config[$k]['pages'])) {
-                        $c['pages_tag'] = $cat_config[$k]['pages'];
+                    if (isset($matched_cfg['active'])) {
+                        $c['is_active'] = $matched_cfg['active'];
+                    }
+                    if (!empty($matched_cfg['name'])) {
+                        $c['name'] = $matched_cfg['name'];
+                    }
+                    if (!empty($matched_cfg['pages'])) {
+                        $c['pages_tag'] = $matched_cfg['pages'];
                     }
                 }
             }
@@ -462,25 +491,87 @@ class MR_Catalog_Manager {
                 }
             }
 
+            // Retrieve master pricing to guarantee prices are never corrupted or desynced
+            $master_sale_price    = isset($existing[$slug]['price_sale']) ? floatval($existing[$slug]['price_sale']) : 0;
+            $master_regular_price = isset($existing[$slug]['price_regular']) ? floatval($existing[$slug]['price_regular']) : 0;
+
+            if (function_exists('mr_get_report_catalog_config')) {
+                $cat_cfg = mr_get_report_catalog_config();
+                $matched_item = $cat_cfg[$slug] ?? null;
+                if (!$matched_item) {
+                    if ($slug === 'numerology' && isset($cat_cfg['numerology_report'])) {
+                        $matched_item = $cat_cfg['numerology_report'];
+                    } elseif ($slug === 'numerology_report' && isset($cat_cfg['numerology'])) {
+                        $matched_item = $cat_cfg['numerology'];
+                    } elseif ($slug === 'palm_reading' && isset($cat_cfg['palmistry_report'])) {
+                        $matched_item = $cat_cfg['palmistry_report'];
+                    } elseif ($slug === 'palmistry_report' && isset($cat_cfg['palm_reading'])) {
+                        $matched_item = $cat_cfg['palm_reading'];
+                    }
+                }
+                if ($matched_item) {
+                    if (isset($matched_item['sale_price'])) {
+                        $master_sale_price = floatval($matched_item['sale_price']);
+                    }
+                    if (isset($matched_item['list_price'])) {
+                        $master_regular_price = floatval($matched_item['list_price']);
+                    }
+                }
+            }
+
+            // System-generated Page Count Tag from Master Catalog
+            $system_pages_tag = $existing[$slug]['pages_tag'] ?? '';
+            if ($matched_item && !empty($matched_item['pages'])) {
+                $system_pages_tag = sanitize_text_field($matched_item['pages']);
+            }
+
+            // System-generated Discount Tag
+            $system_discount_text = '';
+            if ($master_sale_price <= 0) {
+                $system_discount_text = '100% FREE';
+            } elseif ($master_regular_price > $master_sale_price && $master_regular_price > 0) {
+                $pct = round((($master_regular_price - $master_sale_price) / $master_regular_price) * 100);
+                $system_discount_text = 'Save ' . $pct . '%';
+            }
+
+            // Direct file upload handling if user picked a file via local file chooser
+            $sample_url_val = esc_url_raw(isset($data['sample_report_url']) ? $data['sample_report_url'] : ($existing[$slug]['sample_report_url'] ?? ''));
+            if (!empty($_FILES['mr_sample_files']['name'][$slug]) && empty($_FILES['mr_sample_files']['error'][$slug])) {
+                require_once ABSPATH . 'wp-admin/includes/file.php';
+                $file = [
+                    'name'     => $_FILES['mr_sample_files']['name'][$slug],
+                    'type'     => $_FILES['mr_sample_files']['type'][$slug],
+                    'tmp_name' => $_FILES['mr_sample_files']['tmp_name'][$slug],
+                    'error'    => $_FILES['mr_sample_files']['error'][$slug],
+                    'size'     => $_FILES['mr_sample_files']['size'][$slug],
+                ];
+                $overrides = ['test_form' => false];
+                $uploaded_file = wp_handle_upload($file, $overrides);
+                if (!empty($uploaded_file['url'])) {
+                    $sample_url_val = esc_url_raw($uploaded_file['url']);
+                }
+            }
+
             $updated[$slug] = [
-                'id'             => $slug,
-                'code'           => sanitize_text_field(isset($data['code']) ? $data['code'] : ''),
-                'order'          => isset($data['order']) ? (int)$data['order'] : 10,
-                'name'           => sanitize_text_field(isset($data['name']) ? $data['name'] : ''),
-                'sub_text'       => sanitize_textarea_field(isset($data['sub_text']) ? $data['sub_text'] : ''),
-                'category'       => sanitize_text_field(isset($data['category']) ? $data['category'] : 'Horoscope'),
-                'badge'          => $badge,
-                'pages_tag'      => sanitize_text_field(isset($data['pages_tag']) ? $data['pages_tag'] : ''),
-                'image_url'      => esc_url_raw(isset($data['image_url']) ? $data['image_url'] : ''),
-                'highlights'     => $highlights,
-                'price_sale'     => isset($data['price_sale']) ? floatval($data['price_sale']) : 0,
-                'price_regular'  => isset($data['price_regular']) ? floatval($data['price_regular']) : 0,
-                'discount_text'  => sanitize_text_field(isset($data['discount_text']) ? $data['discount_text'] : ''),
-                'price_note'     => sanitize_text_field(isset($data['price_note']) ? $data['price_note'] : ''),
-                'button_text'    => sanitize_text_field(isset($data['button_text']) ? $data['button_text'] : 'Generate My Report →'),
-                'preview_text'   => sanitize_text_field(isset($data['preview_text']) ? $data['preview_text'] : 'Preview Sample Report'),
-                'is_active'      => !empty($data['is_active']) ? 1 : 0,
-                'testimonials'   => $testimonials,
+                'id'                 => $slug,
+                'code'               => sanitize_text_field(isset($data['code']) ? $data['code'] : ''),
+                'order'              => isset($data['order']) ? (int)$data['order'] : 10,
+                'name'               => sanitize_text_field(isset($data['name']) ? $data['name'] : ''),
+                'sub_text'           => sanitize_textarea_field(isset($data['sub_text']) ? $data['sub_text'] : ''),
+                'category'           => sanitize_text_field(isset($data['category']) ? $data['category'] : 'Horoscope'),
+                'badge'              => $badge,
+                'pages_tag'          => $system_pages_tag,
+                'image_url'          => esc_url_raw(isset($data['image_url']) ? $data['image_url'] : ''),
+                'highlights'         => $highlights,
+                'price_sale'         => $master_sale_price,
+                'price_regular'      => $master_regular_price,
+                'discount_text'      => $system_discount_text,
+                'price_note'         => sanitize_text_field(isset($data['price_note']) ? $data['price_note'] : ''),
+                'button_text'        => sanitize_text_field(isset($data['button_text']) ? $data['button_text'] : 'Generate My Report →'),
+                'preview_text'       => sanitize_text_field(isset($data['preview_text']) ? $data['preview_text'] : 'Preview Sample Report'),
+                'sample_report_url'  => $sample_url_val,
+                'is_active'          => !empty($data['is_active']) ? 1 : 0,
+                'testimonials'       => $testimonials,
             ];
         }
 
@@ -545,10 +636,22 @@ class MR_Catalog_Manager {
                 </div>
             <?php endif; ?>
 
+            <div style="background:#eff6ff; border:1px solid #bfdbfe; border-left:4px solid #2563eb; border-radius:6px; padding:12px 16px; margin:16px 0; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <strong style="color:#1e40af; font-size:14px;">ℹ️ <?php _e('Single Source of Truth for Pricing & Status', 'merarashifal'); ?></strong>
+                    <p style="margin:4px 0 0 0; color:#1e3a8a; font-size:13px;">
+                        <?php _e('Report prices, discounts, and active/suspended statuses are centrally managed in <strong>Report Pricing & Catalog</strong>. This page customizes sales presentation assets (badges, marketing copy, feature bullets, and customer testimonials).', 'merarashifal'); ?>
+                    </p>
+                </div>
+                <a href="<?php echo esc_url(admin_url('admin.php?page=mr-report-pricing')); ?>" class="button button-primary" style="white-space:nowrap; background:#2563eb; border-color:#1d4ed8;">
+                    <span class="dashicons dashicons-money-alt" style="vertical-align:middle;"></span> <?php _e('Manage Report Pricing & Catalog ↗', 'merarashifal'); ?>
+                </a>
+            </div>
+
             <div class="mr-admin-intro-box">
                 <div class="mr-admin-intro-col">
                     <h3><?php _e('Customize Sales Page Report Cards', 'merarashifal'); ?></h3>
-                    <p><?php _e('Configure the title, sub-text, cover image, order priority, pricing, and promotional badges (Best Seller, Top Selling, New Report, In Demand, For You, Recommended). Exactly one badge can be assigned per card.', 'merarashifal'); ?></p>
+                    <p><?php _e('Configure the title, sub-text, cover image, order priority, promotional badges, and marketing highlights. Master sale/list prices are automatically synced from the Report Pricing & Catalog manager.', 'merarashifal'); ?></p>
                 </div>
                 <div class="mr-admin-intro-actions">
                     <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" onsubmit="return confirm('Are you sure you want to reset all cards to default values? Any custom text/images will be overwritten.');">
@@ -561,17 +664,26 @@ class MR_Catalog_Manager {
                 </div>
             </div>
 
-            <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" id="mr-cards-form">
+            <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" id="mr-cards-form" enctype="multipart/form-data">
                 <?php wp_nonce_field('mr_save_catalog_cards_nonce', 'mr_nonce'); ?>
                 <input type="hidden" name="action" value="mr_save_catalog_cards">
 
                 <div class="mr-cards-accordion">
                     <?php 
                     $idx = 0;
+                    $master_catalog_cfg = function_exists('mr_get_report_catalog_config') ? mr_get_report_catalog_config() : [];
                     foreach ($cards as $slug => $card): 
                         $idx++;
                         $badge_data = self::get_badge_data($card['badge']);
-                        $badge_label = $badge_data ? $badge_data['label'] : 'No Badge';
+                        $matched_admin_cfg = $master_catalog_cfg[$slug] ?? null;
+                        if (!$matched_admin_cfg) {
+                            if ($slug === 'numerology' && isset($master_catalog_cfg['numerology_report'])) {
+                                $matched_admin_cfg = $master_catalog_cfg['numerology_report'];
+                            } elseif ($slug === 'palm_reading' && isset($master_catalog_cfg['palmistry_report'])) {
+                                $matched_admin_cfg = $master_catalog_cfg['palmistry_report'];
+                            }
+                        }
+                        $is_pricing_suspended = $matched_admin_cfg && empty($matched_admin_cfg['active']);
                     ?>
                         <div class="mr-card-editor-card" data-slug="<?php echo esc_attr($slug); ?>">
                             
@@ -587,10 +699,16 @@ class MR_Catalog_Manager {
                                     <?php endif; ?>
                                 </div>
                                 <div class="mr-card-head-right">
-                                    <span class="mr-price-tag">₹<?php echo esc_html($card['price_sale']); ?> <del>₹<?php echo esc_html($card['price_regular']); ?></del></span>
-                                    <span class="mr-status-pill <?php echo !empty($card['is_active']) ? 'active' : 'hidden'; ?>">
-                                        <?php echo !empty($card['is_active']) ? '● Active' : '○ Hidden'; ?>
-                                    </span>
+                                    <span class="mr-price-tag">₹<?php echo esc_html($card['price_sale']); ?> <?php if ($card['price_regular'] > $card['price_sale']): ?><del>₹<?php echo esc_html($card['price_regular']); ?></del><?php endif; ?></span>
+                                    <?php if ($is_pricing_suspended): ?>
+                                        <span class="mr-status-pill suspended" style="background:#fee2e2; color:#b91c1c; border:1px solid #fca5a5; font-weight:700;">
+                                            ⏸ Suspended
+                                        </span>
+                                    <?php else: ?>
+                                        <span class="mr-status-pill <?php echo !empty($card['is_active']) ? 'active' : 'hidden'; ?>">
+                                            <?php echo !empty($card['is_active']) ? '● Active' : '○ Hidden'; ?>
+                                        </span>
+                                    <?php endif; ?>
                                     <button type="button" class="button mr-btn-toggle-card">
                                         <span class="dashicons dashicons-arrow-down-alt2"></span>
                                     </button>
@@ -617,6 +735,20 @@ class MR_Catalog_Manager {
 
                                     <!-- Right Column: Card Attributes -->
                                     <div class="mr-editor-col-fields">
+
+                                        <?php if ($is_pricing_suspended): ?>
+                                            <div style="background:#fff1f2; border:1px solid #fecdd3; border-left:4px solid #e11d48; border-radius:6px; padding:10px 14px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center;">
+                                                <div>
+                                                    <strong style="color:#9f1239;">⚠️ <?php _e('This report is currently Suspended in Report Pricing & Catalog.', 'merarashifal'); ?></strong>
+                                                    <div style="font-size:12px; color:#be123c; margin-top:2px;">
+                                                        <?php _e('Customers cannot buy or access this report while suspended.', 'merarashifal'); ?>
+                                                    </div>
+                                                </div>
+                                                <a href="<?php echo esc_url(admin_url('admin.php?page=mr-report-pricing')); ?>" class="button button-small" style="white-space:nowrap; border-color:#fda4af; color:#9f1239;" target="_blank">
+                                                    <?php _e('Reactivate in Master Catalog ↗', 'merarashifal'); ?>
+                                                </a>
+                                            </div>
+                                        <?php endif; ?>
                                         
                                         <!-- Row 1: Order, Code, Active -->
                                         <div class="mr-form-row-3">
@@ -664,7 +796,16 @@ class MR_Catalog_Manager {
                                             </div>
                                             <div style="flex:1;">
                                                 <label><strong><?php _e('Page Count Tag', 'merarashifal'); ?>:</strong></label>
-                                                <input type="text" name="mr_cards[<?php echo esc_attr($slug); ?>][pages_tag]" value="<?php echo esc_attr($card['pages_tag']); ?>" class="regular-text" placeholder="e.g. 26 Pages" required>
+                                                <div style="display:flex; align-items:center; gap:8px; margin-top:5px;">
+                                                    <span style="font-weight:700; font-size:13px; color:#1e293b; background:#f1f5f9; border:1px solid #cbd5e1; padding:6px 12px; border-radius:6px; display:inline-flex; align-items:center; gap:6px;">
+                                                        <span class="dashicons dashicons-media-document" style="font-size:16px; width:16px; height:16px; color:#64748b;"></span>
+                                                        <?php echo esc_html(!empty($card['pages_tag']) ? $card['pages_tag'] : 'Auto-detected'); ?>
+                                                    </span>
+                                                    <span style="font-size:10px; font-weight:700; background:#e0f2fe; color:#0369a1; padding:3px 7px; border-radius:4px; border:1px solid #bae6fd; text-transform:uppercase;">
+                                                        System Synced
+                                                    </span>
+                                                </div>
+                                                <span class="description" style="font-size:11px; color:#64748b;"><?php _e('Derived automatically from Master Report Catalog', 'merarashifal'); ?></span>
                                             </div>
                                         </div>
 
@@ -689,23 +830,55 @@ class MR_Catalog_Manager {
                                             </div>
                                         </div>
 
-                                        <!-- Row 5: Pricing & Discounts -->
-                                        <div class="mr-form-row-4">
-                                            <div>
-                                                <label><strong><?php _e('Sale Price (₹)', 'merarashifal'); ?>:</strong></label>
-                                                <input type="number" step="1" name="mr_cards[<?php echo esc_attr($slug); ?>][price_sale]" value="<?php echo esc_attr($card['price_sale']); ?>" class="small-text" style="width:90px;" required>
-                                            </div>
-                                            <div>
-                                                <label><strong><?php _e('Regular Price (₹)', 'merarashifal'); ?>:</strong></label>
-                                                <input type="number" step="1" name="mr_cards[<?php echo esc_attr($slug); ?>][price_regular]" value="<?php echo esc_attr($card['price_regular']); ?>" class="small-text" style="width:90px;" required>
-                                            </div>
-                                            <div>
-                                                <label><strong><?php _e('Discount Tag', 'merarashifal'); ?>:</strong></label>
-                                                <input type="text" name="mr_cards[<?php echo esc_attr($slug); ?>][discount_text]" value="<?php echo esc_attr($card['discount_text']); ?>" class="regular-text" style="width:110px;" placeholder="Save 80%">
-                                            </div>
-                                            <div>
-                                                <label><strong><?php _e('Price Note', 'merarashifal'); ?>:</strong></label>
-                                                <input type="text" name="mr_cards[<?php echo esc_attr($slug); ?>][price_note]" value="<?php echo esc_attr($card['price_note']); ?>" class="regular-text" style="width:110px;" placeholder="Only Today">
+                                        <!-- Row 5: Pricing & Discounts (Synced from Report Pricing & Catalog) -->
+                                        <div style="background:#f8fafc; border:1px solid #cbd5e1; border-radius:8px; padding:12px 16px; margin-bottom:14px;">
+                                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                                                <div style="min-width:220px;">
+                                                    <div style="font-size:11px; text-transform:uppercase; color:#64748b; font-weight:700; margin-bottom:4px;">
+                                                        <span class="dashicons dashicons-money-alt" style="font-size:14px; vertical-align:text-top; color:#0284c7;"></span>
+                                                        <?php _e('Master Live Price', 'merarashifal'); ?>
+                                                    </div>
+                                                    <div style="display:flex; align-items:baseline; gap:8px;">
+                                                        <span style="font-size:22px; font-weight:800; color:#15803d;">₹<?php echo esc_html($card['price_sale']); ?></span>
+                                                        <?php if ($card['price_regular'] > $card['price_sale']): ?>
+                                                            <span style="font-size:14px; text-decoration:line-through; color:#94a3b8;">₹<?php echo esc_html($card['price_regular']); ?></span>
+                                                        <?php endif; ?>
+                                                        <span style="font-size:10px; font-weight:700; background:#e0f2fe; color:#0369a1; padding:2px 7px; border-radius:4px; border:1px solid #bae6fd;">
+                                                            Master Authority
+                                                        </span>
+                                                    </div>
+                                                    <div style="margin-top:6px;">
+                                                        <a href="<?php echo esc_url(admin_url('admin.php?page=mr-report-pricing')); ?>" class="button button-small" target="_blank" style="font-size:11px;">
+                                                            <span class="dashicons dashicons-admin-generic" style="font-size:13px; line-height:1.6; vertical-align:text-top;"></span> <?php _e('Edit Price in Report Pricing & Catalog ↗', 'merarashifal'); ?>
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                                <div style="flex:1; min-width:180px;">
+                                                    <label><strong><?php _e('Card Discount Tag', 'merarashifal'); ?>:</strong></label>
+                                                    <div style="display:flex; align-items:center; gap:8px; margin-top:5px;">
+                                                        <?php 
+                                                        $calc_discount = '';
+                                                        if ($card['price_sale'] <= 0) {
+                                                            $calc_discount = '100% FREE';
+                                                        } elseif ($card['price_regular'] > $card['price_sale'] && $card['price_regular'] > 0) {
+                                                            $pct = round((($card['price_regular'] - $card['price_sale']) / $card['price_regular']) * 100);
+                                                            $calc_discount = 'Save ' . $pct . '%';
+                                                        }
+                                                        ?>
+                                                        <span style="font-weight:800; font-size:13px; color:#065f46; background:#ecfdf5; border:1px solid #a7f3d0; padding:6px 12px; border-radius:6px; display:inline-flex; align-items:center; gap:6px;">
+                                                            <span class="dashicons dashicons-tag" style="font-size:16px; width:16px; height:16px; color:#10b981;"></span>
+                                                            <?php echo esc_html($calc_discount ?: __('No Discount', 'merarashifal')); ?>
+                                                        </span>
+                                                        <span style="font-size:10px; font-weight:700; background:#d1fae5; color:#065f46; padding:3px 7px; border-radius:4px; border:1px solid #a7f3d0; text-transform:uppercase;">
+                                                            Auto-calculated
+                                                        </span>
+                                                    </div>
+                                                    <span class="description" style="font-size:11px; color:#64748b;"><?php _e('Calculated from Master Regular vs Sale Price', 'merarashifal'); ?></span>
+                                                </div>
+                                                <div style="flex:1; min-width:180px;">
+                                                    <label><strong><?php _e('Price Marketing Note', 'merarashifal'); ?>:</strong></label>
+                                                    <input type="text" name="mr_cards[<?php echo esc_attr($slug); ?>][price_note]" value="<?php echo esc_attr($card['price_note']); ?>" class="regular-text" style="width:100%; max-width:200px;" placeholder="Only Today">
+                                                </div>
                                             </div>
                                         </div>
 
@@ -719,6 +892,44 @@ class MR_Catalog_Manager {
                                                 <label><strong><?php _e('Sample Preview Link Text', 'merarashifal'); ?>:</strong></label>
                                                 <input type="text" name="mr_cards[<?php echo esc_attr($slug); ?>][preview_text]" value="<?php echo esc_attr($card['preview_text']); ?>" class="regular-text" style="width:100%;" required>
                                             </div>
+                                        </div>
+
+                                        <!-- Row 6.5: Sample Report Document Upload (PDF or HTML) -->
+                                        <div class="mr-sample-file-upload-box" style="margin-top:14px; background:#f0fdf4; border:1px solid #bbf7d0; border-radius:8px; padding:12px 16px;">
+                                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px; flex-wrap:wrap; gap:8px;">
+                                                <label style="font-weight:700; color:#166534; font-size:13px;">
+                                                    <span class="dashicons dashicons-media-document" style="color:#16a34a; vertical-align:middle;"></span>
+                                                    <?php _e('Sample Preview Report Document (PDF or HTML)', 'merarashifal'); ?>
+                                                </label>
+                                                <?php if (!empty($card['sample_report_url'])): ?>
+                                                    <a href="<?php echo esc_url($card['sample_report_url']); ?>" target="_blank" style="font-size:12px; font-weight:600; color:#15803d; text-decoration:none;">
+                                                        <span class="dashicons dashicons-external" style="font-size:14px; vertical-align:middle;"></span> <?php _e('View Current Upload ↗', 'merarashifal'); ?>
+                                                    </a>
+                                                <?php else: ?>
+                                                    <span style="font-size:11px; font-weight:600; color:#64748b; background:#e2e8f0; padding:2px 8px; border-radius:4px;">
+                                                        <?php _e('Using System Default Sample', 'merarashifal'); ?>
+                                                    </span>
+                                                <?php endif; ?>
+                                            </div>
+                                            <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                                                <input type="text" name="mr_cards[<?php echo esc_attr($slug); ?>][sample_report_url]" value="<?php echo esc_url($card['sample_report_url'] ?? ''); ?>" class="regular-text js-sample-file-url" style="flex:2; min-width:240px;" placeholder="<?php esc_attr_e('URL of custom PDF or HTML sample file...', 'merarashifal'); ?>">
+                                                <button type="button" class="button button-secondary js-upload-sample-btn" style="white-space:nowrap; background:#fff; font-weight:600;">
+                                                    <span class="dashicons dashicons-upload" style="vertical-align:middle;"></span> <?php _e('Media Library (PDF/HTML)', 'merarashifal'); ?>
+                                                </button>
+                                                <label class="button button-secondary" style="white-space:nowrap; cursor:pointer; background:#fff; margin:0;">
+                                                    <span class="dashicons dashicons-desktop" style="vertical-align:middle;"></span> <?php _e('Browse Local File', 'merarashifal'); ?>
+                                                    <input type="file" name="mr_sample_files[<?php echo esc_attr($slug); ?>]" accept=".pdf,.html,.htm" class="js-sample-local-file" style="display:none;">
+                                                </label>
+                                                <span class="js-sample-file-chosen-name" style="font-size:12px; font-weight:600; color:#15803d; display:none;"></span>
+                                                <?php if (!empty($card['sample_report_url'])): ?>
+                                                    <button type="button" class="button button-link-delete js-clear-sample-btn" style="color:#ef4444; text-decoration:none;" title="<?php esc_attr_e('Reset to default system sample', 'merarashifal'); ?>">
+                                                        <span class="dashicons dashicons-trash" style="vertical-align:middle;"></span> <?php _e('Remove', 'merarashifal'); ?>
+                                                    </button>
+                                                <?php endif; ?>
+                                            </div>
+                                            <p class="description" style="margin:6px 0 0 0; font-size:11.5px; color:#475569;">
+                                                <?php _e('Leave empty to use built-in verified sample, or upload any custom PDF or publication-grade HTML sample report. The preview reader modal will automatically stream it.', 'merarashifal'); ?>
+                                            </p>
                                         </div>
 
                                         <!-- Row 7: Testimonials (What Seekers Are Saying) -->
@@ -870,6 +1081,44 @@ class MR_Catalog_Manager {
                     });
 
                     frame.open();
+                });
+
+                // WP Media Library Uploader for Sample Report (PDF / HTML)
+                $('.js-upload-sample-btn').on('click', function(e) {
+                    e.preventDefault();
+                    var btn = $(this);
+                    var container = btn.closest('.mr-sample-file-upload-box');
+                    var inputField = container.find('.js-sample-file-url');
+
+                    var frame = wp.media({
+                        title: 'Select or Upload Sample Report (PDF or HTML)',
+                        button: { text: 'Use this sample document' },
+                        multiple: false
+                    });
+
+                    frame.on('select', function() {
+                        var attachment = frame.state().get('selection').first().toJSON();
+                        inputField.val(attachment.url);
+                    });
+
+                    frame.open();
+                });
+
+                // Clear / Reset Sample Report URL
+                $('.js-clear-sample-btn').on('click', function(e) {
+                    e.preventDefault();
+                    var container = $(this).closest('.mr-sample-file-upload-box');
+                    container.find('.js-sample-file-url').val('');
+                    $(this).fadeOut(150);
+                });
+
+                // Local file chooser display
+                $('.js-sample-local-file').on('change', function() {
+                    if (this.files && this.files.length > 0) {
+                        var fileName = this.files[0].name;
+                        var container = $(this).closest('.mr-sample-file-upload-box');
+                        container.find('.js-sample-file-chosen-name').text('✓ ' + fileName).fadeIn(150);
+                    }
                 });
             });
         </script>

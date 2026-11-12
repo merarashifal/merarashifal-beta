@@ -158,3 +158,96 @@ html, html body {
     margin: 0 !important;
 }
 
+/* === HEADER & NAVIGATION Z-INDEX: ALWAYS ON TOP OF ALL PAGE ELEMENTS === */
+header.elementor-location-header,
+header[data-elementor-type="header"],
+.elementor-location-header,
+.site-header,
+#ast-desktop-header,
+#ast-mobile-header,
+.ast-main-header-wrap,
+.main-header-bar {
+    position: relative !important;
+    z-index: 99999 !important;
+}
+
+/* Elementor Header Root Containers */
+.elementor-element-e4c3414,
+.elementor-element-f9817da,
+header.elementor-location-header > .elementor-element {
+    position: relative !important;
+    z-index: 99999 !important;
+}
+
+/* Dropdown Sub-Menus & Mobile Menu Containers */
+.elementor-nav-menu--dropdown,
+.elementor-nav-menu__container.elementor-nav-menu--dropdown,
+.elementor-widget-nav-menu .elementor-nav-menu--main .sub-menu,
+.elementor-nav-menu .sub-menu,
+ul.sub-menu.elementor-nav-menu--dropdown,
+.elementor-nav-menu--dropdown-mobile,
+.elementor-nav-menu--dropdown-tablet,
+.elementor-menu-toggle,
+.elementor-widget-nav-menu,
+.ast-mobile-header-wrap,
+.ast-mobile-header-content,
+.ast-mobile-popup-drawer,
+.ast-mobile-menu-buttons {
+    z-index: 999999 !important;
+}
+
+/* Prevent lower content elements from escaping over the header */
+#page #content,
+#page .site-content,
+#primary,
+#main,
+.entry-content {
+    position: relative;
+    z-index: 10;
+}
+
+/* === AUTH BUTTONS (LOGGED IN VS LOGGED OUT) === */
+.show-logged-in {
+    display: none !important;
+}
+.show-logged-out {
+    display: inline-flex !important;
+}
+body.logged-in .show-logged-out {
+    display: none !important;
+}
+body.logged-in .show-logged-in {
+    display: inline-flex !important;
+}
+
+/* Automatic Single Header Button Switch: "Sign In / Sign Up" -> "Account" */
+body.logged-in .elementor-element-0bf8cb1 .elementor-button-text,
+body.logged-in .elementor-element-b12e20f .elementor-button-text,
+body.logged-in header a[href*="my-account"] .elementor-button-text,
+body.logged-in header a[href*="/account"] .elementor-button-text,
+body.logged-in .elementor-location-header a[href*="my-account"] .elementor-button-text,
+body.logged-in .elementor-location-header a[href*="/account"] .elementor-button-text,
+body.logged-in .ast-header-break-point a[href*="my-account"] .elementor-button-text {
+    font-size: 0 !important;
+    line-height: 0 !important;
+    letter-spacing: 0 !important;
+    color: transparent !important;
+}
+
+body.logged-in .elementor-element-0bf8cb1 .elementor-button-text::after,
+body.logged-in .elementor-element-b12e20f .elementor-button-text::after,
+body.logged-in header a[href*="my-account"] .elementor-button-text::after,
+body.logged-in header a[href*="/account"] .elementor-button-text::after,
+body.logged-in .elementor-location-header a[href*="my-account"] .elementor-button-text::after,
+body.logged-in .elementor-location-header a[href*="/account"] .elementor-button-text::after,
+body.logged-in .ast-header-break-point a[href*="my-account"] .elementor-button-text::after {
+    content: "Account" !important;
+    font-size: 14px !important;
+    line-height: 1.4 !important;
+    letter-spacing: normal !important;
+    color: #ffffff !important;
+    display: inline-block !important;
+    visibility: visible !important;
+}
+
+

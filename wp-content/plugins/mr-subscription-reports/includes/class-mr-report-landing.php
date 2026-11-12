@@ -578,30 +578,74 @@ class MR_Report_Landing {
                 display: none !important;
             }
 
+            /* Prevent horizontal overflow globally */
+            html, body {
+                overflow-x: hidden !important;
+                max-width: 100% !important;
+            }
+
+            /* Priority Stacking: Ensure site header & mobile navigation dropdowns are ALWAYS above all page elements */
+            header.elementor-location-header,
+            header[data-elementor-type="header"],
+            .elementor-location-header,
+            .site-header,
+            #ast-desktop-header,
+            #ast-mobile-header,
+            .ast-main-header-wrap,
+            .main-header-bar,
+            .elementor-element-e4c3414,
+            .elementor-element-f9817da {
+                position: relative !important;
+                z-index: 99999 !important;
+            }
+
+            .elementor-nav-menu--dropdown,
+            .elementor-nav-menu__container.elementor-nav-menu--dropdown,
+            .elementor-widget-nav-menu .elementor-nav-menu--main .sub-menu,
+            .elementor-nav-menu .sub-menu,
+            ul.sub-menu.elementor-nav-menu--dropdown,
+            .elementor-nav-menu--dropdown-mobile,
+            .elementor-nav-menu--dropdown-tablet,
+            .elementor-menu-toggle,
+            .elementor-widget-nav-menu,
+            .ast-mobile-header-wrap,
+            .ast-mobile-header-content,
+            .ast-mobile-popup-drawer,
+            .ast-mobile-menu-buttons {
+                z-index: 999999 !important;
+            }
+
+            #page #content,
+            #page .site-content,
+            #primary,
+            #main {
+                position: relative;
+                z-index: 10;
+            }
+
             /* Full Viewport Breakout in MeraRashifal Cream Theme */
             .mr-landing-breakout {
-                width: 100vw;
+                width: 100%;
+                max-width: 100%;
                 position: relative;
-                left: 50%;
-                right: 50%;
-                margin-left: -50vw;
-                margin-right: -50vw;
+                left: 0;
+                right: 0;
+                margin: 0 auto;
                 background-color: #FDF8F1;
-                background-image: 
-                    radial-gradient(120% 70% at 50% 0%, #FFF5E7 0%, #FDF8F1 60%, #FAF1E4 100%);
+                background-image: radial-gradient(120% 60% at 50% 0%, #FFF8EE 0%, #FDF8F1 50%, #FAF1E4 100%);
                 color: #3A312D;
                 font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
                 overflow-x: hidden;
                 box-sizing: border-box;
-                line-height: 1.65;
+                line-height: 1.6;
             }
             .mr-landing-breakout * {
                 box-sizing: border-box;
             }
             .mr-landing-container {
-                max-width: 1320px;
+                max-width: 1260px;
                 margin: 0 auto;
-                padding: 0 24px;
+                padding: 0 20px;
             }
 
             /* Typography */
@@ -617,20 +661,21 @@ class MR_Report_Landing {
             }
             .mr-landing-breakout p {
                 color: #3A312D;
-                font-size: 15.5px;
-                line-height: 1.7;
+                font-size: 14.5px;
+                line-height: 1.6;
             }
             .mr-landing-breakout strong,
             .mr-landing-breakout b {
                 color: #7A1F3D;
             }
 
+            /* Controlled Hero Titles */
             .mr-landing-h1 {
-                font-size: clamp(32px, 4.4vw, 54px) !important;
-                line-height: 1.15 !important;
+                font-size: clamp(24px, 3.2vw, 38px) !important;
+                line-height: 1.2 !important;
                 font-weight: 800 !important;
                 color: #7A1F3D !important;
-                margin: 14px 0 18px 0 !important;
+                margin: 8px 0 10px 0 !important;
                 letter-spacing: -0.015em;
             }
             .mr-landing-gold-highlight {
@@ -638,70 +683,40 @@ class MR_Report_Landing {
                 display: inline;
             }
             .mr-landing-h2 {
-                font-size: clamp(26px, 3.4vw, 38px) !important;
+                font-size: clamp(22px, 2.6vw, 32px) !important;
                 line-height: 1.25 !important;
                 font-weight: 700 !important;
                 color: #7A1F3D !important;
-                margin: 0 0 14px 0 !important;
+                margin: 0 0 8px 0 !important;
                 letter-spacing: -0.01em;
             }
             .mr-landing-sub {
-                font-size: clamp(16px, 1.6vw, 18px);
+                font-size: 14.5px;
                 color: #554841 !important;
-                line-height: 1.7;
-                max-width: 720px;
-                margin: 0;
+                line-height: 1.55;
+                max-width: 660px;
+                margin: 0 0 14px 0;
             }
 
-            /* Badges & Tags */
+            /* Badges & Tags (Deprecated - Eyebrow bubble headings removed per design specification) */
             .mr-tag-eyebrow {
-                display: inline-flex;
-                align-items: center;
-                gap: 8px;
-                background: #FFF3E1;
-                border: 1px solid #D9A441;
-                color: #7A1F3D;
-                font-family: 'Poppins', sans-serif;
-                font-size: 11.5px;
-                font-weight: 700;
-                text-transform: uppercase;
-                letter-spacing: 0.14em;
-                padding: 6px 14px;
-                border-radius: 9999px;
-            }
-            .mr-tag-eyebrow i {
-                color: #D9A441;
+                display: none !important;
             }
 
             /* Top Bar */
             .mr-landing-topbar {
-                padding: 24px 0 10px 0;
+                padding: 16px 0 6px 0;
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
                 flex-wrap: wrap;
-                gap: 12px;
+                gap: 10px;
             }
-            .mr-back-link {
-                color: #6B5E57;
-                text-decoration: none;
-                font-size: 13.5px;
-                font-weight: 600;
-                display: inline-flex;
-                align-items: center;
-                gap: 8px;
-                transition: color 0.2s;
-            }
-            .mr-back-link:hover {
-                color: #F58220;
-            }
-
-            /* Breadcrumbs Navigation */
             .mr-breadcrumb-nav {
                 display: inline-flex;
                 align-items: center;
-                gap: 8px;
-                font-size: 13px;
+                gap: 6px;
+                font-size: 12.5px;
                 color: #8C7E77;
                 flex-wrap: wrap;
             }
@@ -717,7 +732,7 @@ class MR_Report_Landing {
             }
             .mr-crumb-sep {
                 color: #D9A441;
-                font-size: 12px;
+                font-size: 11px;
                 font-weight: bold;
             }
             .mr-crumb-current {
@@ -725,86 +740,38 @@ class MR_Report_Landing {
                 font-weight: 600;
             }
 
-            /* Hero Grid */
+            /* Hero Grid: Compact & Balanced */
             .mr-hero-grid {
                 display: grid;
-                grid-template-columns: 1.2fr 0.9fr;
-                gap: 44px;
-                align-items: center;
-                padding: 30px 0 60px 0;
+                grid-template-columns: 1.18fr 0.82fr;
+                gap: 28px;
+                align-items: start;
+                padding: 14px 0 28px 0;
             }
             @media (max-width: 960px) {
                 .mr-hero-grid {
                     grid-template-columns: 1fr;
-                    gap: 36px;
-                    padding-bottom: 40px;
+                    gap: 24px;
+                    padding-bottom: 24px;
                 }
             }
 
-            /* CTA Buttons */
-            .mr-btn-hero-primary {
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                gap: 10px;
-                background: #F58220;
-                color: #FFFFFF !important;
-                font-family: 'Poppins', sans-serif;
-                font-weight: 700;
-                font-size: 16px;
-                padding: 16px 36px;
-                border-radius: 9999px;
-                text-decoration: none;
-                box-shadow: 0 10px 25px rgba(245, 130, 32, 0.35);
-                transition: transform 0.2s, box-shadow 0.2s, background-color 0.2s;
-                border: none;
-                cursor: pointer;
-            }
-            .mr-btn-hero-primary:hover {
-                background: #E06D10;
-                transform: translateY(-2px);
-                box-shadow: 0 14px 32px rgba(245, 130, 32, 0.45), 0 0 16px rgba(217, 164, 65, 0.3);
-            }
-            .mr-btn-hero-secondary {
-                display: inline-flex;
-                align-items: center;
-                justify-content: center;
-                gap: 8px;
-                background: #FFFFFF;
-                border: 2px solid #F58220;
-                color: #F58220 !important;
-                font-family: 'Poppins', sans-serif;
-                font-weight: 700;
-                font-size: 15px;
-                padding: 15px 30px;
-                border-radius: 9999px;
-                text-decoration: none;
-                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
-                transition: background-color 0.2s, color 0.2s, transform 0.2s, box-shadow 0.2s;
-                cursor: pointer;
-            }
-            .mr-btn-hero-secondary:hover {
-                background: #FFF4E8;
-                transform: translateY(-2px);
-                box-shadow: 0 8px 20px rgba(245, 130, 32, 0.15);
-            }
-
-            /* Price Display */
+            /* Price Display (Fallback when bundles disabled) */
             .mr-hero-price-wrap {
                 display: flex;
                 align-items: baseline;
-                gap: 14px;
-                margin: 22px 0 10px 0;
+                gap: 12px;
+                margin: 12px 0 8px 0;
                 flex-wrap: wrap;
             }
             .mr-hero-price {
-                font-size: 38px;
+                font-size: 32px;
                 font-weight: 800;
                 font-family: 'Playfair Display', serif;
                 color: #7A1F3D;
             }
             .mr-hero-old-price {
-                font-size: 20px;
+                font-size: 18px;
                 color: #8C7E77;
                 text-decoration: line-through;
             }
@@ -812,66 +779,66 @@ class MR_Report_Landing {
                 background: #E8F8F0;
                 border: 1px solid #2CB67D;
                 color: #2CB67D;
-                font-size: 13px;
+                font-size: 12px;
                 font-weight: 700;
-                padding: 4px 12px;
+                padding: 3px 10px;
                 border-radius: 9999px;
             }
 
             /* Interactive Bundle Selector (MeraRashifal Brand Edition) */
             .mr-bundle-box {
-                background: #FFFDF9;
-                border: 1.5px solid rgba(217, 164, 65, 0.45);
-                border-radius: 18px;
-                padding: 18px 20px 20px 20px;
-                margin: 22px 0 16px 0;
-                box-shadow: 0 8px 24px rgba(122, 31, 61, 0.05);
+                background: linear-gradient(180deg, #FFFFFF 0%, #FFFDF9 100%);
+                border: 1.5px solid rgba(217, 164, 65, 0.4);
+                border-radius: 16px;
+                padding: 14px 16px 14px 16px;
+                margin: 14px 0 14px 0;
+                box-shadow: 0 4px 18px rgba(122, 31, 61, 0.04);
             }
             .mr-bundle-heading {
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-                margin-bottom: 14px;
+                margin-bottom: 10px;
                 flex-wrap: wrap;
                 gap: 8px;
             }
             .mr-bundle-heading-title {
-                font-size: 13.5px;
+                font-size: 11.5px;
                 font-weight: 700;
                 color: #7A1F3D;
                 display: inline-flex;
                 align-items: center;
-                gap: 8px;
+                gap: 6px;
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
             }
             .mr-bundle-save-pill {
                 background: linear-gradient(135deg, #10B981 0%, #059669 100%);
                 color: #FFFFFF;
-                font-size: 11px;
+                font-size: 10px;
                 font-weight: 700;
-                padding: 3px 10px;
+                padding: 2px 8px;
                 border-radius: 9999px;
                 display: inline-flex;
                 align-items: center;
-                gap: 5px;
+                gap: 4px;
             }
             .mr-bundle-grid {
                 display: grid;
                 grid-template-columns: repeat(3, 1fr);
-                gap: 12px;
+                gap: 10px;
             }
             @media (max-width: 900px) {
                 .mr-bundle-grid {
                     grid-template-columns: 1fr;
-                    gap: 10px;
+                    gap: 8px;
                 }
             }
             .mr-bundle-item {
                 background: #FFFFFF;
-                border: 2px solid #EADCCB;
-                border-radius: 14px;
-                padding: 14px 14px 12px 14px;
+                border: 1.5px solid #EAE0D5;
+                border-radius: 12px;
+                padding: 12px 12px 10px 12px;
                 cursor: pointer;
                 position: relative;
                 transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
@@ -879,48 +846,51 @@ class MR_Report_Landing {
                 flex-direction: column;
                 justify-content: space-between;
                 user-select: none;
+                min-height: 100px;
             }
             .mr-bundle-item:hover {
                 border-color: #D9A441;
                 transform: translateY(-2px);
-                box-shadow: 0 6px 18px rgba(217, 164, 65, 0.18);
+                box-shadow: 0 4px 14px rgba(217, 164, 65, 0.16);
             }
             .mr-bundle-item.active {
                 border-color: #7A1F3D !important;
-                background: #FFF9F2 !important;
-                box-shadow: 0 8px 25px rgba(122, 31, 61, 0.12), 0 0 0 2px #7A1F3D;
+                background: #FFF9F3 !important;
+                box-shadow: 0 4px 16px rgba(122, 31, 61, 0.12), 0 0 0 1.5px #7A1F3D;
             }
             .mr-bundle-item.mr-bundle-best-buy {
                 border-color: #D9A441;
             }
             .mr-bundle-item.mr-bundle-best-buy.active {
                 border-color: #F58220 !important;
-                box-shadow: 0 8px 25px rgba(245, 130, 32, 0.22), 0 0 0 2px #F58220;
+                background: #FFF8F0 !important;
+                box-shadow: 0 4px 16px rgba(245, 130, 32, 0.18), 0 0 0 1.5px #F58220;
             }
             .mr-bundle-ribbon {
                 position: absolute;
-                top: -10px;
-                right: 12px;
+                top: -9px;
+                right: 10px;
                 background: linear-gradient(135deg, #F58220 0%, #D9A441 100%);
                 color: #FFFFFF;
-                font-size: 10px;
+                font-size: 9.5px;
                 font-weight: 800;
                 padding: 2px 8px;
                 border-radius: 9999px;
                 text-transform: uppercase;
                 letter-spacing: 0.5px;
-                box-shadow: 0 2px 6px rgba(245, 130, 32, 0.3);
+                box-shadow: 0 2px 6px rgba(245, 130, 32, 0.25);
                 white-space: nowrap;
+                z-index: 2;
             }
             .mr-bundle-top-row {
                 display: flex;
                 align-items: center;
-                gap: 8px;
-                margin-bottom: 4px;
+                gap: 7px;
+                margin-bottom: 3px;
             }
             .mr-bundle-radio {
-                width: 17px;
-                height: 17px;
+                width: 15px;
+                height: 15px;
                 border-radius: 50%;
                 border: 2px solid #C4B5A5;
                 display: flex;
@@ -941,10 +911,10 @@ class MR_Report_Landing {
                 background: #FFFFFF;
             }
             .mr-bundle-name {
-                font-size: 12.5px;
+                font-size: 12px;
                 font-weight: 700;
                 color: #3A312D;
-                line-height: 1.3;
+                line-height: 1.25;
             }
             .mr-bundle-item.active .mr-bundle-name {
                 color: #7A1F3D;
@@ -953,103 +923,213 @@ class MR_Report_Landing {
                 display: flex;
                 align-items: baseline;
                 gap: 6px;
-                margin: 5px 0 3px 0;
+                margin: 4px 0 2px 0;
             }
             .mr-bundle-sale {
-                font-size: 22px;
+                font-size: 20px;
                 font-weight: 800;
                 font-family: 'Poppins', sans-serif;
                 color: #7A1F3D;
                 line-height: 1;
             }
             .mr-bundle-strike {
-                font-size: 12px;
+                font-size: 11.5px;
                 color: #8C7E77;
                 text-decoration: line-through;
             }
             .mr-bundle-desc {
-                font-size: 11px;
+                font-size: 10.5px;
                 color: #6B5E57;
-                line-height: 1.4;
+                line-height: 1.35;
                 margin-top: 3px;
             }
-            .mr-bundle-chat-tag {
-                display: inline-flex;
-                align-items: center;
-                gap: 4px;
-                font-size: 10.5px;
-                font-weight: 700;
-                color: #0284C7;
-                background: #E0F2FE;
-                padding: 2px 7px;
-                border-radius: 5px;
-                margin-top: 5px;
-                width: fit-content;
+            .mr-bundle-breakdown-bar {
+                background: #FFFDF9;
+                border: 1.5px solid rgba(217, 164, 65, 0.35);
+                border-left: 4px solid #F58220;
+                border-radius: 12px;
+                padding: 12px 14px;
+                margin-top: 12px;
+                box-shadow: 0 2px 10px rgba(122, 31, 61, 0.04);
             }
-            .mr-bundle-tag-neutral {
-                font-size: 10px;
+            .mr-bbb-header {
+                font-size: 12px;
+                font-weight: 700;
+                color: #7A1F3D;
+                margin-bottom: 8px;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+            }
+            .mr-bbb-header strong {
+                color: #B45309;
+            }
+            .mr-bbb-items {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 6px;
+                width: 100%;
+            }
+            .mr-bbb-chip {
+                background: #FFF9F2;
+                border: 1px solid #F5D6B4;
+                color: #3A312D;
+                font-size: 12px;
+                font-weight: 600;
+                padding: 6px 12px;
+                border-radius: 8px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                box-sizing: border-box;
+            }
+            .mr-bbb-chip i {
+                color: #16A34A;
+                font-size: 12px;
+                flex-shrink: 0;
+            }
+            .mr-bbb-chip.mr-chip-chat {
+                background: #E0F2FE;
+                border-color: #BAE6FD;
+                color: #0369A1;
+                font-weight: 700;
+            }
+            .mr-bbb-chip.mr-chip-chat i {
+                color: #0284C7;
+            }
+            mr-bundle-tag-neutral {
+                font-size: 9.5px;
                 font-weight: 600;
                 color: #64748B;
                 background: #F1F5F9;
                 padding: 1px 6px;
                 border-radius: 4px;
-                margin-top: 5px;
+                margin-top: 4px;
                 display: inline-block;
                 width: fit-content;
+            }
+
+            /* Balanced & Harmonious CTA Action Buttons */
+            .mr-hero-actions-wrap {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                flex-wrap: wrap;
+                margin-top: 16px;
+            }
+            .mr-btn-hero-primary {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 8px;
+                background: linear-gradient(135deg, #F58220 0%, #E6680D 100%);
+                color: #FFFFFF !important;
+                font-family: 'Poppins', sans-serif;
+                font-weight: 700;
+                font-size: 14.5px;
+                height: 48px;
+                padding: 0 24px;
+                border-radius: 50px;
+                text-decoration: none;
+                box-shadow: 0 6px 18px rgba(245, 130, 32, 0.32);
+                transition: transform 0.2s, box-shadow 0.2s, background 0.2s;
+                border: none;
+                cursor: pointer;
+                white-space: nowrap;
+            }
+            .mr-btn-hero-primary:hover {
+                background: linear-gradient(135deg, #E6680D 0%, #D45B00 100%);
+                transform: translateY(-2px);
+                box-shadow: 0 8px 24px rgba(245, 130, 32, 0.42);
+            }
+            .mr-hero-secondary-group {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+            }
+            .mr-btn-hero-secondary {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                gap: 6px;
+                background: #FFFDF9;
+                border: 1.5px solid rgba(217, 164, 65, 0.45);
+                color: #7A1F3D !important;
+                font-family: 'Poppins', sans-serif;
+                font-weight: 600;
+                font-size: 13.5px;
+                height: 48px;
+                padding: 0 18px;
+                border-radius: 50px;
+                text-decoration: none;
+                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+                transition: all 0.2s ease;
+                cursor: pointer;
+                white-space: nowrap;
+            }
+            .mr-btn-hero-secondary:hover {
+                background: #FFF5E8;
+                border-color: #F58220;
+                color: #F58220 !important;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(245, 130, 32, 0.15);
             }
 
             /* Trust Row */
             .mr-trust-row {
                 display: flex;
                 align-items: center;
-                gap: 16px;
-                margin-top: 24px;
-                font-size: 13px;
+                gap: 12px;
+                margin-top: 14px;
+                font-size: 12px;
                 color: #6B5E57;
                 flex-wrap: wrap;
             }
             .mr-trust-row span {
                 display: inline-flex;
                 align-items: center;
-                gap: 6px;
+                gap: 5px;
             }
             .mr-trust-row i {
                 color: #F58220;
             }
 
-            /* Right Emblem Stage */
+            /* Right Showcase Stage (Vedic Dossier Preview) */
             .mr-emblem-stage {
                 position: relative;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                min-height: 440px;
+                min-height: auto;
+                padding: 6px 0;
             }
             .mr-emblem-glow {
                 position: absolute;
-                width: 320px;
-                height: 320px;
-                background: radial-gradient(circle, rgba(217, 164, 65, 0.3) 0%, rgba(245, 130, 32, 0.12) 50%, transparent 75%);
-                filter: blur(28px);
+                width: 260px;
+                height: 260px;
+                background: radial-gradient(circle, rgba(217, 164, 65, 0.25) 0%, rgba(245, 130, 32, 0.08) 50%, transparent 75%);
+                filter: blur(24px);
                 z-index: 1;
                 pointer-events: none;
             }
             .mr-orbit-circle-outer {
                 position: absolute;
-                width: 420px;
-                height: 420px;
-                border: 1.5px dashed rgba(217, 164, 65, 0.45);
+                width: 360px;
+                height: 360px;
+                border: 1px dashed rgba(217, 164, 65, 0.35);
                 border-radius: 50%;
                 z-index: 2;
                 animation: mrSpinSlow 90s linear infinite;
+                pointer-events: none;
             }
             .mr-orbit-circle-inner {
                 position: absolute;
-                width: 340px;
-                height: 340px;
-                border: 1px solid rgba(122, 31, 61, 0.2);
+                width: 280px;
+                height: 280px;
+                border: 1px solid rgba(122, 31, 61, 0.15);
                 border-radius: 50%;
                 z-index: 2;
+                pointer-events: none;
             }
             @keyframes mrSpinSlow {
                 0% { transform: rotate(0deg); }
@@ -1059,180 +1139,221 @@ class MR_Report_Landing {
                 position: relative;
                 z-index: 3;
                 background: #FFFFFF;
-                border: 2px solid #D9A441;
-                border-radius: 24px;
-                box-shadow: 0 20px 50px rgba(122, 31, 61, 0.12), 0 10px 25px rgba(0, 0, 0, 0.06);
-                padding: 36px 30px;
+                border: 1.5px solid #D9A441;
+                border-radius: 20px;
+                box-shadow: 0 16px 36px rgba(122, 31, 61, 0.08), 0 4px 12px rgba(217, 164, 65, 0.12);
+                padding: 22px 20px;
                 width: 100%;
-                max-width: 380px;
+                max-width: 360px;
                 text-align: center;
             }
             .mr-mockup-badge {
                 position: absolute;
-                top: -14px;
+                top: -11px;
                 left: 50%;
                 transform: translateX(-50%);
                 background: #7A1F3D;
                 color: #FFFFFF;
-                font-size: 11px;
+                font-size: 10px;
                 font-weight: 700;
                 text-transform: uppercase;
-                letter-spacing: 0.12em;
-                padding: 5px 16px;
+                letter-spacing: 0.1em;
+                padding: 3px 14px;
                 border-radius: 9999px;
                 white-space: nowrap;
                 border: 1px solid #D9A441;
-                box-shadow: 0 4px 12px rgba(122, 31, 61, 0.25);
+                box-shadow: 0 3px 10px rgba(122, 31, 61, 0.2);
             }
             .mr-mockup-icon {
-                width: 72px;
-                height: 72px;
-                margin: 10px auto 16px auto;
+                width: 52px;
+                height: 52px;
+                margin: 4px auto 10px auto;
                 background: radial-gradient(circle, #FFF4E1 0%, #FFE6BE 100%);
-                border: 2px solid #D9A441;
+                border: 1.5px solid #D9A441;
                 border-radius: 50%;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 color: #F58220;
-                font-size: 32px;
-                box-shadow: 0 8px 20px rgba(217, 164, 65, 0.25);
+                font-size: 24px;
+                box-shadow: 0 4px 14px rgba(217, 164, 65, 0.2);
+            }
+            .mr-mockup-title {
+                font-family: 'Playfair Display', serif !important;
+                font-size: 17px !important;
+                font-weight: 800 !important;
+                color: #7A1F3D !important;
+                margin: 0 0 3px 0 !important;
+                line-height: 1.25 !important;
+            }
+            .mr-mockup-cover-badge {
+                font-size: 10.5px;
+                color: #D9A441;
+                font-weight: 700;
+                text-transform: uppercase;
+                letter-spacing: 0.8px;
+                margin-bottom: 12px;
+            }
+            .mr-mockup-highlights {
+                background: #FFFDF9;
+                border-radius: 12px;
+                padding: 12px 14px;
+                text-align: left;
+                font-size: 12px;
+                color: #4A3E39;
+                border: 1px solid rgba(217, 164, 65, 0.22);
+            }
+            .mr-mockup-hl-item {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                margin-bottom: 6px;
+                font-weight: 500;
+            }
+            .mr-mockup-hl-item:last-child {
+                margin-bottom: 0;
+            }
+            .mr-mockup-hl-item i {
+                color: #2CB67D;
+                font-size: 12px;
+                flex-shrink: 0;
             }
 
-            /* Metric Bar */
+            /* Metric Proof Bar */
             .mr-metric-bar {
                 background: #FFFFFF;
-                border-top: 1px solid rgba(217, 164, 65, 0.3);
-                border-bottom: 1px solid rgba(217, 164, 65, 0.3);
-                padding: 34px 0;
-                margin: 10px 0 50px 0;
-                box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+                border-top: 1px solid rgba(217, 164, 65, 0.25);
+                border-bottom: 1px solid rgba(217, 164, 65, 0.25);
+                padding: 16px 0;
+                margin: 8px 0 32px 0;
+                box-shadow: 0 2px 12px rgba(0, 0, 0, 0.02);
             }
             .mr-metric-grid {
                 display: grid;
                 grid-template-columns: repeat(4, 1fr);
-                gap: 24px;
+                gap: 0;
                 text-align: center;
             }
-            @media (max-width: 768px) {
-                .mr-metric-grid {
-                    grid-template-columns: repeat(2, 1fr);
-                    gap: 20px;
-                }
+            .mr-metric-item {
+                padding: 0 12px;
+                position: relative;
+            }
+            .mr-metric-item:not(:last-child)::after {
+                content: '';
+                position: absolute;
+                right: 0;
+                top: 18%;
+                height: 64%;
+                width: 1px;
+                background: rgba(217, 164, 65, 0.3);
             }
             .mr-metric-number {
                 font-family: 'Playfair Display', serif;
-                font-size: clamp(26px, 3vw, 36px);
+                font-size: clamp(20px, 2.2vw, 26px);
                 font-weight: 800;
                 color: #7A1F3D;
-                line-height: 1.1;
-                margin-bottom: 4px;
+                line-height: 1.15;
+                margin-bottom: 2px;
             }
             .mr-metric-label {
-                font-size: 13px;
-                color: #554841;
-                font-weight: 600;
+                font-size: 11px;
+                color: #6B5E57;
+                font-weight: 700;
                 text-transform: uppercase;
                 letter-spacing: 0.05em;
             }
 
             /* Section Spacing */
             .mr-section-wrap {
-                padding: 40px 0;
+                padding: 28px 0;
             }
 
-            /* Chapters Grid (Cards) - Center Aligned */
+            /* Chapters Grid (Cards) */
             .mr-chapters-grid {
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 24px;
-                margin-top: 38px;
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 16px;
+                margin-top: 24px;
+            }
+            @media (max-width: 960px) {
+                .mr-chapters-grid {
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 14px;
+                }
+            }
+            @media (max-width: 600px) {
+                .mr-chapters-grid {
+                    grid-template-columns: 1fr;
+                    gap: 12px;
+                }
             }
             .mr-chapter-card {
                 background: #FFFFFF;
                 border: 1px solid rgba(217, 164, 65, 0.25);
-                border-radius: 20px;
-                padding: 30px;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.04);
-                transition: transform 0.25s, box-shadow 0.25s, border-color 0.25s;
+                border-radius: 14px;
+                padding: 18px 18px;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+                transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
                 position: relative;
-                flex: 0 1 calc(33.333% - 18px);
-                min-width: 280px;
-                max-width: 380px;
-                text-align: center;
+                text-align: left;
                 box-sizing: border-box;
             }
             .mr-chapter-card:hover {
-                transform: translateY(-4px);
-                box-shadow: 0 14px 35px rgba(217, 164, 65, 0.16);
+                transform: translateY(-3px);
+                box-shadow: 0 8px 24px rgba(217, 164, 65, 0.14);
                 border-color: #D9A441;
             }
             .mr-chapter-num {
                 display: inline-block;
                 font-family: 'Poppins', sans-serif;
-                font-size: 11.5px;
+                font-size: 10.5px;
                 font-weight: 700;
                 color: #7A1F3D;
                 background: #FFF3E1;
                 border: 1px solid #D9A441;
-                padding: 4px 14px;
-                border-radius: 8px;
-                margin: 0 auto 16px auto;
-                letter-spacing: 0.06em;
+                padding: 2px 10px;
+                border-radius: 6px;
+                margin-bottom: 10px;
+                letter-spacing: 0.05em;
             }
             .mr-chapter-title {
-                font-size: 19px !important;
+                font-size: 15.5px !important;
                 font-weight: 700 !important;
                 color: #7A1F3D !important;
-                margin: 0 0 10px 0 !important;
+                margin: 0 0 6px 0 !important;
                 line-height: 1.35;
-                text-align: center;
             }
             .mr-chapter-desc {
-                font-size: 14.5px !important;
-                color: #3A312D !important;
-                line-height: 1.65;
+                font-size: 13px !important;
+                color: #4A3E39 !important;
+                line-height: 1.55;
                 margin: 0;
-                text-align: center;
-            }
-            @media (max-width: 960px) {
-                .mr-chapter-card {
-                    flex: 0 1 calc(50% - 14px);
-                    max-width: 48%;
-                }
-            }
-            @media (max-width: 640px) {
-                .mr-chapter-card {
-                    flex: 1 1 100%;
-                    max-width: 100%;
-                }
             }
 
             /* TOC Grid (Table of Contents) */
             .mr-toc-grid {
                 display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-                gap: 20px;
-                margin-top: 38px;
+                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+                gap: 12px;
+                margin-top: 20px;
             }
             .mr-toc-item {
                 background: #FFFFFF;
                 border: 1px solid rgba(217, 164, 65, 0.25);
-                border-radius: 16px;
-                padding: 22px 24px;
+                border-radius: 12px;
+                padding: 14px 16px;
                 display: flex;
                 align-items: flex-start;
-                gap: 16px;
-                box-shadow: 0 6px 18px rgba(0, 0, 0, 0.03);
+                gap: 12px;
+                box-shadow: 0 3px 10px rgba(0, 0, 0, 0.02);
             }
             .mr-toc-page-pill {
                 background: #FFF3E1;
                 border: 1px solid #D9A441;
                 color: #7A1F3D;
                 font-weight: 700;
-                font-size: 11.5px;
-                padding: 4px 10px;
+                font-size: 10.5px;
+                padding: 3px 8px;
                 border-radius: 6px;
                 white-space: nowrap;
                 margin-top: 2px;
@@ -1241,11 +1362,11 @@ class MR_Report_Landing {
             /* Comparison Matrix (Card Design) */
             .mr-matrix-wrap {
                 background: #FFFFFF;
-                border: 1.5px solid rgba(217, 164, 65, 0.35);
-                border-radius: 24px;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.06);
+                border: 1.5px solid rgba(217, 164, 65, 0.3);
+                border-radius: 16px;
+                box-shadow: 0 6px 20px rgba(0, 0, 0, 0.04);
                 overflow: hidden;
-                margin-top: 38px;
+                margin-top: 22px;
             }
             .mr-matrix-row {
                 display: grid;
@@ -1256,18 +1377,19 @@ class MR_Report_Landing {
                 border-bottom: none;
             }
             .mr-matrix-head {
-                font-size: 13.5px;
+                font-size: 12px;
                 font-weight: 700;
                 text-transform: uppercase;
-                letter-spacing: 0.1em;
-                padding: 20px 26px;
+                letter-spacing: 0.08em;
+                padding: 14px 20px;
             }
             .mr-matrix-cell {
-                padding: 20px 26px;
-                font-size: 15px;
+                padding: 14px 20px;
+                font-size: 13.5px;
                 display: flex;
                 align-items: flex-start;
-                gap: 14px;
+                gap: 10px;
+                line-height: 1.5;
             }
             .mr-cell-other {
                 color: #6B5E57;
@@ -1280,14 +1402,14 @@ class MR_Report_Landing {
             }
             .mr-cross-icon {
                 color: #C2410C;
-                font-size: 16px;
+                font-size: 14px;
                 font-weight: 900;
                 flex-shrink: 0;
                 margin-top: 2px;
             }
             .mr-check-icon {
                 color: #2CB67D;
-                font-size: 16px;
+                font-size: 14px;
                 font-weight: 900;
                 flex-shrink: 0;
                 margin-top: 2px;
@@ -1295,45 +1417,44 @@ class MR_Report_Landing {
 
             /* Cross-Promotion Banner (Niyati AI Chat) */
             .mr-promo-banner {
-                background: linear-gradient(135deg, #FFFFFF 0%, #FFF7EE 100%);
-                border: 1.5px solid rgba(217, 164, 65, 0.4);
-                border-left: 6px solid #7A1F3D;
-                border-radius: 24px;
-                padding: 38px 34px;
+                background: linear-gradient(135deg, #FFFFFF 0%, #FFF8F0 100%);
+                border: 1.5px solid rgba(217, 164, 65, 0.35);
+                border-left: 5px solid #7A1F3D;
+                border-radius: 18px;
+                padding: 24px 26px;
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-                gap: 30px;
+                gap: 20px;
                 flex-wrap: wrap;
-                box-shadow: 0 12px 35px rgba(217, 164, 65, 0.15);
-                margin: 40px 0;
+                box-shadow: 0 8px 24px rgba(217, 164, 65, 0.1);
+                margin: 30px 0;
             }
             .mr-promo-content {
                 flex: 1;
-                min-width: 280px;
+                min-width: 260px;
             }
             .mr-promo-title {
-                font-size: 25px !important;
+                font-size: 20px !important;
                 font-weight: 700 !important;
                 color: #7A1F3D !important;
-                margin: 0 0 10px 0 !important;
+                margin: 4px 0 6px 0 !important;
             }
             .mr-promo-text {
-                font-size: 15px;
-                color: #3A312D;
+                font-size: 13.5px;
+                color: #4A3E39;
                 margin: 0;
-                line-height: 1.65;
+                line-height: 1.55;
             }
 
-            /* Related Reports Grid */
-            /* Frequently Bought Together - Stand Out & Bold Design */
+            /* Frequently Bought Together */
             .mr-fbt-wrap {
                 background: linear-gradient(180deg, #FFFFFF 0%, #FFFBF5 60%, #FFF5E7 100%);
-                border: 2px solid #D9A441;
-                border-radius: 28px;
-                padding: 44px 34px 40px 34px;
-                box-shadow: 0 18px 45px rgba(122, 31, 61, 0.08), 0 4px 16px rgba(217, 164, 65, 0.12);
-                margin: 48px 0;
+                border: 1.5px solid #D9A441;
+                border-radius: 22px;
+                padding: 30px 24px 26px 24px;
+                box-shadow: 0 10px 30px rgba(122, 31, 61, 0.06);
+                margin: 34px 0;
                 position: relative;
                 overflow: hidden;
             }
@@ -1342,47 +1463,61 @@ class MR_Report_Landing {
                 position: absolute;
                 top: 0;
                 right: 0;
-                width: 280px;
-                height: 280px;
-                background: radial-gradient(circle, rgba(245, 130, 32, 0.1) 0%, transparent 70%);
+                width: 220px;
+                height: 220px;
+                background: radial-gradient(circle, rgba(245, 130, 32, 0.08) 0%, transparent 70%);
                 pointer-events: none;
+            }
+            .mr-fbt-best-buy-deal {
+                background: linear-gradient(135deg, #FFF9F0 0%, #FFF2DF 100%);
+                border: 1.5px dashed #D9A441;
+                border-radius: 14px;
+                padding: 16px 20px;
+                margin: 20px auto 24px auto;
+                max-width: 820px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 14px;
+                box-shadow: 0 4px 16px rgba(217, 164, 65, 0.1);
             }
             .mr-fbt-grid {
                 display: grid;
                 grid-template-columns: repeat(4, 1fr);
-                gap: 22px;
-                margin-top: 36px;
+                gap: 16px;
+                margin-top: 24px;
             }
-            @media (max-width: 1200px) {
+            @media (max-width: 1100px) {
                 .mr-fbt-grid {
                     grid-template-columns: repeat(2, 1fr);
-                    gap: 20px;
+                    gap: 14px;
                 }
             }
             @media (max-width: 640px) {
                 .mr-fbt-grid {
                     grid-template-columns: 1fr;
-                    gap: 18px;
+                    gap: 14px;
                 }
                 .mr-fbt-wrap {
-                    padding: 28px 16px;
-                    border-radius: 20px;
+                    padding: 20px 14px;
+                    border-radius: 16px;
                 }
             }
             .mr-fbt-card {
                 background: #FFFFFF;
-                border: 1.5px solid rgba(217, 164, 65, 0.28);
-                border-radius: 20px;
+                border: 1.5px solid rgba(217, 164, 65, 0.25);
+                border-radius: 14px;
                 overflow: hidden;
                 display: flex;
                 flex-direction: column;
-                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.04);
-                transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+                box-shadow: 0 4px 16px rgba(0, 0, 0, 0.03);
+                transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
             }
             .mr-fbt-card:hover {
-                transform: translateY(-6px);
+                transform: translateY(-4px);
                 border-color: #D9A441;
-                box-shadow: 0 18px 40px rgba(217, 164, 65, 0.25);
+                box-shadow: 0 10px 25px rgba(217, 164, 65, 0.18);
             }
             .mr-fbt-img-link {
                 display: block;
@@ -1391,56 +1526,51 @@ class MR_Report_Landing {
             }
             .mr-fbt-img-wrap {
                 width: 100%;
-                aspect-ratio: 16 / 11;
+                aspect-ratio: 16 / 10;
                 background: #FDF8F1;
                 position: relative;
                 overflow: hidden;
-                border-bottom: 1px solid rgba(217, 164, 65, 0.18);
+                border-bottom: 1px solid rgba(217, 164, 65, 0.16);
             }
             .mr-fbt-img {
                 width: 100%;
                 height: 100%;
                 object-fit: cover;
-                transition: transform 0.35s ease;
+                transition: transform 0.3s ease;
             }
             .mr-fbt-card:hover .mr-fbt-img {
-                transform: scale(1.05);
+                transform: scale(1.04);
             }
             .mr-fbt-badge {
                 position: absolute;
-                top: 10px;
-                right: 10px;
+                top: 8px;
+                right: 8px;
                 background: rgba(255, 255, 255, 0.95);
                 backdrop-filter: blur(4px);
                 border: 1px solid rgba(217, 164, 65, 0.35);
                 color: #7A1F3D;
-                font-size: 11px;
+                font-size: 10px;
                 font-weight: 700;
-                padding: 3px 9px;
-                border-radius: 8px;
+                padding: 2px 7px;
+                border-radius: 6px;
                 display: inline-flex;
                 align-items: center;
-                gap: 4px;
-                box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-            }
-            .mr-fbt-badge i {
-                color: #D9A441;
-                font-size: 11px;
+                gap: 3px;
             }
             .mr-fbt-content {
-                padding: 18px 20px 20px 20px;
+                padding: 14px 14px 14px 14px;
                 display: flex;
                 flex-direction: column;
                 flex: 1;
             }
             .mr-fbt-title {
                 font-family: 'Playfair Display', Georgia, serif !important;
-                font-size: 16.5px !important;
+                font-size: 14.5px !important;
                 font-weight: 700 !important;
                 color: #7A1F3D !important;
-                margin: 0 0 8px 0 !important;
+                margin: 0 0 6px 0 !important;
                 line-height: 1.35 !important;
-                min-height: 44px;
+                min-height: 40px;
             }
             .mr-fbt-title a {
                 color: #7A1F3D !important;
@@ -1451,11 +1581,11 @@ class MR_Report_Landing {
                 color: #F58220 !important;
             }
             .mr-fbt-desc {
-                font-size: 12.5px !important;
+                font-size: 12px !important;
                 color: #554841 !important;
-                line-height: 1.55 !important;
-                margin: 0 0 16px 0 !important;
-                min-height: 38px;
+                line-height: 1.45 !important;
+                margin: 0 0 12px 0 !important;
+                min-height: 34px;
                 display: -webkit-box;
                 -webkit-line-clamp: 2;
                 -webkit-box-orient: vertical;
@@ -1466,95 +1596,93 @@ class MR_Report_Landing {
                 align-items: center;
                 justify-content: space-between;
                 margin-top: auto;
-                padding-top: 14px;
-                border-top: 1px dashed rgba(217, 164, 65, 0.3);
-                gap: 10px;
+                padding-top: 10px;
+                border-top: 1px dashed rgba(217, 164, 65, 0.25);
+                gap: 8px;
             }
             .mr-fbt-price-col {
                 display: flex;
                 flex-direction: column;
-                gap: 2px;
+                gap: 1px;
             }
             .mr-fbt-price-main {
                 display: flex;
                 align-items: baseline;
-                font-family: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif !important;
+                font-family: 'Poppins', sans-serif !important;
                 color: #7A1F3D !important;
                 font-weight: 800 !important;
                 line-height: 1;
             }
             .mr-fbt-symbol {
-                font-size: 15px;
+                font-size: 13px;
                 font-weight: 700;
                 margin-right: 1px;
             }
             .mr-fbt-val {
-                font-size: 21px;
+                font-size: 18px;
                 font-weight: 800;
             }
             .mr-fbt-strike {
-                font-size: 12px;
+                font-size: 11px;
                 color: #8C7E77;
                 text-decoration: line-through;
-                font-family: 'Poppins', sans-serif !important;
             }
             .mr-fbt-discount-tag {
                 background: #E8F8F0;
                 color: #2CB67D;
-                font-size: 10.5px;
+                font-size: 9.5px;
                 font-weight: 700;
-                padding: 1px 6px;
+                padding: 1px 5px;
                 border-radius: 4px;
                 display: inline-block;
                 width: fit-content;
-                font-family: 'Poppins', sans-serif;
             }
             .mr-fbt-cta-btn {
                 background: linear-gradient(135deg, #F58220 0%, #E6680D 100%) !important;
                 color: #FFFFFF !important;
                 text-decoration: none !important;
-                padding: 9px 16px !important;
-                border-radius: 9999px !important;
+                padding: 7px 14px !important;
+                border-radius: 50px !important;
                 font-weight: 700 !important;
-                font-size: 12.5px !important;
+                font-size: 12px !important;
                 font-family: 'Poppins', sans-serif !important;
-                box-shadow: 0 4px 14px rgba(245, 130, 32, 0.32) !important;
+                box-shadow: 0 3px 10px rgba(245, 130, 32, 0.25) !important;
                 display: inline-flex !important;
                 align-items: center !important;
-                gap: 6px !important;
+                gap: 5px !important;
                 transition: all 0.2s ease !important;
                 white-space: nowrap !important;
             }
             .mr-fbt-cta-btn:hover {
                 background: linear-gradient(135deg, #E6680D 0%, #C2410C 100%) !important;
                 transform: translateY(-2px) !important;
-                box-shadow: 0 6px 18px rgba(245, 130, 32, 0.45) !important;
+                box-shadow: 0 5px 14px rgba(245, 130, 32, 0.35) !important;
                 color: #FFFFFF !important;
             }
 
             /* FAQ Accordion */
             .mr-faq-list {
-                max-width: 900px;
-                margin: 38px auto 0 auto;
+                max-width: 820px;
+                margin: 24px auto 0 auto;
                 display: flex;
                 flex-direction: column;
-                gap: 15px;
+                gap: 10px;
             }
             .mr-faq-item {
                 background: #FFFFFF;
                 border: 1px solid rgba(217, 164, 65, 0.25);
-                border-radius: 16px;
+                border-radius: 12px;
                 overflow: hidden;
-                box-shadow: 0 6px 18px rgba(0, 0, 0, 0.03);
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
                 transition: border-color 0.2s, box-shadow 0.2s;
             }
             .mr-faq-item.active {
                 border-color: #D9A441;
-                box-shadow: 0 8px 24px rgba(217, 164, 65, 0.12);
+                box-shadow: 0 4px 16px rgba(217, 164, 65, 0.1);
             }
             .mr-faq-q {
-                padding: 22px 26px;
-                font-size: 17px;
+                padding: 16px 20px;
+                font-size: 15px;
                 font-weight: 700;
                 color: #7A1F3D;
                 font-family: 'Playfair Display', serif;
@@ -1565,7 +1693,7 @@ class MR_Report_Landing {
                 user-select: none;
             }
             .mr-faq-icon {
-                font-size: 20px;
+                font-size: 18px;
                 color: #F58220;
                 transition: transform 0.25s;
                 font-weight: 700;
@@ -1575,25 +1703,36 @@ class MR_Report_Landing {
             }
             .mr-faq-a {
                 display: none;
-                padding: 0 26px 24px 26px;
-                font-size: 15px;
+                padding: 0 20px 16px 20px;
+                font-size: 13.5px;
                 color: #3A312D;
-                line-height: 1.7;
+                line-height: 1.6;
             }
 
-            /* Bottom Sticky Floating CTA Bar - MeraRashifal Brand Design System */
+            /* Final Conversion Box */
+            .mr-bottom-conversion-box {
+                background: radial-gradient(120% 160% at 50% 100%, #FFF5E7 0%, #FFFFFF 60%, #FDF8F1 100%);
+                border: 1.5px solid rgba(217, 164, 65, 0.35);
+                border-radius: 22px;
+                padding: 38px 24px;
+                text-align: center;
+                margin: 28px 0 60px 0;
+                box-shadow: 0 10px 30px rgba(217, 164, 65, 0.12);
+            }
+
+            /* Bottom Sticky Floating CTA Bar */
             .mr-sticky-cta-bar {
                 position: fixed;
                 bottom: 0;
                 left: 0;
                 width: 100%;
-                background: rgba(253, 248, 241, 0.98);
-                border-top: 2px solid rgba(217, 164, 65, 0.45);
-                backdrop-filter: blur(14px);
-                -webkit-backdrop-filter: blur(14px);
+                background: rgba(253, 248, 241, 0.97);
+                border-top: 1.5px solid rgba(217, 164, 65, 0.4);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
                 z-index: 9998;
-                padding: 12px 24px;
-                box-shadow: 0 -8px 28px rgba(0, 0, 0, 0.09);
+                padding: 8px 20px;
+                box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.07);
                 transform: translateY(120%);
                 transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), bottom 0.2s ease;
                 box-sizing: border-box;
@@ -1602,13 +1741,13 @@ class MR_Report_Landing {
                 transform: translateY(0);
             }
             .mr-sticky-cta-inner {
-                max-width: 1200px;
+                max-width: 1240px;
                 margin: 0 auto;
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
-                gap: 20px;
-                padding-right: 170px; /* Leave comfortable room for floating Niyati chat button on desktop */
+                gap: 16px;
+                padding-right: 140px; /* Comfort space for floating Niyati chat button on desktop */
                 box-sizing: border-box;
             }
             .mr-sticky-info {
@@ -1619,54 +1758,52 @@ class MR_Report_Landing {
             .mr-sticky-title {
                 font-weight: 700;
                 color: #7A1F3D;
-                font-size: 16px;
+                font-size: 14.5px;
                 font-family: 'Playfair Display', serif;
-                line-height: 1.3;
+                line-height: 1.25;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
             .mr-sticky-meta {
-                font-size: 12.5px;
+                font-size: 11.5px;
                 color: #6B5E57;
-                margin-top: 2px;
+                margin-top: 1px;
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
             }
             .mr-sticky-action-center {
-                flex: 1;
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                text-align: center;
             }
             .mr-sticky-cta-btn {
-                padding: 13px 32px !important;
-                font-size: 15px !important;
+                padding: 9px 24px !important;
+                font-size: 13.5px !important;
+                height: 42px !important;
                 white-space: nowrap !important;
-                box-shadow: 0 4px 18px rgba(245, 130, 32, 0.4) !important;
-                border-radius: 25px !important;
+                box-shadow: 0 4px 14px rgba(245, 130, 32, 0.35) !important;
+                border-radius: 50px !important;
             }
             .mr-sticky-price-wrap {
-                flex: 1;
                 display: flex;
                 flex-direction: column;
                 align-items: flex-end;
                 text-align: right;
             }
             .mr-sticky-price {
-                font-size: 22px;
+                font-size: 19px;
                 font-weight: 800;
                 color: #7A1F3D;
                 font-family: 'Playfair Display', serif;
                 line-height: 1.1;
             }
             .mr-sticky-badge {
-                font-size: 11.5px;
+                font-size: 10.5px;
                 color: #2CB67D;
                 font-weight: 700;
-                margin-top: 2px;
+                margin-top: 1px;
             }
 
             /* Responsive Media Queries */
@@ -1680,77 +1817,260 @@ class MR_Report_Landing {
             }
 
             @media (max-width: 768px) {
-                body.mr-sticky-active #niyati-launcher,
-                body:has(#mr-landing-sticky-bar.visible) #niyati-launcher {
-                    bottom: 185px !important;
-                    transition: bottom 0.3s ease;
+                html, body {
+                    overflow-x: hidden !important;
+                    width: 100% !important;
+                    max-width: 100% !important;
+                }
+                .mr-landing-breakout {
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    margin: 0 !important;
+                    left: 0 !important;
+                    right: 0 !important;
+                    overflow-x: hidden !important;
+                }
+                .mr-landing-container {
+                    padding: 0 12px !important;
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    box-sizing: border-box !important;
+                    overflow-x: hidden !important;
+                }
+                .mr-hero-grid {
+                    grid-template-columns: 1fr !important;
+                    gap: 16px !important;
+                    padding: 8px 0 18px 0 !important;
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    box-sizing: border-box !important;
+                }
+                .mr-landing-h1 {
+                    font-size: 24px !important;
+                    line-height: 1.25 !important;
+                    word-break: break-word !important;
+                    margin: 6px 0 8px 0 !important;
+                }
+                .mr-landing-sub {
+                    font-size: 13.5px !important;
+                    line-height: 1.5 !important;
+                    margin: 0 0 12px 0 !important;
+                }
+                .mr-bundle-box {
+                    padding: 12px 10px !important;
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    box-sizing: border-box !important;
+                    margin: 10px 0 !important;
+                }
+                .mr-bundle-heading {
+                    gap: 6px !important;
+                    margin-bottom: 8px !important;
+                }
+                .mr-bundle-heading-title {
+                    font-size: 11px !important;
+                }
+                .mr-bundle-save-pill {
+                    font-size: 9.5px !important;
+                    padding: 2px 7px !important;
+                }
+                .mr-bundle-grid {
+                    grid-template-columns: 1fr !important;
+                    gap: 8px !important;
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    box-sizing: border-box !important;
+                }
+                .mr-bundle-item {
+                    padding: 10px 12px !important;
+                    min-height: auto !important;
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    box-sizing: border-box !important;
+                }
+                .mr-bundle-ribbon {
+                    right: 8px !important;
+                    top: -8px !important;
+                    font-size: 9px !important;
+                    padding: 2px 7px !important;
+                    max-width: calc(100% - 20px) !important;
+                    box-sizing: border-box !important;
+                    text-overflow: ellipsis !important;
+                    overflow: hidden !important;
+                }
+                .mr-bundle-breakdown-bar {
+                    margin-top: 10px !important;
+                    padding: 10px 12px !important;
+                    border-radius: 10px !important;
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    box-sizing: border-box !important;
+                }
+                .mr-bbb-header {
+                    font-size: 11.5px !important;
+                    flex-wrap: wrap !important;
+                    gap: 4px !important;
+                }
+                .mr-bbb-items {
+                    display: flex !important;
+                    flex-direction: column !important;
+                    gap: 6px !important;
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    box-sizing: border-box !important;
+                }
+                .mr-bbb-chip {
+                    font-size: 12px !important;
+                    padding: 7px 10px !important;
+                    border-radius: 8px !important;
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    box-sizing: border-box !important;
+                    word-break: break-word !important;
+                }
+                .mr-hero-actions-wrap {
+                    display: flex !important;
+                    flex-direction: column !important;
+                    gap: 8px !important;
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    box-sizing: border-box !important;
+                    margin-top: 14px !important;
+                }
+                .mr-btn-hero-primary {
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    min-height: 48px !important;
+                    height: auto !important;
+                    font-size: 13.5px !important;
+                    padding: 10px 14px !important;
+                    line-height: 1.3 !important;
+                    white-space: normal !important;
+                    word-break: normal !important;
+                    justify-content: center !important;
+                    text-align: center !important;
+                    box-sizing: border-box !important;
+                }
+                #mr-hero-bundle-btn-text {
+                    white-space: normal !important;
+                    display: inline !important;
+                }
+                .mr-hero-secondary-group {
+                    display: grid !important;
+                    grid-template-columns: 1fr 1fr !important;
+                    gap: 8px !important;
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    box-sizing: border-box !important;
+                }
+                .mr-hero-secondary-group .mr-btn-hero-secondary {
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    min-height: 42px !important;
+                    height: auto !important;
+                    font-size: 12px !important;
+                    padding: 8px 6px !important;
+                    line-height: 1.25 !important;
+                    white-space: normal !important;
+                    word-break: normal !important;
+                    justify-content: center !important;
+                    text-align: center !important;
+                    box-sizing: border-box !important;
+                }
+                .mr-trust-row {
+                    justify-content: center !important;
+                    text-align: center !important;
+                    gap: 6px 10px !important;
+                    font-size: 11px !important;
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    box-sizing: border-box !important;
+                    margin-top: 12px !important;
+                }
+                .mr-emblem-stage {
+                    padding: 4px 0 !important;
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    box-sizing: border-box !important;
+                    overflow: hidden !important;
+                }
+                .mr-report-card-mockup {
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    padding: 18px 14px !important;
+                    box-sizing: border-box !important;
+                }
+                .mr-orbit-circle-outer,
+                .mr-orbit-circle-inner {
+                    display: none !important; /* Avoid mobile horizontal stretch */
+                }
+                .mr-metric-grid {
+                    grid-template-columns: repeat(2, 1fr) !important;
+                    gap: 12px 6px !important;
+                }
+                .mr-metric-item:not(:last-child)::after {
+                    display: none !important;
+                }
+                .mr-matrix-row {
+                    grid-template-columns: 1fr !important;
+                }
+                .mr-cell-other {
+                    border-right: none !important;
+                    border-bottom: 1px solid #F1E7D8 !important;
                 }
                 .mr-sticky-cta-bar {
-                    padding: 10px 16px !important;
-                    bottom: 60px;
+                    padding: 8px 12px !important;
+                    bottom: 60px !important;
+                    max-width: 100vw !important;
+                    box-sizing: border-box !important;
                 }
                 .mr-sticky-cta-inner {
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 8px;
-                    text-align: center;
+                    flex-direction: column !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    gap: 6px !important;
+                    text-align: center !important;
                     padding-right: 0 !important;
+                    max-width: 100% !important;
                 }
                 .mr-sticky-info {
-                    flex: none;
-                    width: 100%;
-                    text-align: center;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    gap: 8px;
+                    width: 100% !important;
+                    text-align: center !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    gap: 6px !important;
                 }
                 .mr-sticky-title {
-                    font-size: 13.5px;
-                    max-width: 70%;
+                    font-size: 13px !important;
+                    max-width: 70% !important;
                 }
                 .mr-sticky-meta {
-                    font-size: 12px;
-                    margin-top: 0;
+                    font-size: 11px !important;
                 }
                 .mr-sticky-action-center {
-                    flex: none;
-                    width: 100%;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
+                    width: 100% !important;
                 }
                 .mr-sticky-cta-btn {
                     width: 100% !important;
-                    max-width: 340px !important;
-                    margin: 0 auto !important;
-                    padding: 12px 18px !important;
-                    font-size: 14.5px !important;
+                    min-height: 42px !important;
+                    height: auto !important;
+                    font-size: 13px !important;
+                    padding: 8px 12px !important;
+                    white-space: normal !important;
                 }
                 .mr-sticky-price-wrap {
-                    display: none; /* Merged into button text */
+                    display: none !important;
+                }
+                #niyati-launcher {
+                    bottom: 72px !important;
+                    right: 8px !important;
+                    transform: scale(0.88) !important;
+                    transform-origin: bottom right !important;
                 }
             }
 
-            /* Mobile & Tablet General Responsiveness */
-            @media (max-width: 640px) {
-                .mr-landing-container {
-                    padding: 0 16px;
-                }
-                .mr-btn-hero-primary, .mr-btn-hero-secondary {
-                    width: 100%;
-                }
-                .mr-matrix-row {
-                    grid-template-columns: 1fr;
-                }
-                .mr-cell-other {
-                    border-right: none;
-                    border-bottom: 1px solid #F1E7D8;
-                }
-            }
-
-            /* Hide Astra Default Page Title, Breadcrumbs and Sidebars across all report landing pages */
+            /* Hide Astra Default Title & Layout Chrome */
             header.entry-header,
             .entry-header,
             .ast-single-post .entry-header,
@@ -1786,7 +2106,7 @@ class MR_Report_Landing {
                 background: rgba(45, 30, 24, 0.65) !important;
                 backdrop-filter: blur(8px) !important;
                 -webkit-backdrop-filter: blur(8px) !important;
-                z-index: 9999999 !important;
+                z-index: 99999999 !important;
                 display: none;
                 align-items: center !important;
                 justify-content: center !important;
@@ -1798,6 +2118,7 @@ class MR_Report_Landing {
             }
             #mr-details-modal .mr-modal-content {
                 background: #FFFFFF !important;
+                z-index: 100000000 !important;
                 border: 2px solid #D9A441 !important;
                 border-radius: 24px !important;
                 box-shadow: 0 25px 60px rgba(122, 31, 61, 0.16), 0 10px 25px rgba(0, 0, 0, 0.08) !important;
@@ -2057,9 +2378,6 @@ class MR_Report_Landing {
                         <span class="mr-crumb-sep">›</span>
                         <span class="mr-crumb-current"><?php echo esc_html($report_title); ?></span>
                     </nav>
-                    <div class="mr-tag-eyebrow">
-                        <i class="fa-solid fa-sun"></i> <?php echo esc_html($data['eyebrow']); ?>
-                    </div>
                 </div>
 
                 <!-- 1. Hero Section -->
@@ -2081,6 +2399,17 @@ class MR_Report_Landing {
                             $duo_reports  = array_merge([$report_slug], $duo_paired);
                             $single_reports = [$report_slug];
 
+                            // Human-readable titles for each included report
+                            $single_report_names = [$data['name']];
+                            $duo_report_names = [];
+                            foreach ($duo_reports as $r_slug) {
+                                $duo_report_names[] = class_exists('MR_Bundles') ? MR_Bundles::get_report_name($r_slug) : $r_slug;
+                            }
+                            $trio_report_names = [];
+                            foreach ($trio_reports as $r_slug) {
+                                $trio_report_names[] = class_exists('MR_Bundles') ? MR_Bundles::get_report_name($r_slug) : $r_slug;
+                            }
+
                             $trio_price = !empty($tier_trio['price_sale']) ? floatval($tier_trio['price_sale']) : 599;
                             $trio_reg   = !empty($tier_trio['price_regular']) ? floatval($tier_trio['price_regular']) : 2097;
                             $trio_cred  = isset($tier_trio['chat_credits']) ? intval($tier_trio['chat_credits']) : 30;
@@ -2095,6 +2424,13 @@ class MR_Report_Landing {
                             $single_reg   = !empty($tier_single['price_regular']) ? floatval($tier_single['price_regular']) : floatval($data['price_regular']);
                             $single_title = !empty($tier_single['title']) ? $tier_single['title'] : 'Single Report';
                             $single_cred  = isset($tier_single['chat_credits']) ? intval($tier_single['chat_credits']) : 0;
+
+                            $fmt_single_price = class_exists('MR_Bundles') ? MR_Bundles::format_price($single_price) : $single_price;
+                            $fmt_single_reg   = class_exists('MR_Bundles') ? MR_Bundles::format_price($single_reg) : $single_reg;
+                            $fmt_duo_price    = class_exists('MR_Bundles') ? MR_Bundles::format_price($duo_price) : $duo_price;
+                            $fmt_duo_reg      = class_exists('MR_Bundles') ? MR_Bundles::format_price($duo_reg) : $duo_reg;
+                            $fmt_trio_price   = class_exists('MR_Bundles') ? MR_Bundles::format_price($trio_price) : $trio_price;
+                            $fmt_trio_reg     = class_exists('MR_Bundles') ? MR_Bundles::format_price($trio_reg) : $trio_reg;
                         ?>
                             <!-- Interactive 3-Tier Bundle Selector Widget -->
                             <div class="mr-bundle-box" id="mr-bundle-selector-wrap">
@@ -2115,19 +2451,21 @@ class MR_Report_Landing {
                                          data-regular="<?php echo esc_attr($single_reg); ?>" 
                                          data-credits="<?php echo esc_attr($single_cred); ?>" 
                                          data-reports="<?php echo esc_attr(wp_json_encode($single_reports)); ?>" 
+                                         data-report-names="<?php echo esc_attr(wp_json_encode($single_report_names)); ?>" 
                                          data-title="<?php echo esc_attr($single_title); ?>" 
-                                         data-btn-label="Get Single Report Now &bull; ₹<?php echo number_format($single_price); ?> &rarr;">
+                                         data-btn-label="Get Single Report Now &bull; ₹<?php echo esc_attr($fmt_single_price); ?> &rarr;">
                                         <div class="mr-bundle-top-row">
                                             <span class="mr-bundle-radio"></span>
                                             <span class="mr-bundle-name"><?php echo esc_html($single_title); ?></span>
                                         </div>
                                         <div class="mr-bundle-price-row">
-                                            <span class="mr-bundle-sale">₹<?php echo number_format($single_price); ?></span>
+                                            <span class="mr-bundle-sale">₹<?php echo esc_html($fmt_single_price); ?></span>
                                             <?php if ($single_reg > $single_price): ?>
-                                                <span class="mr-bundle-strike">₹<?php echo number_format($single_reg); ?></span>
+                                                <span class="mr-bundle-strike">₹<?php echo esc_html($fmt_single_reg); ?></span>
                                             <?php endif; ?>
                                         </div>
-                                        <div class="mr-bundle-desc">1 In-Depth Dossier (<?php echo esc_html($report_pages); ?>)</div>
+
+                                        <div class="mr-bundle-desc" style="font-size:10.5px; color:#786961;">In-Depth Dossier (<?php echo esc_html($report_pages); ?>)</div>
                                         <?php if (!empty($tier_single['badge'])): ?>
                                             <span class="mr-bundle-tag-neutral"><?php echo esc_html($tier_single['badge']); ?></span>
                                         <?php endif; ?>
@@ -2141,8 +2479,9 @@ class MR_Report_Landing {
                                          data-regular="<?php echo esc_attr($duo_reg); ?>" 
                                          data-credits="<?php echo esc_attr($duo_cred); ?>" 
                                          data-reports="<?php echo esc_attr(wp_json_encode($duo_reports)); ?>" 
+                                         data-report-names="<?php echo esc_attr(wp_json_encode($duo_report_names)); ?>" 
                                          data-title="<?php echo esc_attr($duo_title); ?>" 
-                                         data-btn-label="Get Smart Duo (2 Reports + <?php echo esc_attr($duo_cred); ?> AI Questions) &bull; ₹<?php echo number_format($duo_price); ?> &rarr;">
+                                         data-btn-label="Get Smart Duo (2 Reports + <?php echo esc_attr($duo_cred); ?> AI Questions) &bull; ₹<?php echo esc_attr($fmt_duo_price); ?> &rarr;">
                                         <?php if (!empty($tier_duo['badge'])): ?>
                                             <span class="mr-bundle-ribbon" style="background:#ea580c;"><?php echo esc_html($tier_duo['badge']); ?></span>
                                         <?php endif; ?>
@@ -2151,17 +2490,13 @@ class MR_Report_Landing {
                                             <span class="mr-bundle-name"><?php echo esc_html($duo_title); ?></span>
                                         </div>
                                         <div class="mr-bundle-price-row">
-                                            <span class="mr-bundle-sale">₹<?php echo number_format($duo_price); ?></span>
+                                            <span class="mr-bundle-sale">₹<?php echo esc_html($fmt_duo_price); ?></span>
                                             <?php if ($duo_reg > $duo_price): ?>
-                                                <span class="mr-bundle-strike">₹<?php echo number_format($duo_reg); ?></span>
+                                                <span class="mr-bundle-strike">₹<?php echo esc_html($fmt_duo_reg); ?></span>
                                             <?php endif; ?>
                                         </div>
-                                        <div class="mr-bundle-desc">2 Sacred Reports (45+ Pages Total)</div>
-                                        <?php if (!empty($duo_cred)): ?>
-                                            <div class="mr-bundle-chat-tag">
-                                                <i class="fa-solid fa-comments"></i> +<?php echo esc_html($duo_cred); ?> Niyati AI Questions
-                                            </div>
-                                        <?php endif; ?>
+
+                                        <div class="mr-bundle-desc" style="font-size:10.5px; color:#786961;">2 Sacred Reports (45+ Pages Total)</div>
                                     </div>
                                     <?php endif; ?>
 
@@ -2173,27 +2508,40 @@ class MR_Report_Landing {
                                          data-regular="<?php echo esc_attr($trio_reg); ?>" 
                                          data-credits="<?php echo esc_attr($trio_cred); ?>" 
                                          data-reports="<?php echo esc_attr(wp_json_encode($trio_reports)); ?>" 
+                                         data-report-names="<?php echo esc_attr(wp_json_encode($trio_report_names)); ?>" 
                                          data-title="<?php echo esc_attr($trio_title); ?>" 
-                                         data-btn-label="Get Best Buy VIP Suite (3 Reports + <?php echo esc_attr($trio_cred); ?> AI Chat) &bull; ₹<?php echo number_format($trio_price); ?> &rarr;">
+                                         data-btn-label="Get Best Buy VIP Suite (3 Reports + <?php echo esc_attr($trio_cred); ?> AI Chat) &bull; ₹<?php echo esc_attr($fmt_trio_price); ?> &rarr;">
                                         <span class="mr-bundle-ribbon"><i class="fa-solid fa-crown" style="font-size:9px;"></i> <?php echo esc_html($tier_trio['badge'] ?? 'BEST BUY'); ?></span>
                                         <div class="mr-bundle-top-row">
                                             <span class="mr-bundle-radio"></span>
                                             <span class="mr-bundle-name"><?php echo esc_html($trio_title); ?></span>
                                         </div>
                                         <div class="mr-bundle-price-row">
-                                            <span class="mr-bundle-sale" style="color:#F58220;">₹<?php echo number_format($trio_price); ?></span>
+                                            <span class="mr-bundle-sale" style="color:#F58220;">₹<?php echo esc_html($fmt_trio_price); ?></span>
                                             <?php if ($trio_reg > $trio_price): ?>
-                                                <span class="mr-bundle-strike">₹<?php echo number_format($trio_reg); ?></span>
+                                                <span class="mr-bundle-strike">₹<?php echo esc_html($fmt_trio_reg); ?></span>
                                             <?php endif; ?>
                                         </div>
-                                        <div class="mr-bundle-desc">3 Complete Sacred Reports (65+ Pages Total)</div>
-                                        <?php if (!empty($trio_cred)): ?>
-                                            <div class="mr-bundle-chat-tag" style="background:#FEF3C7; color:#B45309;">
-                                                <i class="fa-solid fa-wand-magic-sparkles"></i> +<?php echo esc_html($trio_cred); ?> Niyati AI Questions
-                                            </div>
-                                        <?php endif; ?>
+
+                                        <div class="mr-bundle-desc" style="font-size:10.5px; color:#786961;">3 Complete Sacred Reports (65+ Pages Total)</div>
                                     </div>
                                     <?php endif; ?>
+                                </div>
+
+                                <!-- Dynamic Live Package Breakdown Bar -->
+                                <div class="mr-bundle-breakdown-bar" id="mr-bundle-breakdown-bar">
+                                    <div class="mr-bbb-header">
+                                        <i class="fa-solid fa-gift" style="color:#D9A441;"></i>
+                                        <span>Package Includes (<strong id="mr-bbb-count"><?php echo count($trio_reports); ?> Sacred Reports<?php if ($trio_cred > 0) echo ' + ' . $trio_cred . ' AI Questions'; ?></strong>):</span>
+                                    </div>
+                                    <div class="mr-bbb-items" id="mr-bbb-items">
+                                        <?php foreach ($trio_report_names as $r_name): ?>
+                                            <span class="mr-bbb-chip"><i class="fa-solid fa-circle-check"></i> <?php echo esc_html($r_name); ?></span>
+                                        <?php endforeach; ?>
+                                        <?php if ($trio_cred > 0): ?>
+                                            <span class="mr-bbb-chip mr-chip-chat"><i class="fa-solid fa-wand-magic-sparkles"></i> +<?php echo esc_html($trio_cred); ?> Niyati AI Consultations</span>
+                                        <?php endif; ?>
+                                    </div>
                                 </div>
                             </div>
                         <?php else: ?>
@@ -2205,8 +2553,8 @@ class MR_Report_Landing {
                             </div>
                         <?php endif; ?>
 
-                        <!-- Dual Action Buttons -->
-                        <div style="display:flex; gap:14px; flex-wrap:wrap; margin-top:22px;">
+                        <!-- Balanced Hero Action Buttons Group -->
+                        <div class="mr-hero-actions-wrap">
                             <?php if ($has_token): ?>
                                 <button type="button" class="mr-btn-hero-primary mr-btn-generate-direct" data-slug="<?php echo esc_attr($report_slug); ?>" data-title="<?php echo esc_attr($report_title); ?>" data-price="<?php echo esc_attr($data['price_sale']); ?>">
                                     <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Report (1 Token Available) &rarr;
@@ -2221,7 +2569,7 @@ class MR_Report_Landing {
                                         data-chat-credits="<?php echo esc_attr($trio_cred); ?>" 
                                         data-bundle-reports="<?php echo esc_attr(wp_json_encode($trio_reports)); ?>" 
                                         data-title="<?php echo esc_attr($trio_title); ?>">
-                                    <i class="fa-solid fa-wand-magic-sparkles"></i> <span id="mr-hero-bundle-btn-text">Get Best Buy VIP Suite (3 Reports + <?php echo esc_html($trio_cred); ?> AI Chat) &bull; ₹<?php echo number_format($trio_price); ?> &rarr;</span>
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i> <span id="mr-hero-bundle-btn-text">Get Best Buy VIP Suite (3 Reports + <?php echo esc_html($trio_cred); ?> AI Chat) &bull; ₹<?php echo esc_html($fmt_trio_price); ?> &rarr;</span>
                                 </button>
                             <?php else: ?>
                                 <button type="button" class="mr-btn-hero-primary mr-btn-buy-alacarte" data-slug="<?php echo esc_attr($report_slug); ?>" data-title="<?php echo esc_attr($report_title); ?>" data-price="<?php echo esc_attr($data['price_sale']); ?>">
@@ -2229,13 +2577,15 @@ class MR_Report_Landing {
                                 </button>
                             <?php endif; ?>
 
-                            <button type="button" class="mr-btn-hero-secondary mr-link-sample" data-slug="<?php echo esc_attr($report_slug); ?>" data-title="<?php echo esc_attr($report_title); ?>" style="border-color: rgba(245, 130, 32, 0.45); color: #B45309; background: #FFF9F2;">
-                                <i class="fa-regular fa-eye"></i> Preview Sample Report
-                            </button>
+                            <div class="mr-hero-secondary-group">
+                                <button type="button" class="mr-btn-hero-secondary mr-link-sample" data-slug="<?php echo esc_attr($report_slug); ?>" data-title="<?php echo esc_attr($report_title); ?>">
+                                    <i class="fa-regular fa-eye"></i> Preview Sample
+                                </button>
 
-                            <button type="button" class="mr-btn-hero-secondary" onclick="if(window.openNiyatiChat){window.openNiyatiChat('<?php echo esc_js($report_slug); ?>', '<?php echo esc_js($report_title); ?>');}else{var btn=document.querySelector('#niyati-launcher, #niyati-chat-toggle, .niyati-chat-button');if(btn)btn.click();else window.location.href='<?php echo esc_url(home_url('/')); ?>';}">
-                                <i class="fa-solid fa-comments"></i> Ask Niyati AI First
-                            </button>
+                                <button type="button" class="mr-btn-hero-secondary" onclick="if(window.openNiyatiChat){window.openNiyatiChat('<?php echo esc_js($report_slug); ?>', '<?php echo esc_js($report_title); ?>');}else{var btn=document.querySelector('#niyati-launcher, #niyati-chat-toggle, .niyati-chat-button');if(btn)btn.click();else window.location.href='<?php echo esc_url(home_url('/')); ?>';}">
+                                    <i class="fa-solid fa-comments"></i> Ask Niyati AI
+                                </button>
+                            </div>
                         </div>
 
                         <!-- Trust signals -->
@@ -2261,17 +2611,17 @@ class MR_Report_Landing {
                             <div class="mr-mockup-icon">
                                 <i class="<?php echo esc_attr($data['emblem_icon']); ?>"></i>
                             </div>
-                            <h3 style="font-family:'Playfair Display', serif; font-size:21px; font-weight:800; color:#7A1F3D; margin:0 0 6px 0; line-height:1.25;">
+                            <h3 class="mr-mockup-title">
                                 <?php echo esc_html($data['name']); ?>
                             </h3>
-                            <div style="font-size:12px; color:#D9A441; font-weight:700; text-transform:uppercase; letter-spacing:1px; margin-bottom:18px;">
+                            <div class="mr-mockup-cover-badge">
                                 <?php echo esc_html($data['cover_badge']); ?>
                             </div>
 
-                            <div style="background:#FFF9F0; border-radius:14px; padding:14px; text-align:left; font-size:13px; color:#554841; border:1px solid rgba(217, 164, 65, 0.2);">
+                            <div class="mr-mockup-highlights">
                                 <?php foreach ($data['highlights'] as $hl): ?>
-                                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:7px;">
-                                        <i class="fa-solid fa-circle-check" style="color:#2CB67D; flex-shrink:0;"></i> <span><?php echo esc_html($hl); ?></span>
+                                    <div class="mr-mockup-hl-item">
+                                        <i class="fa-solid fa-circle-check"></i> <span><?php echo esc_html($hl); ?></span>
                                     </div>
                                 <?php endforeach; ?>
                             </div>
@@ -2282,14 +2632,13 @@ class MR_Report_Landing {
                 <!-- Optional: Palm Scanner Integration for Palmistry Report -->
                 <?php if (!empty($data['has_palm_scanner'])): ?>
                     <section class="mr-section-wrap" style="padding-top:0;">
-                        <div style="text-align:center; margin-bottom:24px;">
-                            <span class="mr-tag-eyebrow"><i class="fa-solid fa-camera"></i> Free Interactive Samudrik Scanner</span>
-                            <h2 class="mr-landing-h2" style="margin-top:12px;">Scan Your Palm For An Instant Free Snapshot</h2>
+                        <div style="text-align:center; margin-bottom:20px;">
+                            <h2 class="mr-landing-h2" style="margin-top:0;">Scan Your Palm For An Instant Free Snapshot</h2>
                             <p class="mr-landing-sub" style="margin:0 auto;">
                                 Upload a photo of your dominant palm below to receive a free 6-point Samudrik snapshot reading. You can unlock the complete 26-page master publication dossier anytime.
                             </p>
                         </div>
-                        <div style="background:#FFFFFF; border:2px solid #D9A441; border-radius:24px; padding:24px; box-shadow:0 12px 35px rgba(217, 164, 65, 0.12);">
+                        <div style="background:#FFFFFF; border:1.5px solid #D9A441; border-radius:20px; padding:20px; box-shadow:0 8px 24px rgba(217, 164, 65, 0.1);">
                             <?php echo do_shortcode('[mr_palm_reading show_header="no"]'); ?>
                         </div>
                     </section>
@@ -2326,8 +2675,7 @@ class MR_Report_Landing {
                 <!-- 3. What's Inside (Chapters / Modules) -->
                 <section class="mr-section-wrap">
                     <div style="text-align:center;">
-                        <span class="mr-tag-eyebrow"><i class="fa-solid fa-compass"></i> Exhaustive Vedic Compilation</span>
-                        <h2 class="mr-landing-h2" style="margin-top:14px;">What&#39;s Inside Your <?php echo esc_html($report_pages); ?> Dossier</h2>
+                        <h2 class="mr-landing-h2" style="margin-top:0;">What&#39;s Inside Your <?php echo esc_html($report_pages); ?> Dossier</h2>
                         <p class="mr-landing-sub" style="margin:0 auto;">
                             Mathematically calculated from sacred Shastras and verified celestial coordinates specific to your exact moment and coordinates.
                         </p>
@@ -2348,8 +2696,7 @@ class MR_Report_Landing {
                 <?php if (!empty($data['toc'])): ?>
                     <section class="mr-section-wrap" style="padding-top:0;">
                         <div style="text-align:center;">
-                            <span class="mr-tag-eyebrow"><i class="fa-solid fa-list-ol"></i> Page by Page Structure</span>
-                            <h2 class="mr-landing-h2" style="margin-top:14px;">Complete Report Index &amp; Roadmap</h2>
+                            <h2 class="mr-landing-h2" style="margin-top:0;">Complete Report Index &amp; Roadmap</h2>
                             <p class="mr-landing-sub" style="margin:0 auto;">Every section is meticulously crafted for clarity, depth, and actionable wisdom.</p>
                         </div>
 
@@ -2358,8 +2705,8 @@ class MR_Report_Landing {
                                 <div class="mr-toc-item">
                                     <span class="mr-toc-page-pill"><?php echo esc_html($toc_item['pages']); ?></span>
                                     <div>
-                                        <h3 style="font-size:16px; font-weight:700; color:#7A1F3D; margin:0 0 5px 0;"><?php echo esc_html($toc_item['title']); ?></h3>
-                                        <p style="font-size:13.5px; color:#554841; margin:0; line-height:1.5;"><?php echo esc_html($toc_item['summary']); ?></p>
+                                        <h3 style="font-size:14.5px; font-weight:700; color:#7A1F3D; margin:0 0 3px 0;"><?php echo esc_html($toc_item['title']); ?></h3>
+                                        <p style="font-size:12.5px; color:#554841; margin:0; line-height:1.45;"><?php echo esc_html($toc_item['summary']); ?></p>
                                     </div>
                                 </div>
                             <?php endforeach; ?>
@@ -2371,8 +2718,7 @@ class MR_Report_Landing {
                 <?php if (!empty($data['why_different'])): ?>
                     <section class="mr-section-wrap" style="padding-top:0;">
                         <div style="text-align:center;">
-                            <span class="mr-tag-eyebrow"><i class="fa-solid fa-scale-balanced"></i> The Quality Contrast</span>
-                            <h2 class="mr-landing-h2" style="margin-top:14px;">Why This Beats A Generic Online Reading</h2>
+                            <h2 class="mr-landing-h2" style="margin-top:0;">Why This Beats A Generic Online Reading</h2>
                             <p class="mr-landing-sub" style="margin:0 auto;">See why thousands of seekers rely on MeraRashifal&#39;s Vedic computation engine.</p>
                         </div>
 
@@ -2401,18 +2747,13 @@ class MR_Report_Landing {
                 <!-- 6. Cross-Promotion: Niyati AI Astrology Chat -->
                 <div class="mr-promo-banner" id="mr-promo-niyati">
                     <div class="mr-promo-content">
-                        <div style="display:flex; align-items:center; gap:10px; margin-bottom:10px;">
-                            <span class="mr-tag-eyebrow" style="background:#FFF3E1; color:#7A1F3D; border-color:#D9A441;">
-                                <i class="fa-solid fa-sparkles" style="color:#D9A441;"></i> Conversational Vedic Astrologer
-                            </span>
-                        </div>
-                        <h3 class="mr-promo-title">It Doesn&#39;t End at the PDF &mdash; Meet Niyati AI</h3>
+                        <h3 class="mr-promo-title" style="margin-top:0;">It Doesn&#39;t End at the PDF &mdash; Meet Niyati AI</h3>
                         <p class="mr-promo-text">
                             Have questions about your report? Wondering what an upcoming transit, dasha, or dosh means for your specific job change or relationship? Chat directly with <strong>Niyati</strong>, our specialized Vedic AI astrologer, to ask unlimited follow-ups, what-ifs, and timing queries anytime.
                         </p>
                     </div>
                     <div>
-                        <button type="button" class="mr-btn-hero-primary" onclick="if(window.openNiyatiChat){window.openNiyatiChat('<?php echo esc_js($report_slug); ?>', '<?php echo esc_js($report_title); ?>');}else{var btn=document.querySelector('#niyati-launcher, #niyati-chat-toggle, .niyati-chat-button');if(btn)btn.click();else window.location.href='<?php echo esc_url(home_url('/')); ?>';}">
+                        <button type="button" class="mr-btn-hero-primary" onclick="if(window.openNiyatiChat){window.openNiyatiChat('<?php echo esc_js($report_slug); ?>', '<?php echo esc_js($report_title); ?>');}else{var btn=document.querySelector('#niyati-launcher, #niyati-chat-toggle, .niyati-chat-button');if(btn)btn.click();else window.location.href='<?php echo esc_url(home_url('/')); ?>';}" style="height:44px; padding:0 20px; font-size:13.5px;">
                             <i class="fa-solid fa-comments"></i> Ask Niyati AI Now &rarr;
                         </button>
                     </div>
@@ -2422,25 +2763,35 @@ class MR_Report_Landing {
                 <?php if (!empty($related_reports)): ?>
                     <section class="mr-fbt-wrap">
                         <div style="text-align:center;">
-                            <span class="mr-tag-eyebrow" style="background:#FFF3E1; color:#7A1F3D; border:1.5px solid #D9A441;">
-                                <i class="fa-solid fa-sparkles" style="color:#D9A441;"></i> Complete Your Cosmic Library
-                            </span>
-                            <h2 class="mr-landing-h2" style="margin-top:14px; color:#7A1F3D;">Frequently Bought Together</h2>
+                            <h2 class="mr-landing-h2" style="margin-top:0; color:#7A1F3D;">Frequently Bought Together</h2>
                             <p class="mr-landing-sub" style="margin:0 auto; color:#554841;">Enhance your astrological clarity with our hand-crafted, publication-grade sister dossiers.</p>
                         </div>
 
                         <!-- 1-Click Best Buy Bundle Deal Box -->
-                        <?php if ($bundles_active && !empty($tier_trio['enabled']) && !$has_token): ?>
-                            <div style="background: linear-gradient(135deg, #FFF9F0 0%, #FFF2DF 100%); border: 2px dashed #D9A441; border-radius: 18px; padding: 20px 28px; margin: 26px auto 32px auto; max-width: 860px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; box-shadow: 0 8px 24px rgba(217, 164, 65, 0.15);">
-                                <div style="text-align: left; max-width: 540px;">
-                                    <span style="background: linear-gradient(135deg, #F58220 0%, #E6680D 100%); color: #fff; font-size: 11px; font-weight: 800; padding: 3px 12px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.5px;">
+                        <?php if ($bundles_active && !empty($tier_trio['enabled']) && !$has_token): 
+                            $trio_savings_pct = ($trio_reg > $trio_price && $trio_reg > 0) ? round((($trio_reg - $trio_price) / $trio_reg) * 100) : 0;
+                        ?>
+                            <div class="mr-fbt-best-buy-deal">
+                                <div style="text-align: left; max-width: 520px;">
+                                    <span style="background: linear-gradient(135deg, #F58220 0%, #E6680D 100%); color: #fff; font-size: 10px; font-weight: 800; padding: 2px 10px; border-radius: 9999px; text-transform: uppercase; letter-spacing: 0.5px;">
                                         <i class="fa-solid fa-crown"></i> <?php echo esc_html($tier_trio['badge'] ?? 'BEST BUY VIP BUNDLE'); ?>
                                     </span>
-                                    <h3 style="margin: 8px 0 4px 0; font-size: 18px; font-weight: 800; color: #7A1F3D;">
+                                    <h3 style="margin: 6px 0 3px 0; font-size: 16px; font-weight: 800; color: #7A1F3D;">
                                         <?php echo esc_html($trio_title); ?>
                                     </h3>
-                                    <p style="margin: 0; font-size: 13px; color: #554841; line-height: 1.45;">
-                                        Unlock this report + 2 sister dossiers + <strong><?php echo esc_html($trio_cred); ?> Niyati AI Questions</strong> for only <strong>₹<?php echo number_format($trio_price); ?></strong> (Save over 70%).
+                                    <p style="margin: 0; font-size: 12.5px; color: #554841; line-height: 1.45;">
+                                        Unlock <strong><?php echo esc_html($data['name']); ?></strong> + 
+                                        <?php 
+                                        $trio_sister_names = [];
+                                        foreach ($trio_paired as $t_slug) {
+                                            $trio_sister_names[] = '<strong>' . esc_html(MR_Bundles::get_report_name($t_slug)) . '</strong>';
+                                        }
+                                        echo implode(' + ', $trio_sister_names);
+                                        if (!empty($trio_cred)) {
+                                            echo ' + <strong>' . esc_html($trio_cred) . ' Niyati AI Questions</strong>';
+                                        }
+                                        ?> 
+                                        for only <strong>₹<?php echo esc_html($fmt_trio_price); ?></strong><?php if ($trio_savings_pct > 0) echo ' (Save over ' . $trio_savings_pct . '%)'; ?>.
                                     </p>
                                 </div>
                                 <div>
@@ -2453,8 +2804,8 @@ class MR_Report_Landing {
                                             data-chat-credits="<?php echo esc_attr($trio_cred); ?>"
                                             data-bundle-reports="<?php echo esc_attr(wp_json_encode($trio_reports)); ?>"
                                             data-title="<?php echo esc_attr($trio_title); ?>"
-                                            style="padding: 13px 28px !important; font-size: 14px !important; box-shadow: 0 6px 20px rgba(245, 130, 32, 0.4) !important; cursor:pointer;">
-                                        <i class="fa-solid fa-wand-magic-sparkles"></i> Order Bundle (₹<?php echo number_format($trio_price); ?>) &rarr;
+                                            style="padding: 10px 22px !important; font-size: 13px !important; box-shadow: 0 4px 16px rgba(245, 130, 32, 0.35) !important; cursor:pointer;">
+                                        <i class="fa-solid fa-wand-magic-sparkles"></i> Order Bundle (₹<?php echo esc_html($fmt_trio_price); ?>) &rarr;
                                     </button>
                                 </div>
                             </div>
@@ -2492,7 +2843,7 @@ class MR_Report_Landing {
                                             </a>
                                         </h3>
                                         <p class="mr-fbt-desc">
-                                            <?php echo esc_html(wp_trim_words($rel['hero_sub'], 14)); ?>
+                                            <?php echo esc_html(wp_trim_words($rel['hero_sub'], 12)); ?>
                                         </p>
 
                                         <!-- Footer with Price & CTA -->
@@ -2511,7 +2862,7 @@ class MR_Report_Landing {
                                             </div>
 
                                             <a href="<?php echo esc_url($rel_url); ?>" class="mr-fbt-cta-btn">
-                                                <span>View Report</span> <i class="fa-solid fa-arrow-right"></i>
+                                                <span>View</span> <i class="fa-solid fa-arrow-right"></i>
                                             </a>
                                         </div>
                                     </div>
@@ -2525,22 +2876,21 @@ class MR_Report_Landing {
                 <?php if (!empty($data['testimonials'])): ?>
                     <section class="mr-section-wrap" style="padding-top:0;">
                         <div style="text-align:center;">
-                            <span class="mr-tag-eyebrow"><i class="fa-solid fa-users"></i> Client Experiences</span>
-                            <h2 class="mr-landing-h2" style="margin-top:14px;">What Seekers Are Saying</h2>
+                            <h2 class="mr-landing-h2" style="margin-top:0;">What Seekers Are Saying</h2>
                             <p class="mr-landing-sub" style="margin:0 auto;">Verified reviews from clients who consulted MeraRashifal.</p>
                         </div>
 
-                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:24px; margin-top:38px;">
+                        <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:16px; margin-top:24px;">
                             <?php foreach ($data['testimonials'] as $rev): ?>
-                                <div style="background:#FFFFFF; border:1px solid rgba(217, 164, 65, 0.25); border-radius:20px; padding:30px; box-shadow:0 8px 25px rgba(0,0,0,0.04);">
-                                    <div style="color:#D9A441; font-size:16px; margin-bottom:14px;">
+                                <div style="background:#FFFFFF; border:1px solid rgba(217, 164, 65, 0.25); border-radius:14px; padding:20px 18px; box-shadow:0 4px 16px rgba(0,0,0,0.03);">
+                                    <div style="color:#D9A441; font-size:14px; margin-bottom:10px;">
                                         <?php echo str_repeat('★', intval($rev['rating'] ?? 5)); ?>
                                     </div>
-                                    <p style="font-size:15px; color:#3A312D; font-style:italic; line-height:1.7; margin:0 0 16px 0;">
+                                    <p style="font-size:13.5px; color:#3A312D; font-style:italic; line-height:1.6; margin:0 0 12px 0;">
                                         &ldquo;<?php echo esc_html($rev['quote']); ?>&rdquo;
                                     </p>
-                                    <div style="font-size:14px; font-weight:700; color:#7A1F3D;"><?php echo esc_html($rev['name']); ?></div>
-                                    <div style="font-size:12.5px; color:#6B5E57;"><?php echo esc_html($rev['loc']); ?></div>
+                                    <div style="font-size:13.5px; font-weight:700; color:#7A1F3D;"><?php echo esc_html($rev['name']); ?></div>
+                                    <div style="font-size:11.5px; color:#6B5E57;"><?php echo esc_html($rev['loc']); ?></div>
                                 </div>
                             <?php endforeach; ?>
                         </div>
@@ -2551,8 +2901,7 @@ class MR_Report_Landing {
                 <?php if (!empty($data['faqs'])): ?>
                     <section class="mr-section-wrap" style="padding-top:0;">
                         <div style="text-align:center;">
-                            <span class="mr-tag-eyebrow"><i class="fa-solid fa-circle-question"></i> Common Questions</span>
-                            <h2 class="mr-landing-h2" style="margin-top:14px;">Frequently Asked Questions</h2>
+                            <h2 class="mr-landing-h2" style="margin-top:0;">Frequently Asked Questions</h2>
                             <p class="mr-landing-sub" style="margin:0 auto;">Everything you need to know about your personalized reading.</p>
                         </div>
 
@@ -2573,22 +2922,22 @@ class MR_Report_Landing {
                 <?php endif; ?>
 
                 <!-- 10. Final Bottom Conversion Box -->
-                <div style="background: radial-gradient(120% 160% at 50% 100%, #FFF5E7 0%, #FFFFFF 60%, #FDF8F1 100%); border: 2px solid rgba(217, 164, 65, 0.4); border-radius: 28px; padding: 60px 32px; text-align: center; margin: 40px 0 80px 0; box-shadow: 0 16px 45px rgba(217, 164, 65, 0.16);">
-                    <h2 class="mr-landing-h2" style="font-size:clamp(28px, 3.8vw, 44px) !important;">
+                <div class="mr-bottom-conversion-box">
+                    <h2 class="mr-landing-h2" style="font-size:clamp(22px, 3.2vw, 36px) !important;">
                         Your Stars Have Already Charted The Path.<br>
                         <span class="mr-landing-gold-highlight">Discover What The Cosmic Blueprint Holds For You.</span>
                     </h2>
-                    <p class="mr-landing-sub" style="margin: 14px auto 28px auto;">
+                    <p class="mr-landing-sub" style="margin: 8px auto 20px auto;">
                         Unlock your comprehensive <?php echo esc_html($report_pages); ?> Vedic roadmap and read it in minutes.
                     </p>
 
                     <div>
-                        <button type="button" class="mr-btn-hero-primary mr-btn-buy-alacarte" data-slug="<?php echo esc_attr($report_slug); ?>" data-title="<?php echo esc_attr($report_title); ?>" data-price="<?php echo esc_attr($data['price_sale']); ?>" style="font-size:17px; padding:18px 46px;">
+                        <button type="button" class="mr-btn-hero-primary mr-btn-buy-alacarte" data-slug="<?php echo esc_attr($report_slug); ?>" data-title="<?php echo esc_attr($report_title); ?>" data-price="<?php echo esc_attr($data['price_sale']); ?>" style="font-size:15px; height:48px; padding:0 28px;">
                             <i class="fa-solid fa-wand-magic-sparkles"></i> Generate Your <?php echo esc_html($data['title_prefix']); ?> (₹<?php echo esc_html($report_price); ?>) &rarr;
                         </button>
                     </div>
 
-                    <div style="margin-top:24px; font-size:13px; color:#6B5E57; display:flex; justify-content:center; align-items:center; gap:22px; flex-wrap:wrap;">
+                    <div style="margin-top:20px; font-size:12px; color:#6B5E57; display:flex; justify-content:center; align-items:center; gap:18px; flex-wrap:wrap;">
                         <span><i class="fa-solid fa-certificate" style="color:#D9A441;"></i> Reviewed by Vedic Council</span>
                         <span><i class="fa-solid fa-lock" style="color:#D9A441;"></i> 256-Bit SSL Encrypted Checkout</span>
                         <span><i class="fa-solid fa-envelope" style="color:#D9A441;"></i> Instant Email Delivery</span>
@@ -2620,7 +2969,7 @@ class MR_Report_Landing {
                                 data-chat-credits="<?php echo esc_attr($trio_cred); ?>" 
                                 data-bundle-reports="<?php echo esc_attr(wp_json_encode($trio_reports)); ?>" 
                                 data-title="<?php echo esc_attr($trio_title); ?>">
-                            <i class="fa-solid fa-wand-magic-sparkles"></i> Order Best Buy Suite &bull; ₹<?php echo number_format($trio_price); ?> &rarr;
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Order Best Buy Suite &bull; ₹<?php echo esc_html($fmt_trio_price); ?> &rarr;
                         </button>
                     <?php else: ?>
                         <button type="button" class="mr-btn-hero-primary mr-btn-buy-alacarte mr-sticky-cta-btn" data-slug="<?php echo esc_attr($report_slug); ?>" data-title="<?php echo esc_attr($report_title); ?>" data-price="<?php echo esc_attr($data['price_sale']); ?>">
@@ -2629,7 +2978,7 @@ class MR_Report_Landing {
                     <?php endif; ?>
                 </div>
                 <div class="mr-sticky-price-wrap">
-                    <span class="mr-sticky-price">₹<?php echo esc_html($bundles_active && !empty($tier_trio['enabled']) && !$has_token ? number_format($trio_price) : $report_price); ?></span>
+                    <span class="mr-sticky-price">₹<?php echo esc_html($bundles_active && !empty($tier_trio['enabled']) && !$has_token ? $fmt_trio_price : $report_price); ?></span>
                     <span class="mr-sticky-badge"><i class="fa-solid fa-bolt"></i> Instant Delivery</span>
                 </div>
             </div>
@@ -2649,6 +2998,16 @@ class MR_Report_Landing {
 
         (function($) {
             $(document).ready(function() {
+                // Auto-select bundle tier from URL parameter if present (e.g. ?tier=duo or ?tier=trio)
+                var urlParams = new URLSearchParams(window.location.search);
+                var preselectedTier = urlParams.get('tier');
+                if (preselectedTier) {
+                    var targetCard = $('.mr-bundle-item[data-tier="' + preselectedTier + '"]');
+                    if (targetCard.length) {
+                        targetCard.trigger('click');
+                    }
+                }
+
                 // Interactive Bundle Card Selection Handler
                 $(document).on('click', '.mr-bundle-item', function() {
                     var item = $(this);
@@ -2690,14 +3049,39 @@ class MR_Report_Landing {
                         stickyBtn.attr('data-price', price);
                         stickyBtn.attr('data-bundle-tier', tier);
                         stickyBtn.attr('data-order-type', (tier === 'single' ? 'alacarte' : 'bundle'));
+                        var numPrice = Number(price);
+                        var formattedPrice = (Math.round(numPrice * 100) / 100).toLocaleString('en-IN', { maximumFractionDigits: 2 });
                         var stickyText = (tier === 'trio') 
-                            ? 'Order Best Buy Suite &bull; ₹' + Number(price).toLocaleString() + ' &rarr;' 
+                            ? 'Order Best Buy Suite &bull; ₹' + formattedPrice + ' &rarr;' 
                             : ((tier === 'duo') 
-                                ? 'Order Duo Pack &bull; ₹' + Number(price).toLocaleString() + ' &rarr;' 
-                                : 'Order Report &bull; ₹' + Number(price).toLocaleString() + ' &rarr;');
+                                ? 'Order Duo Pack &bull; ₹' + formattedPrice + ' &rarr;' 
+                                : 'Order Report &bull; ₹' + formattedPrice + ' &rarr;');
                         stickyBtn.html('<i class="fa-solid fa-wand-magic-sparkles"></i> ' + stickyText);
-                        $('#mr-landing-sticky-bar .mr-sticky-price').text('₹' + Number(price).toLocaleString());
+                        $('#mr-landing-sticky-bar .mr-sticky-price').text('₹' + formattedPrice);
                     }
+
+                    // Live synchronize Package Breakdown Bar
+                    var names = item.data('report-names');
+                    if (typeof names === 'string') {
+                        try { names = JSON.parse(names); } catch(e) { names = [names]; }
+                    } else if (!Array.isArray(names)) {
+                        names = [item.data('title') || ''];
+                    }
+                    var cred = parseInt(credits || 0, 10);
+                    var countLabel = names.length + (names.length === 1 ? ' Sacred Report' : ' Sacred Reports');
+                    if (cred > 0) {
+                        countLabel += ' + ' + cred + ' AI Questions';
+                    }
+                    $('#mr-bbb-count').text(countLabel);
+
+                    var chipsHtml = '';
+                    for (var i = 0; i < names.length; i++) {
+                        chipsHtml += '<span class="mr-bbb-chip"><i class="fa-solid fa-circle-check"></i> ' + names[i] + '</span>';
+                    }
+                    if (cred > 0) {
+                        chipsHtml += '<span class="mr-bbb-chip mr-chip-chat"><i class="fa-solid fa-wand-magic-sparkles"></i> +' + cred + ' Niyati AI Consultations</span>';
+                    }
+                    $('#mr-bbb-items').html(chipsHtml);
                 });
 
                 // Order & Bundle Checkout Redirect Handler
@@ -2707,7 +3091,7 @@ class MR_Report_Landing {
                     var btn = $(this);
                     var slug = btn.data('slug') || btn.attr('data-slug') || '<?php echo esc_js($report_slug); ?>';
                     var tier = btn.data('bundle-tier') || btn.attr('data-bundle-tier') || 'single';
-                    var checkoutUrl = '<?php echo esc_js(home_url('/checkout/')); ?>';
+                    var checkoutUrl = '<?php echo esc_js(class_exists("MR_Checkout") ? MR_Checkout::get_checkout_url() : home_url("/checkout/")); ?>';
                     var sep = (checkoutUrl.indexOf('?') !== -1) ? '&' : '?';
                     window.location.href = checkoutUrl + sep + 'report=' + encodeURIComponent(slug) + '&tier=' + encodeURIComponent(tier);
                 });

@@ -1186,10 +1186,13 @@ class MR_Admin {
 
             header('Content-Type: text/csv; charset=utf-8');
             header('Content-Disposition: attachment; filename=merarashifal-transactions-' . date('Y-m-d-His') . '.csv');
-            $output = fopen('php://output', 'w');
-            fputcsv($output, ['ID', 'Internal Ref', 'User ID', 'Customer Name', 'Email', 'Phone', 'Channel', 'Item Slug', 'Item Name', 'Txn Type', 'Gross Amount', 'Discount', 'Net Amount', 'Currency', 'Gateway', 'Mode', 'Order ID', 'Payment ID', 'Status', 'Failure Reason', 'Date']);
+            fputcsv($output, ['ID', 'Internal Ref', 'User ID', 'Customer Name', 'Email', 'Phone', 'Channel', 'Item Slug', 'Item Name', 'Txn Type', 'Gross Amount', 'Discount', 'Coupon Code', 'Coupon Discount', 'Bucket Discount', 'Net Amount', 'Currency', 'Gateway', 'Mode', 'Order ID', 'Payment ID', 'Status', 'Failure Reason', 'Date']);
 
             foreach ($data['rows'] as $r) {
+                $meta = !empty($r['metadata']) ? json_decode($r['metadata'], true) : [];
+                $coupon_code = $meta['coupon_code'] ?? '';
+                $coupon_disc = $meta['coupon_discount'] ?? 0;
+                $bucket_disc = $meta['bucket_discount'] ?? 0;
                 fputcsv($output, [
                     $r['id'],
                     $r['internal_txn_id'],
@@ -1203,6 +1206,9 @@ class MR_Admin {
                     $r['txn_type'],
                     $r['gross_amount'],
                     $r['discount_amount'],
+                    $coupon_code,
+                    $coupon_disc,
+                    $bucket_disc,
                     $r['net_amount'],
                     $r['currency'],
                     $r['gateway'],
@@ -1387,12 +1393,20 @@ class MR_Admin {
                                     <div style="font-size:11px; color:#64748B; margin-top:4px;">
                                         <?php echo date('d M Y, h:i A', strtotime($r['created_at'])); ?>
                                     </div>
+                                    <div style="margin-top:4px;">
+                                        <a href="<?php echo esc_url(admin_url('admin-ajax.php?action=mr_view_invoice&txn_id=' . urlencode($r['internal_txn_id']))); ?>" target="_blank" style="font-size:11px; color:#2563EB; text-decoration:none; font-weight:600;">
+                                            <span class="dashicons dashicons-media-document" style="font-size:13px; vertical-align:middle; width:13px; height:13px;"></span> Invoice &rarr;
+                                        </a>
+                                    </div>
                                 </td>
 
                                 <td>
                                     <strong><?php echo esc_html($r['customer_name'] ?: 'Guest'); ?></strong>
                                     <?php if (!empty($r['customer_email'])): ?>
                                         <div style="font-size:11px; color:#64748B;"><?php echo esc_html($r['customer_email']); ?></div>
+                                    <?php endif; ?>
+                                    <?php if (!empty($r['customer_phone'])): ?>
+                                        <div style="font-size:11px; color:#64748B;"><?php echo esc_html($r['customer_phone']); ?></div>
                                     <?php endif; ?>
                                     <?php if ($r['user_id'] > 0): ?>
                                         <div style="font-size:10px; color:#94A3B8;">UID: #<?php echo esc_html($r['user_id']); ?></div>
@@ -1408,6 +1422,25 @@ class MR_Admin {
                                     <div style="font-weight:600; color:#0F172A; margin-top:4px; font-size:13px;"><?php echo esc_html($r['item_name']); ?></div>
                                     <?php if (!empty($r['item_key'])): ?>
                                         <code style="font-size:10px; color:#94A3B8;"><?php echo esc_html($r['item_key']); ?></code>
+                                    <?php endif; ?>
+                                    <?php 
+                                    $row_meta = !empty($r['metadata']) ? json_decode($r['metadata'], true) : [];
+                                    if (!empty($row_meta['coupon_code'])): ?>
+                                        <div style="margin-top:4px;">
+                                            <span style="display:inline-block; font-size:10.5px; font-weight:700; background:#FFF1F2; color:#BE123C; border:1px solid #FECDD3; padding:1px 6px; border-radius:4px;">
+                                                <span class="dashicons dashicons-tag" style="font-size:12px; vertical-align:middle; width:12px; height:12px;"></span> Coupon: <?php echo esc_html($row_meta['coupon_code']); ?>
+                                                <?php if (!empty($row_meta['coupon_discount'])): ?>
+                                                    (-₹<?php echo number_format($row_meta['coupon_discount'], 2); ?>)
+                                                <?php endif; ?>
+                                            </span>
+                                        </div>
+                                    <?php endif; ?>
+                                    <?php if (!empty($row_meta['bucket_discount']) && $row_meta['bucket_discount'] > 0): ?>
+                                        <div style="margin-top:3px;">
+                                            <span style="display:inline-block; font-size:10.5px; font-weight:700; background:#ECFDF5; color:#047857; border:1px solid #A7F3D0; padding:1px 6px; border-radius:4px;">
+                                                <span class="dashicons dashicons-cart" style="font-size:12px; vertical-align:middle; width:12px; height:12px;"></span> 25% Multi-Report (-₹<?php echo number_format($row_meta['bucket_discount'], 2); ?>)
+                                            </span>
+                                        </div>
                                     <?php endif; ?>
                                 </td>
 

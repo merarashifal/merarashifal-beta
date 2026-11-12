@@ -80,6 +80,13 @@ add_action('plugins_loaded', function () {
     // 23 SEO Parameters & Landing Page Engine
     Niyati_SEO::init();
 
+    // Taxonomy Cache Invalidation for Auto-Linker
+    if (class_exists('Niyati_Linker')) {
+        add_action('created_term', ['Niyati_Linker', 'clear_cache']);
+        add_action('edited_term', ['Niyati_Linker', 'clear_cache']);
+        add_action('delete_term', ['Niyati_Linker', 'clear_cache']);
+    }
+
     // Admin Panel
     if (is_admin()) {
         Niyati_Admin::init();
@@ -154,6 +161,7 @@ class Niyati_Frontend {
             'initial_quota'        => $initial_quota,
             'initial_validity'     => $initial_validity,
             'visitor_id'           => $visitor_id,
+            'checkout_url'         => class_exists('MR_Checkout') ? MR_Checkout::get_checkout_url() : home_url('/checkout/'),
             'nudge'                => class_exists('Niyati_Nudge') ? Niyati_Nudge::get_active_nudge() : ['enabled' => false],
         ]);
 

@@ -32,6 +32,74 @@
         var btnGoReport    = $('#mr-go-to-report-btn');
 
         // =========================================================
+        // Modal Background Scroll Lock Engine
+        // Freezes background page scrolling when any modal is open
+        // while allowing smooth internal scrolling inside modal forms.
+        // =========================================================
+        function mrEnsureModalsInBody() {
+            $('.mr-modal, .mr-offers-modal-backdrop').each(function() {
+                if (!$(this).parent().is('body')) {
+                    $(this).appendTo('body');
+                }
+            });
+        }
+        mrEnsureModalsInBody();
+        $(function() {
+            mrEnsureModalsInBody();
+        });
+
+        function mrLockBackgroundScroll() {
+            mrEnsureModalsInBody();
+            $('html, body').addClass('mr-modal-open');
+        }
+
+        function mrUnlockBackgroundScroll() {
+            setTimeout(function() {
+                var hasVisibleModal = false;
+                $('.mr-modal, .mr-offers-modal-backdrop').each(function() {
+                    if ($(this).hasClass('is-open') || ($(this).is(':visible') && $(this).css('display') !== 'none')) {
+                        hasVisibleModal = true;
+                        return false;
+                    }
+                });
+                if (!hasVisibleModal) {
+                    $('html, body').removeClass('mr-modal-open');
+                }
+            }, 60);
+        }
+        window.mrLockBackgroundScroll = mrLockBackgroundScroll;
+        window.mrUnlockBackgroundScroll = mrUnlockBackgroundScroll;
+
+        // Prevent wheel & touchmove leakage on backdrop from scrolling background
+        $(document).on('wheel touchmove', '.mr-modal, .mr-offers-modal-backdrop', function(e) {
+            if ($(e.target).hasClass('mr-modal') || $(e.target).hasClass('mr-offers-modal-backdrop')) {
+                e.preventDefault();
+            }
+        });
+
+        // MutationObserver to keep background scroll lock in sync
+        if (window.MutationObserver) {
+            var mrModalObserver = new MutationObserver(function() {
+                var hasOpenModal = false;
+                $('.mr-modal, .mr-offers-modal-backdrop').each(function() {
+                    if ($(this).hasClass('is-open') || ($(this).is(':visible') && $(this).css('display') !== 'none')) {
+                        hasOpenModal = true;
+                        return false;
+                    }
+                });
+                if (hasOpenModal) {
+                    $('html, body').addClass('mr-modal-open');
+                } else {
+                    $('html, body').removeClass('mr-modal-open');
+                }
+            });
+
+            $('.mr-modal, .mr-offers-modal-backdrop').each(function() {
+                mrModalObserver.observe(this, { attributes: true, attributeFilter: ['style', 'class'] });
+            });
+        }
+
+        // =========================================================
         // MeraRashifal Luxury Brand Notification & Auth Dialog Engine
         // =========================================================
         window.mrNotify = {
@@ -114,6 +182,7 @@
                 }
 
                 modal.fadeIn(200);
+                mrLockBackgroundScroll();
             },
 
             auth: function(opts) {
@@ -159,7 +228,10 @@
             },
 
             close: function() {
-                $('#mr-notify-modal').fadeOut(150);
+                $('#mr-notify-modal').fadeOut(150, function() {
+                    mrUnlockBackgroundScroll();
+                });
+                mrUnlockBackgroundScroll();
             },
 
             toast: function(message, type, duration) {
@@ -374,8 +446,10 @@
                 }
                 m.removeClass('is-open').fadeOut(120, function() {
                     $(this).attr('style', 'display: none !important;');
+                    mrUnlockBackgroundScroll();
                 });
                 m.attr('style', 'display: none !important;');
+                mrUnlockBackgroundScroll();
             }
         });
 
@@ -549,12 +623,406 @@
                 }
             }
 
+            // If not in bundle flow, ensure step tag is handled properly
+            if (!window.mrBundleFlow || !window.mrBundleFlow.active) {
+                $('#mr-modal-step-tag').hide();
+                $('#mr-same-as-prev-wrap').hide();
+                $('#mr-btn-submit-report-text').text('Confirm & Generate Report \u2192');
+            }
+
+            mrEnsureModalsInBody();
+            detailsModal = $('#mr-details-modal');
             detailsModal.addClass('is-open');
             if (detailsModal.length && detailsModal[0].style) {
                 detailsModal[0].style.setProperty('display', 'flex', 'important');
             }
             detailsModal.fadeIn(150);
+            mrLockBackgroundScroll();
+        };
+
+        function populateSinglePersonFields(data) {
+            if (!data) return;
+            if (data.person_name) $('#mr_person_name').val(data.person_name);
+            if (data.gender) $('#mr_gender').val(data.gender);
+            if (data.dob) $('#mr_dob').val(data.dob);
+            if (data.tob) $('#mr_tob').val(data.tob);
+            if (data.pob) $('#mr_pob').val(data.pob);
+            if (data.pob_lat) $('#mr_pob_lat').val(data.pob_lat);
+            if (data.pob_lng) $('#mr_pob_lng').val(data.pob_lng);
+            if (data.pob_tz) $('#mr_pob_tz').val(data.pob_tz || '5.5');
+            if (data.recipient_email && !$('#mr_recipient_email').val()) {
+                $('#mr_recipient_email').val(data.recipient_email);
+            }
         }
+
+        function clearSinglePersonFields() {
+            $('#mr_person_name').val('').focus();
+            $('#mr_dob').val('');
+            $('#mr_tob').val('');
+            $('#mr_pob').val('');
+            $('#mr_pob_lat').val('');
+            $('#mr_pob_lng').val('');
+        }
+
+        function populateBoyFields(data) {
+            if (!data) return;
+            if (data.person_name) $('#mr_boy_name').val(data.person_name);
+            if (data.dob) $('#mr_boy_dob').val(data.dob);
+            if (data.tob) $('#mr_boy_tob').val(data.tob);
+            if (data.pob) $('#mr_boy_pob').val(data.pob);
+            if (data.pob_lat) $('#mr_boy_pob_lat').val(data.pob_lat);
+            if (data.pob_lng) $('#mr_boy_pob_lng').val(data.pob_lng);
+            if (data.pob_tz) $('#mr_boy_pob_tz').val(data.pob_tz || '5.5');
+        }
+
+        function clearBoyFields() {
+            $('#mr_boy_name').val('').focus();
+            $('#mr_boy_dob').val('');
+            $('#mr_boy_tob').val('');
+            $('#mr_boy_pob').val('');
+            $('#mr_boy_pob_lat').val('');
+            $('#mr_boy_pob_lng').val('');
+        }
+
+        function populateGirlFields(data) {
+            if (!data) return;
+            if (data.person_name) $('#mr_girl_name').val(data.person_name);
+            if (data.dob) $('#mr_girl_dob').val(data.dob);
+            if (data.tob) $('#mr_girl_tob').val(data.tob);
+            if (data.pob) $('#mr_girl_pob').val(data.pob);
+            if (data.pob_lat) $('#mr_girl_pob_lat').val(data.pob_lat);
+            if (data.pob_lng) $('#mr_girl_pob_lng').val(data.pob_lng);
+            if (data.pob_tz) $('#mr_girl_pob_tz').val(data.pob_tz || '5.5');
+        }
+
+        function clearGirlFields() {
+            $('#mr_girl_name').val('').focus();
+            $('#mr_girl_dob').val('');
+            $('#mr_girl_tob').val('');
+            $('#mr_girl_pob').val('');
+            $('#mr_girl_pob_lat').val('');
+            $('#mr_girl_pob_lng').val('');
+        }
+
+        // Toggle "Same as previous report details" checkbox
+        $(document).on('change', '#mr-same-as-prev-checkbox', function() {
+            var isChecked = $(this).is(':checked');
+            var details = (window.mrBundleFlow && window.mrBundleFlow.primaryDetails) || null;
+            if (!details) {
+                try {
+                    var s = sessionStorage.getItem('mr_last_birth_details') || localStorage.getItem('mr_last_birth_details');
+                    if (s) details = JSON.parse(s);
+                } catch(e) {}
+            }
+
+            if (isChecked) {
+                if (details) {
+                    populateSinglePersonFields(details);
+                    if (window.mrNotify && typeof window.mrNotify.toast === 'function') {
+                        window.mrNotify.toast('Copied previous details for ' + (details.person_name || 'person') + '.', 'success');
+                    }
+                }
+            } else {
+                clearSinglePersonFields();
+                if (window.mrNotify && typeof window.mrNotify.toast === 'function') {
+                    window.mrNotify.toast('Cleared. Please enter details for the second person.', 'info');
+                }
+            }
+        });
+
+        // Toggle "Use previous report details" checkbox for Kundli Matching (Gender-aware for Boy/Groom or Girl/Bride)
+        $(document).on('change', '#mr-matching-same-prev-checkbox', function() {
+            var isChecked = $(this).is(':checked');
+            var details = (window.mrBundleFlow && window.mrBundleFlow.primaryDetails) || null;
+            if (!details) {
+                try {
+                    var s = sessionStorage.getItem('mr_last_birth_details') || localStorage.getItem('mr_last_birth_details');
+                    if (s) details = JSON.parse(s);
+                } catch(e) {}
+            }
+
+            var isFemale = details && (details.gender === 'Female' || details.gender === 'female');
+
+            if (isChecked) {
+                if (details) {
+                    if (isFemale) {
+                        populateGirlFields(details);
+                        if (window.mrNotify && typeof window.mrNotify.toast === 'function') {
+                            window.mrNotify.toast('Copied previous details to Bride (Kanya) section.', 'success');
+                        }
+                    } else {
+                        populateBoyFields(details);
+                        if (window.mrNotify && typeof window.mrNotify.toast === 'function') {
+                            window.mrNotify.toast('Copied previous details to Groom (Var) section.', 'success');
+                        }
+                    }
+                }
+            } else {
+                if (isFemale) {
+                    clearGirlFields();
+                } else {
+                    clearBoyFields();
+                }
+            }
+        });
+
+        // Multi-Report Bundle Sequential Pipeline Engine
+        window.mrBundleFlow = {
+            active: false,
+            reports: [],
+            currentIndex: 0,
+            primaryDetails: null,
+            inFlightReport: null,
+            queuedReports: [],
+            completedReports: {},
+
+            init: function(reports) {
+                if (!reports || !reports.length) return;
+                this.active = true;
+                this.reports = reports;
+                this.currentIndex = 0;
+                this.primaryDetails = null;
+                this.inFlightReport = null;
+                this.queuedReports = [];
+                this.completedReports = {};
+
+                // Start step 0: Primary Report
+                this.openStep(0);
+            },
+
+            openStep: function(index) {
+                if (!this.reports || !this.reports.length) {
+                    // Try to detect reports from DOM if opened directly
+                    var detected = [];
+                    $('.mr-btn-queue-action').each(function() {
+                        var sl = $(this).data('slug');
+                        var ti = $(this).data('title');
+                        if (sl) detected.push({ slug: sl, name: ti });
+                    });
+                    if (detected.length) {
+                        this.reports = detected;
+                        this.active = true;
+                    }
+                }
+
+                if (!this.reports || index < 0 || index >= this.reports.length) return;
+                this.currentIndex = index;
+                var r = this.reports[index];
+                var total = this.reports.length;
+                var isFirst = (index === 0);
+
+                // Update Step Tag Badge
+                var stepText = 'Step ' + (index + 1) + ' of ' + total + ': ' + (isFirst ? 'Primary Report' : ('Report ' + (index + 1)));
+                $('#mr-modal-step-text').text(stepText);
+                $('#mr-modal-step-tag').show();
+
+                // Update Submit Button Label
+                if (isFirst && total > 1) {
+                    $('#mr-btn-submit-report-text').text('Generate Report 1 & Continue to Next \u2192');
+                } else if (index === total - 1) {
+                    $('#mr-btn-submit-report-text').text('Queue Final Report in Making \u2192');
+                } else {
+                    $('#mr-btn-submit-report-text').text('Queue Report & Continue \u2192');
+                }
+
+                // Setup "Same as previous" checkbox
+                if (isFirst) {
+                    $('#mr-same-as-prev-wrap').hide();
+                    $('#mr-matching-copy-bar').hide();
+                } else {
+                    var prevName = (this.primaryDetails && this.primaryDetails.person_name) ? this.primaryDetails.person_name : 'Previous Person';
+                    var isFemale = this.primaryDetails && (this.primaryDetails.gender === 'Female' || this.primaryDetails.gender === 'female');
+                    $('#mr-same-prev-person-name').text(prevName);
+
+                    if (r.slug === 'kundli_matching' || r.slug === 'kundali-and-gun-matching-report') {
+                        var roleLabel = isFemale ? 'Bride (Kanya)' : 'Groom (Var)';
+                        $('#mr-matching-copy-bar').find('.mr-same-label > span').html(
+                            'Use previous report details for ' + roleLabel +
+                            '<span id="mr-matching-same-summary" style="display:block; font-size:12px; font-weight:500; color:#64748B; margin-top:2px;">(' + prevName + ')</span>'
+                        );
+                        $('#mr-same-as-prev-wrap').hide();
+                        $('#mr-matching-copy-bar').show();
+                        $('#mr-matching-same-prev-checkbox').prop('checked', true);
+                    } else {
+                        $('#mr-same-as-prev-wrap').show();
+                        $('#mr-matching-copy-bar').hide();
+                        $('#mr-same-as-prev-checkbox').prop('checked', true);
+                    }
+                }
+
+                // Open the modal for this step
+                window.openDetailsModal(r.slug, r.name);
+
+                // Reset palm upload fields for fresh photo
+                if (r.slug === 'palmistry_report' || r.slug === 'palm-reading-report') {
+                    var palmInput = document.getElementById('mr_palm_image');
+                    if (palmInput) palmInput.value = '';
+                    $('#mr-palm-preview-wrap').hide();
+                    $('#mr-palm-upload-action-wrap').show();
+                    $('#mr-palm-client-error').hide().text('');
+                    $('#mr-palm-file-status').text('');
+                }
+
+                // Prepopulate if subsequent step with checkbox checked
+                if (!isFirst && this.primaryDetails) {
+                    if (r.slug === 'kundli_matching' || r.slug === 'kundali-and-gun-matching-report') {
+                        if (isFemale) {
+                            populateGirlFields(this.primaryDetails);
+                        } else {
+                            populateBoyFields(this.primaryDetails);
+                        }
+                    } else {
+                        populateSinglePersonFields(this.primaryDetails);
+                    }
+                }
+            },
+
+            onStepSubmitted: function(formData, capturedDetails) {
+                var self = this;
+                var currIdx = this.currentIndex;
+                var currReport = this.reports[currIdx];
+
+                if (currIdx === 0) {
+                    // Step 0: Primary Report submitted!
+                    this.primaryDetails = capturedDetails;
+
+                    // Update UI state for Primary Report on checkout view
+                    self.updateCardState(currReport.slug, 'generating', '\u2699\uFE0F Making report now...', '<i class="fa-solid fa-spinner fa-spin"></i> In Making...');
+
+                    // Immediately hit report in making!
+                    self.startGenerating(currReport, formData, 0);
+
+                    // If more reports exist in package, smoothly transition to Step 2
+                    if (self.reports.length > 1) {
+                        if (window.mrNotify && typeof window.mrNotify.toast === 'function') {
+                            window.mrNotify.toast('Primary Report generation started! Please confirm or enter details for Report 2.', 'info');
+                        }
+                        setTimeout(function() {
+                            self.openStep(1);
+                        }, 250);
+                    } else {
+                        closeDetailsModal();
+                    }
+                } else {
+                    // Step > 0: Submitting subsequent report (Report 2, 3...)
+                    // DO NOT DEFER OR HOLD IN BROWSER MEMORY! Immediately hit report in making on server!
+                    self.updateCardState(currReport.slug, 'generating', '\u2699\uFE0F Making report now...', '<i class="fa-solid fa-spinner fa-spin"></i> In Making...');
+                    self.startGenerating(currReport, formData, currIdx);
+
+                    if (currIdx + 1 < self.reports.length) {
+                        self.openStep(currIdx + 1);
+                    } else {
+                        // All reports configured and sent to server!
+                        closeDetailsModal();
+                        $('#mr-modal-step-tag').hide();
+
+                        if (window.mrNotify && typeof window.mrNotify.toast === 'function') {
+                            window.mrNotify.toast('All report details submitted! Reports are generating in the background.', 'success');
+                        }
+                    }
+                }
+            },
+
+            updateCardState: function(slug, status, subText, actionHtml) {
+                var card = $('#mr-queue-card-' + slug);
+                if (!card.length) return;
+
+                var sub = $('#mr-queue-sub-' + slug);
+                if (sub.length && subText) sub.html(subText);
+
+                var actionBox = $('#mr-queue-action-' + slug);
+                if (actionBox.length && actionHtml) actionBox.html(actionHtml);
+
+                var badge = card.find('span').first();
+                if (badge.length) {
+                    if (status === 'generating') {
+                        badge.css({ 'background': '#FFFBEB', 'color': '#D97706' }).text('Generating');
+                    } else if (status === 'queued') {
+                        badge.css({ 'background': '#F1F5F9', 'color': '#64748B' }).text('Queued');
+                    } else if (status === 'ready') {
+                        badge.css({ 'background': '#ECFDF5', 'color': '#059669' }).text('Ready');
+                    } else if (status === 'error') {
+                        badge.css({ 'background': '#FEF2F2', 'color': '#DC2626' }).text('Action Required');
+                    }
+                }
+            },
+
+            startGenerating: function(report, formData, stepIndex) {
+                var self = this;
+                self.inFlightReport = report;
+
+                // Configure Sticky Progress Notification Banner
+                $('#mr-banner-spinner').show();
+                $('#mr-banner-check-icon').hide();
+                $('#mr-banner-pill').removeClass('ready').text('In Process');
+                var rName = report.name || 'Astrology Report';
+                progressTitle.text(rName + ' (' + (stepIndex === 0 ? 'Report 1' : 'Report ' + (stepIndex + 1)) + ')');
+                progressStatus.text('Generating ' + rName + ' in background. You can navigate freely.');
+                progressBar.css('width', '25%').css('background', 'linear-gradient(90deg, #F58220, #2CB67D)');
+                btnGoReport.removeClass('mr-btn-banner-retry').prop('disabled', true).html('<span>Go To Report</span> <i class="fa-solid fa-lock"></i>');
+                progressBanner.slideDown(250);
+
+                setTimeout(function() { progressBar.css('width', '55%'); }, 900);
+                setTimeout(function() { progressBar.css('width', '80%'); }, 2000);
+
+                $.ajax({
+                    url: mr_reports_vars.ajax_url,
+                    type: 'POST',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.success) {
+                            var pdfUrl = response.data.pdf_url;
+                            self.completedReports[report.slug] = pdfUrl;
+                            self.inFlightReport = null;
+
+                            progressBar.css('width', '100%');
+                            $('#mr-banner-spinner').hide();
+                            $('#mr-banner-check-icon').show();
+                            $('#mr-banner-pill').addClass('ready').text('Ready');
+                            progressStatus.html('<strong style="color:#2CB67D;">' + rName + ' Ready!</strong> Download below.');
+                            btnGoReport.removeClass('mr-btn-banner-retry').prop('disabled', false).html('<span>Go To Report</span> <i class="fa-solid fa-arrow-up-right-from-square"></i>').data('url', pdfUrl);
+
+                            var downloadBtnHtml = '<a href="' + pdfUrl + '" target="_blank" class="mr-btn-pay" style="width:auto; padding:9px 18px; font-size:12px; background:#059669; text-decoration:none; display:inline-flex; align-items:center; gap:6px; color:#fff; border-radius:8px; font-weight:700;"><i class="fa-solid fa-file-pdf"></i> View / Download PDF</a>';
+                            self.updateCardState(report.slug, 'ready', '\uD83D\uDFE2 Ready! Generated successfully.', downloadBtnHtml);
+
+                            if (window.mrNotify && typeof window.mrNotify.toast === 'function') {
+                                window.mrNotify.toast(rName + ' is ready!', 'success');
+                            }
+
+                            // Check if all reports in bundle are completed
+                            var allCompleted = true;
+                            for (var k = 0; k < self.reports.length; k++) {
+                                if (!self.completedReports[self.reports[k].slug]) {
+                                    allCompleted = false;
+                                    break;
+                                }
+                            }
+
+                            if (allCompleted) {
+                                var succBanner = $('#mr-checkout-success-view');
+                                if (succBanner.length) {
+                                    var lead = succBanner.find('.mr-success-lead');
+                                    if (lead.length) {
+                                        lead.html('<span style="color:#059669; font-weight:700;">All package reports have been generated successfully!</span>');
+                                    }
+                                }
+                            }
+                        } else {
+                            self.inFlightReport = null;
+                            var errMessage = (response.data && response.data.message) ? response.data.message : 'Generation failed.';
+                            self.updateCardState(report.slug, 'error', '<strong style="color:#ef4444;">Error: ' + errMessage + '</strong>', '<button type="button" class="mr-btn-pay mr-btn-queue-action" data-slug="' + report.slug + '" data-title="' + report.name + '" data-index="' + stepIndex + '" style="background:#DC2626;"><i class="fa-solid fa-rotate-right"></i> Retry</button>');
+                        }
+                    },
+                    error: function() {
+                        self.inFlightReport = null;
+                        self.updateCardState(report.slug, 'error', '<strong style="color:#ef4444;">Server error during generation.</strong>', '<button type="button" class="mr-btn-pay mr-btn-queue-action" data-slug="' + report.slug + '" data-title="' + report.name + '" data-index="' + stepIndex + '" style="background:#DC2626;"><i class="fa-solid fa-rotate-right"></i> Retry</button>');
+                    }
+                });
+            }
+        };
 
         // =========================================================================
         // Unified City Autocomplete (High-Speed In-Memory Cache + Persistent Loader)
@@ -758,17 +1226,50 @@
         // Helper function for backwards compatibility
         function initCityInput() {}
 
-        // Palm Photo Select Trigger & Feedback
-        $(document).on('click', '#mr-btn-choose-palm', function(e) {
+        // Palm Photo Select Trigger, Real-Time Thumbnail Preview & Validation
+        $(document).on('click', '#mr-btn-choose-palm, #mr-btn-reselect-palm', function(e) {
             e.preventDefault();
             $('#mr_palm_image').trigger('click');
         });
         $(document).on('change', '#mr_palm_image', function() {
-            if (this.files && this.files.length > 0) {
-                $('#mr-palm-file-status').html('<i class="fa-solid fa-circle-check"></i> Selected: ' + this.files[0].name).show();
-            } else {
-                $('#mr-palm-file-status').hide();
+            var file = (this.files && this.files.length > 0) ? this.files[0] : null;
+            var errBox = $('#mr-palm-client-error');
+            errBox.hide().text('');
+
+            if (!file) {
+                $('#mr-palm-preview-wrap').hide();
+                $('#mr-palm-upload-action-wrap').show();
+                return;
             }
+
+            // Client-side image format validation
+            if (!file.type || !file.type.match(/^image\/(jpeg|jpg|png|webp)$/i)) {
+                errBox.text('Invalid file format. Please upload a clear JPG, PNG, or WebP photo of your palm.').slideDown(150);
+                this.value = '';
+                $('#mr-palm-preview-wrap').hide();
+                $('#mr-palm-upload-action-wrap').show();
+                return;
+            }
+
+            // Client-side file size check (max 15MB)
+            if (file.size > 15 * 1024 * 1024) {
+                errBox.text('The selected image is too large (' + (Math.round(file.size / (1024 * 1024))) + 'MB). Please choose a photo under 15MB.').slideDown(150);
+                this.value = '';
+                $('#mr-palm-preview-wrap').hide();
+                $('#mr-palm-upload-action-wrap').show();
+                return;
+            }
+
+            // Show instant image thumbnail preview via FileReader
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                $('#mr-palm-preview-img').attr('src', e.target.result);
+                $('#mr-palm-file-status').html('<i class="fa-solid fa-circle-check"></i> ' + file.name + ' (' + (Math.round(file.size / 1024)) + ' KB ready for Vedic scan)');
+                $('#mr-palm-upload-action-wrap').hide();
+                $('#mr-palm-preview-wrap').slideDown(150);
+                $('#mr-palm-upload-fields').find('> div').css('border-color', '#10b981');
+            };
+            reader.readAsDataURL(file);
         });
 
         // 11. Sample Reading Preview - Publication Grade Document Reader
@@ -792,6 +1293,7 @@
             if (sampleModal.length && sampleModal[0].style) {
                 sampleModal[0].style.setProperty('display', 'flex', 'important');
             }
+            mrLockBackgroundScroll();
         });
 
         // Close Sample Modal Handler
@@ -800,9 +1302,11 @@
             m.removeClass('is-open').fadeOut(120, function() {
                 $(this).attr('style', 'display: none !important;');
                 $('#mr-sample-iframe').attr('src', 'about:blank');
+                mrUnlockBackgroundScroll();
             });
             m.attr('style', 'display: none !important;');
             $('#mr-sample-iframe').attr('src', 'about:blank');
+            mrUnlockBackgroundScroll();
         }
 
         $(document).on('click', '.mr-sample-close, .mr-sample-close-btn', function(e) {
@@ -871,9 +1375,12 @@
             var m = $('#mr-details-modal');
             m.removeClass('is-open').fadeOut(100, function() {
                 $(this).attr('style', 'display: none !important;');
+                mrUnlockBackgroundScroll();
             });
             m.attr('style', 'display: none !important;');
+            mrUnlockBackgroundScroll();
         }
+        window.closeDetailsModal = closeDetailsModal;
 
         // 12. Submit Birth Details & Launch Sticky Bottom Progress Banner
         $('#mr-birth-details-form').on('submit', function(e) {
@@ -897,7 +1404,7 @@
                 if (!firstErrorField) firstErrorField = $('#mr_recipient_email');
             }
 
-            if (reportSlug === 'kundli_matching') {
+            if (reportSlug === 'kundli_matching' || reportSlug === 'kundali-and-gun-matching-report') {
                 // Validate Boy Details (Var)
                 if (!$('#mr_boy_name').val().trim()) {
                     errors.push("Boy's full name is required.");
@@ -966,7 +1473,7 @@
             }
 
             // Validate Palm Photo for Palmistry Report
-            if (reportSlug === 'palmistry_report') {
+            if (reportSlug === 'palmistry_report' || reportSlug === 'palm-reading-report') {
                 var palmFileInput = document.getElementById('mr_palm_image');
                 if (!palmFileInput || !palmFileInput.files || palmFileInput.files.length === 0) {
                     errors.push("Please select or snap a photo of your palm to proceed with Hast Rekha analysis.");
@@ -977,7 +1484,7 @@
 
             // If validation errors exist, display banner in modal, scroll to first error, and DO NOT close modal!
             if (errors.length > 0) {
-                var errorNotice = (reportSlug === 'kundli_matching')
+                var errorNotice = (reportSlug === 'kundli_matching' || reportSlug === 'kundali-and-gun-matching-report')
                     ? "Please fill in all birth details for both the Boy and Girl to generate your 36 Gun Milan report."
                     : (errors[0] || "Please fill in all required birth details.");
                 $('#mr-modal-error-box').slideDown(150).find('.mr-error-text').text(errorNotice);
@@ -996,6 +1503,53 @@
             var formData = new FormData(formEl);
             formData.append('action', 'mr_generate_report');
             formData.append('nonce', mr_reports_vars.nonce);
+
+            // Persist entered birth details to enable 1-click copy for subsequent bundle reports
+            var lastDetails = {
+                person_name: $('#mr_person_name').val() || $('#mr_boy_name').val(),
+                gender: $('#mr_gender').val() || 'Male',
+                dob: $('#mr_dob').val() || $('#mr_boy_dob').val(),
+                tob: $('#mr_tob').val() || $('#mr_boy_tob').val(),
+                pob: $('#mr_pob').val() || $('#mr_boy_pob').val(),
+                pob_lat: $('#mr_pob_lat').val() || $('#mr_boy_pob_lat').val(),
+                pob_lng: $('#mr_pob_lng').val() || $('#mr_boy_pob_lng').val(),
+                pob_tz: $('#mr_pob_tz').val() || $('#mr_boy_pob_tz').val() || '5.5',
+                recipient_email: $('#mr_recipient_email').val()
+            };
+
+            if (reportSlug === 'kundli_matching' || reportSlug === 'kundali-and-gun-matching-report') {
+                lastDetails.boy = {
+                    person_name: $('#mr_boy_name').val(),
+                    gender: 'Male',
+                    dob: $('#mr_boy_dob').val(),
+                    tob: $('#mr_boy_tob').val(),
+                    pob: $('#mr_boy_pob').val(),
+                    pob_lat: $('#mr_boy_pob_lat').val(),
+                    pob_lng: $('#mr_boy_pob_lng').val(),
+                    pob_tz: $('#mr_boy_pob_tz').val() || '5.5'
+                };
+                lastDetails.girl = {
+                    person_name: $('#mr_girl_name').val(),
+                    gender: 'Female',
+                    dob: $('#mr_girl_dob').val(),
+                    tob: $('#mr_girl_tob').val(),
+                    pob: $('#mr_girl_pob').val(),
+                    pob_lat: $('#mr_girl_pob_lat').val(),
+                    pob_lng: $('#mr_girl_pob_lng').val(),
+                    pob_tz: $('#mr_girl_pob_tz').val() || '5.5'
+                };
+            }
+
+            try {
+                sessionStorage.setItem('mr_last_birth_details', JSON.stringify(lastDetails));
+                localStorage.setItem('mr_last_birth_details', JSON.stringify(lastDetails));
+            } catch(e) {}
+
+            // If multi-report sequential bundle flow is active, delegate to window.mrBundleFlow
+            if (window.mrBundleFlow && window.mrBundleFlow.active) {
+                window.mrBundleFlow.onStepSubmitted(formData, lastDetails);
+                return false;
+            }
 
             // 1. Instantly hide and close modal so user is unblocked to browse other features
             closeDetailsModal();

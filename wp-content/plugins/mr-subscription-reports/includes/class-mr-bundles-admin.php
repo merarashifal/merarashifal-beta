@@ -53,43 +53,66 @@ class MR_Bundles_Admin {
         if (isset($_POST['bundle'][$active_report])) {
             $input = $_POST['bundle'][$active_report];
 
+            $single_credits = intval($input['tier_single']['chat_credits'] ?? 0);
+            $single_calc    = MR_Bundles::calculate_tier_pricing([$active_report], 0, 0);
+
+            $duo_paired       = [sanitize_key($input['tier_duo']['paired_report_1'] ?? '')];
+            $duo_credits      = intval($input['tier_duo']['chat_credits'] ?? 15);
+            $duo_discount_pct = floatval($input['tier_duo']['discount_pct'] ?? 10);
+            $duo_calc         = MR_Bundles::calculate_tier_pricing(array_merge([$active_report], $duo_paired), $duo_credits, $duo_discount_pct);
+
+            $trio_paired      = [
+                sanitize_key($input['tier_trio']['paired_report_1'] ?? ''),
+                sanitize_key($input['tier_trio']['paired_report_2'] ?? '')
+            ];
+            $trio_credits      = intval($input['tier_trio']['chat_credits'] ?? 30);
+            $trio_discount_pct = floatval($input['tier_trio']['discount_pct'] ?? 15);
+            $trio_calc         = MR_Bundles::calculate_tier_pricing(array_merge([$active_report], $trio_paired), $trio_credits, $trio_discount_pct);
+
             $config = [
                 'report_slug'    => $active_report,
                 'bundle_enabled' => !empty($input['bundle_enabled']),
                 'tier_single'    => [
-                    'enabled'       => true,
-                    'title'         => sanitize_text_field($input['tier_single']['title'] ?? 'Single Report'),
-                    'subtitle'      => sanitize_text_field($input['tier_single']['subtitle'] ?? ''),
-                    'price_regular' => floatval($input['tier_single']['price_regular'] ?? 599),
-                    'price_sale'    => floatval($input['tier_single']['price_sale'] ?? 299),
-                    'badge'         => sanitize_text_field($input['tier_single']['badge'] ?? 'Standard'),
-                    'chat_credits'  => intval($input['tier_single']['chat_credits'] ?? 0),
+                    'enabled'              => true,
+                    'title'                => sanitize_text_field($input['tier_single']['title'] ?? 'Single Report'),
+                    'subtitle'             => sanitize_text_field($input['tier_single']['subtitle'] ?? ''),
+                    'price_regular'        => $single_calc['sum_regular'],
+                    'price_sale'           => $single_calc['sum_sale'],
+                    'badge'                => sanitize_text_field($input['tier_single']['badge'] ?? 'Standard'),
+                    'chat_credits'         => $single_credits,
+                    'discount_pct'         => 0,
+                    'overall_discount_pct' => $single_calc['overall_discount_pct'],
                 ],
                 'tier_duo'       => [
-                    'enabled'        => !empty($input['tier_duo']['enabled']),
-                    'title'          => sanitize_text_field($input['tier_duo']['title'] ?? 'Smart Duo (Pack of 2)'),
-                    'subtitle'       => sanitize_text_field($input['tier_duo']['subtitle'] ?? ''),
-                    'paired_reports' => [sanitize_key($input['tier_duo']['paired_report_1'] ?? '')],
-                    'price_regular'  => floatval($input['tier_duo']['price_regular'] ?? 1198),
-                    'price_sale'     => floatval($input['tier_duo']['price_sale'] ?? 449),
-                    'badge'          => sanitize_text_field($input['tier_duo']['badge'] ?? 'POPULAR'),
-                    'chat_credits'   => intval($input['tier_duo']['chat_credits'] ?? 15),
-                    'highlights'     => sanitize_textarea_field($input['tier_duo']['highlights'] ?? ''),
+                    'enabled'              => !empty($input['tier_duo']['enabled']),
+                    'title'                => sanitize_text_field($input['tier_duo']['title'] ?? 'Smart Duo (Pack of 2)'),
+                    'subtitle'             => sanitize_text_field($input['tier_duo']['subtitle'] ?? ''),
+                    'paired_reports'       => $duo_paired,
+                    'discount_pct'         => $duo_discount_pct,
+                    'price_regular'        => $duo_calc['price_regular'],
+                    'price_sale'           => $duo_calc['price_sale'],
+                    'savings'              => $duo_calc['savings'],
+                    'overall_discount_pct' => $duo_calc['overall_discount_pct'],
+                    'combined_sale'        => $duo_calc['combined_sale'],
+                    'badge'                => sanitize_text_field($input['tier_duo']['badge'] ?? 'POPULAR'),
+                    'chat_credits'         => $duo_credits,
+                    'highlights'           => sanitize_textarea_field($input['tier_duo']['highlights'] ?? ''),
                 ],
                 'tier_trio'      => [
-                    'enabled'        => !empty($input['tier_trio']['enabled']),
-                    'title'          => sanitize_text_field($input['tier_trio']['title'] ?? 'Cosmic Trinity (Pack of 3 + AI Chat)'),
-                    'subtitle'       => sanitize_text_field($input['tier_trio']['subtitle'] ?? ''),
-                    'is_best_buy'    => !empty($input['tier_trio']['is_best_buy']),
-                    'paired_reports' => [
-                        sanitize_key($input['tier_trio']['paired_report_1'] ?? ''),
-                        sanitize_key($input['tier_trio']['paired_report_2'] ?? '')
-                    ],
-                    'price_regular'  => floatval($input['tier_trio']['price_regular'] ?? 2097),
-                    'price_sale'     => floatval($input['tier_trio']['price_sale'] ?? 599),
-                    'badge'          => sanitize_text_field($input['tier_trio']['badge'] ?? 'BEST BUY - SAVE 71%'),
-                    'chat_credits'   => intval($input['tier_trio']['chat_credits'] ?? 30),
-                    'highlights'     => sanitize_textarea_field($input['tier_trio']['highlights'] ?? ''),
+                    'enabled'              => !empty($input['tier_trio']['enabled']),
+                    'title'                => sanitize_text_field($input['tier_trio']['title'] ?? 'Cosmic Trinity (Pack of 3 + AI Chat)'),
+                    'subtitle'             => sanitize_text_field($input['tier_trio']['subtitle'] ?? ''),
+                    'is_best_buy'          => !empty($input['tier_trio']['is_best_buy']),
+                    'paired_reports'       => $trio_paired,
+                    'discount_pct'         => $trio_discount_pct,
+                    'price_regular'        => $trio_calc['price_regular'],
+                    'price_sale'           => $trio_calc['price_sale'],
+                    'savings'              => $trio_calc['savings'],
+                    'overall_discount_pct' => $trio_calc['overall_discount_pct'],
+                    'combined_sale'        => $trio_calc['combined_sale'],
+                    'badge'                => sanitize_text_field($input['tier_trio']['badge'] ?? ('BEST BUY - SAVE ' . $trio_calc['overall_discount_pct'] . '%')),
+                    'chat_credits'         => $trio_credits,
+                    'highlights'           => sanitize_textarea_field($input['tier_trio']['highlights'] ?? ''),
                 ]
             ];
 
@@ -127,11 +150,23 @@ class MR_Bundles_Admin {
             $active_report = 'yearly_horoscope_long';
         }
 
-        $bundle_cfg = MR_Bundles::get_bundle_for_report($active_report);
-        $saved      = !empty($_GET['saved']);
-        $reset      = !empty($_GET['reset']);
+        $bundle_cfg   = MR_Bundles::get_bundle_for_report($active_report);
+        $base_pricing = MR_Bundles::get_standalone_pricing($active_report);
+        $saved        = !empty($_GET['saved']);
+        $reset        = !empty($_GET['reset']);
+
+        // Build price map for JavaScript dynamic preview
+        $catalog_map = [];
+        foreach ($all_reports as $s_slug => $s_meta) {
+            $p = MR_Bundles::get_standalone_pricing($s_slug);
+            $catalog_map[$s_slug] = [
+                'name'          => $p['name'],
+                'price_sale'    => $p['price_sale'],
+                'price_regular' => $p['price_regular'],
+            ];
+        }
         ?>
-        <div class="wrap mr-admin-wrap" style="max-width: 1200px; margin: 25px auto;">
+        <div class="wrap mr-admin-wrap" style="max-width: 1240px; margin: 25px auto;">
             <h1 style="display:flex; align-items:center; gap:12px; font-size:24px; font-weight:700; color:#1e293b; margin-bottom:18px;">
                 <span style="background:linear-gradient(135deg, #F58220 0%, #7A1F3D 100%); color:#fff; width:40px; height:40px; border-radius:10px; display:inline-flex; align-items:center; justify-content:center; box-shadow:0 4px 12px rgba(245, 130, 32, 0.3);">
                     <i class="dashicons dashicons-cart" style="font-size:22px; width:22px; height:22px; margin-top:2px;"></i>
@@ -139,7 +174,7 @@ class MR_Bundles_Admin {
                 <?php _e('Report Bundles & Best Buy Manager', 'merarashifal'); ?>
             </h1>
             <p style="color:#64748b; font-size:14px; margin-top:-8px; margin-bottom:24px;">
-                <?php _e('Configure custom discounted packs (Pack of 2, Pack of 3 / Best Buy) and bonus Niyati AI Chat Credits for each report page. Everything is 100% variable and editable.', 'merarashifal'); ?>
+                <?php _e('Configure dynamic discounted packs (Pack of 2, Pack of 3 / Best Buy) and bonus Niyati AI Chat Credits. Standalone prices are strictly sourced from Sales Cards Manager; bundle sale prices are calculated from your configured Bundle Discount % on combined prices.', 'merarashifal'); ?>
             </p>
 
             <?php if ($saved): ?>
@@ -171,10 +206,10 @@ class MR_Bundles_Admin {
             <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="background:#ffffff; border:1px solid #cbd5e1; border-top:none; border-radius:0 0 12px 12px; padding:28px 32px; box-shadow:0 10px 25px rgba(0,0,0,0.04);">
                 <?php wp_nonce_field('mr_save_bundles_action', 'mr_bundles_nonce'); ?>
                 <input type="hidden" name="action" value="mr_save_bundles">
-                <input type="hidden" name="active_report_slug" value="<?php echo esc_attr($active_report); ?>">
+                <input type="hidden" name="active_report_slug" id="mr_active_report_slug" value="<?php echo esc_attr($active_report); ?>">
 
                 <!-- REPORT HEADER SUMMARY -->
-                <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:20px; border-bottom:2px solid #f1f5f9; margin-bottom:24px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; padding-bottom:18px; border-bottom:2px solid #f1f5f9; margin-bottom:20px;">
                     <div>
                         <span style="background:#fef3c7; color:#b45309; font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:1px; padding:3px 10px; border-radius:999px;">Currently Editing</span>
                         <h2 style="font-size:22px; font-weight:800; color:#7A1F3D; margin:6px 0 2px 0;">
@@ -192,46 +227,96 @@ class MR_Bundles_Admin {
                             <span>Enable Bundle Selector On This Page</span>
                         </label>
                     </div>
+                <!-- CHECKOUT SHORTCODE BANNER -->
+                <?php 
+                $detected_checkout_url = class_exists('MR_Checkout') ? MR_Checkout::get_checkout_url() : home_url('/checkout/');
+                ?>
+                <div style="background:#fdf4ff; border:1.5px solid #f0abfc; border-radius:10px; padding:12px 18px; margin-bottom:16px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <span style="background:#a855f7; color:#fff; width:36px; height:36px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; font-size:20px;">
+                            <i class="dashicons dashicons-cart"></i>
+                        </span>
+                        <div>
+                            <div style="font-weight:700; color:#86198f; font-size:13.5px;">
+                                Checkout Shortcode: <code style="font-size:13px; background:#fae8ff; color:#701a75; padding:2px 8px; border-radius:4px; font-weight:800;">[mr_checkout]</code>
+                            </div>
+                            <div style="color:#a21caf; font-size:12px; margin-top:2px;">
+                                Place <code>[mr_checkout]</code> on any WordPress page of your choice. All "Buy" and "Bundle" buttons across the platform automatically direct customers to your chosen page.
+                                Current active checkout URL: <a href="<?php echo esc_url($detected_checkout_url); ?>" target="_blank" style="color:#86198f; font-weight:600; text-decoration:underline;"><?php echo esc_html($detected_checkout_url); ?></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STANDALONE PRICING MASTER BANNER -->
+                <div style="background:#eff6ff; border:1.5px solid #bfdbfe; border-radius:10px; padding:14px 18px; margin-bottom:24px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <span style="background:#2563eb; color:#fff; width:36px; height:36px; border-radius:8px; display:inline-flex; align-items:center; justify-content:center; font-size:20px;">
+                            <i class="dashicons dashicons-money-alt"></i>
+                        </span>
+                        <div>
+                            <div style="font-weight:700; color:#1e40af; font-size:13.5px;">
+                                Pricing Master Connected: Standalone Prices Driven by Sales Cards Manager
+                            </div>
+                            <div style="color:#3b82f6; font-size:12px; margin-top:2px;">
+                                Standalone Sale Price: <strong style="color:#1e3a8a;">₹<?php echo MR_Bundles::format_price($base_pricing['price_sale']); ?></strong> &bull; 
+                                Standalone Listing MRP: <strong style="color:#1e3a8a;">₹<?php echo MR_Bundles::format_price($base_pricing['price_regular']); ?></strong> &bull; 
+                                AI Chat Questions: <strong style="color:#1e3a8a;">₹1.00 / credit</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="<?php echo esc_url(admin_url('admin.php?page=mr-reports-catalog-manager')); ?>" class="button button-secondary" style="font-size:12px; height:32px; line-height:30px;">
+                        <i class="dashicons dashicons-admin-generic" style="font-size:14px; vertical-align:middle; margin-top:-2px;"></i> Manage Master Prices
+                    </a>
                 </div>
 
                 <!-- 3 BUNDLE TIERS DISPLAY -->
-                <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:24px; margin-bottom:30px;">
+                <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:22px; margin-bottom:30px;">
                     
                     <!-- TIER 1: SINGLE REPORT -->
-                    <div style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:12px; padding:20px; position:relative;">
-                        <div style="position:absolute; top:-12px; left:16px; background:#64748b; color:#fff; font-size:11px; font-weight:700; padding:2px 10px; border-radius:999px;">
-                            TIER 1 &bull; BASELINE
-                        </div>
-                        <h3 style="font-size:16px; font-weight:700; color:#1e293b; margin:10px 0 14px 0;">
-                            <?php _e('Single Report A la Carte', 'merarashifal'); ?>
-                        </h3>
-
-                        <p style="font-size:12px; color:#64748b; margin-bottom:14px;">The base individual report purchase without extra bundles.</p>
-
-                        <div style="margin-bottom:12px;">
-                            <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:4px;">Tier Title:</label>
-                            <input type="text" name="bundle[<?php echo esc_attr($active_report); ?>][tier_single][title]" value="<?php echo esc_attr($bundle_cfg['tier_single']['title']); ?>" style="width:100%; border-radius:6px;">
-                        </div>
-
-                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:12px;">
-                            <div>
-                                <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:4px;">Sale Price (₹):</label>
-                                <input type="number" step="1" name="bundle[<?php echo esc_attr($active_report); ?>][tier_single][price_sale]" value="<?php echo esc_attr($bundle_cfg['tier_single']['price_sale']); ?>" style="width:100%; font-weight:700; border-radius:6px;">
-                            </div>
-                            <div>
-                                <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:4px;">MRP Price (₹):</label>
-                                <input type="number" step="1" name="bundle[<?php echo esc_attr($active_report); ?>][tier_single][price_regular]" value="<?php echo esc_attr($bundle_cfg['tier_single']['price_regular']); ?>" style="width:100%; border-radius:6px;">
-                            </div>
-                        </div>
-
-                        <div style="margin-bottom:12px;">
-                            <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:4px;">Badge Text:</label>
-                            <input type="text" name="bundle[<?php echo esc_attr($active_report); ?>][tier_single][badge]" value="<?php echo esc_attr($bundle_cfg['tier_single']['badge'] ?? 'Standard'); ?>" style="width:100%; border-radius:6px;">
-                        </div>
-
+                    <div style="background:#f8fafc; border:1.5px solid #cbd5e1; border-radius:12px; padding:20px; position:relative; display:flex; flex-direction:column; justify-content:space-between;">
                         <div>
-                            <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:4px;">Bonus Chat Credits:</label>
-                            <input type="number" name="bundle[<?php echo esc_attr($active_report); ?>][tier_single][chat_credits]" value="<?php echo esc_attr($bundle_cfg['tier_single']['chat_credits'] ?? 0); ?>" style="width:100%; border-radius:6px;" placeholder="0">
+                            <div style="position:absolute; top:-12px; left:16px; background:#64748b; color:#fff; font-size:11px; font-weight:700; padding:2px 10px; border-radius:999px;">
+                                TIER 1 &bull; BASELINE
+                            </div>
+                            <h3 style="font-size:16px; font-weight:700; color:#1e293b; margin:10px 0 14px 0;">
+                                <?php _e('Single Report A la Carte', 'merarashifal'); ?>
+                            </h3>
+
+                            <p style="font-size:12px; color:#64748b; margin-bottom:14px;">The base individual report purchase without extra bundles.</p>
+
+                            <div style="margin-bottom:12px;">
+                                <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:4px;">Tier Title:</label>
+                                <input type="text" name="bundle[<?php echo esc_attr($active_report); ?>][tier_single][title]" value="<?php echo esc_attr($bundle_cfg['tier_single']['title']); ?>" style="width:100%; border-radius:6px;">
+                            </div>
+
+                            <!-- Standalone Sourced Price Read-Only Display -->
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:14px;">
+                                <div style="background:#fff; border:1.5px solid #e2e8f0; border-radius:8px; padding:10px 12px;">
+                                    <span style="display:block; font-size:11px; font-weight:600; color:#64748b;">Standalone Sale Price:</span>
+                                    <strong style="font-size:17px; color:#059669;">₹<?php echo MR_Bundles::format_price($bundle_cfg['tier_single']['price_sale']); ?></strong>
+                                    <span style="font-size:10px; color:#94a3b8; display:block; margin-top:2px;">From Sales Cards Manager</span>
+                                </div>
+                                <div style="background:#fff; border:1.5px solid #e2e8f0; border-radius:8px; padding:10px 12px;">
+                                    <span style="display:block; font-size:11px; font-weight:600; color:#64748b;">Listing MRP:</span>
+                                    <strong style="font-size:17px; color:#64748b;"><s>₹<?php echo MR_Bundles::format_price($bundle_cfg['tier_single']['price_regular']); ?></s></strong>
+                                    <span style="font-size:10px; color:#94a3b8; display:block; margin-top:2px;">From Sales Cards Manager</span>
+                                </div>
+                            </div>
+
+                            <div style="margin-bottom:12px;">
+                                <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:4px;">Badge Text:</label>
+                                <input type="text" name="bundle[<?php echo esc_attr($active_report); ?>][tier_single][badge]" value="<?php echo esc_attr($bundle_cfg['tier_single']['badge'] ?? 'Standard'); ?>" style="width:100%; border-radius:6px;">
+                            </div>
+
+                            <div style="margin-bottom:12px;">
+                                <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:4px;">Bonus Chat Credits:</label>
+                                <input type="number" name="bundle[<?php echo esc_attr($active_report); ?>][tier_single][chat_credits]" value="<?php echo esc_attr($bundle_cfg['tier_single']['chat_credits'] ?? 0); ?>" style="width:100%; border-radius:6px;" placeholder="0">
+                            </div>
+                        </div>
+
+                        <div style="background:#f1f5f9; padding:8px 12px; border-radius:6px; font-size:11px; color:#64748b; margin-top:10px;">
+                            <i class="dashicons dashicons-info" style="font-size:14px; vertical-align:middle;"></i> Standalone price is master-controlled in Sales Cards Manager.
                         </div>
                     </div>
 
@@ -261,37 +346,53 @@ class MR_Bundles_Admin {
                                 <i class="dashicons dashicons-plus" style="font-size:14px; vertical-align:middle;"></i> Paired Sister Report:
                             </label>
                             <?php $selected_duo = $bundle_cfg['tier_duo']['paired_reports'][0] ?? ''; ?>
-                            <select name="bundle[<?php echo esc_attr($active_report); ?>][tier_duo][paired_report_1]" style="width:100%; border-radius:6px;">
+                            <select name="bundle[<?php echo esc_attr($active_report); ?>][tier_duo][paired_report_1]" id="mr_duo_sister_select" style="width:100%; border-radius:6px;">
                                 <?php foreach ($all_reports as $s_slug => $s_meta): 
-                                    if ($s_slug === $active_report) continue; // Don't pair with itself
+                                    if ($s_slug === $active_report) continue;
+                                    $sp = $catalog_map[$s_slug];
                                 ?>
                                     <option value="<?php echo esc_attr($s_slug); ?>" <?php selected($selected_duo, $s_slug); ?>>
-                                        <?php echo esc_html($s_meta['name']); ?> (<?php echo esc_html($s_meta['pages']); ?>)
+                                        <?php echo esc_html($s_meta['name']); ?> (Sale: ₹<?php echo MR_Bundles::format_price($sp['price_sale']); ?> | MRP: ₹<?php echo MR_Bundles::format_price($sp['price_regular']); ?>)
                                     </option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
 
+                        <!-- DUO CREDITS & BUNDLE DISCOUNT % INPUTS -->
                         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:12px;">
                             <div>
-                                <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:4px;">Sale Price (₹):</label>
-                                <input type="number" step="1" name="bundle[<?php echo esc_attr($active_report); ?>][tier_duo][price_sale]" value="<?php echo esc_attr($bundle_cfg['tier_duo']['price_sale']); ?>" style="width:100%; font-weight:700; color:#c2410c; border-radius:6px;">
+                                <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:4px;">Bonus Chat Credits:</label>
+                                <input type="number" name="bundle[<?php echo esc_attr($active_report); ?>][tier_duo][chat_credits]" id="mr_duo_credits_input" value="<?php echo esc_attr($bundle_cfg['tier_duo']['chat_credits'] ?? 15); ?>" style="width:100%; font-weight:700; color:#0284c7; border-radius:6px;">
                             </div>
-                            <div>
-                                <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:4px;">MRP Price (₹):</label>
-                                <input type="number" step="1" name="bundle[<?php echo esc_attr($active_report); ?>][tier_duo][price_regular]" value="<?php echo esc_attr($bundle_cfg['tier_duo']['price_regular']); ?>" style="width:100%; border-radius:6px;">
+                            <div style="background:#fff; padding:6px 10px; border-radius:6px; border:1.5px solid #ea580c;">
+                                <label style="display:block; font-size:11.5px; font-weight:800; color:#c2410c; margin-bottom:3px;">
+                                    Discount % on Sale Price:
+                                </label>
+                                <div style="display:flex; align-items:center; gap:4px;">
+                                    <input type="number" step="0.5" min="0" max="95" name="bundle[<?php echo esc_attr($active_report); ?>][tier_duo][discount_pct]" id="mr_duo_discount_input" value="<?php echo esc_attr($bundle_cfg['tier_duo']['discount_pct'] ?? 10); ?>" style="width:70px; font-weight:800; font-size:15px; color:#c2410c; border-radius:4px; padding:3px 6px;">
+                                    <span style="font-weight:800; font-size:13px; color:#ea580c;">% OFF</span>
+                                </div>
                             </div>
                         </div>
 
-                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:12px;">
-                            <div>
-                                <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:4px;">Badge Text:</label>
-                                <input type="text" name="bundle[<?php echo esc_attr($active_report); ?>][tier_duo][badge]" value="<?php echo esc_attr($bundle_cfg['tier_duo']['badge'] ?? 'POPULAR'); ?>" style="width:100%; border-radius:6px;">
+                        <!-- DYNAMIC PRICING BREAKDOWN PREVIEW -->
+                        <div style="background:#fff; border:1.5px solid #fed7aa; border-radius:8px; padding:12px; margin-bottom:12px; box-shadow:0 2px 6px rgba(234,88,12,0.06);">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                <span style="font-size:11px; font-weight:800; color:#ea580c; text-transform:uppercase; letter-spacing:0.5px;">
+                                    <i class="dashicons dashicons-calculator" style="font-size:14px; vertical-align:middle;"></i> Dynamic Pricing Math
+                                </span>
+                                <button type="button" class="button button-small" id="mr_duo_autofill_badge" style="font-size:10px; height:20px; line-height:18px; padding:0 6px;">
+                                    Auto-fill Badge
+                                </button>
                             </div>
-                            <div>
-                                <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:4px;">Bonus Chat Credits:</label>
-                                <input type="number" name="bundle[<?php echo esc_attr($active_report); ?>][tier_duo][chat_credits]" value="<?php echo esc_attr($bundle_cfg['tier_duo']['chat_credits'] ?? 15); ?>" style="width:100%; font-weight:700; color:#0284c7; border-radius:6px;">
+                            <div id="mr_duo_calc_box" style="font-size:12px; line-height:1.6; color:#334155;">
+                                <!-- Live calculated via JS -->
                             </div>
+                        </div>
+
+                        <div style="margin-bottom:12px;">
+                            <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:4px;">Badge Text:</label>
+                            <input type="text" name="bundle[<?php echo esc_attr($active_report); ?>][tier_duo][badge]" id="mr_duo_badge_input" value="<?php echo esc_attr($bundle_cfg['tier_duo']['badge'] ?? 'POPULAR'); ?>" style="width:100%; border-radius:6px;">
                         </div>
 
                         <div>
@@ -327,12 +428,13 @@ class MR_Bundles_Admin {
                                 <i class="dashicons dashicons-plus" style="font-size:14px; vertical-align:middle;"></i> Paired Sister Report #2:
                             </label>
                             <?php $selected_trio_1 = $bundle_cfg['tier_trio']['paired_reports'][0] ?? ''; ?>
-                            <select name="bundle[<?php echo esc_attr($active_report); ?>][tier_trio][paired_report_1]" style="width:100%; border-radius:6px; margin-bottom:8px;">
+                            <select name="bundle[<?php echo esc_attr($active_report); ?>][tier_trio][paired_report_1]" id="mr_trio_sister1_select" style="width:100%; border-radius:6px; margin-bottom:8px;">
                                 <?php foreach ($all_reports as $s_slug => $s_meta): 
                                     if ($s_slug === $active_report) continue;
+                                    $sp1 = $catalog_map[$s_slug];
                                 ?>
                                     <option value="<?php echo esc_attr($s_slug); ?>" <?php selected($selected_trio_1, $s_slug); ?>>
-                                        <?php echo esc_html($s_meta['name']); ?> (<?php echo esc_html($s_meta['pages']); ?>)
+                                        <?php echo esc_html($s_meta['name']); ?> (Sale: ₹<?php echo MR_Bundles::format_price($sp1['price_sale']); ?> | MRP: ₹<?php echo MR_Bundles::format_price($sp1['price_regular']); ?>)
                                     </option>
                                 <?php endforeach; ?>
                             </select>
@@ -341,37 +443,53 @@ class MR_Bundles_Admin {
                                 <i class="dashicons dashicons-plus" style="font-size:14px; vertical-align:middle;"></i> Paired Sister Report #3:
                             </label>
                             <?php $selected_trio_2 = $bundle_cfg['tier_trio']['paired_reports'][1] ?? ''; ?>
-                            <select name="bundle[<?php echo esc_attr($active_report); ?>][tier_trio][paired_report_2]" style="width:100%; border-radius:6px;">
+                            <select name="bundle[<?php echo esc_attr($active_report); ?>][tier_trio][paired_report_2]" id="mr_trio_sister2_select" style="width:100%; border-radius:6px;">
                                 <?php foreach ($all_reports as $s_slug => $s_meta): 
                                     if ($s_slug === $active_report) continue;
+                                    $sp2 = $catalog_map[$s_slug];
                                 ?>
                                     <option value="<?php echo esc_attr($s_slug); ?>" <?php selected($selected_trio_2, $s_slug); ?>>
-                                        <?php echo esc_html($s_meta['name']); ?> (<?php echo esc_html($s_meta['pages']); ?>)
+                                        <?php echo esc_html($s_meta['name']); ?> (Sale: ₹<?php echo MR_Bundles::format_price($sp2['price_sale']); ?> | MRP: ₹<?php echo MR_Bundles::format_price($sp2['price_regular']); ?>)
                                     </option>
                                 <?php endforeach; ?>
                             </select>
                         </div>
 
+                        <!-- TRIO CREDITS & BUNDLE DISCOUNT % INPUTS -->
                         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:12px;">
                             <div>
-                                <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:4px;">Sale Price (₹):</label>
-                                <input type="number" step="1" name="bundle[<?php echo esc_attr($active_report); ?>][tier_trio][price_sale]" value="<?php echo esc_attr($bundle_cfg['tier_trio']['price_sale']); ?>" style="width:100%; font-weight:800; color:#7A1F3D; border-radius:6px;">
+                                <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:4px;">Bonus Chat Credits:</label>
+                                <input type="number" name="bundle[<?php echo esc_attr($active_report); ?>][tier_trio][chat_credits]" id="mr_trio_credits_input" value="<?php echo esc_attr($bundle_cfg['tier_trio']['chat_credits'] ?? 30); ?>" style="width:100%; font-weight:800; color:#0284c7; border-radius:6px;">
                             </div>
-                            <div>
-                                <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:4px;">MRP Price (₹):</label>
-                                <input type="number" step="1" name="bundle[<?php echo esc_attr($active_report); ?>][tier_trio][price_regular]" value="<?php echo esc_attr($bundle_cfg['tier_trio']['price_regular']); ?>" style="width:100%; border-radius:6px;">
+                            <div style="background:#fff; padding:6px 10px; border-radius:6px; border:1.5px solid #7A1F3D;">
+                                <label style="display:block; font-size:11.5px; font-weight:800; color:#7A1F3D; margin-bottom:3px;">
+                                    Discount % on Sale Price:
+                                </label>
+                                <div style="display:flex; align-items:center; gap:4px;">
+                                    <input type="number" step="0.5" min="0" max="95" name="bundle[<?php echo esc_attr($active_report); ?>][tier_trio][discount_pct]" id="mr_trio_discount_input" value="<?php echo esc_attr($bundle_cfg['tier_trio']['discount_pct'] ?? 15); ?>" style="width:70px; font-weight:800; font-size:15px; color:#7A1F3D; border-radius:4px; padding:3px 6px;">
+                                    <span style="font-weight:800; font-size:13px; color:#7A1F3D;">% OFF</span>
+                                </div>
                             </div>
                         </div>
 
-                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:12px;">
-                            <div>
-                                <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:4px;">Badge Text:</label>
-                                <input type="text" name="bundle[<?php echo esc_attr($active_report); ?>][tier_trio][badge]" value="<?php echo esc_attr($bundle_cfg['tier_trio']['badge'] ?? 'BEST BUY - SAVE 71%'); ?>" style="width:100%; border-radius:6px;">
+                        <!-- DYNAMIC PRICING BREAKDOWN PREVIEW -->
+                        <div style="background:#fff; border:1.5px solid #fde68a; border-radius:8px; padding:12px; margin-bottom:12px; box-shadow:0 2px 6px rgba(122,31,61,0.06);">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                <span style="font-size:11px; font-weight:800; color:#7A1F3D; text-transform:uppercase; letter-spacing:0.5px;">
+                                    <i class="dashicons dashicons-calculator" style="font-size:14px; vertical-align:middle;"></i> Dynamic Pricing Math
+                                </span>
+                                <button type="button" class="button button-small" id="mr_trio_autofill_badge" style="font-size:10px; height:20px; line-height:18px; padding:0 6px;">
+                                    Auto-fill Badge
+                                </button>
                             </div>
-                            <div>
-                                <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:4px;">Bonus Chat Credits:</label>
-                                <input type="number" name="bundle[<?php echo esc_attr($active_report); ?>][tier_trio][chat_credits]" value="<?php echo esc_attr($bundle_cfg['tier_trio']['chat_credits'] ?? 30); ?>" style="width:100%; font-weight:800; color:#0284c7; border-radius:6px;">
+                            <div id="mr_trio_calc_box" style="font-size:12px; line-height:1.6; color:#334155;">
+                                <!-- Live calculated via JS -->
                             </div>
+                        </div>
+
+                        <div style="margin-bottom:12px;">
+                            <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:4px;">Badge Text:</label>
+                            <input type="text" name="bundle[<?php echo esc_attr($active_report); ?>][tier_trio][badge]" id="mr_trio_badge_input" value="<?php echo esc_attr($bundle_cfg['tier_trio']['badge'] ?? 'BEST BUY - SAVE 71%'); ?>" style="width:100%; border-radius:6px;">
                         </div>
 
                         <div>
@@ -420,6 +538,121 @@ class MR_Bundles_Admin {
                     </form>
                 </div>
         </div>
+
+        <!-- JAVASCRIPT REAL-TIME DYNAMIC BUNDLE PRICING CALCULATOR -->
+        <script>
+        (function($) {
+            $(document).ready(function() {
+                var catalogMap = <?php echo wp_json_encode($catalog_map); ?>;
+                var activeSlug = $('#mr_active_report_slug').val();
+
+                function formatInr(val) {
+                    var n = Number(val);
+                    if (isNaN(n)) return '0';
+                    if (Math.floor(n) === n) {
+                        return n.toLocaleString('en-IN');
+                    }
+                    return n.toLocaleString('en-IN', {minimumFractionDigits: 1, maximumFractionDigits: 2});
+                }
+
+                function updateDuoPreview() {
+                    var base = catalogMap[activeSlug] || { price_sale: 0, price_regular: 0, name: activeSlug };
+                    var sisterSlug = $('#mr_duo_sister_select').val();
+                    var sister = catalogMap[sisterSlug] || { price_sale: 0, price_regular: 0, name: sisterSlug };
+                    var credits = parseInt($('#mr_duo_credits_input').val(), 10) || 0;
+                    var creditsVal = credits * 1.0;
+                    var discPct = parseFloat($('#mr_duo_discount_input').val()) || 0;
+
+                    var combinedSale = base.price_sale + sister.price_sale + creditsVal;
+                    var bundleSale = Math.round((combinedSale * (1 - (discPct / 100))) * 100) / 100;
+                    var combinedReg = base.price_regular + sister.price_regular + creditsVal;
+                    var savings = Math.max(0, Math.round((combinedReg - bundleSale) * 100) / 100);
+                    var overallPct = (combinedReg > 0) ? Math.round((savings / combinedReg) * 100) : 0;
+
+                    window.lastDuoOverallPct = overallPct;
+
+                    var html = '<div style="margin-bottom:6px; padding-bottom:5px; border-bottom:1px dashed #fed7aa;">' +
+                        '<strong>Constituent Items:</strong><br>' +
+                        '&bull; ' + base.name + ': ₹' + formatInr(base.price_sale) + ' (MRP ₹' + formatInr(base.price_regular) + ')<br>' +
+                        '&bull; ' + sister.name + ': ₹' + formatInr(sister.price_sale) + ' (MRP ₹' + formatInr(sister.price_regular) + ')<br>' +
+                        '&bull; ' + credits + ' AI Chat Credits: ₹' + formatInr(creditsVal) +
+                        '</div>' +
+                        '<div style="margin-bottom:6px; padding-bottom:5px; border-bottom:1px dashed #fed7aa;">' +
+                        '<strong>Sale Price Calculation:</strong><br>' +
+                        '(' + formatInr(base.price_sale) + ' + ' + formatInr(sister.price_sale) + ' + ' + formatInr(creditsVal) + ') - ' + discPct + '% = <strong style="color:#c2410c; font-size:14px;">₹' + formatInr(bundleSale) + '</strong>' +
+                        '</div>' +
+                        '<div>' +
+                        '<strong>Listing MRP &amp; Total Value:</strong><br>' +
+                        'Listing MRP: <s>₹' + formatInr(combinedReg) + '</s> &bull; ' +
+                        '<strong style="color:#059669;">Save ₹' + formatInr(savings) + ' (' + overallPct + '% OFF)</strong>' +
+                        '</div>';
+
+                    $('#mr_duo_calc_box').html(html);
+                }
+
+                function updateTrioPreview() {
+                    var base = catalogMap[activeSlug] || { price_sale: 0, price_regular: 0, name: activeSlug };
+                    var sister1Slug = $('#mr_trio_sister1_select').val();
+                    var sister1 = catalogMap[sister1Slug] || { price_sale: 0, price_regular: 0, name: sister1Slug };
+                    var sister2Slug = $('#mr_trio_sister2_select').val();
+                    var sister2 = catalogMap[sister2Slug] || { price_sale: 0, price_regular: 0, name: sister2Slug };
+                    var credits = parseInt($('#mr_trio_credits_input').val(), 10) || 0;
+                    var creditsVal = credits * 1.0;
+                    var discPct = parseFloat($('#mr_trio_discount_input').val()) || 0;
+
+                    var combinedSale = base.price_sale + sister1.price_sale + sister2.price_sale + creditsVal;
+                    var bundleSale = Math.round((combinedSale * (1 - (discPct / 100))) * 100) / 100;
+                    var combinedReg = base.price_regular + sister1.price_regular + sister2.price_regular + creditsVal;
+                    var savings = Math.max(0, Math.round((combinedReg - bundleSale) * 100) / 100);
+                    var overallPct = (combinedReg > 0) ? Math.round((savings / combinedReg) * 100) : 0;
+
+                    window.lastTrioOverallPct = overallPct;
+
+                    var html = '<div style="margin-bottom:6px; padding-bottom:5px; border-bottom:1px dashed #fde68a;">' +
+                        '<strong>Constituent Items:</strong><br>' +
+                        '&bull; ' + base.name + ': ₹' + formatInr(base.price_sale) + ' (MRP ₹' + formatInr(base.price_regular) + ')<br>' +
+                        '&bull; ' + sister1.name + ': ₹' + formatInr(sister1.price_sale) + ' (MRP ₹' + formatInr(sister1.price_regular) + ')<br>' +
+                        '&bull; ' + sister2.name + ': ₹' + formatInr(sister2.price_sale) + ' (MRP ₹' + formatInr(sister2.price_regular) + ')<br>' +
+                        '&bull; ' + credits + ' AI Chat Credits: ₹' + formatInr(creditsVal) +
+                        '</div>' +
+                        '<div style="margin-bottom:6px; padding-bottom:5px; border-bottom:1px dashed #fde68a;">' +
+                        '<strong>Sale Price Calculation:</strong><br>' +
+                        '(' + formatInr(base.price_sale) + ' + ' + formatInr(sister1.price_sale) + ' + ' + formatInr(sister2.price_sale) + ' + ' + formatInr(creditsVal) + ') - ' + discPct + '% = <strong style="color:#7A1F3D; font-size:14px;">₹' + formatInr(bundleSale) + '</strong>' +
+                        '</div>' +
+                        '<div>' +
+                        '<strong>Listing MRP &amp; Total Value:</strong><br>' +
+                        'Listing MRP: <s>₹' + formatInr(combinedReg) + '</s> &bull; ' +
+                        '<strong style="color:#059669;">Save ₹' + formatInr(savings) + ' (' + overallPct + '% OFF)</strong>' +
+                        '</div>';
+
+                    $('#mr_trio_calc_box').html(html);
+                }
+
+                // Bind events for live calculation
+                $('#mr_duo_sister_select, #mr_duo_credits_input, #mr_duo_discount_input').on('input change', updateDuoPreview);
+                $('#mr_trio_sister1_select, #mr_trio_sister2_select, #mr_trio_credits_input, #mr_trio_discount_input').on('input change', updateTrioPreview);
+
+                // Auto-fill Badge Buttons
+                $('#mr_duo_autofill_badge').on('click', function(e) {
+                    e.preventDefault();
+                    if (window.lastDuoOverallPct) {
+                        $('#mr_duo_badge_input').val('SAVE ' + window.lastDuoOverallPct + '%');
+                    }
+                });
+
+                $('#mr_trio_autofill_badge').on('click', function(e) {
+                    e.preventDefault();
+                    if (window.lastTrioOverallPct) {
+                        $('#mr_trio_badge_input').val('BEST BUY - SAVE ' + window.lastTrioOverallPct + '%');
+                    }
+                });
+
+                // Initial render
+                updateDuoPreview();
+                updateTrioPreview();
+            });
+        })(jQuery);
+        </script>
         <?php
     }
 }

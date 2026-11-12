@@ -29,6 +29,10 @@ class MR_Invoice {
         add_action('template_redirect', [__CLASS__, 'handle_invoice_request']);
         add_action('wp_ajax_mr_download_invoice', [__CLASS__, 'ajax_download_invoice']);
         add_action('wp_ajax_nopriv_mr_download_invoice', [__CLASS__, 'ajax_download_invoice']);
+
+        // Async background invoice generation and email worker
+        add_action('wp_ajax_mr_async_invoice_worker', [__CLASS__, 'ajax_async_invoice_worker']);
+        add_action('wp_ajax_nopriv_mr_async_invoice_worker', [__CLASS__, 'ajax_async_invoice_worker']);
     }
 
     /**
@@ -161,6 +165,11 @@ class MR_Invoice {
         $bundle_tier = $meta['bundle_tier'] ?? 'single';
         $reports     = !empty($meta['bundle_reports']) ? (array)$meta['bundle_reports'] : [];
         $chat_credits= intval($meta['chat_credits'] ?? 0);
+        $is_chat         = (($txn['channel'] ?? '') === 'chat_recharge' || (!empty($meta['item_type']) && $meta['item_type'] === 'chat_credits'));
+        $coupon_code     = !empty($meta['coupon_code']) ? $meta['coupon_code'] : '';
+        $coupon_discount = floatval($meta['coupon_discount'] ?? 0);
+        $bucket_discount = floatval($meta['bucket_discount'] ?? 0);
+        $bucket_label    = !empty($meta['bucket_label']) ? $meta['bucket_label'] : (!empty($meta['bucket_rule_title']) ? $meta['bucket_rule_title'] : 'Bucket / Multi-Item Privilege:');
 
         $gross_amount = floatval($txn['gross_amount'] ?? $txn['net_amount']);
         $net_amount   = floatval($txn['net_amount'] ?? 299);
@@ -405,8 +414,7 @@ class MR_Invoice {
                         <h1><?php echo esc_html(self::COMPANY_NAME); ?></h1>
                         <p>
                             <?php echo esc_html(self::COMPANY_ADDRESS); ?><br>
-                            Email: <a href="mailto:<?php echo esc_attr(self::COMPANY_EMAIL); ?>" style="color:#7A1F3D; text-decoration:none;"><?php echo esc_html(self::COMPANY_EMAIL); ?></a><br>
-                            Status: <strong><?php echo esc_html(self::TAX_STATUS); ?></strong>
+                            Email: <a href="mailto:<?php echo esc_attr(self::COMPANY_EMAIL); ?>" style="color:#7A1F3D; text-decoration:none;"><?php echo esc_html(self::COMPANY_EMAIL); ?></a>
                         </p>
                     </div>
 
@@ -468,7 +476,12 @@ class MR_Invoice {
                             <td>
                                 <div class="mr-item-title"><?php echo esc_html($item_name); ?></div>
                                 <div class="mr-item-sub">
-                                    <?php if (!empty($reports)): ?>
+                                    <?php if ($is_chat): ?>
+                                        Niyati AI Astrological Consultation Pack &bull; Instant Electronic Wallet Credit &bull; Lifetime Validity
+                                        <?php if ($chat_credits > 0): ?>
+                                            <br><span style="color:#0284c7; font-weight:700;">★ Credited <?php echo esc_html($chat_credits); ?> Consultation Questions</span>
+                                        <?php endif; ?>
+                                    <?php elseif (!empty($reports)): ?>
                                         Included: 
                                         <?php 
                                         $r_names = array_map(function($slug) {
@@ -480,7 +493,7 @@ class MR_Invoice {
                                         Personalized Vedic Astrological Dossier (Vector PDF & Online Archive)
                                     <?php endif; ?>
 
-                                    <?php if ($chat_credits > 0): ?>
+                                    <?php if (!$is_chat && $chat_credits > 0): ?>
                                         <br><span style="color:#0284c7; font-weight:700;">★ Includes <?php echo esc_html($chat_credits); ?> Niyati AI Astrological Consultation Questions</span>
                                     <?php endif; ?>
                                 </div>
@@ -501,17 +514,28 @@ class MR_Invoice {
                 <!-- Summary & Totals -->
                 <table class="mr-inv-totals-box">
                     <tr>
-                        <td>Subtotal:</td>
-                        <td><?php echo esc_html($currency_sym . number_format($net_amount, 2)); ?></td>
+                        <td>Subtotal (Pre-Tax):</td>
+                        <td><?php echo esc_html($currency_sym . number_format($gross_amount, 2)); ?></td>
                     </tr>
-                    <?php if ($discount > 0): ?>
+                    <?php if ($bucket_discount > 0): ?>
                     <tr>
-                        <td style="color:#059669;">Bundle Discount:</td>
+                        <td style="color:#C2410C;"><?php echo esc_html($bucket_label); ?></td>
+                        <td style="color:#C2410C;">- <?php echo esc_html($currency_sym . number_format($bucket_discount, 2)); ?></td>
+                    </tr>
+                    <?php endif; ?>
+                    <?php if ($coupon_discount > 0): ?>
+                    <tr>
+                        <td style="color:#059669;">Coupon Discount (<?php echo esc_html($coupon_code); ?>):</td>
+                        <td style="color:#059669;">- <?php echo esc_html($currency_sym . number_format($coupon_discount, 2)); ?></td>
+                    </tr>
+                    <?php elseif ($discount > 0 && $bucket_discount <= 0): ?>
+                    <tr>
+                        <td style="color:#059669;"><?php echo !empty($coupon_code) ? ('Coupon Discount (' . esc_html($coupon_code) . '):') : ($is_chat ? 'Special Offer Discount:' : 'Bundle Discount:'); ?></td>
                         <td style="color:#059669;">- <?php echo esc_html($currency_sym . number_format($discount, 2)); ?></td>
                     </tr>
                     <?php endif; ?>
                     <tr>
-                        <td>Taxes (0% Non-GST / Nil):</td>
+                        <td>Taxes:</td>
                         <td><?php echo esc_html($currency_sym); ?>0.00</td>
                     </tr>
                     <tr class="mr-inv-grand-total">
@@ -528,7 +552,7 @@ class MR_Invoice {
                         All report tokens and AI chat credits have been credited to your account and remain accessible for lifetime download.
                     </p>
                     <p style="margin-top:6px; color:#cbd5e1;">
-                        &copy; <?php echo esc_html($year); ?> <?php echo esc_html(self::COMPANY_NAME); ?>. All rights reserved.
+                        &copy; <?php echo esc_html(date('Y')); ?> <?php echo esc_html(self::COMPANY_NAME); ?>. All rights reserved.
                     </p>
                 </div>
             </div>
@@ -625,12 +649,80 @@ class MR_Invoice {
     }
 
     /**
+     * Asynchronously dispatch PDF invoice generation and email dispatch
+     */
+    public static function dispatch_async_invoice_email($txn_id) {
+        $txn_id = intval($txn_id);
+        if (!$txn_id) return;
+
+        $ajax_url = admin_url('admin-ajax.php');
+        $auth_secret = wp_hash('mr_async_invoice_' . $txn_id);
+
+        // 1. Non-blocking asynchronous HTTP loopback request to background worker
+        wp_remote_post($ajax_url, [
+            'blocking'  => false,
+            'timeout'   => 0.05,
+            'sslverify' => false,
+            'body'      => [
+                'action' => 'mr_async_invoice_worker',
+                'txn_id' => $txn_id,
+                'auth'   => $auth_secret,
+            ],
+        ]);
+
+        // 2. Also register shutdown function so it runs when PHP finishes sending response
+        register_shutdown_function(function() use ($txn_id) {
+            if (function_exists('fastcgi_finish_request')) {
+                fastcgi_finish_request();
+            }
+            self::process_invoice_email_safe($txn_id);
+        });
+    }
+
+    /**
+     * Safe runner with concurrency lock to ensure invoice is compiled and sent once
+     */
+    public static function process_invoice_email_safe($txn_id) {
+        $txn_id = intval($txn_id);
+        if (!$txn_id) return;
+
+        $lock_key = 'mr_inv_mail_sent_' . $txn_id;
+        if (get_transient($lock_key)) {
+            return;
+        }
+        set_transient($lock_key, 1, 300);
+
+        self::send_invoice_email($txn_id);
+    }
+
+    /**
+     * AJAX Worker endpoint for async background invoice processing
+     */
+    public static function ajax_async_invoice_worker() {
+        // Prevent script abort when HTTP connection closes
+        ignore_user_abort(true);
+        if (function_exists('set_time_limit')) {
+            @set_time_limit(180);
+        }
+
+        $txn_id = intval($_POST['txn_id'] ?? 0);
+        $auth   = sanitize_text_field($_POST['auth'] ?? '');
+
+        if (!$txn_id || !hash_equals(wp_hash('mr_async_invoice_' . $txn_id), (string)$auth)) {
+            wp_send_json_error(['message' => 'Unauthorized async request']);
+        }
+
+        self::process_invoice_email_safe($txn_id);
+        wp_send_json_success(['status' => 'invoice_dispatched']);
+    }
+
+    /**
      * Public template redirect for viewing / downloading invoices
-     * URL: /invoice/?id=MR_ORD_... OR /my-account/?action=invoice&id=...
+     * URL: /invoice/?id=MR_ORD_... OR /my-account/?action=invoice&id=... OR /?mr_invoice=1&id=...
      */
     public static function handle_invoice_request() {
         $uri = trim($_SERVER['REQUEST_URI'] ?? '', '/');
-        $is_invoice_url = (strpos($uri, 'invoice') === 0 || isset($_GET['mr_invoice']) || (isset($_GET['action']) && $_GET['action'] === 'invoice'));
+        $is_invoice_url = (strpos($uri, 'invoice') !== false || isset($_GET['mr_invoice']) || (isset($_GET['action']) && $_GET['action'] === 'invoice'));
 
         if (!$is_invoice_url) {
             return;
@@ -718,9 +810,14 @@ class MR_Invoice {
      * Get direct invoice URL for a transaction
      */
     public static function get_invoice_url($txn) {
-        $internal_id = $txn['internal_txn_id'] ?? '';
-        $email       = $txn['customer_email'] ?? '';
+        $internal_id = is_array($txn) ? ($txn['internal_txn_id'] ?? '') : ($txn->internal_txn_id ?? '');
+        $email       = is_array($txn) ? ($txn['customer_email'] ?? '') : ($txn->customer_email ?? '');
         $k           = substr(md5($internal_id . $email . AUTH_KEY), 0, 12);
-        return home_url('/invoice/?id=' . urlencode($internal_id) . '&k=' . $k);
+        
+        return add_query_arg([
+            'mr_invoice' => 1,
+            'id'         => $internal_id,
+            'k'          => $k,
+        ], home_url('/'));
     }
 }

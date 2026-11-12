@@ -275,7 +275,14 @@
                 _ajax_nonce: mr_account_vars.nonce,
                 pref_chart: $('#mr_pref_chart').val(),
                 pref_system: $('#mr_pref_system').val(),
-                pref_notify: $('input[name="pref_notify"]').is(':checked') ? 1 : 0
+                pref_notify: $('input[name="pref_notify"]').is(':checked') ? 1 : 0,
+                nominee_name: $('#mr_dpdp_nominee_name').val(),
+                nominee_relation: $('#mr_dpdp_nominee_relation').val(),
+                nominee_email: $('#mr_dpdp_nominee_email').val(),
+                nominee_phone: $('#mr_dpdp_nominee_phone').val(),
+                consent_profile: $('#mr_consent_profile').is(':checked') ? 1 : 0,
+                consent_ai: $('#mr_consent_ai').is(':checked') ? 1 : 0,
+                consent_comms: $('#mr_consent_comms').is(':checked') ? 1 : 0
             };
 
             $.ajax({
@@ -304,52 +311,338 @@
         });
 
         // -------------------------------------------------------------
-        // 5. Client-Side Table Pagination (Reports & Passbook)
+        // 4b. DPDP Act 2023: Section 11 - Right to Access (Export Data Archive)
         // -------------------------------------------------------------
-        $(document).on('click', '.mr-pagination-wrap .mr-page-num', function(e) {
+        $('#mr-btn-dpdp-export').on('click', function(e) {
+            e.preventDefault();
+
+            var $btn = $(this);
+            var $feedback = $('#mr-dpdp-export-feedback');
+            var originalHtml = $btn.html();
+            var spinImg = mr_account_vars.loader_url ? '<img src="' + mr_account_vars.loader_url + '" class="mr-spin-btn-icon" alt="" /> ' : '';
+
+            $btn.prop('disabled', true).html(spinImg + 'Compiling Archive...');
+            $feedback.removeClass('mr-feedback-success mr-feedback-error').empty();
+
+            $.ajax({
+                url: mr_account_vars.ajax_url,
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    action: 'mr_dpdp_export_data',
+                    _ajax_nonce: mr_account_vars.nonce
+                },
+                success: function(res) {
+                    $btn.prop('disabled', false).html(originalHtml);
+                    if (res && res.success && res.data && res.data.data) {
+                        try {
+                            var jsonStr = JSON.stringify(res.data.data, null, 2);
+                            var blob = new Blob([jsonStr], { type: 'application/json' });
+                            var blobUrl = window.URL.createObjectURL(blob);
+                            var a = document.createElement('a');
+                            a.style.display = 'none';
+                            a.href = blobUrl;
+                            a.download = res.data.filename || ('merarashifal-data-archive-' + Date.now() + '.json');
+                            document.body.appendChild(a);
+                            a.click();
+                            setTimeout(function() {
+                                document.body.removeChild(a);
+                                window.URL.revokeObjectURL(blobUrl);
+                            }, 250);
+
+                            $feedback.addClass('mr-feedback-success').html('✓ Personal data archive (.JSON) downloaded successfully.');
+                        } catch (err) {
+                            $feedback.addClass('mr-feedback-error').html('⚠ Error generating export file.');
+                        }
+                    } else {
+                        $feedback.addClass('mr-feedback-error').html('⚠ ' + (res.data ? res.data.message : 'Could not compile data archive.'));
+                    }
+                },
+                error: function() {
+                    $btn.prop('disabled', false).html(originalHtml);
+                    $feedback.addClass('mr-feedback-error').html('⚠ Server connection error while exporting data.');
+                }
+            });
+        });
+
+        // -------------------------------------------------------------
+        // 4c. DPDP Act 2023: Section 12 - Right to Erasure / Account Deletion
+        // -------------------------------------------------------------
+        var $eraseContainer   = $('#mr-dpdp-erase-confirm-container');
+        var $eraseInput       = $('#mr-dpdp-erase-confirm-input');
+        var $eraseConfirmBtn  = $('#mr-btn-dpdp-erase-confirm');
+        var $eraseFeedback    = $('#mr-dpdp-erase-feedback');
+        var $challengeSentence = $('#mr-dpdp-challenge-sentence');
+        var $refreshChallengeBtn = $('#mr-btn-refresh-challenge');
+
+        function updateEraseChallenge(challenge) {
+            if (!challenge || !challenge.word) return;
+            if ($challengeSentence.length && challenge.sentence_html) {
+                $challengeSentence.html(challenge.sentence_html);
+            }
+            $eraseInput.attr('data-expected', challenge.word);
+            $eraseInput.attr('placeholder', 'Type ' + challenge.word);
+            $eraseInput.val('');
+            $eraseConfirmBtn.prop('disabled', true);
+        }
+
+        function fetchFreshEraseChallenge(callback) {
+            var $icon = $refreshChallengeBtn.find('svg');
+            $icon.addClass('mr-spin-btn-icon');
+            $refreshChallengeBtn.prop('disabled', true);
+
+            $.ajax({
+                url: mr_account_vars.ajax_url,
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    action: 'mr_dpdp_get_erase_challenge',
+                    _ajax_nonce: mr_account_vars.nonce
+                },
+                success: function(res) {
+                    $icon.removeClass('mr-spin-btn-icon');
+                    $refreshChallengeBtn.prop('disabled', false);
+                    if (res && res.success && res.data) {
+                        updateEraseChallenge(res.data);
+                        if (typeof callback === 'function') callback(res.data);
+                    }
+                },
+                error: function() {
+                    $icon.removeClass('mr-spin-btn-icon');
+                    $refreshChallengeBtn.prop('disabled', false);
+                }
+            });
+        }
+
+        // Open collapsible container & immediately fetch fresh security challenge
+        $('#mr-btn-dpdp-erase-open').on('click', function(e) {
+            e.preventDefault();
+            var isOpen = $eraseContainer.is(':visible');
+            $eraseContainer.slideToggle(200);
+            $eraseFeedback.empty();
+
+            if (!isOpen) {
+                fetchFreshEraseChallenge();
+            }
+        });
+
+        // Refresh Challenge Button Click
+        $refreshChallengeBtn.on('click', function(e) {
+            e.preventDefault();
+            fetchFreshEraseChallenge();
+        });
+
+        $('#mr-btn-dpdp-erase-cancel').on('click', function(e) {
+            e.preventDefault();
+            $eraseContainer.slideUp(200);
+            $eraseInput.val('');
+            $eraseConfirmBtn.prop('disabled', true);
+            $eraseFeedback.empty();
+        });
+
+        // Real-time input comparison against dynamic expected token
+        $eraseInput.on('input propertychange', function() {
+            var val = $(this).val().trim();
+            var expected = ($(this).attr('data-expected') || '').trim();
+            if (expected && val.toUpperCase() === expected.toUpperCase()) {
+                $eraseConfirmBtn.prop('disabled', false);
+            } else {
+                $eraseConfirmBtn.prop('disabled', true);
+            }
+        });
+
+        $eraseConfirmBtn.on('click', function(e) {
+            e.preventDefault();
+            var val = $eraseInput.val().trim();
+            var expected = ($eraseInput.attr('data-expected') || '').trim();
+
+            if (!expected || val.toUpperCase() !== expected.toUpperCase()) {
+                $eraseFeedback.addClass('mr-feedback-error').html('⚠ Please type the highlighted verification word exactly as displayed.');
+                return;
+            }
+
+            var spinImg = mr_account_vars.loader_url ? '<img src="' + mr_account_vars.loader_url + '" class="mr-spin-btn-icon" alt="" /> ' : '';
+            var originalHtml = $eraseConfirmBtn.html();
+
+            $eraseConfirmBtn.prop('disabled', true).html(spinImg + 'Erasing Account...');
+            $eraseFeedback.removeClass('mr-feedback-success mr-feedback-error').empty();
+
+            $.ajax({
+                url: mr_account_vars.ajax_url,
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    action: 'mr_dpdp_erase_account',
+                    _ajax_nonce: mr_account_vars.nonce,
+                    confirm_phrase: val
+                },
+                success: function(res) {
+                    if (res && res.success) {
+                        $eraseFeedback.addClass('mr-feedback-success').html('✓ ' + (res.data ? res.data.message : 'Account erased. Redirecting...'));
+                        setTimeout(function() {
+                            window.location.href = (res.data && res.data.redirect_url) ? res.data.redirect_url : '/?mr_dpdp_erased=1';
+                        }, 1200);
+                    } else {
+                        $eraseConfirmBtn.prop('disabled', false).html(originalHtml);
+                        $eraseFeedback.addClass('mr-feedback-error').html('⚠ ' + (res.data ? res.data.message : 'Could not complete erasure.'));
+                        if (res.data && res.data.new_challenge) {
+                            updateEraseChallenge(res.data.new_challenge);
+                        }
+                    }
+                },
+                error: function() {
+                    $eraseConfirmBtn.prop('disabled', false).html(originalHtml);
+                    $eraseFeedback.addClass('mr-feedback-error').html('⚠ Server connection error while processing erasure request.');
+                }
+            });
+        });
+
+        // -------------------------------------------------------------
+        // 5. On-Demand 25-Entry Passbook Filter & Pagination (AJAX)
+        // -------------------------------------------------------------
+        var currentPassbookFilter = 'all';
+        var currentPassbookPage   = 1;
+        var isPassbookLoading     = false;
+
+        function loadPassbookPage(filter, page) {
+            if (isPassbookLoading) return;
+            isPassbookLoading = true;
+            currentPassbookFilter = filter || 'all';
+            currentPassbookPage   = page || 1;
+
+            var $table = $('#mr-passbook-ledger-table');
+            var $tbody = $table.find('tbody');
+            var $paginationWrap = $('#mr-passbook-pagination-container');
+            var $hint = $('#mr-passbook-filter-hint');
+
+            // Update explanation hint immediately
+            var hints = {
+                'all': 'Showing complete chronological ledger of report orders, credit recharges, and chat sessions.',
+                'credits': 'Showing Niyati AI credit awards, pack recharges, and daily grouped consultation sessions.',
+                'orders': 'Showing certified horoscope reports and payment receipts with invoices.'
+            };
+            if ($hint.length && hints[currentPassbookFilter]) {
+                $hint.text(hints[currentPassbookFilter]);
+            }
+
+            // Visual feedback while loading
+            $tbody.css('opacity', '0.45');
+
+            $.ajax({
+                url: (window.mr_account_vars && window.mr_account_vars.ajax_url) ? window.mr_account_vars.ajax_url : '/wp-admin/admin-ajax.php',
+                type: 'POST',
+                dataType: 'json',
+                data: {
+                    action: 'mr_get_passbook_page',
+                    nonce: (window.mr_account_vars && window.mr_account_vars.nonce) ? window.mr_account_vars.nonce : '',
+                    filter: currentPassbookFilter,
+                    page: currentPassbookPage
+                },
+                success: function(res) {
+                    $tbody.css('opacity', '1');
+                    isPassbookLoading = false;
+
+                    if (res && res.success && res.data) {
+                        $tbody.html(res.data.rows_html);
+                        $paginationWrap.html(res.data.pagination_html);
+
+                        // Update filter pill counts dynamically
+                        if (res.data.counts) {
+                            $('.mr-passbook-filter-btn[data-filter="all"] .mr-filter-count').text(res.data.counts.all);
+                            $('.mr-passbook-filter-btn[data-filter="credits"] .mr-filter-count').text(res.data.counts.credits);
+                            $('.mr-passbook-filter-btn[data-filter="orders"] .mr-filter-count').text(res.data.counts.orders);
+                        }
+                    } else {
+                        var msg = (res && res.data && res.data.message) ? res.data.message : 'Failed to load records.';
+                        $tbody.html('<tr><td colspan="5" style="text-align:center; padding:30px; color:#BE123C;">' + msg + '</td></tr>');
+                    }
+                },
+                error: function() {
+                    $tbody.css('opacity', '1');
+                    isPassbookLoading = false;
+                    $tbody.html('<tr><td colspan="5" style="text-align:center; padding:30px; color:#BE123C;">Connection error. Please refresh the page.</td></tr>');
+                }
+            });
+        }
+
+        // Passbook Filter Tab click
+        $(document).on('click', '.mr-passbook-filter-btn', function(e) {
+            e.preventDefault();
+            if ($(this).hasClass('active')) return;
+            $('.mr-passbook-filter-btn').removeClass('active');
+            $(this).addClass('active');
+            var filter = $(this).data('filter') || 'all';
+            loadPassbookPage(filter, 1);
+        });
+
+        // Passbook Pagination button clicks
+        $(document).on('click', '#mr-passbook-pagination .mr-page-num', function(e) {
+            e.preventDefault();
+            var targetPage = parseInt($(this).data('page'), 10);
+            if (!targetPage || targetPage === currentPassbookPage) return;
+            loadPassbookPage(currentPassbookFilter, targetPage);
+            var $table = $('#mr-passbook-ledger-table');
+            if ($table.length) {
+                $('html, body').animate({ scrollTop: $table.offset().top - 80 }, 200);
+            }
+        });
+
+        $(document).on('click', '#mr-passbook-pagination .mr-prev-page', function(e) {
+            e.preventDefault();
+            if ($(this).is(':disabled') || currentPassbookPage <= 1) return;
+            loadPassbookPage(currentPassbookFilter, currentPassbookPage - 1);
+            var $table = $('#mr-passbook-ledger-table');
+            if ($table.length) {
+                $('html, body').animate({ scrollTop: $table.offset().top - 80 }, 200);
+            }
+        });
+
+        $(document).on('click', '#mr-passbook-pagination .mr-next-page', function(e) {
+            e.preventDefault();
+            var totalPages = parseInt($('#mr-passbook-pagination').data('total-pages'), 10) || 1;
+            if ($(this).is(':disabled') || currentPassbookPage >= totalPages) return;
+            loadPassbookPage(currentPassbookFilter, currentPassbookPage + 1);
+            var $table = $('#mr-passbook-ledger-table');
+            if ($table.length) {
+                $('html, body').animate({ scrollTop: $table.offset().top - 80 }, 200);
+            }
+        });
+
+        // Reports table pagination (Tab 2)
+        $(document).on('click', '#mr-reports-pagination .mr-page-num', function(e) {
             e.preventDefault();
             var $wrap = $(this).closest('.mr-pagination-wrap');
             var targetPage = parseInt($(this).data('page'), 10);
-            paginateAccountTable($wrap, targetPage);
+            paginateReportsTable($wrap, targetPage);
         });
 
-        $(document).on('click', '.mr-pagination-wrap .mr-prev-page', function(e) {
+        $(document).on('click', '#mr-reports-pagination .mr-prev-page', function(e) {
             e.preventDefault();
             var $wrap = $(this).closest('.mr-pagination-wrap');
             var current = parseInt($wrap.data('current-page') || 1, 10);
             if (current > 1) {
-                paginateAccountTable($wrap, current - 1);
+                paginateReportsTable($wrap, current - 1);
             }
         });
 
-        $(document).on('click', '.mr-pagination-wrap .mr-next-page', function(e) {
+        $(document).on('click', '#mr-reports-pagination .mr-next-page', function(e) {
             e.preventDefault();
             var $wrap = $(this).closest('.mr-pagination-wrap');
             var current = parseInt($wrap.data('current-page') || 1, 10);
             var total = parseInt($wrap.data('total-pages') || 1, 10);
             if (current < total) {
-                paginateAccountTable($wrap, current + 1);
+                paginateReportsTable($wrap, current + 1);
             }
         });
 
-        function paginateAccountTable($pagination, page) {
+        function paginateReportsTable($pagination, page) {
             var total = parseInt($pagination.data('total-pages') || 1, 10);
             if (page < 1 || page > total) return;
-
             $pagination.data('current-page', page);
-
-            var isReports = $pagination.attr('id') === 'mr-reports-pagination';
-            var rowClass = isReports ? '.mr-report-row' : '.mr-txn-row';
-
-            // Show target page rows, hide others
-            $(rowClass).hide();
-            $(rowClass + '[data-page="' + page + '"]').show();
-
-            // Update page button states
+            $('.mr-report-row').hide();
+            $('.mr-report-row[data-page="' + page + '"]').show();
             $pagination.find('.mr-page-num').removeClass('active');
             $pagination.find('.mr-page-num[data-page="' + page + '"]').addClass('active');
-
-            // Prev / Next button state
             $pagination.find('.mr-prev-page').prop('disabled', page <= 1);
             $pagination.find('.mr-next-page').prop('disabled', page >= total);
         }
@@ -425,6 +718,238 @@
                 });
             }
         });
+
+        // -------------------------------------------------------------
+        // 8. Contact & Support Ticket Form with Single Picture Attachment
+        // -------------------------------------------------------------
+        var $dropzone      = $('#mr-file-dropzone');
+        var $fileInput     = $('#mr_support_attachment');
+        var $dropzoneInner = $('#mr-dropzone-prompt');
+        var $previewCard   = $('#mr-file-preview-card');
+        var $previewImg    = $('#mr-file-preview-img');
+        var $fileName      = $('#mr-file-name');
+        var $fileSize      = $('#mr-file-size');
+        var $fileError     = $('#mr-file-upload-error');
+        var $supportForm   = $('#mr-support-ticket-form');
+        var $supportFeedback = $('#mr-support-ticket-feedback');
+
+        function formatBytes(bytes, decimals) {
+            if (bytes === 0) return '0 Bytes';
+            var k = 1024;
+            var dm = decimals < 0 ? 0 : decimals || 1;
+            var sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            var i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+
+        function clearAttachment() {
+            $fileInput.val('');
+            $previewImg.attr('src', '');
+            $fileName.text('');
+            $fileSize.text('');
+            $previewCard.hide();
+            $dropzoneInner.show();
+            $fileError.hide().text('');
+        }
+
+        function handleFileSelection(file) {
+            $fileError.hide().text('');
+            if (!file) {
+                clearAttachment();
+                return;
+            }
+
+            // Verify single file is an image
+            var validMimes = ['image/jpeg', 'image/png', 'image/webp'];
+            var validExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+            var fileExt = file.name.split('.').pop().toLowerCase();
+
+            if (validMimes.indexOf(file.type) === -1 && validExtensions.indexOf(fileExt) === -1) {
+                $fileError.text('Only image files (JPG, PNG, WEBP) are allowed.').show();
+                clearAttachment();
+                return;
+            }
+
+            // 5MB Limit
+            var maxBytes = 5 * 1024 * 1024;
+            if (file.size > maxBytes) {
+                $fileError.text('The image exceeds the 5MB size limit. Please choose a smaller picture.').show();
+                clearAttachment();
+                return;
+            }
+
+            // Preview image
+            var reader = new FileReader();
+            reader.onload = function(e) {
+                $previewImg.attr('src', e.target.result);
+                $fileName.text(file.name);
+                $fileSize.text(formatBytes(file.size));
+                $dropzoneInner.hide();
+                $previewCard.show();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Dropzone interactions
+        $dropzone.on('click', function(e) {
+            if ($(e.target).closest('#mr-btn-clear-attachment').length) {
+                return;
+            }
+            $fileInput.trigger('click');
+        });
+
+        $dropzone.on('keydown', function(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                $fileInput.trigger('click');
+            }
+        });
+
+        $fileInput.on('change', function() {
+            var files = this.files;
+            if (files && files.length > 0) {
+                handleFileSelection(files[0]);
+            } else {
+                clearAttachment();
+            }
+        });
+
+        $('#mr-btn-clear-attachment').on('click', function(e) {
+            e.stopPropagation();
+            clearAttachment();
+        });
+
+        // Drag & Drop events
+        $dropzone.on('dragover dragenter', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $(this).addClass('mr-drag-over');
+        });
+
+        $dropzone.on('dragleave dragend drop', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $(this).removeClass('mr-drag-over');
+        });
+
+        $dropzone.on('drop', function(e) {
+            var dt = e.originalEvent.dataTransfer;
+            if (dt && dt.files && dt.files.length > 0) {
+                // Take only the first picture
+                var file = dt.files[0];
+                handleFileSelection(file);
+
+                // Set file input if supported by DataTransfer
+                try {
+                    var container = new DataTransfer();
+                    container.items.add(file);
+                    $fileInput[0].files = container.files;
+                } catch(err) {
+                    // Fallback for browsers where DataTransfer cannot assign to input.files
+                }
+            }
+        });
+
+        // Form submission via AJAX
+        $supportForm.on('submit', function(e) {
+            e.preventDefault();
+
+            var $btn = $('#mr-btn-submit-support');
+            var $btnText = $btn.find('.mr-btn-text');
+            var $btnSpinner = $btn.find('.mr-btn-spinner');
+
+            $supportFeedback.hide().removeClass('success error').text('');
+
+            // Validate question input
+            var message = $.trim($('#mr_support_message').val());
+
+            if (!message) {
+                $supportFeedback.addClass('error').text('Please enter your question before submitting.').fadeIn(200);
+                $('#mr_support_message').focus();
+                return false;
+            }
+
+            var formData = new FormData(this);
+            formData.append('action', 'mr_submit_support_ticket');
+            formData.append('nonce', mr_account_vars.nonce);
+
+            $btn.prop('disabled', true);
+            $btnText.hide();
+            $btnSpinner.show();
+
+            $.ajax({
+                url: mr_account_vars.ajax_url,
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                dataType: 'json',
+                success: function(response) {
+                    if (response && response.success) {
+                        $supportFeedback.addClass('success').html(
+                            '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#16A34A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:6px;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>' +
+                            response.data.message
+                        ).fadeIn(200);
+
+                        // Clear subject, message and attachment
+                        $('#mr_support_subject').val('');
+                        $('#mr_support_message').val('');
+                        clearAttachment();
+                    } else {
+                        var errMsg = (response && response.data && response.data.message) ? response.data.message : 'An error occurred while submitting your ticket. Please write to support@merarashifal.com.';
+                        $supportFeedback.addClass('error').html(
+                            '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#DC2626" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px; margin-right:6px;"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>' +
+                            errMsg
+                        ).fadeIn(200);
+                    }
+                },
+                error: function() {
+                    $supportFeedback.addClass('error').html(
+                        'A network error occurred. Please contact us directly at <a href="mailto:support@merarashifal.com" style="color:#B91C1C; font-weight:700;">support@merarashifal.com</a>.'
+                    ).fadeIn(200);
+                },
+                complete: function() {
+                    $btn.prop('disabled', false);
+                    $btnText.show();
+                    $btnSpinner.hide();
+                }
+            });
+        });
+
+        // -------------------------------------------------------------
+        // Header Auth Button Auto-Switch (Sign In / Sign Up -> Account)
+        // -------------------------------------------------------------
+        (function initHeaderAuthButtonSwitch() {
+            function checkLoggedIn() {
+                if ($('body').hasClass('logged-in')) return true;
+                if (window.mr_account_vars && (window.mr_account_vars.is_logged_in === true || window.mr_account_vars.is_logged_in === '1' || window.mr_account_vars.is_logged_in === 1)) return true;
+                if (document.cookie && document.cookie.indexOf('wordpress_logged_in_') !== -1) return true;
+                return false;
+            }
+
+            function updateHeaderButtons() {
+                if (!checkLoggedIn()) return;
+
+                if (!$('body').hasClass('logged-in')) {
+                    $('body').addClass('logged-in');
+                }
+
+                $('.elementor-element-0bf8cb1, .elementor-element-b12e20f, header a[href*="my-account"], .elementor-location-header a[href*="my-account"], .ast-header-break-point a[href*="my-account"]').each(function() {
+                    var $btn = $(this).is('a') ? $(this) : $(this).find('a.elementor-button');
+                    var $text = $btn.find('.elementor-button-text');
+                    if ($text.length) {
+                        var str = $text.text().trim();
+                        if (str === 'Sign In / Sign Up' || str === 'Sign In' || str.indexOf('Sign') !== -1) {
+                            $text.text('Account');
+                        }
+                    }
+                });
+            }
+
+            updateHeaderButtons();
+            setTimeout(updateHeaderButtons, 300);
+            setTimeout(updateHeaderButtons, 1000);
+        })();
 
     });
 })(jQuery);

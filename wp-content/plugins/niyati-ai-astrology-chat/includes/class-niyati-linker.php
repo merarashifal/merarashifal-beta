@@ -1,15 +1,15 @@
 <?php
 /**
  * Niyati Smart Auto-Linker Engine
- * Scans AI chat responses and links relevant MeraRashifal tools and pages.
+ * Scans AI chat responses and links relevant MeraRashifal tools, calculators, categories, and tags.
  * 
  * Strict Anti-Spam Guardrails:
  * 1. Each URL is linked AT MOST ONCE per response.
  * 2. Maximum 2 distinct contextual links per message total (keeps responses clean and natural).
  * 3. Natural reading order: links are introduced progressively as the user reads.
- * 4. Longest-phrase matching: Prevents partial/fragmented sub-word collisions (e.g. 'आज का पंचांग' before 'पंचांग').
+ * 4. Longest-phrase matching: Prevents partial/fragmented sub-word collisions (e.g. 'Lord Ganesha' before 'Ganesh').
  * 5. Safe regex boundaries: Never links inside existing HTML tags or Markdown links [text](url).
- * 6. Canonical tool URLs: Matches exact MeraRashifal calculators (e.g. /dosh/kaal-sarp-dosh/, /dosh/mangal-dosh/).
+ * 6. Canonical tool & taxonomy URLs: Matches exact MeraRashifal tools and Category/Tag archives.
  */
 
 if (!defined('ABSPATH')) {
@@ -19,12 +19,29 @@ if (!defined('ABSPATH')) {
 class Niyati_Linker {
 
     const MAX_LINKS_PER_MESSAGE = 2; // Strict anti-spam cap
+    const TAXONOMY_CACHE_KEY    = 'niyati_taxonomy_link_cache';
+    const TAXONOMY_CACHE_TTL    = 604800; // 7 days cache
 
     /**
-     * Get Master Link Map
-     * Returns canonical site URLs and their corresponding Hindi/English keywords.
+     * Clear cached taxonomy link map
+     */
+    public static function clear_cache() {
+        delete_transient(self::TAXONOMY_CACHE_KEY);
+    }
+
+    /**
+     * Get Master Link Map (Tools + Taxonomies)
      */
     public static function get_link_dictionary() {
+        $tools = self::get_tool_dictionary();
+        $taxonomies = self::get_taxonomy_links();
+        return array_merge($tools, $taxonomies);
+    }
+
+    /**
+     * Core Astrological Calculators & Tools Dictionary
+     */
+    public static function get_tool_dictionary() {
         $base_url = rtrim(home_url(), '/');
 
         return [
@@ -64,10 +81,10 @@ class Niyati_Linker {
                 ]
             ],
 
-            // 5. Current Mahadasha Tool
+            // 5. Current Mahadasha & Timing Report
             [
-                'url'      => $base_url . '/dasha/current-mahadasha/',
-                'title'    => 'Current Mahadasha Check',
+                'url'      => $base_url . '/reports/dasha-timing-report/',
+                'title'    => 'Dasha Timing & Predictions Report',
                 'keywords' => [
                     'वर्तमान महादशा', 'Current Mahadasha', 'महादशा फल', 'महादशा',
                     'Mahadasha', 'Maha Dasha', 'Mahadashas'
@@ -76,8 +93,8 @@ class Niyati_Linker {
 
             // 6. Antardasha Tool
             [
-                'url'      => $base_url . '/dasha/antar-dasha/',
-                'title'    => 'Antardasha Check',
+                'url'      => $base_url . '/dasha/',
+                'title'    => 'Antardasha Predictions',
                 'keywords' => [
                     'अंतर्दशा', 'Antardasha', 'Antar Dasha', 'Antardashas'
                 ]
@@ -214,35 +231,7 @@ class Niyati_Linker {
                 ]
             ],
 
-            // 20. Shani Dev Category
-            [
-                'url'      => $base_url . '/category/hindu-god/shani-dev/',
-                'title'    => 'Shani Dev Worship & Remedies',
-                'keywords' => [
-                    'शनि की साढ़ेसाती', 'Shani Sade Sati', 'साढ़ेसाती', 'Sade Sati',
-                    'शनि ढैय्या', 'Shani Dhaiya', 'शनि देव'
-                ]
-            ],
-
-            // 21. Hanuman Ji Category
-            [
-                'url'      => $base_url . '/category/hindu-god/hanuman-ji/',
-                'title'    => 'Hanuman Ji Worship',
-                'keywords' => [
-                    'हनुमान चालीसा', 'Hanuman Chalisa', 'बजरंगबली', 'हनुमान जी'
-                ]
-            ],
-
-            // 22. Shiv Ji Category
-            [
-                'url'      => $base_url . '/category/hindu-god/shiv-ji/',
-                'title'    => 'Lord Shiva Worship',
-                'keywords' => [
-                    'महामृत्युंजय मंत्र', 'Maha Mrityunjaya', 'भगवान शिव', 'महादेव की पूजा'
-                ]
-            ],
-
-            // 23. Detailed Kundli Details
+            // 20. Janam Kundali Details
             [
                 'url'      => $base_url . '/kundali-details/',
                 'title'    => 'Janam Kundali Details',
@@ -251,6 +240,309 @@ class Niyati_Linker {
                 ]
             ]
         ];
+    }
+
+    /**
+     * Taxonomy Links (Categories and Post Tags)
+     * Automatically resolves WordPress categories & tags with multi-lingual synonyms.
+     */
+    public static function get_taxonomy_links() {
+        $cached = get_transient(self::TAXONOMY_CACHE_KEY);
+        if (is_array($cached) && !empty($cached)) {
+            return $cached;
+        }
+
+        $base_url = rtrim(home_url(), '/');
+        $taxonomy_links = [];
+
+        // 1. Curated Deity, Gods, Goddesses, Vrats & Festivals Taxonomy Definitions
+        $curated_taxonomies = [
+            'ganesh' => [
+                'title'              => 'Lord Ganesha Worship & Remedies',
+                'preferred_category' => 'ganesh-ji',
+                'fallback_tag'       => 'ganesh-ji',
+                'default_path'       => '/category/hindu-god/ganesh-ji/',
+                'keywords'           => [
+                    'Lord Ganesha', 'Lord Ganesh', 'Ganesh Ji', 'Ganesha', 'Ganpati Bappa', 'Ganpati',
+                    'गणेश जी', 'भगवान गणेश', 'श्री गणेश', 'गणपति बप्पा', 'गणपति', 'विघ्नहर्ता'
+                ]
+            ],
+            'shiv' => [
+                'title'              => 'Lord Shiva Worship & Remedies',
+                'preferred_category' => 'shiv-ji',
+                'fallback_tag'       => 'shiv-ji',
+                'default_path'       => '/category/hindu-god/shiv-ji/',
+                'keywords'           => [
+                    'Lord Shiva', 'Shiv Ji', 'Mahadev', 'Bholenath', 'Shankar Ji', 'Lord Shankar', 'Shiva Lingam',
+                    'भगवान शिव', 'शिव जी', 'महादेव', 'भोलेनाथ', 'शंकर जी', 'शिवलिंग', 'महामृत्युंजय मंत्र'
+                ]
+            ],
+            'vishnu' => [
+                'title'              => 'Lord Vishnu Worship & Remedies',
+                'preferred_category' => 'vishnu-ji',
+                'fallback_tag'       => 'vishnu-ji',
+                'default_path'       => '/category/hindu-god/vishnu-ji/',
+                'keywords'           => [
+                    'Lord Vishnu', 'Vishnu Ji', 'Shree Hari', 'Narayan', 'Bhagwan Vishnu',
+                    'भगवान विष्णु', 'विष्णु जी', 'श्री हरि', 'नारायण', 'श्रीहरि'
+                ]
+            ],
+            'laxmi' => [
+                'title'              => 'Maa Lakshmi Worship & Wealth Remedies',
+                'preferred_category' => 'laxmi-ji',
+                'fallback_tag'       => 'laxmi-ji',
+                'default_path'       => '/category/hindu-goddess/laxmi-ji/',
+                'keywords'           => [
+                    'Maa Lakshmi', 'Laxmi Mata', 'Lakshmi Ji', 'Laxmi Ji', 'Goddess Lakshmi', 'Dhanlaxmi',
+                    'मां लक्ष्मी', 'देवी लक्ष्मी', 'लक्ष्मी जी', 'महालक्ष्मी', 'धनलक्ष्मी'
+                ]
+            ],
+            'hanuman' => [
+                'title'              => 'Hanuman Ji Worship & Remedies',
+                'preferred_category' => 'hanuman-ji',
+                'fallback_tag'       => 'hanuman-ji',
+                'default_path'       => '/category/hindu-god/hanuman-ji/',
+                'keywords'           => [
+                    'Hanuman Ji', 'Lord Hanuman', 'Bajrangbali', 'Sankat Mochan', 'Shree Hanuman',
+                    'हनुमान जी', 'बजरंगबली', 'संकटमोचन', 'हनुमान चालीसा', 'पवनपुत्र'
+                ]
+            ],
+            'surya' => [
+                'title'              => 'Surya Dev Worship & Remedies',
+                'preferred_category' => 'surya-dev',
+                'fallback_tag'       => 'surya-dev',
+                'default_path'       => '/category/hindu-god/surya-dev/',
+                'keywords'           => [
+                    'Surya Dev', 'Bhagwan Surya', 'Sun God', 'Surya Bhagwan',
+                    'सूर्य देव', 'भगवान सूर्य', 'सूर्य भगवान', 'आदित्य देव'
+                ]
+            ],
+            'shani' => [
+                'title'              => 'Shani Dev Worship & Remedies',
+                'preferred_category' => 'shani-dev',
+                'fallback_tag'       => 'shani-dev',
+                'default_path'       => '/category/hindu-god/shani-dev/',
+                'keywords'           => [
+                    'Shani Dev', 'Lord Shani', 'Shani Bhagwan', 'Shani Sade Sati', 'Shani Dhaiya',
+                    'शनि देव', 'शनि भगवान', 'शनि की साढ़ेसाती', 'साढ़ेसाती', 'शनि ढैय्या'
+                ]
+            ],
+            'durga' => [
+                'title'              => 'Maa Durga Worship & Remedies',
+                'preferred_category' => 'durga-ji',
+                'fallback_tag'       => 'durga-ji',
+                'default_path'       => '/category/hindu-goddess/durga-ji/',
+                'keywords'           => [
+                    'Maa Durga', 'Durga Ji', 'Mata Rani', 'Durga Mata', 'Goddess Durga',
+                    'मां दुर्गा', 'दुर्गा जी', 'दुर्गा माता', 'माता रानी'
+                ]
+            ],
+            'krishna' => [
+                'title'              => 'Lord Krishna Worship & Katha',
+                'preferred_category' => 'krishna-ji',
+                'fallback_tag'       => 'krishna-ji',
+                'default_path'       => '/category/hindu-god/krishna-ji/',
+                'keywords'           => [
+                    'Lord Krishna', 'Krishna Ji', 'Bhagwan Krishna', 'Shree Krishna', 'Radhe Krishna',
+                    'भगवान कृष्ण', 'श्री कृष्ण', 'राधे कृष्ण', 'कान्हा', 'बांके बिहारी'
+                ]
+            ],
+            'ram' => [
+                'title'              => 'Shree Ram Worship & Ramcharitmanas',
+                'preferred_category' => 'shree-ram',
+                'fallback_tag'       => 'shree-ram',
+                'default_path'       => '/category/hindu-god/shree-ram/',
+                'keywords'           => [
+                    'Shree Ram', 'Lord Rama', 'Ram Ji', 'Bhagwan Ram', 'Ayodhya Ram', 'Jai Shree Ram',
+                    'भगवान राम', 'श्री राम', 'जय श्री राम', 'अयोध्या राम', 'राम लला'
+                ]
+            ],
+            'parvati' => [
+                'title'              => 'Parvati Mata Worship',
+                'preferred_category' => 'parvati-mata',
+                'default_path'       => '/category/hindu-goddess/parvati-mata/',
+                'keywords'           => [
+                    'Parvati Mata', 'Maa Parvati', 'पार्वती माता', 'मां पार्वती', 'गौरी माता'
+                ]
+            ],
+            'santoshi' => [
+                'title'              => 'Santoshi Mata Vrat & Katha',
+                'preferred_category' => 'santoshi-mata',
+                'default_path'       => '/category/hindu-goddess/santoshi-mata/',
+                'keywords'           => [
+                    'Santoshi Mata', 'संतोषी माता', 'संतोषी मां'
+                ]
+            ],
+            'kaali' => [
+                'title'              => 'Kaali Mata Worship',
+                'preferred_category' => 'kaali-mata',
+                'fallback_tag'       => 'kaali-maata',
+                'default_path'       => '/category/hindu-goddess/kaali-mata/',
+                'keywords'           => [
+                    'Kaali Mata', 'Maa Kali', 'काली माता', 'मां काली', 'महाकाली'
+                ]
+            ],
+            'brahma' => [
+                'title'              => 'Brahma Ji Worship',
+                'preferred_category' => 'brahma-ji',
+                'fallback_tag'       => 'bhrama-ji',
+                'default_path'       => '/category/hindu-god/brahma-ji/',
+                'keywords'           => [
+                    'Brahma Ji', 'Lord Brahma', 'ब्रह्मा जी', 'भगवान ब्रह्मा'
+                ]
+            ],
+            'balaji' => [
+                'title'              => 'Shree Mehndipur Balaji',
+                'preferred_category' => 'shree-mehndipur-balaji',
+                'default_path'       => '/category/hindu-god/shree-mehndipur-balaji/',
+                'keywords'           => [
+                    'Mehndipur Balaji', 'Shree Balaji', 'मेहंदीपुर बालाजी', 'बालाजी'
+                ]
+            ],
+            'ekadashi' => [
+                'title'              => 'Ekadashi Vrat Katha & Muhurat',
+                'preferred_category' => 'ekadashi',
+                'default_path'       => '/category/vrat-katha/ekadashi/',
+                'keywords'           => [
+                    'Ekadashi Vrat', 'Ekadashi Katha', 'Ekadashi', 'एकादशी व्रत', 'एकादशी कथा', 'एकादशी'
+                ]
+            ],
+            'karva_chauth' => [
+                'title'              => 'Karva Chauth Vrat Katha & Muhurat',
+                'preferred_category' => 'karva-chauth',
+                'fallback_tag'       => 'karva-chauth',
+                'default_path'       => '/category/vrat-katha/karva-chauth/',
+                'keywords'           => [
+                    'Karva Chauth', 'Karwa Chauth', 'करवा चौथ'
+                ]
+            ],
+            'hartalika_teej' => [
+                'title'              => 'Hartalika Teej Vrat Katha',
+                'preferred_category' => 'hartalika-teej',
+                'default_path'       => '/category/vrat-katha/hartalika-teej/',
+                'keywords'           => [
+                    'Hartalika Teej', 'हरतालिका तीज', 'तीज व्रत'
+                ]
+            ],
+            'chhath_puja' => [
+                'title'              => 'Chhath Puja Muhurat & Katha',
+                'preferred_category' => 'chhath-puja',
+                'default_path'       => '/category/vrat-katha/chhath-puja/',
+                'keywords'           => [
+                    'Chhath Puja', 'छठ पूजा', 'छठ महापर्व'
+                ]
+            ],
+            'navratri' => [
+                'title'              => 'Navratri Vrat, Puja & Muhurat',
+                'preferred_category' => 'navratri',
+                'default_path'       => '/category/festivals/navratri/',
+                'keywords'           => [
+                    'Navratri', 'Navaratri', 'नवरात्रि', 'शारदीय नवरात्रि', 'चैत्र नवरात्रि'
+                ]
+            ],
+            'diwali' => [
+                'title'              => 'Diwali Puja & Muhurat',
+                'preferred_category' => 'diwali',
+                'default_path'       => '/category/festivals/diwali/',
+                'keywords'           => [
+                    'Diwali Puja', 'Diwali Muhurat', 'Deepawali', 'दीवाली', 'दीपावली'
+                ]
+            ],
+            'dhanteras' => [
+                'title'              => 'Dhanteras Puja & Shubh Muhurat',
+                'preferred_category' => 'dhanteras',
+                'default_path'       => '/category/festivals/dhanteras/',
+                'keywords'           => [
+                    'Dhanteras Puja', 'Dhanteras', 'धनतेरस'
+                ]
+            ],
+            'bhai_dooj' => [
+                'title'              => 'Bhai Dooj Shubh Muhurat & Katha',
+                'preferred_category' => 'bhai-dooj',
+                'default_path'       => '/category/festivals/bhai-dooj/',
+                'keywords'           => [
+                    'Bhai Dooj', 'भाई दूज', 'यम द्वितीया'
+                ]
+            ],
+            'aarti' => [
+                'title'              => 'Aarti Sangrah',
+                'preferred_category' => 'aarti-sangrah',
+                'default_path'       => '/category/aarti-sangrah/',
+                'keywords'           => [
+                    'Aarti Sangrah', 'आरती संग्रह'
+                ]
+            ]
+        ];
+
+        $known_keywords = [];
+
+        // Resolve URLs dynamically using WordPress taxonomy system
+        foreach ($curated_taxonomies as $key => $meta) {
+            $target_url = '';
+            if (!empty($meta['preferred_category'])) {
+                $term = get_term_by('slug', $meta['preferred_category'], 'category');
+                if ($term && !is_wp_error($term)) {
+                    $target_url = get_term_link($term);
+                }
+            }
+            if (empty($target_url) && !empty($meta['fallback_tag'])) {
+                $term = get_term_by('slug', $meta['fallback_tag'], 'post_tag');
+                if ($term && !is_wp_error($term)) {
+                    $target_url = get_term_link($term);
+                }
+            }
+            if (empty($target_url) || is_wp_error($target_url)) {
+                $target_url = $base_url . $meta['default_path'];
+            }
+
+            $taxonomy_links[] = [
+                'url'      => $target_url,
+                'title'    => $meta['title'],
+                'keywords' => $meta['keywords']
+            ];
+
+            foreach ($meta['keywords'] as $kw) {
+                $known_keywords[mb_strtolower($kw)] = true;
+            }
+        }
+
+        // 2. Dynamic Tag Scanner: Automatically scan active WordPress post tags
+        $active_tags = get_terms([
+            'taxonomy'   => 'post_tag',
+            'hide_empty' => true,
+            'number'     => 100
+        ]);
+
+        if (!empty($active_tags) && !is_wp_error($active_tags)) {
+            $ignored_generic = [
+                'horoscope', 'janam', 'katha', 'rashi', 'aaj ka rashifal',
+                'daily horoscope', 'rashifal', 'astrology', 'hindu-devotional'
+            ];
+
+            foreach ($active_tags as $t_obj) {
+                $t_name = trim($t_obj->name);
+                $lower_name = mb_strtolower($t_name);
+
+                if (mb_strlen($t_name) < 4 || in_array($lower_name, $ignored_generic, true)) {
+                    continue;
+                }
+
+                if (!isset($known_keywords[$lower_name])) {
+                    $tag_url = get_tag_link($t_obj->term_id);
+                    if ($tag_url && !is_wp_error($tag_url)) {
+                        $taxonomy_links[] = [
+                            'url'      => $tag_url,
+                            'title'    => $t_name,
+                            'keywords' => [$t_name]
+                        ];
+                        $known_keywords[$lower_name] = true;
+                    }
+                }
+            }
+        }
+
+        set_transient(self::TAXONOMY_CACHE_KEY, $taxonomy_links, self::TAXONOMY_CACHE_TTL);
+        return $taxonomy_links;
     }
 
     /**
