@@ -82,20 +82,51 @@ add_filter('script_loader_tag', function($tag, $handle, $src) {
     return $tag;
 }, 10, 3);
 
-// Force loading="lazy" and decoding="async" on all content images
-add_filter('the_content', 'mr_force_lazy_load_images', 99);
-add_filter('widget_text', 'mr_force_lazy_load_images', 99);
-function mr_force_lazy_load_images($content) {
+// Dequeue Razorpay on homepage where no direct checkout occurs (saves 212 KB JS)
+add_action('wp_enqueue_scripts', function() {
+    if (is_front_page()) {
+        wp_dequeue_script('razorpay-checkout');
+    }
+}, 100);
+
+// Optimize Above-The-Fold LCP Image & Smart Lazy-Loading for Below-The-Fold
+add_filter('the_content', 'mr_optimize_images_and_lcp', 99);
+add_filter('widget_text', 'mr_optimize_images_and_lcp', 99);
+add_filter('elementor/frontend/the_content', 'mr_optimize_images_and_lcp', 99);
+
+function mr_optimize_images_and_lcp($content) {
     if (is_admin() || empty($content)) {
         return $content;
     }
 
-    // Add loading="lazy" and decoding="async" to img tags if missing
-    $content = preg_replace_callback('/<img\b(?![^>]*\bloading=)([^>]+)>/i', function($matches) {
-        return '<img loading="lazy" decoding="async" ' . $matches[1] . '>';
+    $first_img = true;
+
+    $content = preg_replace_callback('/<img\b([^>]+)>/i', function($matches) use (&$first_img) {
+        $attrs = $matches[1];
+        $is_lcp = false;
+
+        // Identify the above-the-fold hero banner
+        if ($first_img || stripos($attrs, 'ea-rashifal') !== false || stripos($attrs, 'final banner') !== false || stripos($attrs, 'logo') !== false) {
+            $is_lcp = true;
+            $first_img = false;
+        }
+
+        if ($is_lcp) {
+            // LCP Hero Banner must NEVER be lazy loaded - must load eager with high priority
+            $attrs = preg_replace('/\bloading=[\'"][^\'"]*[\'"]/i', '', $attrs);
+            return '<img fetchpriority="high" loading="eager" decoding="async" ' . trim($attrs) . '>';
+        }
+
+        // Below-the-fold images: apply loading="lazy" if not present
+        if (stripos($attrs, 'loading=') === false) {
+            return '<img loading="lazy" decoding="async" ' . trim($attrs) . '>';
+        }
+
+        return '<img ' . trim($attrs) . '>';
     }, $content);
 
     return $content;
 }
+
 
 
