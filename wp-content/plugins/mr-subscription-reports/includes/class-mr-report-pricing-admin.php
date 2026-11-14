@@ -1177,15 +1177,6 @@ class MR_Report_Pricing_Admin {
     }
 }
 
-// Global Backward-Compatibility Helpers
-if (!function_exists('mr_get_default_report_definitions')) {
-    function mr_get_default_report_definitions() {
-        return MR_Report_Pricing_Admin::get_default_definitions();
-    }
-}
+// Global Backward-Compatibility Helpers (handled by snippet or class methods)
+// Delegated to MR_Report_Pricing_Admin::get_default_definitions() and snippet 88
 
-if (!function_exists('mr_get_report_catalog_config')) {
-    function mr_get_report_catalog_config() {
-        return MR_Report_Pricing_Admin::get_config();
-    }
-}
