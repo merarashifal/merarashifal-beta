@@ -282,7 +282,10 @@
                 nominee_phone: $('#mr_dpdp_nominee_phone').val(),
                 consent_profile: $('#mr_consent_profile').is(':checked') ? 1 : 0,
                 consent_ai: $('#mr_consent_ai').is(':checked') ? 1 : 0,
-                consent_comms: $('#mr_consent_comms').is(':checked') ? 1 : 0
+                consent_comms: $('#mr_consent_comms').is(':checked') ? 1 : 0,
+                cookie_personalization: $('#mr_cookie_personalization').is(':checked') ? 1 : 0,
+                cookie_analytics: $('#mr_cookie_analytics').is(':checked') ? 1 : 0,
+                cookie_marketing: $('#mr_cookie_marketing').is(':checked') ? 1 : 0
             };
 
             $.ajax({
@@ -293,6 +296,19 @@
                 success: function(res) {
                     $btn.prop('disabled', false).html(originalBtnHtml);
                     if (res.success) {
+                        // Sync updated cookie preferences with browser storage
+                        if (res.data && res.data.cookie_consent) {
+                            try {
+                                var consentStr = JSON.stringify(res.data.cookie_consent);
+                                var d = new Date();
+                                d.setTime(d.getTime() + (365 * 24 * 60 * 60 * 1000));
+                                var secure = location.protocol === 'https:' ? '; Secure' : '';
+                                document.cookie = "mr_cookie_consent=" + encodeURIComponent(consentStr) + "; expires=" + d.toUTCString() + "; path=/; SameSite=Lax" + secure;
+                                localStorage.setItem("mr_cookie_consent", consentStr);
+                                window.dispatchEvent(new CustomEvent('mr_cookie_consent_updated', { detail: res.data.cookie_consent }));
+                            } catch(e) {}
+                        }
+
                         $feedback.addClass('mr-feedback-success').html('✓ ' + res.data.message);
                         setTimeout(function() {
                             $feedback.fadeOut(function() {

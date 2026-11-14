@@ -136,10 +136,12 @@ class Niyati_Frontend {
         $settings = Niyati_REST_API::get_settings();
         $curr_user_id = get_current_user_id();
         $curr_user = $curr_user_id ? wp_get_current_user() : null;
-        $visitor_id = class_exists('Niyati_Limits') ? Niyati_Limits::get_visitor_id() : '';
-        $initial_quota = class_exists('Niyati_Limits') ? Niyati_Limits::check_quota($visitor_id) : null;
-        $initial_paid_credits = class_exists('Niyati_Wallet') ? Niyati_Wallet::get_balance($visitor_id, $curr_user_id) : 0;
-        $initial_validity = class_exists('Niyati_Wallet') ? Niyati_Wallet::get_validity_info($visitor_id, $curr_user_id) : null;
+        // Do not force setcookie on anonymous visitors during initial HTML render to allow full CDN caching
+        $cookie_name = defined('Niyati_Limits::COOKIE_NAME') ? Niyati_Limits::COOKIE_NAME : 'niyati_visitor_token';
+        $visitor_id = $curr_user_id ? ('user_' . $curr_user_id) : (!empty($_COOKIE[$cookie_name]) ? sanitize_text_field($_COOKIE[$cookie_name]) : '');
+        $initial_quota = ($visitor_id && class_exists('Niyati_Limits')) ? Niyati_Limits::check_quota($visitor_id) : null;
+        $initial_paid_credits = ($visitor_id && class_exists('Niyati_Wallet')) ? Niyati_Wallet::get_balance($visitor_id, $curr_user_id) : 0;
+        $initial_validity = ($visitor_id && class_exists('Niyati_Wallet')) ? Niyati_Wallet::get_validity_info($visitor_id, $curr_user_id) : null;
 
         $redirect_to = home_url(add_query_arg([], $GLOBALS['wp']->request ?? ''));
         $login_url   = wp_login_url($redirect_to ?: home_url('/'));

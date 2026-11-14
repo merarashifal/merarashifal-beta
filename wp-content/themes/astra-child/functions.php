@@ -23,3 +23,79 @@ if (!class_exists('MR_Reports_Showcase') && file_exists(WP_PLUGIN_DIR . '/mr-sub
     require_once WP_PLUGIN_DIR . '/mr-subscription-reports/includes/class-mr-reports-showcase.php';
     add_action('init', ['MR_Reports_Showcase', 'init']);
 }
+
+/* ==============================================================================
+   SECURITY HARDENING: REST API USER ENUMERATION & VERSION CONCEALMENT
+   ============================================================================== */
+
+// Block REST API user listing for unauthenticated requests
+add_filter('rest_endpoints', function($endpoints) {
+    if (!is_user_logged_in()) {
+        if (isset($endpoints['/wp/v2/users'])) {
+            unset($endpoints['/wp/v2/users']);
+        }
+        if (isset($endpoints['/wp/v2/users/(?P<id>[\d]+)'])) {
+            unset($endpoints['/wp/v2/users/(?P<id>[\d]+)']);
+        }
+    }
+    return $endpoints;
+});
+
+// Conceal WordPress Version
+remove_action('wp_head', 'wp_generator');
+add_filter('the_generator', '__return_empty_string');
+
+// Block author archive page redirection and show 404 or redirect to home
+add_action('template_redirect', function() {
+    if (is_author()) {
+        wp_safe_redirect(home_url(), 301);
+        exit;
+    }
+});
+
+/* ==============================================================================
+   PERFORMANCE: DEFER HEAVY NON-CRITICAL SCRIPTS & NATIVE LAZY LOADING
+   ============================================================================== */
+
+// Defer non-critical scripts to eliminate Total Blocking Time (TBT)
+add_filter('script_loader_tag', function($tag, $handle, $src) {
+    if (is_admin()) {
+        return $tag;
+    }
+
+    $defer_scripts = [
+        'google-maps-places',
+        'global-city-autocomplete',
+        'razorpay-checkout',
+        'sbi_scripts',
+        'sbi-scripts',
+        'niyati-chat-js',
+        'flatpickr',
+    ];
+
+    if (in_array($handle, $defer_scripts, true)) {
+        if (strpos($tag, 'defer') === false && strpos($tag, 'async') === false) {
+            $tag = str_replace('<script ', '<script defer ', $tag);
+        }
+    }
+
+    return $tag;
+}, 10, 3);
+
+// Force loading="lazy" and decoding="async" on all content images
+add_filter('the_content', 'mr_force_lazy_load_images', 99);
+add_filter('widget_text', 'mr_force_lazy_load_images', 99);
+function mr_force_lazy_load_images($content) {
+    if (is_admin() || empty($content)) {
+        return $content;
+    }
+
+    // Add loading="lazy" and decoding="async" to img tags if missing
+    $content = preg_replace_callback('/<img\b(?![^>]*\bloading=)([^>]+)>/i', function($matches) {
+        return '<img loading="lazy" decoding="async" ' . $matches[1] . '>';
+    }, $content);
+
+    return $content;
+}
+
+

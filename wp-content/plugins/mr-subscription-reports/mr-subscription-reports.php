@@ -58,6 +58,7 @@ require_once MR_PLUGIN_DIR . 'includes/class-mr-report-landing.php';
 require_once MR_PLUGIN_DIR . 'includes/class-mr-pricing-page.php';
 require_once MR_PLUGIN_DIR . 'includes/class-mr-report-pricing-admin.php';
 require_once MR_PLUGIN_DIR . 'includes/class-mr-reports-showcase.php';
+require_once MR_PLUGIN_DIR . 'includes/class-mr-cookie-consent.php';
 
 // Plugin Activation: Create Database Tables
 register_activation_hook(__FILE__, ['MR_DB', 'create_tables']);
@@ -88,6 +89,7 @@ add_action('plugins_loaded', function() {
     MR_Pricing_Page::init();
     MR_Invoice::init();
     MR_Checkout::init();
+    MR_Cookie_Consent::init();
 });
 
 

@@ -851,6 +851,11 @@ class MR_Account_UI {
         $consent_ai       = get_user_meta($user_id, 'mr_dpdp_consent_ai_chat', true) !== '0' ? '1' : '0';
         $consent_comms    = get_user_meta($user_id, 'mr_dpdp_consent_comms', true) !== '0' ? '1' : '0';
 
+        // DPDP Act 2023 - Cookie & Storage Preferences
+        $cookie_personalization = get_user_meta($user_id, 'mr_cookie_personalization', true) !== '0' ? '1' : '0';
+        $cookie_analytics       = get_user_meta($user_id, 'mr_cookie_analytics', true) !== '0' ? '1' : '0';
+        $cookie_marketing       = get_user_meta($user_id, 'mr_cookie_marketing', true) !== '0' ? '1' : '0';
+
         // DPDP Erasure Dynamic Security Challenge (Anti-bot word & 50-sentence pool)
         $erase_challenge  = self::generate_dpdp_erase_challenge($user_id);
 
@@ -1516,6 +1521,56 @@ class MR_Account_UI {
                             <label class="mr-toggle-label">
                                 <input type="checkbox" name="consent_comms" id="mr_consent_comms" value="1" <?php checked($consent_comms, '1'); ?> />
                                 <span><strong>Planetary Transit Alerts &amp; PDF Report Delivery:</strong> Receiving instant transactional email copies of generated PDF reports, astrological transit updates, and order receipts.</span>
+                            </label>
+                        </div>
+
+                        <div class="mr-form-divider" id="mr-cookie-settings-section">
+                            <span>DPDP Act 2023 &bull; Cookie &amp; Storage Preferences</span>
+                        </div>
+
+                        <p class="mr-settings-field-hint" style="font-size:13px; color:#64748B; margin-top:-6px; margin-bottom:14px; line-height:1.5;">
+                            Under India's DPDP Act 2023, you retain granular statutory control over non-essential browser cookies and local device storage. You can customize which categories you permit below:
+                        </p>
+
+                        <div class="mr-checkbox-group mr-dpdp-consent-group" style="display:flex; flex-direction:column; gap:12px; margin-bottom:16px;">
+                            <!-- Category 1: Strictly Necessary (Locked ON) -->
+                            <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:10px; padding:12px 14px; display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
+                                <div>
+                                    <div style="display:flex; align-items:center; gap:8px; margin-bottom:3px;">
+                                        <strong style="font-size:13px; color:#1E293B;">Strictly Necessary Cookies</strong>
+                                        <span style="font-size:11px; font-weight:700; background:#DCFCE7; color:#166534; padding:2px 7px; border-radius:9999px;">Always Active</span>
+                                    </div>
+                                    <p style="margin:0; font-size:12px; color:#64748B; line-height:1.45;">
+                                        Essential for core website operation, Google OAuth session authentication, cart security, and passbook fraud detection. Cannot be turned off.
+                                    </p>
+                                </div>
+                                <div style="flex-shrink:0; padding-top:2px;">
+                                    <input type="checkbox" checked disabled style="accent-color:#16A34A; width:17px; height:17px; cursor:not-allowed;" />
+                                </div>
+                            </div>
+
+                            <!-- Category 2: Personalization & Astrological Memory -->
+                            <label class="mr-toggle-label" style="background:#FFFFFF; border:1px solid #E2E8F0; border-radius:10px; padding:12px 14px; margin:0; display:flex; align-items:flex-start; gap:10px; cursor:pointer;">
+                                <input type="checkbox" name="cookie_personalization" id="mr_cookie_personalization" value="1" <?php checked($cookie_personalization, '1'); ?> style="margin-top:2px;" />
+                                <span>
+                                    <strong>Personalization &amp; Astrological Memory:</strong> Remembers your birth chart preferences (North vs South Indian charts, Vedic Sidereal Ayanamsha), saved birth city, and Niyati AI conversation context for seamless astrological continuity.
+                                </span>
+                            </label>
+
+                            <!-- Category 3: Analytics & Performance Metrics -->
+                            <label class="mr-toggle-label" style="background:#FFFFFF; border:1px solid #E2E8F0; border-radius:10px; padding:12px 14px; margin:0; display:flex; align-items:flex-start; gap:10px; cursor:pointer;">
+                                <input type="checkbox" name="cookie_analytics" id="mr_cookie_analytics" value="1" <?php checked($cookie_analytics, '1'); ?> style="margin-top:2px;" />
+                                <span>
+                                    <strong>Analytics &amp; Performance Metrics:</strong> Allows aggregated and anonymous measurement of horoscope traffic, page load speeds, and Vedic computation accuracy (via Google Analytics / Site Kit).
+                                </span>
+                            </label>
+
+                            <!-- Category 4: Marketing & Sponsored Ad Targeting -->
+                            <label class="mr-toggle-label" style="background:#FFFFFF; border:1px solid #E2E8F0; border-radius:10px; padding:12px 14px; margin:0; display:flex; align-items:flex-start; gap:10px; cursor:pointer;">
+                                <input type="checkbox" name="cookie_marketing" id="mr_cookie_marketing" value="1" <?php checked($cookie_marketing, '1'); ?> style="margin-top:2px;" />
+                                <span>
+                                    <strong>Marketing &amp; Sponsored Ad Targeting:</strong> Used by Google AdSense to deliver relevant ads. In compliance with Section 9 of the DPDP Act 2023, targeted advertising or behavioral tracking directed at minors is strictly prohibited.
+                                </span>
                             </label>
                         </div>
 
@@ -2429,8 +2484,25 @@ class MR_Account_UI {
         update_user_meta($user_id, 'mr_dpdp_consent_ai_chat', $consent_ai);
         update_user_meta($user_id, 'mr_dpdp_consent_comms', $consent_comms);
 
+        // DPDP Act 2023 - Cookie & Storage Preferences
+        $cookie_personalization = isset($_POST['cookie_personalization']) && ($_POST['cookie_personalization'] === '1' || $_POST['cookie_personalization'] === 1) ? '1' : '0';
+        $cookie_analytics       = isset($_POST['cookie_analytics']) && ($_POST['cookie_analytics'] === '1' || $_POST['cookie_analytics'] === 1) ? '1' : '0';
+        $cookie_marketing       = isset($_POST['cookie_marketing']) && ($_POST['cookie_marketing'] === '1' || $_POST['cookie_marketing'] === 1) ? '1' : '0';
+
+        update_user_meta($user_id, 'mr_cookie_personalization', $cookie_personalization);
+        update_user_meta($user_id, 'mr_cookie_analytics', $cookie_analytics);
+        update_user_meta($user_id, 'mr_cookie_marketing', $cookie_marketing);
+
         wp_send_json_success([
-            'message' => 'Preferences and DPDP Data Principal settings updated successfully!'
+            'message' => 'Preferences and DPDP Data Principal settings updated successfully!',
+            'cookie_consent' => [
+                'necessary'       => true,
+                'personalization' => $cookie_personalization === '1',
+                'analytics'       => $cookie_analytics === '1',
+                'marketing'       => $cookie_marketing === '1',
+                'status'          => 'custom',
+                'timestamp'       => gmdate('c'),
+            ]
         ]);
     }
 
@@ -2483,6 +2555,12 @@ class MR_Account_UI {
                 'astrological_profiling' => get_user_meta($user_id, 'mr_dpdp_consent_profiling', true) !== '0',
                 'ai_chat_session_memory' => get_user_meta($user_id, 'mr_dpdp_consent_ai_chat', true) !== '0',
                 'service_alerts'         => get_user_meta($user_id, 'mr_dpdp_consent_comms', true) !== '0',
+            ],
+            'cookie_storage_preferences' => [
+                'necessary_cookies'       => true,
+                'personalization_storage' => get_user_meta($user_id, 'mr_cookie_personalization', true) !== '0',
+                'analytics_storage'       => get_user_meta($user_id, 'mr_cookie_analytics', true) !== '0',
+                'marketing_storage'       => get_user_meta($user_id, 'mr_cookie_marketing', true) !== '0',
             ],
             'escalation_notice' => 'Under Section 15 of the DPDP Act 2023, the Data Principal has the right to escalate any unresolved grievances to the Data Protection Board of India (DPBI).'
         ];
