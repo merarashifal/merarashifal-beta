@@ -976,8 +976,8 @@ class MR_Account_UI {
                         <button type="button" class="mr-btn-action-pill mr-btn-contact" id="mr-tab-btn-contact-trigger" title="Reach Astro Support & Consultation">
                             Contact Us
                         </button>
-                        <button type="button" class="mr-btn-action-pill mr-btn-settings" id="mr-tab-btn-settings-trigger" title="Account & Astro Preferences">
-                            Settings
+                        <button type="button" class="mr-btn-action-pill mr-btn-settings" id="mr-tab-btn-settings-trigger" title="Account &amp; DPDP Privacy Preferences">
+                            Settings &amp; Privacy
                         </button>
                         <a href="<?php echo esc_url($logout_url); ?>" class="mr-btn-action-pill mr-btn-logout" title="Safely log out of your session">
                             Log Out
@@ -999,7 +999,7 @@ class MR_Account_UI {
                         <span class="mr-tab-count"><?php echo count($unified_ledger); ?></span>
                     </button>
                     <button type="button" class="mr-tab-btn" data-tab="settings">
-                        <span>Settings</span>
+                        <span>Settings &amp; Privacy</span>
                     </button>
                     <button type="button" class="mr-tab-btn" data-tab="contact">
                         <span>Contact Us</span>
@@ -1416,8 +1416,8 @@ class MR_Account_UI {
                     <div class="mr-card-header">
                         <div class="mr-card-icon-badge mr-loader-badge"><img src="<?php echo esc_url($loader_url); ?>" alt="" class="mr-spin-loader" /></div>
                         <div>
-                            <h3 class="mr-card-title">Account Settings &amp; Preferences</h3>
-                            <p class="mr-card-sub">Customize your astrological calculation methods, report delivery, and account security.</p>
+                            <h3 class="mr-card-title">Account Settings &amp; DPDP Privacy Preferences</h3>
+                            <p class="mr-card-sub">Customize your astrological calculation methods, report delivery, and DPDP Cookie &amp; Storage preferences.</p>
                         </div>
                     </div>
 

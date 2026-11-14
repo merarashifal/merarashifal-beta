@@ -78,10 +78,20 @@
             location.hash = '#settings';
         });
 
-        // Hash listener on page load
-        if (window.location.hash) {
-            var initialHash = window.location.hash.substring(1);
-            switchTab(initialHash);
+        // Tab listener on page load (via query param ?tab= or hash #)
+        try {
+            var urlParams = new URLSearchParams(window.location.search);
+            var queryTab = urlParams.get('tab');
+            if (queryTab) {
+                switchTab(queryTab);
+            } else if (window.location.hash) {
+                var initialHash = window.location.hash.substring(1).split('#')[0].split('?')[0];
+                switchTab(initialHash);
+            }
+        } catch(e) {
+            if (window.location.hash) {
+                switchTab(window.location.hash.substring(1));
+            }
         }
 
         $(window).on('hashchange', function() {
