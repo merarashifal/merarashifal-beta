@@ -11,22 +11,22 @@ global $wpdb;
 $t_queue = MRCB_DB_Setup::table_queue();
 $t_fest  = MRCB_DB_Setup::table_festivals();
 
-// Filter
-$status_filter = isset( $_GET['status'] ) ? sanitize_text_field( $_GET['status'] ) : '';
+// Filter - default to pending_review so unapproved drafts stay in this workspace until approved
+$status_filter = isset( $_GET['status'] ) ? sanitize_text_field( $_GET['status'] ) : 'pending_review';
 $where = '1=1';
-if ( ! empty( $status_filter ) ) {
+if ( $status_filter !== 'all' && ! empty( $status_filter ) ) {
     $where .= $wpdb->prepare( " AND q.admin_status = %s", $status_filter );
 }
 
-// Fetch queue items for next 30 days and past 3 days
+// Fetch queue items
 $today = current_time( 'Y-m-d' );
 $items = $wpdb->get_results(
     "SELECT q.*, f.festival_name_hi, f.festival_name_en, f.tier 
      FROM {$t_queue} q
      LEFT JOIN {$t_fest} f ON q.festival_id = f.id
-     WHERE {$where} AND q.scheduled_date >= DATE_SUB('{$today}', INTERVAL 3 DAY)
+     WHERE {$where} AND q.scheduled_date >= DATE_SUB('{$today}', INTERVAL 7 DAY)
      ORDER BY q.scheduled_date ASC
-     LIMIT 50",
+     LIMIT 100",
     ARRAY_A
 );
 
@@ -34,7 +34,7 @@ $items = $wpdb->get_results(
 $counts = $wpdb->get_results(
     "SELECT admin_status, COUNT(*) as cnt 
      FROM {$t_queue} 
-     WHERE scheduled_date >= '{$today}' AND scheduled_date <= DATE_ADD('{$today}', INTERVAL 30 DAY)
+     WHERE scheduled_date >= DATE_SUB('{$today}', INTERVAL 7 DAY) AND scheduled_date <= DATE_ADD('{$today}', INTERVAL 45 DAY)
      GROUP BY admin_status",
     ARRAY_A
 );
@@ -48,9 +48,12 @@ foreach ( $counts as $c ) {
     <div class="mrcb-header">
         <div class="mrcb-header-title">
             <h1>✍️ MeraRashifal Content Bot — Content Queue</h1>
-            <p class="mrcb-subtitle">10-Day Advance Hindi Festival Content &bull; Admin Approval Workflow &bull; Gemini AI Engine</p>
+            <p class="mrcb-subtitle">Unapproved drafts stay in this staging area until reviewed &bull; Approved posts are scheduled directly in <strong>WordPress Posts &gt; Scheduled</strong></p>
         </div>
         <div class="mrcb-header-actions">
+            <a href="<?php echo admin_url( 'edit.php?post_status=future' ); ?>" class="button" target="_blank" style="margin-right: 8px;">
+                📋 View WP Scheduled Posts (<?php echo $metrics['approved']; ?>)
+            </a>
             <button id="mrcb-trigger-advance-cron" class="button button-primary">
                 ⚡ Generate for Day+10 Now
             </button>
@@ -59,35 +62,35 @@ foreach ( $counts as $c ) {
 
     <!-- Status Overview Metrics -->
     <div class="mrcb-stats-grid">
-        <div class="mrcb-stat-card stat-pending">
+        <div class="mrcb-stat-card stat-pending <?php echo $status_filter === 'pending_review' ? 'active-filter' : ''; ?>">
             <div class="stat-num"><?php echo $metrics['pending_review']; ?></div>
             <div class="stat-label">Pending Review (Action Required)</div>
-            <div class="stat-sub">Review & approve at your own pace</div>
+            <div class="stat-sub">Stays here until you approve</div>
         </div>
-        <div class="mrcb-stat-card stat-approved">
+        <div class="mrcb-stat-card stat-approved <?php echo $status_filter === 'approved' ? 'active-filter' : ''; ?>">
             <div class="stat-num"><?php echo $metrics['approved']; ?></div>
-            <div class="stat-label">Approved (Scheduled)</div>
-            <div class="stat-sub">Ready to publish at 7:00 AM IST</div>
+            <div class="stat-label">Scheduled in WordPress Posts</div>
+            <div class="stat-sub"><a href="<?php echo admin_url( 'edit.php?post_status=future' ); ?>" target="_blank" style="color:inherit; text-decoration:underline;">View in Posts &gt; Scheduled &rarr;</a></div>
         </div>
-        <div class="mrcb-stat-card stat-published">
+        <div class="mrcb-stat-card stat-published <?php echo $status_filter === 'published' ? 'active-filter' : ''; ?>">
             <div class="stat-num"><?php echo $metrics['published']; ?></div>
             <div class="stat-label">Published Live</div>
-            <div class="stat-sub">Active on merarashifal.com</div>
+            <div class="stat-sub"><a href="<?php echo admin_url( 'edit.php?post_status=publish' ); ?>" target="_blank" style="color:inherit; text-decoration:underline;">View in Posts &gt; Published &rarr;</a></div>
         </div>
         <div class="mrcb-stat-card stat-total">
             <div class="stat-num"><?php echo count( $items ); ?></div>
-            <div class="stat-label">Visible Posts in Window</div>
-            <div class="stat-sub">Next 30 days schedule</div>
+            <div class="stat-label">Posts in Active Filter</div>
+            <div class="stat-sub">Filter: <?php echo esc_html( ucwords( str_replace( '_', ' ', $status_filter ) ) ); ?></div>
         </div>
     </div>
 
     <!-- Toolbar -->
     <div class="mrcb-toolbar">
         <ul class="subsubsub">
-            <li><a href="<?php echo admin_url( 'admin.php?page=mrcb-queue' ); ?>" class="<?php echo empty( $status_filter ) ? 'current' : ''; ?>">All</a> |</li>
-            <li><a href="<?php echo admin_url( 'admin.php?page=mrcb-queue&status=pending_review' ); ?>" class="<?php echo $status_filter === 'pending_review' ? 'current' : ''; ?>">Pending Review <span class="count">(<?php echo $metrics['pending_review']; ?>)</span></a> |</li>
-            <li><a href="<?php echo admin_url( 'admin.php?page=mrcb-queue&status=approved' ); ?>" class="<?php echo $status_filter === 'approved' ? 'current' : ''; ?>">Approved <span class="count">(<?php echo $metrics['approved']; ?>)</span></a> |</li>
-            <li><a href="<?php echo admin_url( 'admin.php?page=mrcb-queue&status=published' ); ?>" class="<?php echo $status_filter === 'published' ? 'current' : ''; ?>">Published <span class="count">(<?php echo $metrics['published']; ?>)</span></a></li>
+            <li><a href="<?php echo admin_url( 'admin.php?page=mrcb-queue&status=pending_review' ); ?>" class="<?php echo $status_filter === 'pending_review' ? 'current' : ''; ?>">Needs Review (Pending) <span class="count">(<?php echo $metrics['pending_review']; ?>)</span></a> |</li>
+            <li><a href="<?php echo admin_url( 'admin.php?page=mrcb-queue&status=approved' ); ?>" class="<?php echo $status_filter === 'approved' ? 'current' : ''; ?>">Scheduled in WP <span class="count">(<?php echo $metrics['approved']; ?>)</span></a> |</li>
+            <li><a href="<?php echo admin_url( 'admin.php?page=mrcb-queue&status=published' ); ?>" class="<?php echo $status_filter === 'published' ? 'current' : ''; ?>">Published <span class="count">(<?php echo $metrics['published']; ?>)</span></a> |</li>
+            <li><a href="<?php echo admin_url( 'admin.php?page=mrcb-queue&status=all' ); ?>" class="<?php echo $status_filter === 'all' ? 'current' : ''; ?>">All Queue Items</a></li>
         </ul>
 
         <div class="mrcb-quick-generate">
@@ -105,15 +108,21 @@ foreach ( $counts as $c ) {
                 <th>Hindi Topic Title & Angle</th>
                 <th style="width: 130px;">Type / Tier</th>
                 <th style="width: 180px;">Focus Keyword</th>
-                <th style="width: 130px;">Status</th>
-                <th style="width: 220px;">Actions</th>
+                <th style="width: 140px;">Status</th>
+                <th style="width: 230px;">Actions</th>
             </tr>
         </thead>
         <tbody>
             <?php if ( empty( $items ) ) : ?>
                 <tr>
-                    <td colspan="6" style="text-align: center; padding: 30px;">
-                        <em>No content in queue for this filter. Click <strong>"Generate for Day+10 Now"</strong> above to start your 10-day buffer!</em>
+                    <td colspan="6" style="text-align: center; padding: 35px 20px;">
+                        <?php if ( $status_filter === 'pending_review' ) : ?>
+                            <p style="font-size: 15px; margin: 0 0 10px 0;">🎉 <strong>All caught up! No drafts currently waiting for review.</strong></p>
+                            <p style="color: #64748b; margin: 0 0 15px 0;">Any posts you approved are already scheduled in WordPress under <a href="<?php echo admin_url( 'edit.php?post_status=future' ); ?>" target="_blank"><strong>Posts &gt; Scheduled</strong></a>.</p>
+                            <button id="mrcb-trigger-advance-cron" class="button button-primary">⚡ Generate Draft for Day+10 Now</button>
+                        <?php else : ?>
+                            <em>No content in queue matching this filter.</em>
+                        <?php endif; ?>
                     </td>
                 </tr>
             <?php else : ?>
@@ -131,7 +140,6 @@ foreach ( $counts as $c ) {
                     }
 
                     $status_class = 'status-' . esc_attr( $it['admin_status'] );
-                    $status_text  = ucwords( str_replace( '_', ' ', $it['admin_status'] ) );
                 ?>
                     <tr data-id="<?php echo esc_attr( $it['id'] ); ?>">
                         <td>
@@ -139,7 +147,9 @@ foreach ( $counts as $c ) {
                             <br><?php echo $timing_label; ?>
                         </td>
                         <td>
-                            <strong class="mrcb-post-title"><?php echo esc_html( $it['topic_title_hi'] ); ?></strong>
+                            <a href="<?php echo admin_url( 'admin.php?page=mrcb-queue&action=review&id=' . $it['id'] ); ?>" style="text-decoration: none;">
+                                <strong class="mrcb-post-title"><?php echo esc_html( $it['topic_title_hi'] ); ?></strong>
+                            </a>
                             <div class="mrcb-meta-sub">
                                 <span class="mrcb-angle-tag">Angle: <?php echo esc_html( $it['topic_angle'] ); ?></span>
                                 <?php if ( ! empty( $it['festival_name_hi'] ) ) : ?>
@@ -161,30 +171,67 @@ foreach ( $counts as $c ) {
                             <?php endif; ?>
                         </td>
                         <td>
-                            <span class="mrcb-badge <?php echo $status_class; ?>">
-                                <?php echo esc_html( $status_text ); ?>
-                            </span>
+                            <?php if ( $it['admin_status'] === 'approved' ) : ?>
+                                <span class="mrcb-badge status-approved">Scheduled in WP</span>
+                                <?php if ( ! empty( $it['wp_post_id'] ) ) : ?>
+                                    <br><a href="<?php echo admin_url( 'post.php?post=' . $it['wp_post_id'] . '&action=edit' ); ?>" target="_blank" style="font-size:11px; font-weight:600;">Post #<?php echo $it['wp_post_id']; ?> &rarr;</a>
+                                <?php endif; ?>
+                            <?php elseif ( $it['admin_status'] === 'published' ) : ?>
+                                <span class="mrcb-badge status-published">Published Live</span>
+                                <?php if ( ! empty( $it['wp_post_id'] ) ) : ?>
+                                    <br><a href="<?php echo get_permalink( $it['wp_post_id'] ); ?>" target="_blank" style="font-size:11px;">View Live &nearr;</a>
+                                <?php endif; ?>
+                            <?php elseif ( $it['admin_status'] === 'pending_review' ) : ?>
+                                <span class="mrcb-badge status-pending_review">Needs Review</span>
+                            <?php else : ?>
+                                <span class="mrcb-badge <?php echo $status_class; ?>">
+                                    <?php echo esc_html( ucwords( str_replace( '_', ' ', $it['admin_status'] ) ) ); ?>
+                                </span>
+                            <?php endif; ?>
                         </td>
                         <td class="mrcb-actions-cell">
-                            <a href="<?php echo admin_url( 'admin.php?page=mrcb-queue&action=review&id=' . $it['id'] ); ?>" class="button button-primary button-small">
-                                👁️ Review & Edit
-                            </a>
-
                             <?php if ( $it['admin_status'] === 'pending_review' ) : ?>
-                                <button class="button button-small btn-quick-approve" data-id="<?php echo esc_attr( $it['id'] ); ?>" title="Approve as-is">
-                                    ✅
+                                <a href="<?php echo admin_url( 'admin.php?page=mrcb-queue&action=review&id=' . $it['id'] ); ?>" class="button button-primary button-small">
+                                    👁️ Review & Approve
+                                </a>
+                                <button class="button button-small btn-quick-approve" data-id="<?php echo esc_attr( $it['id'] ); ?>" title="Approve and Schedule in WordPress Posts">
+                                    ✅ Schedule
                                 </button>
-                            <?php endif; ?>
-
-                            <?php if ( $it['admin_status'] === 'approved' && empty( $it['wp_post_id'] ) ) : ?>
+                                <button class="button button-small btn-regenerate" data-id="<?php echo esc_attr( $it['id'] ); ?>" title="Regenerate with Gemini">
+                                    🔄
+                                </button>
+                            <?php elseif ( $it['admin_status'] === 'approved' ) : ?>
+                                <?php if ( ! empty( $it['wp_post_id'] ) ) : ?>
+                                    <a href="<?php echo admin_url( 'post.php?post=' . $it['wp_post_id'] . '&action=edit' ); ?>" class="button button-small button-primary" target="_blank">
+                                        ✏️ Edit in Posts
+                                    </a>
+                                <?php endif; ?>
+                                <a href="<?php echo admin_url( 'admin.php?page=mrcb-queue&action=review&id=' . $it['id'] ); ?>" class="button button-small">
+                                    👁️ Review
+                                </a>
                                 <button class="button button-small btn-publish-now" data-id="<?php echo esc_attr( $it['id'] ); ?>" title="Publish immediately to site">
                                     🚀 Publish
                                 </button>
+                            <?php elseif ( $it['admin_status'] === 'published' ) : ?>
+                                <?php if ( ! empty( $it['wp_post_id'] ) ) : ?>
+                                    <a href="<?php echo get_permalink( $it['wp_post_id'] ); ?>" class="button button-small" target="_blank">
+                                        👁️ View Live ↗
+                                    </a>
+                                    <a href="<?php echo admin_url( 'post.php?post=' . $it['wp_post_id'] . '&action=edit' ); ?>" class="button button-small" target="_blank">
+                                        ✏️ Edit
+                                    </a>
+                                <?php endif; ?>
+                                <a href="<?php echo admin_url( 'admin.php?page=mrcb-queue&action=review&id=' . $it['id'] ); ?>" class="button button-small">
+                                    Queue Details
+                                </a>
+                            <?php else : ?>
+                                <a href="<?php echo admin_url( 'admin.php?page=mrcb-queue&action=review&id=' . $it['id'] ); ?>" class="button button-small">
+                                    👁️ Review
+                                </a>
+                                <button class="button button-small btn-regenerate" data-id="<?php echo esc_attr( $it['id'] ); ?>" title="Regenerate with Gemini">
+                                    🔄
+                                </button>
                             <?php endif; ?>
-
-                            <button class="button button-small btn-regenerate" data-id="<?php echo esc_attr( $it['id'] ); ?>" title="Regenerate with Gemini">
-                                🔄
-                            </button>
                         </td>
                     </tr>
                 <?php endforeach; ?>

@@ -17,6 +17,11 @@ class MRCB_Publisher {
      */
     public static function init() {
         add_action( self::CRON_HOOK_PUBLISH, [ __CLASS__, 'run_daily_publishing' ] );
+        add_action( 'transition_post_status', [ __CLASS__, 'on_post_status_transition' ], 10, 3 );
+        add_action( 'before_delete_post', [ __CLASS__, 'on_post_deleted' ] );
+
+        // Automatically ensure any approved posts are scheduled in WordPress
+        add_action( 'admin_init', [ __CLASS__, 'sync_approved_unscheduled_posts' ] );
     }
 
     /**
@@ -43,19 +48,41 @@ class MRCB_Publisher {
     }
 
     /**
-     * Daily morning publishing handler
+     * Ensure any approved queue posts have a corresponding WordPress post created & scheduled
+     */
+    public static function sync_approved_unscheduled_posts() {
+        global $wpdb;
+        $t_queue = MRCB_DB_Setup::table_queue();
+
+        $orphans = $wpdb->get_results(
+            "SELECT id FROM {$t_queue} 
+             WHERE admin_status = 'approved' 
+               AND (wp_post_id IS NULL OR wp_post_id = 0)",
+            ARRAY_A
+        );
+
+        if ( ! empty( $orphans ) ) {
+            foreach ( $orphans as $o ) {
+                self::schedule_queue_item( (int) $o['id'] );
+            }
+        }
+    }
+
+    /**
+     * Daily morning publishing handler (Safety net)
      */
     public static function run_daily_publishing() {
         global $wpdb;
         $t_queue = MRCB_DB_Setup::table_queue();
         $today = current_time( 'Y-m-d' );
 
-        // Strictly check: admin_status = 'approved' AND wp_post_id IS NULL AND scheduled_date <= today
+        self::sync_approved_unscheduled_posts();
+
+        // Check for approved posts whose scheduled date is today or earlier
         $due_posts = $wpdb->get_results(
             $wpdb->prepare(
-                "SELECT id FROM {$t_queue} 
+                "SELECT id, wp_post_id FROM {$t_queue} 
                  WHERE admin_status = 'approved' 
-                   AND wp_post_id IS NULL 
                    AND scheduled_date <= %s",
                 $today
             ),
@@ -65,7 +92,13 @@ class MRCB_Publisher {
         $results = [];
         if ( ! empty( $due_posts ) ) {
             foreach ( $due_posts as $p ) {
-                $results[] = self::publish_queue_item( $p['id'] );
+                $post_id = (int) $p['wp_post_id'];
+                if ( $post_id && get_post_status( $post_id ) === 'future' ) {
+                    wp_publish_post( $post_id );
+                    $results[] = [ 'queue_id' => $p['id'], 'wp_post_id' => $post_id, 'status' => 'published' ];
+                } elseif ( empty( $post_id ) ) {
+                    $results[] = self::schedule_queue_item( (int) $p['id'], true );
+                }
             }
         }
 
@@ -73,9 +106,13 @@ class MRCB_Publisher {
     }
 
     /**
-     * Publish a single approved queue item to WordPress
+     * Schedule or Publish an approved queue item in WordPress
+     *
+     * @param int  $queue_id
+     * @param bool $force_publish_now
+     * @return array
      */
-    public static function publish_queue_item( $queue_id ) {
+    public static function schedule_queue_item( $queue_id, $force_publish_now = false ) {
         global $wpdb;
         $t_queue = MRCB_DB_Setup::table_queue();
         $t_fest  = MRCB_DB_Setup::table_festivals();
@@ -85,13 +122,8 @@ class MRCB_Publisher {
             return [ 'success' => false, 'error' => 'Queue item not found.' ];
         }
 
-        // STRICT GUARD: Must be approved by admin!
-        if ( $item['admin_status'] !== 'approved' ) {
-            return [ 'success' => false, 'error' => 'Post cannot be published without admin approval.' ];
-        }
-
-        // Content to use: admin edited version if present, else final AI tagged version
-        $markdown_content = ! empty( $item['admin_draft'] ) ? $item['admin_draft'] : $item['ai_draft_tagged'];
+        // Content to use: admin edited version if present, else final AI tagged version, else raw ai_draft
+        $markdown_content = ! empty( $item['admin_draft'] ) ? $item['admin_draft'] : ( $item['ai_draft_tagged'] ?: $item['ai_draft'] );
         if ( empty( $markdown_content ) ) {
             return [ 'success' => false, 'error' => 'No content found in draft.' ];
         }
@@ -99,7 +131,7 @@ class MRCB_Publisher {
         $html_content = MRCB_Writer::markdown_to_html( $markdown_content );
 
         // Post Title
-        $post_title = ! empty( $item['admin_meta_title'] ) ? $item['admin_meta_title'] : $item['topic_title_hi'];
+        $post_title = ! empty( $item['admin_meta_title'] ) ? $item['admin_meta_title'] : ( $item['ai_meta_title'] ?: $item['topic_title_hi'] );
 
         // Post Slug (clean English)
         $post_slug = ! empty( $item['wp_slug'] ) ? sanitize_title( $item['wp_slug'] ) : sanitize_title( $item['focus_keyword'] );
@@ -111,7 +143,7 @@ class MRCB_Publisher {
         $category_ids = self::resolve_categories( $item );
 
         // Determine Tags (Strictly English only)
-        $raw_tags = array_filter( array_map( 'trim', explode( ',', $item['ai_tags'] ) ) );
+        $raw_tags = array_filter( array_map( 'trim', explode( ',', (string) $item['ai_tags'] ) ) );
         $tag_names = [];
         foreach ( $raw_tags as $t ) {
             $cleaned = preg_replace( '/[^a-zA-Z0-9\s\-]/', '', $t );
@@ -122,20 +154,47 @@ class MRCB_Publisher {
         }
         $tag_names = array_unique( $tag_names );
 
-        // Insert WordPress Post
+        // Determine Timing & Status
+        $publish_time        = ! empty( $item['publish_time'] ) ? $item['publish_time'] : '07:00:00';
+        $scheduled_datetime  = $item['scheduled_date'] . ' ' . $publish_time;
+        $scheduled_timestamp = strtotime( $scheduled_datetime );
+        $current_timestamp   = current_time( 'timestamp' );
+
+        $is_future = ( ! $force_publish_now && $scheduled_timestamp > $current_timestamp );
+        $post_status = $is_future ? 'future' : 'publish';
+
+        if ( $is_future ) {
+            $post_date     = $scheduled_datetime;
+            $post_date_gmt = get_gmt_from_date( $scheduled_datetime );
+        } else {
+            $post_date     = current_time( 'mysql' );
+            $post_date_gmt = current_time( 'mysql', 1 );
+        }
+
+        $author_id = get_current_user_id() ?: ( (int) $item['approved_by'] ?: 1 );
+
         $post_data = [
             'post_title'    => wp_strip_all_tags( $post_title ),
             'post_name'     => $post_slug,
             'post_content'  => $html_content,
-            'post_status'   => 'publish',
+            'post_status'   => $post_status,
             'post_type'     => 'post',
-            'post_author'   => 1, // Default to site admin
+            'post_author'   => $author_id,
             'post_category' => $category_ids,
             'tags_input'    => $tag_names,
-            'post_date'     => current_time( 'mysql' ),
+            'post_date'     => $post_date,
+            'post_date_gmt' => $post_date_gmt,
+            'edit_date'     => true,
         ];
 
-        $post_id = wp_insert_post( $post_data, true );
+        $existing_id = ! empty( $item['wp_post_id'] ) ? (int) $item['wp_post_id'] : 0;
+        if ( $existing_id && get_post( $existing_id ) ) {
+            $post_data['ID'] = $existing_id;
+            $post_id = wp_update_post( $post_data, true );
+        } else {
+            $post_id = wp_insert_post( $post_data, true );
+        }
+
         if ( is_wp_error( $post_id ) ) {
             return [ 'success' => false, 'error' => $post_id->get_error_message() ];
         }
@@ -162,29 +221,112 @@ class MRCB_Publisher {
         }
 
         // Update Queue record
-        $published_at = current_time( 'mysql' );
+        $now = current_time( 'mysql' );
+        $final_slug = get_post_field( 'post_name', $post_id ) ?: $post_slug;
+        $queue_update = [
+            'wp_post_id'      => $post_id,
+            'wp_slug'         => $final_slug,
+            'wp_scheduled_at' => $scheduled_datetime,
+            'admin_status'    => ( $post_status === 'publish' ) ? 'published' : 'approved',
+            'approved_by'     => $author_id,
+            'approved_at'     => $now,
+        ];
+        if ( $post_status === 'publish' ) {
+            $queue_update['wp_published_at'] = $now;
+            self::register_post_in_link_map( $post_id, $post_title, $focus_kw, $tag_names );
+        }
+
         $wpdb->update(
             $t_queue,
-            [
-                'wp_post_id'      => $post_id,
-                'wp_published_at' => $published_at,
-                'admin_status'    => 'published',
-            ],
-            [ 'id' => $queue_id ],
-            [ '%d', '%s', '%s' ],
-            [ '%d' ]
+            $queue_update,
+            [ 'id' => $queue_id ]
         );
-
-        // Update Link Map so future AI articles can link to this new post
-        self::register_post_in_link_map( $post_id, $post_title, $focus_kw, $tag_names );
 
         return [
             'success'      => true,
             'queue_id'     => $queue_id,
             'wp_post_id'   => $post_id,
-            'published_at' => $published_at,
-            'url'          => get_permalink( $post_id )
+            'post_status'  => $post_status,
+            'scheduled_at' => $scheduled_datetime,
+            'url'          => get_permalink( $post_id ),
+            'edit_url'     => admin_url( 'post.php?post=' . $post_id . '&action=edit' ),
+            'scheduled_url'=> admin_url( 'edit.php?post_status=future' ),
         ];
+    }
+
+    /**
+     * Publish a single queue item immediately to WordPress (wrapper around schedule_queue_item)
+     */
+    public static function publish_queue_item( $queue_id ) {
+        return self::schedule_queue_item( $queue_id, true );
+    }
+
+    /**
+     * Hook into WordPress post transitions to keep queue in sync with WP Posts lifecycle
+     */
+    public static function on_post_status_transition( $new_status, $old_status, $post ) {
+        if ( ! $post || $post->post_type !== 'post' ) {
+            return;
+        }
+
+        global $wpdb;
+        $t_queue = MRCB_DB_Setup::table_queue();
+        $queue_item = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$t_queue} WHERE wp_post_id = %d", $post->ID ), ARRAY_A );
+        if ( ! $queue_item ) {
+            return;
+        }
+
+        if ( $new_status === 'publish' && $old_status !== 'publish' ) {
+            $now = current_time( 'mysql' );
+            $wpdb->update(
+                $t_queue,
+                [
+                    'admin_status'    => 'published',
+                    'wp_published_at' => $now,
+                ],
+                [ 'id' => $queue_item['id'] ]
+            );
+
+            $focus_kw = get_post_meta( $post->ID, '_yoast_wpseo_focuskw', true ) ?: $queue_item['focus_keyword'];
+            $tags = wp_get_post_tags( $post->ID, [ 'fields' => 'names' ] );
+            self::register_post_in_link_map( $post->ID, $post->post_title, $focus_kw, (array) $tags );
+            delete_transient( 'related_posts_' . $post->ID );
+        } elseif ( $new_status === 'trash' ) {
+            $wpdb->update(
+                $t_queue,
+                [
+                    'admin_status' => 'rejected',
+                    'admin_notes'  => 'Post moved to trash in WordPress Posts on ' . current_time( 'mysql' ),
+                ],
+                [ 'id' => $queue_item['id'] ]
+            );
+        } elseif ( $old_status === 'trash' && $new_status === 'future' ) {
+            $wpdb->update(
+                $t_queue,
+                [
+                    'admin_status'    => 'approved',
+                    'wp_scheduled_at' => $post->post_date,
+                ],
+                [ 'id' => $queue_item['id'] ]
+            );
+        }
+    }
+
+    /**
+     * Hook when a post is permanently deleted from WordPress Posts
+     */
+    public static function on_post_deleted( $post_id ) {
+        global $wpdb;
+        $t_queue = MRCB_DB_Setup::table_queue();
+        $wpdb->update(
+            $t_queue,
+            [
+                'wp_post_id'   => null,
+                'admin_status' => 'rejected',
+                'admin_notes'  => 'Post deleted permanently from WordPress Posts on ' . current_time( 'mysql' ),
+            ],
+            [ 'wp_post_id' => $post_id ]
+        );
     }
 
     /**

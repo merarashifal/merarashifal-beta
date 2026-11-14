@@ -176,13 +176,30 @@ class MRCB_Admin {
         if ( ! empty( $meta_desc ) ) {
             $data['admin_meta_desc'] = $meta_desc;
         }
-        if ( ! empty( $slug ) ) {
-            $data['wp_slug'] = $slug;
-        }
-
         $wpdb->update( $t_queue, $data, [ 'id' => $id ] );
 
-        wp_send_json_success( [ 'message' => 'Post approved successfully! It will be published at 7:00 AM on scheduled date.' ] );
+        // Immediately schedule post in WordPress Posts
+        $sched_res = MRCB_Publisher::schedule_queue_item( $id );
+        if ( ! $sched_res['success'] ) {
+            wp_send_json_error( [ 'message' => 'Draft saved in queue, but WordPress scheduling failed: ' . $sched_res['error'] ] );
+        }
+
+        $post_id     = $sched_res['wp_post_id'];
+        $post_status = $sched_res['post_status'];
+
+        if ( $post_status === 'future' ) {
+            $msg = 'Post #' . $post_id . ' approved & scheduled in WordPress! It is now visible in WordPress under Posts > Scheduled.';
+        } else {
+            $msg = 'Post #' . $post_id . ' approved & published live in WordPress!';
+        }
+
+        wp_send_json_success( [
+            'message'       => $msg,
+            'post_id'       => $post_id,
+            'post_status'   => $post_status,
+            'edit_url'      => admin_url( 'post.php?post=' . $post_id . '&action=edit' ),
+            'scheduled_url' => admin_url( 'edit.php?post_status=future' ),
+        ] );
     }
 
     public static function ajax_reject_draft() {

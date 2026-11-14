@@ -70,14 +70,28 @@ $slug           = $item['wp_slug'] ?: sanitize_title( $item['focus_keyword'] );
                     <strong>📅 <?php echo esc_html( wp_date( 'l, d F Y', strtotime( $item['scheduled_date'] ) ) ); ?></strong> at <strong>07:00 AM IST</strong>
                 </p>
 
+                <?php if ( ! empty( $item['wp_post_id'] ) ) : ?>
+                    <div style="background:#e0f2fe; border-left:4px solid #0284c7; padding:10px 12px; margin-bottom:15px; border-radius:4px; font-size:13px; line-height: 1.5;">
+                        <strong style="color:#0369a1;">📌 Scheduled in WordPress:</strong><br>
+                        Post ID: <code>#<?php echo esc_html( $item['wp_post_id'] ); ?></code> &bull; 
+                        Status: <strong><?php echo esc_html( get_post_status( $item['wp_post_id'] ) ); ?></strong><br>
+                        <a href="<?php echo admin_url( 'post.php?post=' . $item['wp_post_id'] . '&action=edit' ); ?>" target="_blank" style="font-weight:600; text-decoration:underline;">✏️ Edit in WordPress Posts &rarr;</a><br>
+                        <a href="<?php echo admin_url( 'edit.php?post_status=future' ); ?>" target="_blank" style="font-weight:600; text-decoration:underline;">📋 View Posts &gt; Scheduled &rarr;</a>
+                    </div>
+                <?php endif; ?>
+
                 <div class="mrcb-action-stack">
                     <button id="btn-save-approve" class="button button-primary button-hero" data-id="<?php echo esc_attr( $item['id'] ); ?>">
-                        ✅ Approve Draft
+                        <?php echo ! empty( $item['wp_post_id'] ) ? '💾 Update Scheduled Post in WP' : '✅ Approve & Schedule in WordPress'; ?>
                     </button>
-                    <p class="text-muted" style="margin-top:4px; font-size:12px;">Approving locks in the post. It will automatically publish at 7:00 AM on scheduled date.</p>
+                    <p class="text-muted" style="margin-top:4px; font-size:12px;">
+                        <?php echo ! empty( $item['wp_post_id'] )
+                            ? 'Updates content, SEO metadata, and schedule of WordPress Post #' . $item['wp_post_id'] . '.'
+                            : 'Immediately creates and schedules this post in WordPress under <strong>Posts &gt; Scheduled</strong>.'; ?>
+                    </p>
 
                     <button id="btn-publish-direct" class="button button-secondary" data-id="<?php echo esc_attr( $item['id'] ); ?>">
-                        🚀 Publish to Site Immediately
+                        🚀 Publish Live Immediately
                     </button>
 
                     <button id="btn-review-regenerate" class="button" data-id="<?php echo esc_attr( $item['id'] ); ?>">

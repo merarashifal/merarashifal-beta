@@ -27,7 +27,7 @@
             var metaDesc = $('#mrcb-meta-desc').val();
             var slug = $('#mrcb-slug').val();
 
-            $btn.prop('disabled', true).text('⏳ Approving...');
+            $btn.prop('disabled', true).text('⏳ Scheduling in WordPress...');
 
             $.post(mrcbConfig.ajax_url, {
                 action: 'mrcb_approve_draft',
@@ -43,7 +43,7 @@
                     window.location.reload();
                 } else {
                     alert('❌ ' + (res.data.message || 'Error approving draft.'));
-                    $btn.prop('disabled', false).text('✅ Approve Draft');
+                    $btn.prop('disabled', false).text('✅ Approve & Schedule in WordPress');
                 }
             });
         });
@@ -54,7 +54,7 @@
             var $btn = $(this);
             var id = $btn.data('id');
 
-            if (!confirm('Approve this post as-is? It will be scheduled for 7:00 AM publish.')) {
+            if (!confirm('Approve and schedule this post in WordPress Posts (under Posts > Scheduled)?')) {
                 return;
             }
 
