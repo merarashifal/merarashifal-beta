@@ -18,3 +18,7 @@ snippet_59_backup_original.php
 # Large uploads and logs
 wp-content/uploads/
 *.log
+
+# Local festive themes in testing (do not push to beta/production)
+wp-content/themes/astra-child/inc/christmas-theme/
+wp-content/mu-plugins/
