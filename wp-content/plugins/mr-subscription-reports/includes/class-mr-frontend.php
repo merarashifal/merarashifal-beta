@@ -1005,6 +1005,11 @@ class MR_Frontend {
     public static function ajax_simulate_payment() {
         check_ajax_referer('mr_reports_nonce', 'nonce');
 
+        // Security check: Simulation strictly forbidden in production
+        if (!defined('WP_DEBUG') || !WP_DEBUG) {
+            wp_send_json_error(['message' => 'Simulated checkout is disabled in production.']);
+        }
+
         $user_id = get_current_user_id();
         if (!$user_id) {
             // If guest in simulation, use admin or first user

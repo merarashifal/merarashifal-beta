@@ -2812,6 +2812,26 @@ class MR_Checkout {
             wp_send_json_error(['message' => 'Transaction record not found.']);
         }
 
+        // Security Verification: Cryptographic HMAC SHA256 Signature Check
+        $gateway_order_id = $txn['gateway_order_id'] ?? '';
+        $is_simulation = (strpos($payment_id, 'pay_sim_') !== false || empty($signature));
+
+        if ($is_simulation) {
+            // Only allow simulated payment if WP_DEBUG is explicitly enabled (local testing)
+            if (!defined('WP_DEBUG') || !WP_DEBUG) {
+                wp_send_json_error(['message' => 'Simulated test payments are disabled in live production.']);
+            }
+        } else {
+            // Verify HMAC SHA256 signature for live Razorpay payments
+            $key_secret = class_exists('MR_Razorpay') ? MR_Razorpay::get_key_secret() : '';
+            if (!empty($key_secret) && !empty($gateway_order_id)) {
+                $expected_sig = hash_hmac('sha256', $gateway_order_id . '|' . $payment_id, $key_secret);
+                if (!hash_equals($expected_sig, $signature)) {
+                    wp_send_json_error(['message' => 'Payment signature verification failed. Transaction was not confirmed by Razorpay.']);
+                }
+            }
+        }
+
         // 1. Mark transaction complete
         if (class_exists('MR_Transactions')) {
             MR_Transactions::complete_transaction(

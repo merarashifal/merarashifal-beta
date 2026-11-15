@@ -941,7 +941,10 @@ class Niyati_REST_API {
         $key_secret = self::get_razorpay_key_secret();
 
         if (strpos($order_id, 'order_sim_') !== false) {
-            // Simulated payment verification
+            // Simulated payment verification (only allowed if WP_DEBUG is enabled)
+            if (!defined('WP_DEBUG') || !WP_DEBUG) {
+                return new WP_Error('simulation_disabled', 'Simulated payments are disabled in live production.', ['status' => 403]);
+            }
             $verified = true;
             if (empty($payment_id)) {
                 $payment_id = 'pay_sim_' . wp_generate_uuid4();

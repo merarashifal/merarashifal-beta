@@ -17,8 +17,8 @@ if (!$live_panchang) {
 }
 
 // Fallback values if DB is empty or missing specific fields
-$tithi_display     = !empty($live_panchang['tithi_name']) ? ($live_panchang['tithi_type'] . ' ' . $live_panchang['tithi_name']) : 'कार्तिक शुक्ल दशमी';
-$nakshatra_display = !empty($live_panchang['nakshatra_name']) ? $live_panchang['nakshatra_name'] : 'रोहिणी';
+$tithi_display     = !empty($live_panchang['tithi_name']) ? ($live_panchang['tithi_type'] . ' ' . $live_panchang['tithi_name']) : 'कार्तिक शुक्ल एकादशी';
+$nakshatra_display = !empty($live_panchang['nakshatra_name']) ? $live_panchang['nakshatra_name'] : 'उत्तराषाढ़ा';
 $nakshatra_lord    = !empty($live_panchang['nakshatra_lord']) ? $live_panchang['nakshatra_lord'] : 'सूर्य';
 $nakshatra_diety   = !empty($live_panchang['nakshatra_diety']) ? $live_panchang['nakshatra_diety'] : 'विश्वेदेवस';
 $yoga_display      = !empty($live_panchang['yoga_name']) ? $live_panchang['yoga_name'] : 'सिद्धि';
@@ -50,7 +50,7 @@ get_header();
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=""/>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,500;0,600;0,700;0,800;1,600&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet"/>
 
 <!-- Scoped Tailwind CDN without preflight to preserve Astra/Elementor theme header & footer -->
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
@@ -89,6 +89,7 @@ get_header();
         fontFamily: {
           "sans": ["Inter", "-apple-system", "BlinkMacSystemFont", "Segoe UI", "Roboto", "sans-serif"],
           "serif": ["Playfair Display", "Georgia", "serif"],
+          "display": ["Poppins", "Inter", "sans-serif"],
         }
       }
     }
@@ -100,11 +101,14 @@ get_header();
  * SACRED VEDIC VISUAL IDENTITY & AMBIENCE
  * ========================================================== */
 .mr-homepage-master-wrap {
+  overflow-x: hidden;
+  max-width: 100vw;
+  width: 100%;
   background-color: #FFFBEB;
   background-image: 
-    radial-gradient(ellipse at 50% 0%, rgba(245, 130, 32, 0.10) 0%, rgba(255, 251, 235, 0) 65%),
-    radial-gradient(circle at 85% 30%, rgba(159, 60, 89, 0.05) 0%, transparent 40%),
-    radial-gradient(circle at 15% 70%, rgba(203, 152, 54, 0.06) 0%, transparent 45%);
+    radial-gradient(ellipse at 50% 0%, rgba(245, 130, 32, 0.12) 0%, rgba(255, 251, 235, 0) 65%),
+    radial-gradient(circle at 85% 25%, rgba(159, 60, 89, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at 15% 65%, rgba(203, 152, 54, 0.06) 0%, transparent 45%);
   color: #221a16;
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   line-height: 1.5;
@@ -124,8 +128,8 @@ get_header();
 
 /* Custom Scrollbars */
 .custom-scroll::-webkit-scrollbar {
-  height: 5px;
-  width: 5px;
+  height: 4px;
+  width: 4px;
 }
 .custom-scroll::-webkit-scrollbar-thumb {
   background: #cb9836;
@@ -138,7 +142,7 @@ get_header();
 
 /* Shastric Radiance & Card Hover Animations */
 .spiritual-glow {
-  background: radial-gradient(ellipse at top, rgba(245, 130, 32, 0.07) 0%, rgba(255, 255, 255, 0.95) 75%);
+  background: radial-gradient(ellipse at top, rgba(245, 130, 32, 0.08) 0%, rgba(255, 255, 255, 0.96) 75%);
 }
 .golden-card {
   background: #ffffff;
@@ -153,38 +157,52 @@ get_header();
   box-shadow: 0 14px 28px -6px rgba(150, 73, 0, 0.14), 0 0 0 1px rgba(203, 152, 54, 0.25);
 }
 
-/* Pulsing Aura & Shimmer */
-@keyframes sacredGlowPulse {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(245, 130, 32, 0.4);
-  }
-  50% {
-    box-shadow: 0 0 0 8px rgba(245, 130, 32, 0);
-  }
-}
-.pulse-sacred {
-  animation: sacredGlowPulse 2.5s infinite;
+/* Mobile Segmented Tab Active Styles */
+.hero-tab-btn.active {
+  background: #f58220;
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(245, 130, 32, 0.3);
 }
 
-@keyframes spinCelestial {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-.spin-slow {
-  animation: spinCelestial 20s linear infinite;
-}
-
-/* Zodiac Interactive Swipe Bar */
-.zodiac-chip {
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  border: 1px solid rgba(217, 119, 6, 0.2);
+/* Zodiac 4x3 Mobile Grid Card */
+.zodiac-grid-card {
+  border: 1px solid rgba(217, 119, 6, 0.18);
   background: #ffffff;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.zodiac-chip:hover {
+.zodiac-grid-card:hover, .zodiac-grid-card:active {
   background: #fff8f6;
   border-color: #f58220;
   transform: translateY(-2px);
-  box-shadow: 0 6px 14px -3px rgba(150, 73, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(150, 73, 0, 0.12);
+}
+
+/* Life Problem Solution Gateway Cards */
+.gateway-card {
+  border: 1px solid rgba(217, 119, 6, 0.18);
+  background: #ffffff;
+  transition: all 0.2s ease-in-out;
+}
+.gateway-card:hover, .gateway-card:active {
+  border-color: #f58220;
+  background: #fff8f6;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(150, 73, 0, 0.1);
+}
+
+/* Deity Mobile Grid Avatar */
+.deity-circle-card {
+  transition: all 0.2s ease-in-out;
+}
+.deity-circle-card:hover .avatar-ring, .deity-circle-card:active .avatar-ring {
+  border-color: #f58220;
+  transform: scale(1.08);
+  box-shadow: 0 0 0 3px rgba(245, 130, 32, 0.2);
+}
+
+button, a, input, select {
+  touch-action: manipulation;
 }
 
 /* Sun Sign AJAX Card Styling */
@@ -259,17 +277,6 @@ get_header();
   background: #e07210 !important;
   transform: translateY(-1px);
 }
-
-/* Tablet & Mobile Responsiveness Enhancements */
-@media (max-width: 640px) {
-  .mr-hero-grid {
-    grid-template-columns: 1fr !important;
-  }
-  .mr-deity-avatar {
-    width: 64px !important;
-    height: 64px !important;
-  }
-}
 </style>
 
 <div class="mr-homepage-master-wrap">
@@ -296,48 +303,28 @@ foreach ($ordered_sections as $section_id => $sec_data) {
          * ========================================================== */
         case 'astronomical_bar':
             ?>
-            <div class="border-b border-amber-900/10 bg-amber-100/60 text-on-surface-variant py-2 px-4 lg:px-12 text-xs">
-              <div class="max-w-7xl mx-auto flex items-center justify-between gap-3 overflow-hidden">
-                <!-- Mobile Condensed -->
-                <div class="flex md:hidden items-center justify-between w-full text-[11px] font-medium">
-                  <span class="inline-flex items-center gap-1.5 text-primary truncate max-w-[65%]">
+            <div class="border-b border-amber-900/10 bg-amber-100/70 text-on-surface-variant py-2 px-3 sm:px-6 lg:px-12 text-xs">
+              <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-1.5 sm:gap-3">
+                <!-- Line 1: Samvat & Tithi -->
+                <div class="flex items-center justify-between w-full sm:w-auto text-[11px] sm:text-xs">
+                  <span class="inline-flex items-center gap-1.5 text-primary font-bold">
                     <span class="w-2 h-2 rounded-full bg-primary-container animate-pulse shrink-0"></span>
-                    <strong class="text-primary font-bold">VS <?php echo esc_html($vikram_samvat); ?></strong>
+                    <span>VS <?php echo esc_html($vikram_samvat); ?></span>
                     <span class="text-amber-400">|</span>
-                    <span class="text-secondary font-semibold truncate"><?php echo esc_html($tithi_display); ?></span>
+                    <span class="text-secondary truncate"><?php echo esc_html($tithi_display); ?></span>
                   </span>
-                  <span class="inline-flex items-center gap-2 text-on-surface-variant shrink-0 text-[10px] font-medium">
-                    <span>☀️ <?php echo esc_html($sunrise_display); ?></span>
-                    <span>🌙 <?php echo esc_html($moonrise_display); ?></span>
+                  <span class="sm:hidden text-[10px] font-semibold text-tertiary">
+                    ☀️ <?php echo esc_html($sunrise_display); ?>
                   </span>
                 </div>
-                <!-- Desktop Full Astronomical Bar -->
-                <div class="hidden md:flex items-center space-x-3 overflow-x-auto whitespace-nowrap">
-                  <span class="inline-flex items-center gap-1.5 font-bold text-primary">
-                    <span class="w-2 h-2 rounded-full bg-primary-container animate-pulse"></span>
-                    Vikram Samvat <?php echo esc_html($vikram_samvat); ?>
-                  </span>
-                  <span class="text-amber-400">|</span>
-                  <span class="font-medium text-on-surface-variant">Saka <?php echo esc_html($saka_samvat); ?></span>
-                  <span class="text-amber-400">|</span>
-                  <span class="font-bold text-secondary"><?php echo esc_html($tithi_display); ?></span>
-                  <span class="text-amber-400">|</span>
-                  <span class="text-on-surface-variant">Nakshatra: <strong class="text-on-surface font-semibold"><?php echo esc_html($nakshatra_display); ?></strong></span>
-                </div>
-                <div class="hidden md:flex items-center space-x-4 overflow-x-auto whitespace-nowrap text-on-surface-variant">
-                  <span class="inline-flex items-center gap-1">
-                    <span class="material-symbols-outlined text-tertiary text-sm">wb_sunny</span>
-                    Sunrise: <strong class="text-on-surface font-semibold"><?php echo esc_html($sunrise_display); ?></strong>
-                  </span>
-                  <span class="inline-flex items-center gap-1">
-                    <span class="material-symbols-outlined text-primary text-sm">wb_twilight</span>
-                    Sunset: <strong class="text-on-surface font-semibold"><?php echo esc_html($sunset_display); ?></strong>
-                  </span>
-                  <span class="inline-flex items-center gap-1">
-                    <span class="material-symbols-outlined text-tertiary text-sm">bedtime</span>
-                    Moonrise: <strong class="text-on-surface font-semibold"><?php echo esc_html($moonrise_display); ?></strong>
-                  </span>
-                  <span class="hidden xl:inline-flex items-center gap-1 bg-white px-2.5 py-0.5 rounded-full border border-amber-900/10 text-tertiary text-[11px] font-semibold shadow-xs">
+                <!-- Line 2: Astronomical Times -->
+                <div class="hidden sm:flex items-center space-x-3 text-[11px] text-on-surface-variant">
+                  <span>Nakshatra: <strong class="text-on-surface font-semibold"><?php echo esc_html($nakshatra_display); ?></strong></span>
+                  <span class="text-amber-300">|</span>
+                  <span>☀️ Rise: <strong class="text-on-surface"><?php echo esc_html($sunrise_display); ?></strong></span>
+                  <span class="text-amber-300">|</span>
+                  <span>🌙 Moon: <strong class="text-on-surface"><?php echo esc_html($moonrise_display); ?></strong></span>
+                  <span class="hidden lg:inline-flex items-center gap-1 bg-white px-2 py-0.5 rounded-full border border-amber-900/10 text-tertiary text-[10px] font-semibold shadow-xs">
                     <span class="material-symbols-outlined text-xs">tune</span>
                     Drik Ganita • Ujjain Reference 23.17° N
                   </span>
@@ -366,33 +353,73 @@ foreach ($ordered_sections as $section_id => $sec_data) {
                 ['slug' => 'pisces',      'name' => 'Pisces',      'hi' => 'मीन',     'symbol' => '♓'],
             ];
             ?>
-            <section class="max-w-7xl mx-auto px-4 lg:px-12 pt-6 pb-2">
-              <div class="bg-white p-4 lg:p-5 rounded-2xl border border-amber-900/10 shadow-sm">
-                <!-- Header: Clean, Authentic, NO BUBBLE BADGE -->
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-3.5 gap-2 pb-3 border-b border-amber-900/10">
-                  <div class="flex items-center gap-2.5">
-                    <span class="material-symbols-outlined text-primary-container text-2xl">cyclone</span>
+            <section class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-12 pt-4 pb-2">
+              <div class="bg-white p-3 sm:p-5 rounded-2xl border border-amber-900/10 shadow-xs">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-1.5 pb-2.5 border-b border-amber-900/10">
+                  <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary-container text-xl sm:text-2xl">cyclone</span>
                     <div>
-                      <h2 class="font-serif text-lg sm:text-xl font-bold text-primary leading-tight">Daily Horoscope (दैनिक राशिफल)</h2>
-                      <p class="text-xs text-on-surface-variant">Tap your Moon or Sun Sign for immediate planetary forecast</p>
+                      <h2 class="font-serif text-base sm:text-xl font-bold text-primary leading-tight">Daily Horoscope (दैनिक राशिफल)</h2>
+                      <p class="text-[11px] sm:text-xs text-on-surface-variant">Tap your Moon or Sun Sign for immediate planetary forecast</p>
                     </div>
                   </div>
-                  <span class="text-xs font-semibold text-tertiary bg-amber-50 border border-amber-200 px-3 py-1 rounded-full self-start sm:self-auto">
+                  <span class="text-[11px] sm:text-xs font-semibold text-tertiary bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full self-start sm:self-auto">
                     Today: <?php echo date('d M Y'); ?>
                   </span>
                 </div>
 
-                <!-- 12 Signs: Smooth Horizontal Scrollable Strip with Touch Support -->
-                <div class="flex items-center gap-2 sm:gap-2.5 overflow-x-auto pb-2 pt-1 custom-scroll">
+                <!-- 12 Signs: 4x3 Compact Mobile Grid (Zero Horizontal Scroll!) -->
+                <div class="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-12 gap-1.5 sm:gap-2">
                   <?php foreach ($zodiacs as $z): ?>
                     <a href="<?php echo esc_url(home_url('/horoscope/' . $z['slug'] . '/')); ?>"
-                       class="zodiac-chip flex items-center gap-2 px-3.5 py-2 rounded-xl whitespace-nowrap shrink-0 group">
-                      <span class="text-primary-container font-bold text-base group-hover:scale-125 transition-transform"><?php echo esc_html($z['symbol']); ?></span>
-                      <span class="font-bold text-xs text-on-surface group-hover:text-primary transition-colors"><?php echo esc_html($z['hi']); ?></span>
-                      <span class="text-[11px] text-on-surface-variant font-medium">(<?php echo esc_html($z['name']); ?>)</span>
+                       class="zodiac-grid-card p-2 sm:p-2.5 rounded-xl flex flex-col items-center justify-center text-center group">
+                      <span class="text-primary-container font-bold text-lg sm:text-2xl group-hover:scale-115 transition-transform"><?php echo esc_html($z['symbol']); ?></span>
+                      <span class="font-bold text-xs sm:text-sm text-on-surface group-hover:text-primary leading-tight mt-0.5"><?php echo esc_html($z['hi']); ?></span>
+                      <span class="text-[9px] sm:text-[11px] text-on-surface-variant font-medium leading-tight"><?php echo esc_html($z['name']); ?></span>
                     </a>
                   <?php endforeach; ?>
                 </div>
+              </div>
+            </section>
+
+            <!-- Life Problem Solution Gateway Pills (2-Col Mobile / 5-Col Desktop - Zero Horizontal Scroll) -->
+            <section class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-12 py-2">
+              <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
+                <a href="<?php echo esc_url(home_url('/dasha/')); ?>" class="gateway-card p-2.5 rounded-xl flex items-center gap-2">
+                  <span class="text-xl sm:text-2xl shrink-0">💼</span>
+                  <div class="overflow-hidden">
+                    <span class="block text-xs font-bold text-on-surface leading-tight truncate">Career &amp; Growth</span>
+                    <span class="block text-[10px] text-on-surface-variant truncate">Varshaphal &amp; Dasha</span>
+                  </div>
+                </a>
+                <a href="<?php echo esc_url(home_url('/matchmaking-compatibility-check/')); ?>" class="gateway-card p-2.5 rounded-xl flex items-center gap-2">
+                  <span class="text-xl sm:text-2xl shrink-0">💍</span>
+                  <div class="overflow-hidden">
+                    <span class="block text-xs font-bold text-on-surface leading-tight truncate">Vivah &amp; Milan</span>
+                    <span class="block text-[10px] text-on-surface-variant truncate">36 Gun Matchmaking</span>
+                  </div>
+                </a>
+                <a href="<?php echo esc_url(home_url('/muhurat-dates/')); ?>" class="gateway-card p-2.5 rounded-xl flex items-center gap-2">
+                  <span class="text-xl sm:text-2xl shrink-0">💰</span>
+                  <div class="overflow-hidden">
+                    <span class="block text-xs font-bold text-on-surface leading-tight truncate">Shubh Muhurat</span>
+                    <span class="block text-[10px] text-on-surface-variant truncate">Choghadiya &amp; Dates</span>
+                  </div>
+                </a>
+                <a href="<?php echo esc_url(home_url('/dosh/')); ?>" class="gateway-card p-2.5 rounded-xl flex items-center gap-2">
+                  <span class="text-xl sm:text-2xl shrink-0">🪐</span>
+                  <div class="overflow-hidden">
+                    <span class="block text-xs font-bold text-on-surface leading-tight truncate">Shani &amp; Dosha</span>
+                    <span class="block text-[10px] text-on-surface-variant truncate">Manglik &amp; Sade Sati</span>
+                  </div>
+                </a>
+                <a href="<?php echo esc_url(home_url('/baby-names/')); ?>" class="gateway-card p-2.5 rounded-xl flex items-center gap-2 col-span-2 sm:col-span-1">
+                  <span class="text-xl sm:text-2xl shrink-0">👶</span>
+                  <div class="overflow-hidden">
+                    <span class="block text-xs font-bold text-on-surface leading-tight truncate">Baby Names (नामकरण)</span>
+                    <span class="block text-[10px] text-on-surface-variant truncate">50k+ Nakshatra Names</span>
+                  </div>
+                </a>
               </div>
             </section>
             <?php
@@ -405,11 +432,7 @@ foreach ($ordered_sections as $section_id => $sec_data) {
             ?>
             <section class="max-w-7xl mx-auto px-4 lg:px-12 py-4">
               <div class="bg-gradient-to-br from-amber-50 via-orange-50/70 to-amber-100/60 border border-amber-300/70 rounded-2xl p-5 sm:p-7 shadow-sm relative overflow-hidden">
-                <!-- Spiritual Aura Graphic Behind -->
-                <div class="absolute -top-16 -right-16 w-52 h-52 bg-primary-container/10 rounded-full blur-3xl pointer-events-none"></div>
-
                 <div class="max-w-3xl mx-auto relative z-10">
-                  <!-- Header: Pure, Elegant, NO BUBBLE BADGE -->
                   <div class="text-center mb-5">
                     <div class="inline-flex items-center gap-1.5 text-primary mb-1">
                       <span class="material-symbols-outlined text-xl text-primary-container">auto_awesome</span>
@@ -420,26 +443,21 @@ foreach ($ordered_sections as $section_id => $sec_data) {
                     </p>
                   </div>
 
-                  <!-- Interactive Form Bar -->
                   <div class="bg-white border border-amber-900/15 rounded-xl p-3 sm:p-4 shadow-sm">
                     <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-                      <!-- Sleek Language Toggle -->
                       <div class="flex items-center justify-center bg-amber-50 border border-amber-200/80 rounded-lg p-1 shrink-0">
                         <button type="button" class="mr-z-lang-btn px-3 py-1.5 rounded-md text-xs font-bold bg-primary-container text-white transition-all shadow-xs" data-lang="en">EN</button>
                         <button type="button" class="mr-z-lang-btn px-3 py-1.5 rounded-md text-xs font-bold text-on-surface hover:text-primary transition-all" data-lang="hi">हिंदी</button>
                       </div>
 
-                      <!-- High-contrast Date Input -->
                       <div class="flex-1 relative">
                         <input type="date" id="mr-zodiac-dob" 
                                value="1995-05-15"
                                class="w-full h-11 px-3.5 bg-amber-50/40 border border-amber-200 rounded-lg text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:bg-white transition-all font-semibold" />
                       </div>
 
-                      <!-- Security Nonce for Snippet #67 -->
                       <input type="hidden" id="mr_zodiac_nonce_field" value="<?php echo esc_attr(wp_create_nonce('hp_zodiac_nonce')); ?>" />
 
-                      <!-- Vibrant Action CTA -->
                       <button type="button" id="mr-zodiac-submit-btn" 
                               class="h-11 px-6 bg-primary-container hover:bg-orange-600 active:scale-95 text-white font-bold text-xs sm:text-sm rounded-lg shadow-sm flex items-center justify-center gap-2 transition-all shrink-0 golden-halo">
                         <span class="material-symbols-outlined text-lg">explore</span>
@@ -447,7 +465,6 @@ foreach ($ordered_sections as $section_id => $sec_data) {
                       </button>
                     </div>
 
-                    <!-- AJAX Result Container -->
                     <div id="mr-zodiac-result" class="hidden"></div>
                   </div>
                 </div>
@@ -464,11 +481,27 @@ foreach ($ordered_sections as $section_id => $sec_data) {
             $kundali_title  = "Free Janam Kundali";
             $niyati_title   = "Niyati AI Astrologer";
             ?>
-            <section class="max-w-7xl mx-auto px-4 lg:px-12 py-6">
-              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-6 items-stretch mr-hero-grid">
+            <section class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-12 py-3 sm:py-5">
+              <!-- MOBILE TAB SWITCHER: Visible only on mobile (<1024px) -->
+              <div class="lg:hidden flex items-center justify-between bg-amber-200/50 p-1 rounded-2xl mb-3 border border-amber-300/60">
+                <button type="button" class="hero-tab-btn active flex-1 py-2 text-xs font-bold rounded-xl transition-all text-center flex items-center justify-center gap-1" data-target="hero-panchang-col">
+                  <span class="material-symbols-outlined text-sm">calendar_today</span>
+                  <span>Panchang</span>
+                </button>
+                <button type="button" class="hero-tab-btn flex-1 py-2 text-xs font-bold text-on-surface rounded-xl transition-all text-center flex items-center justify-center gap-1" data-target="hero-kundali-col">
+                  <span class="material-symbols-outlined text-sm">hub</span>
+                  <span>Kundali</span>
+                </button>
+                <button type="button" class="hero-tab-btn flex-1 py-2 text-xs font-bold text-on-surface rounded-xl transition-all text-center flex items-center justify-center gap-1" data-target="hero-niyati-col">
+                  <span class="material-symbols-outlined text-sm">psychology</span>
+                  <span>Niyati AI</span>
+                </button>
+              </div>
+
+              <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
 
                 <!-- 1. PANCHANG CARD (Col 1 - 4 Cols) -->
-                <div class="lg:col-span-4 golden-card p-5 sm:p-6 flex flex-col justify-between spiritual-glow relative" id="panchang">
+                <div id="hero-panchang-col" class="hero-column-panel lg:col-span-4 golden-card p-4 sm:p-6 flex flex-col justify-between spiritual-glow relative block">
                   <div>
                     <div class="flex items-center justify-between pb-3 border-b border-amber-900/10 mb-4">
                       <div class="flex items-center gap-2">
@@ -483,7 +516,7 @@ foreach ($ordered_sections as $section_id => $sec_data) {
                     </div>
 
                     <!-- Auspicious Muhurat Indicator -->
-                    <div class="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200/80 mb-3 flex items-start justify-between">
+                    <div class="p-3.5 rounded-xl bg-emerald-50/80 border border-emerald-200/80 mb-3 flex items-start justify-between">
                       <div class="space-y-0.5">
                         <div class="flex items-center gap-1.5">
                           <span class="w-2.5 h-2.5 rounded-full bg-emerald-600 animate-pulse"></span>
@@ -498,7 +531,7 @@ foreach ($ordered_sections as $section_id => $sec_data) {
                     </div>
 
                     <!-- Inauspicious Muhurat Warning -->
-                    <div class="p-3.5 rounded-xl bg-red-50/70 border border-red-200/80 mb-4 flex items-start justify-between">
+                    <div class="p-3.5 rounded-xl bg-red-50/80 border border-red-200/80 mb-4 flex items-start justify-between">
                       <div class="space-y-0.5">
                         <div class="flex items-center gap-1.5">
                           <span class="w-2.5 h-2.5 rounded-full bg-red-600"></span>
@@ -545,7 +578,7 @@ foreach ($ordered_sections as $section_id => $sec_data) {
                 </div>
 
                 <!-- 2. FREE INSTANT JANAM KUNDALI GENERATOR (Col 2 - 4 Cols) -->
-                <div class="lg:col-span-4 golden-card p-5 sm:p-6 flex flex-col justify-between relative" id="kundali">
+                <div id="hero-kundali-col" class="hero-column-panel lg:col-span-4 golden-card p-4 sm:p-6 flex flex-col justify-between relative hidden lg:flex">
                   <div>
                     <div class="flex items-center justify-between pb-3 border-b border-amber-900/10 mb-3">
                       <div class="flex items-center gap-2">
@@ -622,12 +655,10 @@ foreach ($ordered_sections as $section_id => $sec_data) {
                 </div>
 
                 <!-- 3. NIYATI AI VEDIC ASTROLOGER (Col 3 - 4 Cols) -->
-                <div class="lg:col-span-4 golden-card p-5 sm:p-6 flex flex-col justify-between relative overflow-hidden">
-                  <!-- Cosmic Glow Accent -->
+                <div id="hero-niyati-col" class="hero-column-panel lg:col-span-4 golden-card p-4 sm:p-6 flex flex-col justify-between relative overflow-hidden hidden lg:flex">
                   <div class="absolute -top-12 -right-12 w-32 h-32 bg-primary-container/15 rounded-full blur-2xl pointer-events-none"></div>
 
                   <div>
-                    <!-- Portrait & Status -->
                     <div class="flex items-center gap-3 pb-3 border-b border-amber-900/10 mb-3">
                       <div class="relative">
                         <div class="w-13 h-13 rounded-full bg-gradient-to-tr from-amber-700 via-primary to-orange-500 flex items-center justify-center text-white ring-2 ring-tertiary-container shadow-md">
@@ -650,7 +681,6 @@ foreach ($ordered_sections as $section_id => $sec_data) {
                       Instant shastric answers to your career, relationship, and planetary dosha questions backed by Parashara Hora Shastra.
                     </p>
 
-                    <!-- Frequently Asked Inquiries Chips -->
                     <div class="space-y-1.5 mb-3.5">
                       <span class="text-[11px] font-bold text-tertiary block">Frequently Asked Inquiries:</span>
                       <div class="flex flex-col gap-1.5 text-xs">
@@ -673,7 +703,6 @@ foreach ($ordered_sections as $section_id => $sec_data) {
                       </div>
                     </div>
 
-                    <!-- Quick Chat Input Box -->
                     <div class="relative">
                       <input id="mr-niyati-quick-input" class="w-full text-xs pl-3 pr-9 py-2 bg-amber-50/50 border border-amber-200 rounded-lg focus:outline-none focus:border-tertiary-container focus:ring-1" placeholder="Ask Niyati any astrological question..." type="text"/>
                       <button type="button" id="mr-niyati-quick-send" aria-label="Send query" class="absolute right-1.5 top-1/2 -translate-y-1/2 p-1 text-primary-container hover:text-primary">
@@ -704,7 +733,6 @@ foreach ($ordered_sections as $section_id => $sec_data) {
             $cta_text    = 'View Full 2026-2027 Calendar';
             $cta_url     = !empty($sec_data['cta_url']) ? $sec_data['cta_url'] : home_url('/festivals/');
 
-            // Dynamic query to af_mr_content_festivals for upcoming active festivals
             $upcoming_festivals = $wpdb->get_results($wpdb->prepare(
                 "SELECT * FROM af_mr_content_festivals 
                  WHERE coverage_status = 'active' 
@@ -726,8 +754,7 @@ foreach ($ordered_sections as $section_id => $sec_data) {
                 ), ARRAY_A);
             }
             ?>
-            <section class="max-w-7xl mx-auto px-4 lg:px-12 py-6">
-              <!-- Header: Pure, Elegant, NO BUBBLE BADGE -->
+            <section class="max-w-7xl mx-auto px-4 lg:px-12 py-6" id="festivals">
               <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 border-b border-amber-900/10 pb-3 mb-6">
                 <div>
                   <div class="flex items-center gap-2">
@@ -746,7 +773,6 @@ foreach ($ordered_sections as $section_id => $sec_data) {
                 </div>
               </div>
 
-              <!-- 4-Column Card Grid -->
               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
                 <?php foreach ($upcoming_festivals as $fest): 
                     $f_en = $fest['festival_name_en'];
@@ -754,7 +780,6 @@ foreach ($ordered_sections as $section_id => $sec_data) {
                     $f_date = !empty($fest['festival_date']) ? strtotime($fest['festival_date']) : time();
                     $f_tier = intval($fest['tier'] ?? 3);
 
-                    // Dynamic Smart Resolver: Only links to article/term if exists, otherwise /festivals/
                     $resolved = MR_Homepage_Manager::get_festival_smart_link($f_en, $f_hi);
                     $dest_url = $resolved['url'];
                     $is_article = ($resolved['type'] === 'article');
@@ -806,53 +831,105 @@ foreach ($ordered_sections as $section_id => $sec_data) {
             break;
 
         /* ==========================================================
-         * 6. VEDIC ASTROLOGY MASTER REPORTS (3X2 Horizontal Scroll)
+         * 6. VEDIC ASTROLOGY MASTER REPORTS (Flagship Store)
          * ========================================================== */
         case 'master_reports':
-            $cta_text    = !empty($sec_data['cta_text']) ? $sec_data['cta_text'] : 'Browse All Reports & Bundles';
+            $items_limit = !empty($sec_data['items_count']) ? intval($sec_data['items_count']) : 4;
+            $cta_text    = 'Browse All Reports & Bundles';
             $cta_url     = !empty($sec_data['cta_url']) ? $sec_data['cta_url'] : home_url('/pricing/');
-            $title       = !empty($sec_data['title']) ? $sec_data['title'] : 'Vedic Astrology Master Reports';
-            $subtitle    = !empty($sec_data['subtitle']) ? $sec_data['subtitle'] : 'Comprehensive 20-26 page shastric dossiers computed by high-precision mathematical algorithms and verified by traditional pandits.';
 
-            $layout      = !empty($sec_data['layout']) ? $sec_data['layout'] : '3x2_scroll';
+            $synced_reports = MR_Homepage_Manager::get_synced_reports();
+            $reports_subset = array_slice($synced_reports, 0, $items_limit);
+            ?>
+            <section class="max-w-7xl mx-auto px-4 lg:px-12 py-6" id="reports">
+              <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-2 border-b border-amber-900/10 pb-3 mb-6">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="material-symbols-outlined text-primary-container text-2xl">menu_book</span>
+                    <h2 class="font-serif text-2xl sm:text-3xl font-bold text-primary">Vedic Astrology Master Reports</h2>
+                  </div>
+                  <p class="text-xs sm:text-sm text-on-surface-variant mt-1">
+                    Comprehensive 20-26 page shastric dossiers computed by high-precision mathematical algorithms and verified by traditional pandits.
+                  </p>
+                </div>
+                <div>
+                  <a href="<?php echo esc_url($cta_url); ?>" class="inline-flex items-center gap-1 text-xs font-bold text-tertiary hover:text-primary transition-colors">
+                    <span><?php echo esc_html($cta_text); ?></span>
+                    <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                  </a>
+                </div>
+              </div>
 
-            echo '<section class="max-w-7xl mx-auto px-4 lg:px-12 py-6" id="reports">';
-            if (class_exists('MR_Reports_Showcase')) {
-                if ($layout === 'vertical') {
-                    echo MR_Reports_Showcase::render_vertical_list([
-                        'title'       => $title,
-                        'subtitle'    => $subtitle,
-                        'cta_url'     => $cta_url,
-                        'cta_text'    => $cta_text,
-                        'button_text' => 'Get Report →',
-                    ]);
-                } elseif ($layout === '2x2' || $layout === '2x2_grid') {
-                    echo MR_Reports_Showcase::render_2x2_grid([
-                        'title'       => $title,
-                        'subtitle'    => $subtitle,
-                        'cta_url'     => $cta_url,
-                        'cta_text'    => $cta_text,
-                        'button_text' => 'Get Report →',
-                    ]);
-                } else {
-                    echo MR_Reports_Showcase::render_3x2_scroll([
-                        'title'       => $title,
-                        'subtitle'    => $subtitle,
-                        'cta_url'     => $cta_url,
-                        'cta_text'    => $cta_text,
-                        'button_text' => 'Get Report →',
-                    ]);
-                }
-            } else {
-                if ($layout === 'vertical') {
-                    echo do_shortcode('[mr_reports_vertical_list]');
-                } elseif ($layout === '2x2' || $layout === '2x2_grid') {
-                    echo do_shortcode('[mr_reports_2x2_grid]');
-                } else {
-                    echo do_shortcode('[mr_reports_3x2_scroll]');
-                }
-            }
-            echo '</section>';
+              <!-- 4-Column Product Showcase Grid -->
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                <?php foreach ($reports_subset as $rep): 
+                    $price_sale = number_format($rep['price_sale'], 0);
+                    $price_reg  = number_format($rep['price_regular'], 0);
+                    $discount   = $rep['discount_text'];
+                ?>
+                  <div class="golden-card p-5 flex flex-col justify-between relative group">
+                    <div class="space-y-3">
+                      <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded">
+                          <?php echo esc_html($rep['pages_badge']); ?>
+                        </span>
+                        <span class="text-[10px] font-bold bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded">
+                          <?php echo esc_html($discount); ?>
+                        </span>
+                      </div>
+
+                      <div class="h-36 bg-amber-50 rounded-xl border border-amber-900/10 overflow-hidden relative group-hover:shadow-inner transition-all">
+                        <?php if (!empty($rep['image_url'])): ?>
+                          <img src="<?php echo esc_url($rep['image_url']); ?>" 
+                               alt="<?php echo esc_attr($rep['title']); ?>" 
+                               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <?php else: ?>
+                          <div class="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-100 to-orange-100 text-primary">
+                            <span class="material-symbols-outlined text-4xl">auto_stories</span>
+                          </div>
+                        <?php endif; ?>
+                      </div>
+
+                      <h3 class="font-serif font-bold text-base text-primary leading-snug">
+                        <a href="<?php echo esc_url($rep['page_url']); ?>" class="hover:text-primary-container transition-colors">
+                          <?php echo esc_html($rep['title']); ?>
+                        </a>
+                      </h3>
+
+                      <ul class="text-xs text-on-surface-variant space-y-1">
+                        <li class="flex items-center gap-1.5">
+                          <span class="material-symbols-outlined text-emerald-600 text-sm">check_circle</span>
+                          <span>Verified by Traditional Pandits</span>
+                        </li>
+                        <li class="flex items-center gap-1.5">
+                          <span class="material-symbols-outlined text-emerald-600 text-sm">check_circle</span>
+                          <span>Instant PDF Delivery in 60s</span>
+                        </li>
+                        <li class="flex items-center gap-1.5">
+                          <span class="material-symbols-outlined text-emerald-600 text-sm">check_circle</span>
+                          <span>Personalized Vedic Remedies</span>
+                        </li>
+                      </ul>
+
+                      <div class="pt-2 border-t border-amber-900/10 flex items-baseline gap-2">
+                        <span class="text-xl font-bold font-serif text-primary">₹<?php echo esc_html($price_sale); ?></span>
+                        <span class="text-xs text-outline line-through">₹<?php echo esc_html($price_reg); ?></span>
+                        <span class="text-[11px] text-tertiary font-bold ml-auto">Instant PDF</span>
+                      </div>
+                    </div>
+
+                    <div class="mt-4 space-y-2">
+                      <a href="<?php echo esc_url($rep['page_url']); ?>" 
+                         class="w-full py-2.5 rounded-xl bg-primary-container hover:bg-orange-600 active:scale-95 text-white text-xs font-bold shadow-xs flex items-center justify-center gap-1.5 transition-all golden-halo">
+                        <span>Get Your Report Now</span>
+                        <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                      </a>
+                    </div>
+                  </div>
+                <?php endforeach; ?>
+              </div>
+            </section>
+            <?php
             break;
 
         /* ==========================================================
@@ -860,8 +937,7 @@ foreach ($ordered_sections as $section_id => $sec_data) {
          * ========================================================== */
         case 'baby_names':
             ?>
-            <section class="max-w-7xl mx-auto px-4 lg:px-12 py-6">
-              <!-- Header: Pure, Elegant, NO BUBBLE BADGE -->
+            <section class="max-w-7xl mx-auto px-4 lg:px-12 py-6" id="baby-names">
               <div class="border-b border-amber-900/10 pb-3 mb-5">
                 <div class="flex items-center gap-2">
                   <span class="material-symbols-outlined text-secondary text-2xl">child_care</span>
@@ -872,11 +948,9 @@ foreach ($ordered_sections as $section_id => $sec_data) {
                 </p>
               </div>
 
-              <!-- Interactive Sacred Baby Name Search Strip -->
               <div class="bg-gradient-to-r from-amber-50 via-pink-50/40 to-amber-50 border border-amber-200/80 rounded-2xl p-5 sm:p-6 shadow-sm">
                 <form action="<?php echo esc_url(home_url('/baby-names/')); ?>" method="GET" class="space-y-4">
                   <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                    <!-- Gender Selector -->
                     <div>
                       <label class="block text-xs font-bold text-on-surface-variant mb-1.5">Gender (लिंग)</label>
                       <select name="gender" class="w-full h-10 px-3 bg-white border border-amber-300 rounded-lg text-xs font-semibold text-on-surface focus:outline-none focus:ring-1 focus:ring-primary-container">
@@ -886,14 +960,12 @@ foreach ($ordered_sections as $section_id => $sec_data) {
                       </select>
                     </div>
 
-                    <!-- Starting Syllable / Letter -->
                     <div>
                       <label class="block text-xs font-bold text-on-surface-variant mb-1.5">Starting Syllable (नक्षत्र नामाक्षर)</label>
                       <input type="text" name="letter" placeholder="e.g. A, R, Sh, Ra, V (अ, र, श)"
                              class="w-full h-10 px-3 bg-white border border-amber-300 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-1 focus:ring-primary-container font-medium" />
                     </div>
 
-                    <!-- Search Button -->
                     <div class="flex items-end">
                       <button type="submit" 
                               class="w-full h-10 bg-primary-container hover:bg-orange-600 text-white font-bold text-xs rounded-lg shadow-sm flex items-center justify-center gap-2 transition-all golden-halo">
@@ -903,7 +975,6 @@ foreach ($ordered_sections as $section_id => $sec_data) {
                     </div>
                   </div>
 
-                  <!-- Quick Popular Nakshatra Syllables -->
                   <div class="pt-2 flex flex-wrap items-center gap-1.5 text-xs text-on-surface-variant">
                     <span class="font-bold text-tertiary">Popular Syllables:</span>
                     <?php 
@@ -928,7 +999,6 @@ foreach ($ordered_sections as $section_id => $sec_data) {
             $tools = MR_Homepage_Manager::get_calculators();
             ?>
             <section class="max-w-7xl mx-auto px-4 lg:px-12 py-6" id="calculators">
-              <!-- Header: Pure, Elegant, NO BUBBLE BADGE -->
               <div class="border-b border-amber-900/10 pb-3 mb-6">
                 <div class="flex items-center gap-2">
                   <span class="material-symbols-outlined text-tertiary text-2xl">calculate</span>
@@ -939,7 +1009,6 @@ foreach ($ordered_sections as $section_id => $sec_data) {
                 </p>
               </div>
 
-              <!-- 8-Card responsive micro-grid (4x2 on desktop, 2x4 on mobile) -->
               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <?php foreach ($tools as $t): ?>
                   <a href="<?php echo esc_url($t['url']); ?>" 
@@ -973,7 +1042,6 @@ foreach ($ordered_sections as $section_id => $sec_data) {
             $deities = MR_Homepage_Manager::get_deities();
             ?>
             <section class="max-w-7xl mx-auto px-4 lg:px-12 py-6" id="devotional">
-              <!-- Header: Pure, Elegant, NO BUBBLE BADGE -->
               <div class="border-b border-amber-900/10 pb-3 mb-6">
                 <div class="flex items-center gap-2">
                   <span class="material-symbols-outlined text-primary-container text-2xl">temple_hindu</span>
@@ -985,28 +1053,28 @@ foreach ($ordered_sections as $section_id => $sec_data) {
               </div>
 
               <!-- Subsection A: Hindu Deities Navigation (Horizontal Circular Avatar Bar) -->
-              <div class="bg-white p-4 lg:p-5 rounded-2xl border border-amber-900/10 shadow-xs mb-6">
+              <!-- Subsection A: Hindu Deities Navigation (5-Col Mobile Grid, 10-Col Desktop - Zero Horizontal Scroll) -->
+              <div class="bg-white p-3 sm:p-5 rounded-2xl border border-amber-900/10 shadow-xs mb-6">
                 <div class="flex items-center justify-between mb-3 px-1">
                   <span class="text-xs font-bold text-on-surface">Choose Deity for Dedicated Aartis &amp; Stotras:</span>
                 </div>
-                <div class="flex items-center gap-4 lg:gap-6 overflow-x-auto pb-2 custom-scroll">
+                <div class="grid grid-cols-5 sm:grid-cols-5 lg:grid-cols-10 gap-2 sm:gap-4 items-center">
                   <?php foreach ($deities as $d): ?>
-                    <a href="<?php echo esc_url($d['url']); ?>" class="flex flex-col items-center gap-1.5 min-w-[76px] group shrink-0">
-                      <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-amber-50 border-2 border-amber-300 group-hover:border-primary-container p-0.5 shadow-sm group-hover:scale-110 transition-transform duration-300">
+                    <a href="<?php echo esc_url($d['url']); ?>" class="deity-circle-card flex flex-col items-center gap-1 group">
+                      <div class="avatar-ring w-12 h-12 sm:w-16 sm:h-16 rounded-full bg-amber-50 border-2 border-amber-300 p-0.5 shadow-xs transition-all">
                         <img src="<?php echo esc_url($d['image_url']); ?>" 
                              alt="<?php echo esc_attr($d['name']); ?>" 
                              class="w-full h-full object-cover rounded-full" />
                       </div>
-                      <span class="font-bold text-xs text-on-surface group-hover:text-primary transition-colors text-center"><?php echo esc_html($d['name']); ?></span>
-                      <span class="text-[10px] text-outline text-center"><?php echo esc_html($d['count']); ?></span>
+                      <span class="font-bold text-[11px] sm:text-xs text-on-surface group-hover:text-primary transition-colors text-center truncate max-w-full"><?php echo esc_html($d['name']); ?></span>
+                      <span class="text-[9px] sm:text-[10px] text-tertiary text-center"><?php echo esc_html($d['count']); ?></span>
                     </a>
                   <?php endforeach; ?>
                 </div>
               </div>
 
-              <!-- Subsection B: Devotional Content & Media Grid (3-Column Layout from Stitch) -->
+              <!-- Subsection B: Devotional Content & Media Grid -->
               <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-                <!-- Col 1: Trending Vrat Katha -->
                 <div class="golden-card p-5 flex flex-col justify-between">
                   <div>
                     <div class="flex items-center gap-2 pb-3 border-b border-amber-900/10 mb-3">
@@ -1043,7 +1111,6 @@ foreach ($ordered_sections as $section_id => $sec_data) {
                   </a>
                 </div>
 
-                <!-- Col 2: Daily Aarti Sangrah -->
                 <div class="golden-card p-5 flex flex-col justify-between">
                   <div>
                     <div class="flex items-center gap-2 pb-3 border-b border-amber-900/10 mb-3">
@@ -1086,7 +1153,6 @@ foreach ($ordered_sections as $section_id => $sec_data) {
                   </a>
                 </div>
 
-                <!-- Col 3: Devotional Chants & Audio -->
                 <div class="golden-card p-5 flex flex-col justify-between">
                   <div>
                     <div class="flex items-center gap-2 pb-3 border-b border-amber-900/10 mb-3">
@@ -1243,7 +1309,6 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(data => {
             if (data.success) {
                 let html = data.data;
-                // Correct any absolute external domain links
                 html = html.split("https://merarashifal.com/horoscope/zodiac_sign/").join("<?php echo esc_url(home_url('/horoscope/')); ?>");
                 resultArea.innerHTML = html;
             } else {
@@ -1316,6 +1381,33 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         });
     }
+
+    // 3. Mobile Hero Tab Switcher (Zero Overhead)
+    const tabButtons = document.querySelectorAll(".hero-tab-btn");
+    const panels = document.querySelectorAll(".hero-column-panel");
+
+    tabButtons.forEach(function(btn) {
+        btn.addEventListener("click", function() {
+            const targetId = this.getAttribute("data-target");
+
+            tabButtons.forEach(function(b) {
+                b.classList.remove("active");
+                b.classList.add("text-on-surface");
+            });
+            this.classList.add("active");
+            this.classList.remove("text-on-surface");
+
+            panels.forEach(function(p) {
+                if (p.id === targetId) {
+                    p.classList.remove("hidden");
+                    p.classList.add("block");
+                } else {
+                    p.classList.add("hidden");
+                    p.classList.remove("block");
+                }
+            });
+        });
+    });
 });
 </script>
 
