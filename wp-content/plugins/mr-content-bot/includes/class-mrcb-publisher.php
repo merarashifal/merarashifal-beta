@@ -225,10 +225,35 @@ class MRCB_Publisher {
         // Bust snippet 45 transient cache so "Also Read" refreshes immediately
         delete_transient( 'related_posts_' . $post_id );
 
-        // Apply Yoast SEO Postmeta
-        $focus_kw  = $item['focus_keyword'] ?: '';
+        // Apply Yoast SEO Postmeta with strict Yoast validation guards
+        $focus_kw  = trim( $item['focus_keyword'] ?: '' );
         $meta_desc = ! empty( $item['admin_meta_desc'] ) ? $item['admin_meta_desc'] : $item['ai_meta_desc'];
         $seo_title = ! empty( $item['admin_meta_title'] ) ? $item['admin_meta_title'] : $item['ai_meta_title'];
+
+        // Guard 1: Ensure SEO Title starts with or contains the exact focus keyphrase
+        if ( ! empty( $focus_kw ) && ! empty( $seo_title ) ) {
+            if ( mb_strpos( $seo_title, $focus_kw ) === false ) {
+                $seo_title = $focus_kw . ': ' . $seo_title;
+            }
+            if ( mb_strlen( $seo_title ) > 60 ) {
+                $seo_title = mb_substr( $seo_title, 0, 57 ) . '...';
+            }
+        }
+
+        // Guard 2: Ensure Meta Description contains focus keyphrase & strictly complies with length (125-154 chars)
+        if ( ! empty( $meta_desc ) ) {
+            $meta_desc = trim( strip_tags( $meta_desc ) );
+            if ( ! empty( $focus_kw ) && mb_strpos( $meta_desc, $focus_kw ) === false ) {
+                $meta_desc = $focus_kw . ' - ' . $meta_desc;
+            }
+            if ( mb_strlen( $meta_desc ) > 154 ) {
+                $meta_desc = mb_substr( $meta_desc, 0, 148 );
+                $last_space = mb_strrpos( $meta_desc, ' ' );
+                if ( $last_space !== false && $last_space > 120 ) {
+                    $meta_desc = mb_substr( $meta_desc, 0, $last_space ) . '।';
+                }
+            }
+        }
 
         if ( ! empty( $focus_kw ) ) {
             update_post_meta( $post_id, '_yoast_wpseo_focuskw', sanitize_text_field( $focus_kw ) );

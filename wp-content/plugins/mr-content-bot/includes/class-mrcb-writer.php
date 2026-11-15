@@ -176,12 +176,11 @@ ANTI-AI DETECTION MANIFESTO (CRITICAL FOR ZERO AI DETECTABILITY):
    - STRICTLY FORBIDDEN: Formulaic summaries ("निष्कर्ष के रूप में", "संक्षेप में कहें तो", "इस प्रकार", "उपरोक्त बातों से", "अतः यह कहा जा सकता है").
    - HOW TO END: Conclude naturally with a thoughtful practical tip, a balanced perspective on faith and self-discipline, or simple warm wishes.
 
-3. HUMAN RHYTHM & NATURAL SENTENCE VARIATION (HIGH BURSTINESS):
+3. HUMAN RHYTHM, SENTENCE LENGTH & YOAST READABILITY:
    - AI writes sentences of uniform length and predictable structure. You must break this pattern completely!
-   - Write with a dynamic human rhythm:
-     * Mix very short, crisp sentences (3 to 6 words) for emphasis. (e.g., "समय का ध्यान रखें।", "यह नियम काफी व्यावहारिक है।", "संयम ही इसका मूल आधार है।")
-     * Follow with clear, medium-length explanatory sentences (10 to 18 words).
-     * Add occasional thoughtful sentences with real conversational depth.
+   - Sentence Length (Yoast Readability Rule): Over 80% of sentences must be concise (between 8 and 16 words). Do NOT drag compound sentences past 20 words. Whenever an idea is complete, place a full stop (।) immediately. Break long multi-clause thoughts into two crisp, punchy sentences.
+   - Mix very short, crisp sentences (3 to 6 words) for emphasis. (e.g., "समय का ध्यान रखें।", "यह नियम काफी व्यावहारिक है।", "संयम ही इसका मूल आधार है।")
+   - Transition Words (Yoast Readability Rule): Ensure natural sentence flow by incorporating standard Hindi transition connectors (e.g. "इसलिए", "हालांकि", "इसके अलावा", "साथ ही", "दरअसल", "विशेष रूप से", "परिणामस्वरूप", "इसके साथ ही", "वस्तुतः", "अतः") in 25% to 30% of sentences.
    - Vary paragraph sizes naturally: some paragraphs should be 1-2 sentences, some 3-4 sentences. Never stick to a rigid template!
 
 4. NATURAL CONTEMPORARY HINDI (NOT TRANSLATED ENGLISH):
@@ -198,8 +197,22 @@ PROMPT;
     /**
      * PASS 1: Generate comprehensive Hindi draft tailored to Topic Angle with Anti-AI standards
      */
-    public static function generate_pass1_draft( $topic_title_hi, $festival_name_hi, $topic_angle, $target_word_count = 1100 ) {
+    public static function generate_pass1_draft( $topic_title_hi, $festival_name_hi, $topic_angle, $target_word_count = 1100, $focus_keyword = '', $festival_name_en = '' ) {
         $system = self::get_editorial_persona();
+
+        $kw_instruction = '';
+        if ( ! empty( $focus_keyword ) ) {
+            $en_part = ! empty( $festival_name_en ) ? " ({$festival_name_en})" : '';
+            $kw_instruction = <<<KWGUIDE
+6. YOAST SEO एवं कीवर्ड नियम (Strict Yoast SEO Rules):
+   - मुख्य फोकस कीवर्ड (Focus Keyphrase): "{$focus_keyword}"
+   - पहले पैराग्राफ में कीवर्ड (Keyphrase in Introduction): लेख के सबसे पहले पैराग्राफ के पहले 1-2 वाक्यों में मुख्य कीवर्ड "{$focus_keyword}"{$en_part} को अनिवार्य रूप से शामिल करें (जैसे: "{$focus_keyword}{$en_part} का पावन पर्व...").
+   - सबहेडिंग्स में कीवर्ड (Keyphrase in Subheadings): कम से कम 2 सबहेडिंग्स (H2) में मुख्य कीवर्ड "{$focus_keyword}" का स्वाभाविक प्रयोग करें (जैसे: "## {$focus_keyword} का शुभ मुहूर्त और तिथि", "## {$focus_keyword}: पूजन सामग्री और विधि").
+   - कीवर्ड घनत्व (Keyphrase Density): पूरे लेख में यह कीवर्ड 4 से 6 बार अलग-अलग अनुच्छेदों में स्वाभाविक रूप से आना चाहिए (न ज्यादा, न कम).
+   - वाक्यों की लंबाई (Sentence Length): 80% से अधिक वाक्य 10 से 16 शब्दों के होने चाहिए। किसी भी वाक्य को 20 शब्दों से अधिक लंबा न खींचें। जहाँ बात पूरी हो, तुरंत पूर्णविराम (।) लगाएं।
+   - संयोजक शब्द (Transition Words): पठनीयता के लिए 'इसलिए', 'हालांकि', 'इसके अलावा', 'साथ ही', 'दरअसल', 'विशेष रूप से', 'परिणामस्वरूप', 'इसके साथ ही' का स्वाभाविक प्रयोग करें।
+KWGUIDE;
+        }
 
         // Specific Angle & Pillar Guidance
         $angle_instructions = '';
@@ -287,6 +300,7 @@ GUIDE;
    - पैराग्राफ्स की लंबाई प्राकृतिक रखें; मशीनी एकरूपता न हो।
 4. स्वाभाविक समापन: कोई रोबोटिक 'निष्कर्ष' न लिखें। एक सकारात्मक, व्यावहारिक विचार या मंगलकामना के साथ समाप्त करें।
 5. FAQ (अक्सर पूछे जाने वाले सवाल): ठीक 3 व्यावहारिक प्रश्न और उनके 2-3 वाक्यों के स्पष्ट उत्तर।
+{$kw_instruction}
 
 प्रारूप: Markdown में लिखें (#, ##, ### का प्रयोग करें)।
 PROMPT;
@@ -295,27 +309,36 @@ PROMPT;
     }
 
     /**
-     * PASS 2: Senior Digital Magazine Editor - Aggressive Anti-AI Humanizer
+     * PASS 2: Senior Digital Magazine Editor - Aggressive Anti-AI Humanizer & Yoast Readability Polish
      */
-    public static function generate_pass2_humanizer( $raw_draft ) {
-        $prompt = <<<PROMPT
-तुम एक अत्यंत अनुभवी, सीनियर डिजिटल मैगज़ीन संपादक (Senior Digital Magazine Editor) हो। तुम्हारा कार्य नीचे दिए गए ड्राफ्ट को पूरी तरह से प्राकृतिक, मानवीय और AI-मुक्त (Zero AI Detectable) शैली में परिष्कृत करना है।
+    public static function generate_pass2_humanizer( $raw_draft, $focus_keyword = '' ) {
+        $kw_guard = '';
+        if ( ! empty( $focus_keyword ) ) {
+            $kw_guard = "- मुख्य कीवर्ड '{$focus_keyword}' को पहले पैराग्राफ और सबहेडिंग्स में सुरक्षित रखें। इसे हटाएं नहीं।";
+        }
 
-संपादकीय जांच सूची (Anti-AI Polish Checklist):
+        $prompt = <<<PROMPT
+तुम एक अत्यंत अनुभवी, सीनियर डिजिटल मैगज़ीन संपादक (Senior Digital Magazine Editor) हो। तुम्हारा कार्य नीचे दिए गए ड्राफ्ट को पूरी तरह से प्राकृतिक, मानवीय, AI-मुक्त (Zero AI Detectable) और Yoast Readability मानकों के अनुरूप परिष्कृत करना है।
+
+संपादकीय जांच सूची (Anti-AI & Readability Polish Checklist):
 1. कृत्रिम नाटकीयता और अतिशयोक्ति को जड़ से मिटाएं:
    - यदि कहीं भी "ठिठुरती रातें", "श्वेत चांदनी", "अलौकिक शांति", "ब्रह्मांड की ऊर्जा", "दुर्लभ महासंयोग", "अचूक चमत्कार", "सारे कष्ट दूर" जैसी बनावटी या अतिशयोक्तिपूर्ण भाषा दिखे, तो उसे तुरंत हटाकर सहज, परिपक्व और प्रामाणिक शैली में लिखें।
-2. बर्स्टीनेस (Sentence Length & Rhythm Variation):
-   - सुनिश्चित करें कि वाक्य एक ही ढर्रे पर न हों।
+2. वाक्यों की लंबाई एवं बर्स्टीनेस (Sentence Length & Human Rhythm):
+   - 80% से अधिक वाक्य छोटे और मध्यम (10 से 16 शब्द) होने चाहिए।
+   - 20 शब्दों से अधिक लंबे वाक्यों को दो छोटे वाक्यों में तोड़ें। बात पूरी होते ही तुरंत पूर्णविराम (।) लगाएं।
    - छोटे, सीधे और धारदार वाक्यों (3-6 शब्द) का प्रयोग करें, फिर मध्यम और विचारपूर्ण वाक्यों को लाएं।
-   - पैराग्राफ की लंबाई में स्वाभाविक विविधता रखें।
-3. समकालीन स्वाभाविक हिंदी:
+   - पैराग्राफ की लंबाई में स्वाभाविक विविधता रखें (1-3 वाक्य प्रति पैराग्राफ)।
+3. स्वाभाविक संयोजक शब्द (Transition Words for Readability):
+   - वाक्यों और विचारों के बीच स्वाभाविक प्रवाह के लिए हिंदी के संयोजक शब्दों (जैसे: इसलिए, हालांकि, इसके अलावा, साथ ही, दरअसल, विशेष रूप से, परिणामस्वरूप, इसके साथ ही) का सहज प्रयोग करें।
+4. समकालीन स्वाभाविक हिंदी:
    - भाषा ऐसी लगे जैसे कोई वरिष्ठ पत्रकार या अनुभवी विद्वान पाठक से आमने-सामने बैठकर व्यावहारिक रूप से बात कर रहा हो।
    - अनुवादित या किताबी हिंदी न हो।
-4. मशीनी कनेक्टर्स हटाएं:
+5. मशीनी कनेक्टर्स हटाएं:
    - "इस लेख में", "आइए जानते हैं", "निष्कर्ष के रूप में", "इस प्रकार", "जैसा कि हम जानते हैं", "अतः यह कहा जा सकता है" जैसे मशीनी कनेक्टर्स को पूरी तरह हटा दें।
-5. नए तथ्यों का प्रवाह:
+6. नए तथ्यों का प्रवाह:
    - हर पैराग्राफ और हेडिंग में नई, उपयोगी जानकारी हो। दोहराव न हो।
-6. तथ्यों और तिथियों की सुरक्षा:
+7. तथ्यों और कीवर्ड की सुरक्षा:
+   {$kw_guard}
    - सभी तारीखें, समय, मुहूर्त, मंत्र और उपयोगी जानकारियां पूरी तरह सुरक्षित रहें।
 
 केवल और केवल शुद्ध परिष्कृत (Humanized) Markdown आलेख ही लौटाएं; कोई अपनी भूमिका, 'यहाँ है आपका लेख' जैसी टिप्पणी न लिखें।
@@ -352,14 +375,17 @@ PROMPT;
     /**
      * Generate SEO metadata (Focus Keyword, Meta Title, Meta Description, English Slug, English Tags)
      */
-    public static function generate_seo_metadata( $topic_title_hi, $festival_name_hi, $final_content ) {
+    public static function generate_seo_metadata( $topic_title_hi, $festival_name_hi, $final_content, $preset_focus_kw = '' ) {
         $year = wp_date( 'Y' );
+        $default_kw = ! empty( $preset_focus_kw ) ? $preset_focus_kw : ( $festival_name_hi ? $festival_name_hi . ' ' . $year : mb_substr( $topic_title_hi, 0, 25 ) );
+
         $prompt = <<<PROMPT
 निम्नलिखित हिंदी ब्लॉग पोस्ट के लिए Yoast SEO अनुकूल मेटाडाटा तैयार करें:
 
 विषय: {$topic_title_hi}
 पर्व: {$festival_name_hi}
 वर्ष: {$year}
+सुझावित मुख्य कीवर्ड: "{$default_kw}"
 
 सामग्री का संक्षिप्त अंश:
 """
@@ -368,43 +394,73 @@ PROMPT;
 
 कृपया JSON फॉर्मेट में उत्तर दें:
 {
-  "focus_keyword": "अंग्रेजी या हिंग्लिश में मुख्य कीवर्ड (उदा: dhanteras 2026 या diwali 2026 puja vidhi)",
-  "meta_title": "SEO टाइटल 60 अक्षरों के अंदर (उदा: धनतेरस 2026: शुभ मुहूर्त, पूजन विधि और आरती | मेरा राशिफल)",
-  "meta_desc": "SEO मेटा विवरण 150-160 अक्षरों में जिसमें मुख्य कीवर्ड स्वाभाविक रूप से शामिल हो",
-  "slug": "clean-english-url-slug-strictly-in-english-without-hindi-characters (e.g. dhanteras-2026-shubh-muhurat-puja-vidhi)",
-  "tags": "strictly-english-only-comma-separated-tags (e.g. dhanteras 2026, dhanteras puja vidhi, shubh muhurat, diwali festival, katha)"
+  "focus_keyword": "हिंदी में 2 से 4 शब्दों का मुख्य कीवर्ड जो लेख का सटीक विषय हो (उदा: {$default_kw})",
+  "meta_title": "SEO टाइटल 50-60 अक्षरों के अंदर जो अनिवार्य रूप से मुख्य कीवर्ड से शुरू हो (उदा: {$default_kw}: शुभ मुहूर्त, पूजन विधि और उपाय | मेरा राशिफल)",
+  "meta_desc": "SEO मेटा विवरण ठीक 130-150 अक्षरों में जिसमें मुख्य कीवर्ड शुरू में आए (कड़ाई से 154 अक्षरों से छोटा रखें)",
+  "slug": "clean-english-url-slug-strictly-in-english-without-hindi-characters",
+  "tags": "strictly-english-only-comma-separated-tags"
 }
 
 महत्वपूर्ण नियम:
-1. "tags" strictly 100% ENGLISH ONLY (lowercase words separated by comma). Never write Hindi or Devanagari in tags!
-2. "slug" strictly clean English words separated by hyphens.
-3. केवल शुद्ध JSON लौटाएं। कोई Markdown बैक-टिक्स या अतिरिक्त टेक्स्ट न लिखें।
+1. "focus_keyword" वही हिंदी शब्द होना चाहिए जो लेख के शीर्षक, पहले पैराग्राफ और सबहेडिंग में मौजूद है (उदा: {$default_kw})।
+2. "meta_title" अनिवार्य रूप से "focus_keyword" से ही शुरू होना चाहिए और 60 अक्षरों से कम होना चाहिए।
+3. "meta_desc" में "focus_keyword" शामिल होना चाहिए और लंबाई 130 से 150 अक्षरों के बीच होनी चाहिए (154 से अधिक होने पर Yoast त्रुटि देता है)।
+4. "tags" strictly 100% ENGLISH ONLY (lowercase words separated by comma). Never write Hindi or Devanagari in tags!
+5. "slug" strictly clean English words separated by hyphens.
+6. केवल शुद्ध JSON लौटाएं। कोई Markdown बैक-टिक्स या अतिरिक्त टेक्स्ट न लिखें।
 PROMPT;
 
         $res = self::call_gemini( $prompt, '', 0.4, 800 );
-        if ( ! $res['success'] ) {
-            return false;
+        $data = [];
+        if ( $res['success'] ) {
+            $raw_json = trim( $res['text'] );
+            $raw_json = preg_replace( '/^```json\s*/i', '', $raw_json );
+            $raw_json = preg_replace( '/^```\s*/i', '', $raw_json );
+            $raw_json = preg_replace( '/\s*```$/', '', $raw_json );
+            $data = json_decode( $raw_json, true );
         }
 
-        $raw_json = trim( $res['text'] );
-        // Strip markdown fences if present
-        $raw_json = preg_replace( '/^```json\s*/i', '', $raw_json );
-        $raw_json = preg_replace( '/^```\s*/i', '', $raw_json );
-        $raw_json = preg_replace( '/\s*```$/', '', $raw_json );
-
-        $data = json_decode( $raw_json, true );
         if ( ! is_array( $data ) ) {
-            $fest_slug = sanitize_title( ! empty( $festival_name_hi ) ? $festival_name_hi : 'festival' );
-            return [
-                'focus_keyword' => $fest_slug . ' ' . $year,
-                'meta_title'    => mb_substr( $topic_title_hi, 0, 55 ) . ' | MeraRashifal',
-                'meta_desc'     => mb_substr( strip_tags( $final_content ), 0, 155 ),
-                'slug'          => $fest_slug . '-' . $year . '-puja-vidhi',
-                'tags'          => $fest_slug . ', ' . $fest_slug . ' ' . $year . ', puja vidhi, shubh muhurat, festivals'
-            ];
+            $data = [];
         }
 
-        // Code-level sanitization: Guarantee tags are 100% English
+        // 1. Focus Keyword sanitization (strictly clean Hindi target)
+        $focus_kw = trim( $data['focus_keyword'] ?? '' );
+        if ( empty( $focus_kw ) ) {
+            $focus_kw = $default_kw;
+        }
+        $data['focus_keyword'] = $focus_kw;
+
+        // 2. SEO Title: Must start with focus keyword & stay under 60 characters
+        $meta_title = trim( $data['meta_title'] ?? '' );
+        if ( empty( $meta_title ) ) {
+            $meta_title = $focus_kw . ': शुभ मुहूर्त, पूजन विधि और उपाय | मेरा राशिफल';
+        } elseif ( mb_strpos( $meta_title, $focus_kw ) === false ) {
+            $meta_title = $focus_kw . ': ' . $meta_title;
+        }
+        if ( mb_strlen( $meta_title ) > 60 ) {
+            $meta_title = mb_substr( $meta_title, 0, 57 ) . '...';
+        }
+        $data['meta_title'] = $meta_title;
+
+        // 3. Meta Description: Must contain focus keyword & strictly 125-150 characters (Yoast safe limit: <= 154)
+        $meta_desc = trim( strip_tags( $data['meta_desc'] ?? '' ) );
+        if ( empty( $meta_desc ) ) {
+            $meta_desc = $focus_kw . ' का शुभ मुहूर्त, संपूर्ण पूजन विधि, व्रत कथा और कुंडली ग्रह शांति के अचूक उपाय जानें।';
+        } elseif ( mb_strpos( $meta_desc, $focus_kw ) === false ) {
+            $meta_desc = $focus_kw . ' - ' . $meta_desc;
+        }
+        if ( mb_strlen( $meta_desc ) > 154 ) {
+            $meta_desc = mb_substr( $meta_desc, 0, 148 );
+            $last_space = mb_strrpos( $meta_desc, ' ' );
+            if ( $last_space !== false && $last_space > 120 ) {
+                $meta_desc = mb_substr( $meta_desc, 0, $last_space ) . '।';
+            }
+        }
+        $data['meta_desc'] = $meta_desc;
+
+        // 4. Code-level sanitization: Guarantee tags are 100% English
+        $fest_slug = sanitize_title( ! empty( $festival_name_hi ) ? $festival_name_hi : 'festival' );
         if ( ! empty( $data['tags'] ) ) {
             $raw_tags = explode( ',', $data['tags'] );
             $clean_tags = [];
@@ -418,29 +474,56 @@ PROMPT;
             if ( ! empty( $clean_tags ) ) {
                 $data['tags'] = implode( ', ', array_unique( $clean_tags ) );
             } else {
-                $fest_slug = sanitize_title( $festival_name_hi ?: 'festival' );
                 $data['tags'] = $fest_slug . ' ' . $year . ', puja vidhi, shubh muhurat, festivals';
             }
+        } else {
+            $data['tags'] = $fest_slug . ' ' . $year . ', puja vidhi, shubh muhurat, festivals';
         }
 
-        // Guarantee slug is clean English
+        // 5. Guarantee slug is clean English
         if ( ! empty( $data['slug'] ) ) {
             $data['slug'] = sanitize_title( $data['slug'] );
+        } else {
+            $data['slug'] = $fest_slug . '-' . $year . '-puja-vidhi';
         }
 
         return $data;
     }
 
     /**
+     * Normalize URL to match current site's home domain (avoids localhost vs live domain issues)
+     */
+    public static function normalize_internal_url( $raw_url ) {
+        if ( empty( $raw_url ) ) {
+            return home_url();
+        }
+        $parsed = function_exists( 'wp_parse_url' ) ? wp_parse_url( $raw_url ) : parse_url( $raw_url );
+        $path = ! empty( $parsed['path'] ) ? $parsed['path'] : '/';
+        // Strip out local folder prefix if moved to live domain
+        $clean_path = preg_replace( '#^/merarashifal#i', '', $path );
+        return home_url( $clean_path );
+    }
+
+    /**
      * Inject internal links from mr_link_map into final markdown / HTML content
+     * Fully compliant with Yoast SEO internal links detection
      */
     public static function inject_internal_links( $content ) {
         global $wpdb;
         $t_links = MRCB_DB_Setup::table_link_map();
 
-        $links = $wpdb->get_results( "SELECT * FROM {$t_links} WHERE is_active = 1", ARRAY_A );
+        $links = ! empty( $wpdb ) ? $wpdb->get_results( "SELECT * FROM {$t_links} WHERE is_active = 1", ARRAY_A ) : [];
+
+        // Fallback default core links if database link map table is empty
         if ( empty( $links ) ) {
-            return $content;
+            $links = [
+                [ 'url' => home_url( '/panchang/' ), 'title_hi' => 'दैनिक हिंदू पंचांग', 'keywords_hi' => 'पंचांग, दैनिक पंचांग, शुभ मुहूर्त, आज का पंचांग, तिथि, नक्षत्र, चौघड़िया', 'link_type' => 'tool' ],
+                [ 'url' => home_url( '/kundali-details/' ), 'title_hi' => 'जन्म कुंडली एवं जन्म पत्रिका', 'keywords_hi' => 'कुंडली, जन्मपत्री, जन्म कुंडली, ग्रह शांति', 'link_type' => 'tool' ],
+                [ 'url' => home_url( '/dosh/mangal-dosh/' ), 'title_hi' => 'मांगलिक दोष जांच एवं उपाय', 'keywords_hi' => 'मांगलिक दोष, मंगल दोष, मांगलिक', 'link_type' => 'tool' ],
+                [ 'url' => home_url( '/dosh/kaal-sarp-dosh/' ), 'title_hi' => 'कालसर्प दोष निवारण', 'keywords_hi' => 'कालसर्प दोष, काल सर्प', 'link_type' => 'tool' ],
+                [ 'url' => home_url( '/horoscope/' ), 'title_hi' => 'दैनिक राशिफल', 'keywords_hi' => 'राशिफल, दैनिक राशिफल, राशि अनुसार, 12 राशियों', 'link_type' => 'tool' ],
+                [ 'url' => home_url( '/festivals/' ), 'title_hi' => 'हिंदू व्रत एवं त्योहार कैलेंडर', 'keywords_hi' => 'त्योहार कैलेंडर, व्रत त्योहार, हिंदू व्रत, पावन पर्व', 'link_type' => 'tool' ],
+            ];
         }
 
         $linked_urls = [];
@@ -452,7 +535,8 @@ PROMPT;
                 break;
             }
 
-            if ( in_array( $link['url'], $linked_urls, true ) ) {
+            $clean_url = self::normalize_internal_url( $link['url'] );
+            if ( in_array( $clean_url, $linked_urls, true ) ) {
                 continue;
             }
 
@@ -462,28 +546,43 @@ PROMPT;
                     continue;
                 }
 
-                // Match first occurrence outside markdown headings (#) and existing links
-                $pattern = '/(?<!\[)(?<!href=")(?<!href=\')\b(' . preg_quote( $kw, '/' ) . ')\b(?![^<]*>)(?![^\[]*\])/u';
+                // Unicode-safe word boundary matching for Devanagari Hindi characters
+                $pattern = '/(?<!\[)(?<!href=")(?<!href=\')(?<![\p{L}\p{N}])(' . preg_quote( $kw, '/' ) . ')(?![\p{L}\p{N}])(?![^<]*>)(?![^\[]*\])/u';
 
                 if ( preg_match( $pattern, $content ) ) {
-                    $replacement = '<a href="' . esc_url( $link['url'] ) . '" title="' . esc_attr( $link['title_hi'] ) . '">$1</a>';
+                    $replacement = '<a href="' . esc_url( $clean_url ) . '" title="' . esc_attr( $link['title_hi'] ) . '">$1</a>';
                     $content = preg_replace( $pattern, $replacement, $content, 1 );
-                    $linked_urls[] = $link['url'];
+                    $linked_urls[] = $clean_url;
                     $injected_count++;
                     break;
                 }
             }
         }
 
-        // Add a styled "यह भी देखें" (Also Check) box at the bottom if tool links exist
-        $tools = array_filter( $links, function( $l ) { return $l['link_type'] === 'tool'; } );
+        // Guaranteed In-Text Internal Links: If no keyword was matched, add an in-text editorial reference
+        if ( $injected_count === 0 ) {
+            $panchang_url = home_url( '/panchang/' );
+            $kundali_url  = home_url( '/kundali-details/' );
+            $editorial_callout = "\n\n> 💡 **संपादकीय सुझाव:** इस तिथि के शुभ मुहूर्त, चौघड़िया और पंचांग गणना की सटीक जानकारी के लिए हमारा [<a href=\"" . esc_url( $panchang_url ) . "\"><strong>दैनिक हिंदू पंचांग</strong></a>] देखें। यदि आप ग्रह दोष शांति के उपाय जानना चाहते हैं, तो अपनी [<a href=\"" . esc_url( $kundali_url ) . "\"><strong>जन्म कुंडली</strong></a>] का विश्लेषण अवश्य करें।\n\n";
+
+            // Insert callout right after the first H2 heading
+            if ( preg_match( '/(##\s+[^\n]+\n)/u', $content ) ) {
+                $content = preg_replace( '/(##\s+[^\n]+\n)/u', '$1' . $editorial_callout, $content, 1 );
+            } else {
+                $content .= $editorial_callout;
+            }
+        }
+
+        // Add styled "यह भी देखें" (Also Check) box at the bottom with normalized URLs
+        $tools = array_filter( $links, function( $l ) { return ( $l['link_type'] ?? '' ) === 'tool'; } );
         if ( ! empty( $tools ) ) {
             shuffle( $tools );
             $selected_tools = array_slice( $tools, 0, 3 );
             $tool_box = "\n\n<div class=\"mrcb-tools-box\"><h4>🔮 मेरा राशिफल विशेष सेवाएँ:</h4><p>";
             $tool_links = [];
             foreach ( $selected_tools as $t ) {
-                $tool_links[] = "👉 <a href=\"" . esc_url( $t['url'] ) . "\"><strong>" . esc_html( $t['title_hi'] ) . "</strong></a>";
+                $clean_tool_url = self::normalize_internal_url( $t['url'] );
+                $tool_links[] = "👉 <a href=\"" . esc_url( $clean_tool_url ) . "\"><strong>" . esc_html( $t['title_hi'] ) . "</strong></a>";
             }
             $tool_box .= implode( " &nbsp;•&nbsp; ", $tool_links ) . "</p></div>\n\n";
             $content .= $tool_box;
@@ -617,11 +716,20 @@ PROMPT;
         }
 
         $festival_name_hi = '';
+        $festival_name_en = '';
         if ( ! empty( $item['festival_id'] ) ) {
             $fest = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$t_fest} WHERE id = %d", $item['festival_id'] ), ARRAY_A );
             if ( $fest ) {
                 $festival_name_hi = $fest['festival_name_hi'] ?: $fest['festival_name_en'];
+                $festival_name_en = $fest['festival_name_en'] ?: '';
             }
+        }
+
+        $year = wp_date( 'Y' );
+        // Determine primary focus keyword upfront for consistency across title, introduction, subheadings & Yoast
+        $focus_kw = ! empty( $item['focus_keyword'] ) ? trim( $item['focus_keyword'] ) : '';
+        if ( empty( $focus_kw ) ) {
+            $focus_kw = ! empty( $festival_name_hi ) ? ( $festival_name_hi . ' ' . $year ) : mb_substr( $item['topic_title_hi'], 0, 25 );
         }
 
         // PASS 1: Raw Draft
@@ -629,7 +737,9 @@ PROMPT;
             $item['topic_title_hi'],
             $festival_name_hi,
             $item['topic_angle'] ?: 'katha',
-            $item['word_count_target'] ?: 950
+            $item['word_count_target'] ?: 950,
+            $focus_kw,
+            $festival_name_en
         );
         if ( ! $pass1_res['success'] ) {
             return [ 'success' => false, 'error' => 'Pass 1 failed: ' . $pass1_res['error'] ];
@@ -637,7 +747,7 @@ PROMPT;
         $pass1_text = $pass1_res['text'];
 
         // PASS 2: Humanizer
-        $pass2_res = self::generate_pass2_humanizer( $pass1_text );
+        $pass2_res = self::generate_pass2_humanizer( $pass1_text, $focus_kw );
         $pass2_text = $pass2_res['success'] ? $pass2_res['text'] : $pass1_text;
 
         // PASS 3: Entity Tagging
@@ -648,11 +758,11 @@ PROMPT;
         $final_content = self::inject_internal_links( $pass3_text );
 
         // Generate SEO Meta
-        $seo_meta = self::generate_seo_metadata( $item['topic_title_hi'], $festival_name_hi, $final_content );
+        $seo_meta = self::generate_seo_metadata( $item['topic_title_hi'], $festival_name_hi, $final_content, $focus_kw );
 
-        $focus_kw   = $seo_meta['focus_keyword'] ?? ( $festival_name_hi . ' ' . wp_date( 'Y' ) );
+        $focus_kw   = $seo_meta['focus_keyword'] ?? $focus_kw;
         $meta_title = $seo_meta['meta_title'] ?? mb_substr( $item['topic_title_hi'], 0, 60 );
-        $meta_desc  = $seo_meta['meta_desc'] ?? mb_substr( strip_tags( $final_content ), 0, 155 );
+        $meta_desc  = $seo_meta['meta_desc'] ?? mb_substr( strip_tags( $final_content ), 0, 150 );
         $slug       = $seo_meta['slug'] ?? sanitize_title( $item['topic_title_hi'] );
         $tags       = $seo_meta['tags'] ?? '';
 
