@@ -349,6 +349,25 @@
             });
         });
 
+        // 13. Manual Sync Approved Posts to WP Posts
+        $('#mrcb-btn-sync-wp').on('click', function(e) {
+            e.preventDefault();
+            var $btn = $(this);
+            $btn.prop('disabled', true).text('⏳ Syncing...');
+            $.post(mrcbConfig.ajax_url, {
+                action: 'mrcb_sync_to_wp',
+                nonce: mrcbConfig.nonce
+            }, function(res) {
+                if (res.success) {
+                    alert('✅ ' + res.data.message);
+                    window.location.reload();
+                } else {
+                    alert('❌ ' + (res.data.message || 'Sync failed.'));
+                    $btn.prop('disabled', false).text('🔄 Sync to WP Posts');
+                }
+            });
+        });
+
     });
 
 })(jQuery);

@@ -51,7 +51,10 @@ foreach ( $counts as $c ) {
             <p class="mrcb-subtitle">Unapproved drafts stay in this staging area until reviewed &bull; Approved posts are scheduled directly in <strong>WordPress Posts &gt; Scheduled</strong></p>
         </div>
         <div class="mrcb-header-actions">
-            <a href="<?php echo admin_url( 'edit.php?post_status=future' ); ?>" class="button" target="_blank" style="margin-right: 8px;">
+            <button id="mrcb-btn-sync-wp" class="button" style="margin-right: 8px;">
+                🔄 Sync to WP Posts
+            </button>
+            <a href="<?php echo admin_url( 'edit.php?post_status=future' ); ?>" class="button button-secondary" target="_blank" style="margin-right: 8px;">
                 📋 View WP Scheduled Posts (<?php echo $metrics['approved']; ?>)
             </a>
             <button id="mrcb-trigger-advance-cron" class="button button-primary">

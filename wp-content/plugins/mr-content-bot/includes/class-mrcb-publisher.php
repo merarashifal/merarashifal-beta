@@ -54,18 +54,26 @@ class MRCB_Publisher {
         global $wpdb;
         $t_queue = MRCB_DB_Setup::table_queue();
 
-        $orphans = $wpdb->get_results(
-            "SELECT id FROM {$t_queue} 
-             WHERE admin_status = 'approved' 
-               AND (wp_post_id IS NULL OR wp_post_id = 0)",
+        $approved_items = $wpdb->get_results(
+            "SELECT id, wp_post_id FROM {$t_queue} 
+             WHERE admin_status = 'approved'",
             ARRAY_A
         );
 
-        if ( ! empty( $orphans ) ) {
-            foreach ( $orphans as $o ) {
-                self::schedule_queue_item( (int) $o['id'] );
+        $synced_count = 0;
+        if ( ! empty( $approved_items ) ) {
+            foreach ( $approved_items as $o ) {
+                $post_id = (int) ( $o['wp_post_id'] ?? 0 );
+                if ( empty( $post_id ) || ! get_post( $post_id ) ) {
+                    $res = self::schedule_queue_item( (int) $o['id'] );
+                    if ( ! empty( $res['success'] ) ) {
+                        $synced_count++;
+                    }
+                }
             }
         }
+
+        return $synced_count;
     }
 
     /**
@@ -124,8 +132,20 @@ class MRCB_Publisher {
 
         // Content to use: admin edited version if present, else final AI tagged version, else raw ai_draft
         $markdown_content = ! empty( $item['admin_draft'] ) ? $item['admin_draft'] : ( $item['ai_draft_tagged'] ?: $item['ai_draft'] );
+
+        // If content is empty (item was queued but not yet drafted), auto-generate it now!
         if ( empty( $markdown_content ) ) {
-            return [ 'success' => false, 'error' => 'No content found in draft.' ];
+            if ( class_exists( 'MRCB_Writer' ) ) {
+                $gen_res = MRCB_Writer::generate_for_queue_item( $queue_id );
+                if ( ! empty( $gen_res['success'] ) ) {
+                    $item = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$t_queue} WHERE id = %d", $queue_id ), ARRAY_A );
+                    $markdown_content = ! empty( $item['admin_draft'] ) ? $item['admin_draft'] : ( $item['ai_draft_tagged'] ?: $item['ai_draft'] );
+                }
+            }
+        }
+
+        if ( empty( $markdown_content ) ) {
+            return [ 'success' => false, 'error' => 'No content found in draft, and automatic generation failed.' ];
         }
 
         $html_content = MRCB_Writer::markdown_to_html( $markdown_content );

@@ -26,6 +26,7 @@ class MRCB_Admin {
         add_action( 'wp_ajax_mrcb_plan_campaign', [ __CLASS__, 'ajax_plan_campaign' ] );
         add_action( 'wp_ajax_mrcb_save_filler', [ __CLASS__, 'ajax_save_filler' ] );
         add_action( 'wp_ajax_mrcb_delete_filler', [ __CLASS__, 'ajax_delete_filler' ] );
+        add_action( 'wp_ajax_mrcb_sync_to_wp', [ __CLASS__, 'ajax_sync_to_wp' ] );
     }
 
     /**
@@ -456,5 +457,19 @@ class MRCB_Admin {
         $wpdb->delete( MRCB_DB_Setup::table_filler(), [ 'id' => $id ] );
 
         wp_send_json_success( [ 'message' => 'Filler topic deleted.' ] );
+    }
+
+    public static function ajax_sync_to_wp() {
+        check_ajax_referer( 'mrcb_admin_nonce', 'nonce' );
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => 'Unauthorized' ] );
+        }
+
+        $count = MRCB_Publisher::sync_approved_unscheduled_posts();
+        wp_send_json_success( [
+            'message' => $count > 0 
+                ? "Successfully synchronized {$count} approved post(s) into WordPress Posts > Scheduled!" 
+                : "All approved posts are already scheduled in WordPress!"
+        ] );
     }
 }
