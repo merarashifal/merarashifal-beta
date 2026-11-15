@@ -474,10 +474,13 @@ class MR_Reports_Showcase {
             $atts['show_header'] = 'no'; // Heading removed by default
         }
         if (!isset($atts['columns'])) {
-            $atts['columns'] = 2; // 2 cards side by side
+            $atts['columns'] = 4; // 4-column matrix on desktop
         }
         if (!isset($atts['show_filter'])) {
             $atts['show_filter'] = 'yes'; // Sorting/filter on top
+        }
+        if (!isset($atts['show_description'])) {
+            $atts['show_description'] = 'yes'; // Show report description (4 lines on mobile)
         }
         return self::shortcode_showcase($atts);
     }
@@ -810,14 +813,19 @@ class MR_Reports_Showcase {
 
                             <!-- Dual Action Buttons -->
                             <div class="mr-rsc-grid-actions">
+                                <?php 
+                                $desktop_grid_btn = trim(str_replace(['→', '&rarr;', '->'], '', $btn_label ?: 'Get My Personalized Report'));
+                                ?>
                                 <a href="<?php echo esc_url($rep['page_url']); ?>" class="mr-rsc-btn">
-                                    <span><?php echo esc_html($btn_label); ?></span>
-                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                                    <span class="mr-rsc-btn-txt-desktop"><?php echo esc_html($desktop_grid_btn); ?></span>
+                                    <span class="mr-rsc-btn-txt-mobile">Get My Report</span>
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                                 </a>
 
                                 <button type="button" class="mr-rsc-sample-btn mr-link-sample" data-title="<?php echo esc_attr($rep['name']); ?>" data-slug="<?php echo esc_attr($rep['key']); ?>">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-                                    <span><?php echo esc_html($rep['preview_text']); ?></span>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    <span class="mr-rsc-btn-txt-desktop"><?php echo esc_html($rep['preview_text'] ?: 'Preview Sample Report'); ?></span>
+                                    <span class="mr-rsc-btn-txt-mobile">Preview Sample</span>
                                 </button>
                             </div>
                         </div>
@@ -843,7 +851,7 @@ class MR_Reports_Showcase {
         $category         = $args['category'] ?? '';
         $custom_btn       = $args['button_text'] ?? '';
         $show_header      = !empty($args['show_header']) && $args['show_header'] !== 'no';
-        $show_desc        = !empty($args['show_description']) && $args['show_description'] !== 'no';
+        $show_desc        = !isset($args['show_description']) || ($args['show_description'] !== 'no' && $args['show_description'] !== false);
         $show_filter      = !isset($args['show_filter']) || ($args['show_filter'] !== 'no' && $args['show_filter'] !== false);
         $cta_url          = $args['cta_url'] ?? home_url('/pricing/');
         $cta_text         = $args['cta_text'] ?? 'Browse All Reports & Bundles';
@@ -1043,14 +1051,19 @@ class MR_Reports_Showcase {
 
                             <!-- Dual Action Buttons -->
                             <div class="mr-rsc-vert-btns-wrap">
+                                <?php 
+                                $desktop_btn_label = trim(str_replace(['→', '&rarr;', '->'], '', $btn_label ?: 'Get My Personalized Report'));
+                                ?>
                                 <a href="<?php echo esc_url($rep['page_url']); ?>" class="mr-rsc-btn mr-rsc-btn-vert">
-                                    <span><?php echo esc_html($btn_label ?: 'Get My Personalized Report →'); ?></span>
-                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                                    <span class="mr-rsc-btn-txt-desktop"><?php echo esc_html($desktop_btn_label); ?></span>
+                                    <span class="mr-rsc-btn-txt-mobile">Get My Report</span>
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
                                 </a>
 
                                 <button type="button" class="mr-rsc-sample-btn mr-rsc-sample-btn-vert mr-link-sample" data-title="<?php echo esc_attr($rep['name']); ?>" data-slug="<?php echo esc_attr($rep['key']); ?>">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-                                    <span><?php echo esc_html($rep['preview_text']); ?></span>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+                                    <span class="mr-rsc-btn-txt-desktop"><?php echo esc_html($rep['preview_text'] ?: 'Preview Sample Report'); ?></span>
+                                    <span class="mr-rsc-btn-txt-mobile">Preview Sample</span>
                                 </button>
                             </div>
                         </div>
@@ -1665,6 +1678,14 @@ class MR_Reports_Showcase {
             border-style: solid;
         }
 
+        /* Responsive Button Labels (Desktop vs Mobile) */
+        .mr-rsc-btn-txt-desktop {
+            display: inline;
+        }
+        .mr-rsc-btn-txt-mobile {
+            display: none;
+        }
+
         .mr-rsc-scroll-hint {
             display: flex;
             align-items: center;
@@ -1956,35 +1977,35 @@ class MR_Reports_Showcase {
             box-shadow: 0 2px 8px rgba(120, 53, 15, 0.25);
         }
 
-        /* ==========================================================================
-           VERTICAL LISTING LAYOUT (2 Cards Side-by-Side on Desktop & Tablet)
+/* ==========================================================================
+           VERTICAL LISTING LAYOUT - 4-COLUMN COMPACT DOSSIER MATRIX
+           Desktop: 4 Cards per row (Compact Publication Dossier Format)
+           Tablet: 3 Cards per row (120px book cover)
+           Mobile: 2 Cards per row (100px compact book cover)
            ========================================================================== */
         .mr-rsc-vertical-stack {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 18px;
-        }
-        @media (min-width: 768px) {
-            .mr-rsc-vertical-stack {
-                grid-template-columns: repeat(2, minmax(0, 1fr));
-            }
+            display: grid !important;
+            grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+            gap: 16px;
         }
 
+        /* Card Container (Base / Desktop 4-Column Matrix) */
         .mr-rsc-vert-card {
             background: #FDF6E3 !important;
-            border: 1px solid rgba(217, 119, 6, 0.28);
-            border-radius: 16px;
-            padding: 18px;
+            border: 1px solid rgba(217, 119, 6, 0.28) !important;
+            border-radius: 14px;
+            padding: 14px 12px;
             display: flex;
-            flex-direction: row;
-            gap: 18px;
+            flex-direction: column;
+            justify-content: space-between;
+            gap: 8px;
             box-shadow: 0 4px 16px rgba(120, 53, 15, 0.05);
             transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, opacity 0.25s ease;
             box-sizing: border-box;
-            align-items: center; /* Center aligned to card height */
+            height: 100%;
         }
         .mr-rsc-vert-card:hover {
-            transform: translateY(-2px);
+            transform: translateY(-3px);
             box-shadow: 0 10px 24px rgba(120, 53, 15, 0.12);
             border-color: rgba(245, 130, 32, 0.55);
         }
@@ -1993,94 +2014,65 @@ class MR_Reports_Showcase {
         }
 
         /* ==========================================================================
-           Feature Media in Vertical (Square 1:1 Aspect Ratio on All Devices)
-           Prevents Letterboxing/Whitespace and Prevents Cropping Across All Screens
+           Dossier Cover Format - Compact, Centered & 3D Shadowed (Never oversized)
            ========================================================================== */
         .mr-rsc-vert-media {
             position: relative;
-            display: block;
-            width: 170px !important;
-            min-width: 170px !important;
-            max-width: 170px !important;
-            height: 170px !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 130px !important;
+            max-width: 130px !important;
+            min-width: 130px !important;
+            height: 130px !important;
             aspect-ratio: 1 / 1 !important;
-            border-radius: 14px;
-            overflow: hidden;
-            background: #ffffff;
-            border: 1px solid rgba(217, 119, 6, 0.22);
-            box-shadow: 0 4px 14px rgba(120, 53, 15, 0.1);
+            background: transparent !important;
+            border: none !important;
+            box-shadow: none !important;
+            border-radius: 10px;
+            overflow: visible;
             flex-shrink: 0 !important;
             align-self: center !important;
-            text-decoration: none;
-            margin: 0;
+            margin: 0 auto 6px auto !important;
             padding: 0;
             box-sizing: border-box;
+            text-decoration: none;
         }
 
-        /* Large Screen / Laptop (992px - 1199px) */
-        @media (max-width: 1199px) and (min-width: 992px) {
-            .mr-rsc-vert-media {
-                width: 150px !important;
-                min-width: 150px !important;
-                max-width: 150px !important;
-                height: 150px !important;
-                aspect-ratio: 1 / 1 !important;
-            }
-        }
-
-        /* Tablet (768px - 991px): 2 columns side-by-side */
-        @media (max-width: 991px) and (min-width: 768px) {
-            .mr-rsc-vert-media {
-                width: 135px !important;
-                min-width: 135px !important;
-                max-width: 135px !important;
-                height: 135px !important;
-                aspect-ratio: 1 / 1 !important;
-                border-radius: 12px;
-            }
-        }
-
-        /* Phablet / Small Tablet (641px - 767px): 1 column */
-        @media (max-width: 767px) and (min-width: 641px) {
-            .mr-rsc-vert-media {
-                width: 160px !important;
-                min-width: 160px !important;
-                max-width: 160px !important;
-                height: 160px !important;
-                aspect-ratio: 1 / 1 !important;
-            }
-        }
-
-        /* The Image element: full-bleed 100% fit, overcoming any theme `height: auto` */
+        /* The Image element: publication cover with soft drop shadow */
         .mr-rsc-vert-img {
-            width: 100% !important;
-            height: 100% !important;
-            max-width: 100% !important;
-            max-height: 100% !important;
-            min-width: 100% !important;
-            min-height: 100% !important;
+            width: 130px !important;
+            height: 130px !important;
+            max-width: 130px !important;
+            max-height: 130px !important;
+            min-width: 130px !important;
+            min-height: 130px !important;
+            aspect-ratio: 1 / 1 !important;
             object-fit: cover !important;
             object-position: center !important;
             display: block !important;
             margin: 0 !important;
             padding: 0 !important;
-            border: none !important;
-            border-radius: inherit !important;
-            transition: transform 0.35s ease;
+            border: 1px solid rgba(217, 119, 6, 0.22) !important;
+            border-radius: 10px !important;
+            box-shadow: 0 6px 18px rgba(120, 53, 15, 0.16) !important;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
         .mr-rsc-vert-card:hover .mr-rsc-vert-img {
-            transform: scale(1.05);
+            transform: translateY(-2px) scale(1.04);
+            box-shadow: 0 10px 24px rgba(245, 130, 32, 0.25) !important;
         }
 
         /* Discount Badge inside Media Container */
         .mr-rsc-vert-media .mr-rsc-badge-discount {
-            top: 8px !important;
-            right: 8px !important;
-            font-size: 10px !important;
-            padding: 4px 7px !important;
-            border-radius: 6px !important;
+            top: -4px !important;
+            right: -6px !important;
+            font-size: 9px !important;
+            padding: 3px 6px !important;
+            border-radius: 4px !important;
             font-weight: 800 !important;
             box-shadow: 0 2px 6px rgba(5, 150, 105, 0.4) !important;
+            z-index: 2;
         }
 
         /* Body column */
@@ -2089,48 +2081,49 @@ class MR_Reports_Showcase {
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            gap: 10px;
+            gap: 6px;
             min-width: 0;
             background: transparent !important;
         }
 
         .mr-rsc-vert-meta {
             display: flex;
-            flex-wrap: wrap;
             align-items: center;
-            gap: 6px;
+            justify-content: center;
+            gap: 5px;
         }
         .mr-rsc-vert-tag {
             display: inline-flex;
             align-items: center;
             gap: 4px;
-            font-size: 11px;
+            font-size: 10.5px;
             font-weight: 700;
-            padding: 3px 8px;
-            border-radius: 5px;
+            padding: 2px 7px;
+            border-radius: 4px;
             background: rgba(254, 243, 199, 0.85);
             color: #92400e;
             white-space: nowrap;
         }
 
-        /* Heading Bold and Bigger (at least twice the size: 30-32px) */
+        /* Heading Bold for Desktop 4-Column Matrix (15.5-16.5px) */
         .mr-rsc-vert-title {
             margin: 0;
             font-family: "Playfair Display", Georgia, serif;
-            font-size: 26px;
-            font-weight: 800;
-            line-height: 1.22;
+            font-size: 15.5px !important;
+            font-weight: 800 !important;
+            line-height: 1.25 !important;
             color: #964900;
-            letter-spacing: -0.015em;
+            text-align: center;
+            letter-spacing: -0.01em;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            min-height: 2.5em;
         }
-        @media (min-width: 768px) {
+        @media (min-width: 1400px) {
             .mr-rsc-vert-title {
-                font-size: 30px;
-            }
-        }
-        @media (min-width: 1024px) {
-            .mr-rsc-vert-title {
-                font-size: 32px;
+                font-size: 16.5px !important;
             }
         }
         .mr-rsc-vert-title a {
@@ -2145,86 +2138,357 @@ class MR_Reports_Showcase {
 
         .mr-rsc-vert-desc {
             margin: 0;
-            font-size: 13px;
+            font-size: 11.5px !important;
             color: #564336;
-            line-height: 1.5;
+            line-height: 1.35 !important;
+            text-align: center;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             overflow: hidden;
             text-overflow: ellipsis;
+            min-height: 2.7em;
         }
 
         .mr-rsc-vert-price-row {
             display: flex;
             align-items: baseline;
             justify-content: space-between;
-            gap: 8px;
-            padding-top: 6px;
+            gap: 6px;
+            padding-top: 5px;
             border-top: 1px solid rgba(120, 53, 15, 0.12);
+            margin-top: auto;
+        }
+        .mr-rsc-vert-price-row .mr-rsc-price-sale {
+            font-size: 16px !important;
+            font-weight: 800;
+            color: #964900;
+        }
+        .mr-rsc-vert-price-row .mr-rsc-price-reg {
+            font-size: 11.5px !important;
+            color: #9ca3af;
+            text-decoration: line-through;
+            margin-left: 3px;
+        }
+        .mr-rsc-vert-price-row .mr-rsc-delivery-tag {
+            font-size: 10px !important;
         }
 
         .mr-rsc-vert-btns-wrap {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 4px;
             margin-top: 4px;
         }
         .mr-rsc-btn-vert {
             width: 100%;
-            padding: 10px 14px;
-            font-size: 13px;
+            padding: 8px 10px !important;
+            font-size: 11.5px !important;
+            font-weight: 700;
+            border-radius: 7px !important;
+            text-align: center;
+            justify-content: center;
         }
         .mr-rsc-sample-btn-vert {
             width: 100%;
-            padding: 8px 12px;
-            font-size: 12px;
+            padding: 6px 8px !important;
+            font-size: 10.5px !important;
+            font-weight: 600;
+            border-radius: 6px !important;
+            text-align: center;
+            justify-content: center;
         }
 
-        /* Mobile & Responsive Adjustments (640px and below) */
-        @media (max-width: 640px) {
-            .mr-rsc-vert-card {
-                padding: 16px 14px;
+        /* Tablet / Medium Screens (641px - 1023px): 3 columns */
+        @media (max-width: 1023px) and (min-width: 641px) {
+            .mr-rsc-vertical-stack {
+                grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
                 gap: 14px;
+            }
+            .mr-rsc-vert-card {
+                padding: 12px 10px;
+            }
+            .mr-rsc-vert-media {
+                width: 120px !important;
+                max-width: 120px !important;
+                height: 120px !important;
+            }
+            .mr-rsc-vert-img {
+                width: 120px !important;
+                height: 120px !important;
+                max-width: 120px !important;
+                max-height: 120px !important;
+            }
+            .mr-rsc-vert-title {
+                font-size: 15px !important;
+            }
+        }
+
+        /* ==========================================================================
+           MOBILE 2X2 MATRIX GRID (Screens <= 640px)
+           Compact Book Covers (100px), Perfectly Fitted, No Giant Images
+           ========================================================================== */
+        @media (max-width: 640px) {
+            /* Maximize available screen width - eliminate excessive side padding */
+            .mr-rsc-wrapper {
+                padding: 10px 4px !important;
+                width: 100% !important;
+                max-width: 100% !important;
+            }
+
+            .mr-rsc-filter-bar {
+                margin-bottom: 14px !important;
+                gap: 8px !important;
+                width: 100% !important;
+            }
+
+            .mr-rsc-tabs {
+                gap: 6px !important;
+                justify-content: flex-start !important;
+                overflow-x: auto !important;
+                flex-wrap: nowrap !important;
+                padding: 2px 2px 6px 2px !important;
+                -webkit-overflow-scrolling: touch !important;
+                scrollbar-width: none !important;
+            }
+            .mr-rsc-tabs::-webkit-scrollbar {
+                display: none !important;
+            }
+
+            .mr-rsc-tab {
+                padding: 6px 12px !important;
+                font-size: 12px !important;
+                flex-shrink: 0 !important;
+            }
+            .mr-rsc-tab-count {
+                min-width: 18px !important;
+                height: 18px !important;
+                font-size: 10px !important;
+            }
+
+            .mr-rsc-subgroup {
+                padding: 4px 8px !important;
+                gap: 5px !important;
+                overflow-x: auto !important;
+                flex-wrap: nowrap !important;
+                scrollbar-width: none !important;
+            }
+            .mr-rsc-subgroup::-webkit-scrollbar {
+                display: none !important;
+            }
+
+            .mr-rsc-subpill {
+                padding: 4px 10px !important;
+                font-size: 11px !important;
+                flex-shrink: 0 !important;
+            }
+
+            .mr-rsc-vertical-stack {
+                display: grid !important;
+                grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+                gap: 8px !important;
+                width: 100% !important;
+            }
+
+            .mr-rsc-vert-card {
+                padding: 8px 6px !important;
+                gap: 6px !important;
+                border-radius: 10px !important;
                 flex-direction: column !important;
                 align-items: stretch !important;
+                justify-content: space-between !important;
+                height: 100% !important;
+                background: #FDF6E3 !important;
+                box-sizing: border-box !important;
             }
+
+            /* Compact 100px centered book cover on mobile (never oversized) */
             .mr-rsc-vert-media {
-                width: 100% !important;
-                max-width: 200px !important;
-                min-width: auto !important;
-                height: auto !important;
+                width: 100px !important;
+                max-width: 100px !important;
+                min-width: 100px !important;
+                height: 100px !important;
                 aspect-ratio: 1 / 1 !important;
-                margin: 0 auto !important;
+                margin: 0 auto 4px auto !important;
                 align-self: center !important;
-                border-radius: 14px !important;
-                box-shadow: 0 4px 14px rgba(120, 53, 15, 0.12) !important;
+                border-radius: 8px !important;
+                overflow: visible !important;
+                background: transparent !important;
+                border: none !important;
+                box-shadow: none !important;
             }
+
+            .mr-rsc-vert-img {
+                width: 100px !important;
+                height: 100px !important;
+                max-width: 100px !important;
+                max-height: 100px !important;
+                aspect-ratio: 1 / 1 !important;
+                object-fit: cover !important;
+                border-radius: 8px !important;
+                box-shadow: 0 4px 12px rgba(120, 53, 15, 0.15) !important;
+                border: 1px solid rgba(217, 119, 6, 0.2) !important;
+            }
+
+            .mr-rsc-vert-media .mr-rsc-badge-discount {
+                top: -3px !important;
+                right: -4px !important;
+                font-size: 8.5px !important;
+                padding: 2px 5px !important;
+                border-radius: 4px !important;
+                font-weight: 800 !important;
+            }
+
             .mr-rsc-vert-body {
                 width: 100% !important;
-                gap: 8px;
+                gap: 5px !important;
+                flex-grow: 1 !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: space-between !important;
             }
-            .mr-rsc-vert-title {
-                font-size: 22px;
-                line-height: 1.25;
-            }
-            .mr-rsc-vert-desc {
-                -webkit-line-clamp: 2;
-                font-size: 12.5px;
+
+            .mr-rsc-vert-meta {
+                gap: 4px !important;
+                margin-bottom: 1px !important;
             }
             .mr-rsc-vert-tag {
-                font-size: 10.5px;
-                padding: 2px 6px;
+                font-size: 9px !important;
+                padding: 1px 5px !important;
+                border-radius: 4px !important;
+            }
+
+            /* 2-line title in bold, neat font size for 2-column mobile matrix */
+            .mr-rsc-vert-title {
+                font-size: 13px !important;
+                font-weight: 800 !important;
+                line-height: 1.22 !important;
+                margin: 0 !important;
+                display: -webkit-box !important;
+                -webkit-line-clamp: 2 !important;
+                -webkit-box-orient: vertical !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                min-height: 2.45em; /* Ensures title height consistency */
+            }
+
+            /* 4 lines of description with ellipsis (...) */
+            .mr-rsc-vert-desc {
+                display: -webkit-box !important;
+                -webkit-line-clamp: 4 !important;
+                -webkit-box-orient: vertical !important;
+                overflow: hidden !important;
+                text-overflow: ellipsis !important;
+                font-size: 11px !important;
+                line-height: 1.35 !important;
+                color: #564336 !important;
+                margin: 3px 0 4px 0 !important;
+                word-break: break-word !important;
+            }
+
+            .mr-rsc-vert-price-row {
+                padding-top: 4px !important;
+                margin-top: auto !important;
+                border-top: 1px solid rgba(120, 53, 15, 0.1) !important;
+                display: flex !important;
+                align-items: baseline !important;
+                justify-content: space-between !important;
+                flex-wrap: nowrap !important;
+                gap: 4px !important;
+            }
+            .mr-rsc-vert-price-row .mr-rsc-price-sale {
+                font-size: 14.5px !important;
+                font-weight: 800 !important;
+            }
+            .mr-rsc-vert-price-row .mr-rsc-price-reg {
+                font-size: 11px !important;
+                margin-left: 3px !important;
+            }
+            .mr-rsc-vert-price-row .mr-rsc-delivery-tag {
+                display: none !important;
+            }
+
+            /* Toggle responsive button text */
+            .mr-rsc-btn-txt-desktop {
+                display: none !important;
+            }
+            .mr-rsc-btn-txt-mobile {
+                display: inline !important;
+            }
+
+            /* Compact thumb-friendly action buttons - single neat line */
+            .mr-rsc-vert-btns-wrap {
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 4px !important;
+                margin-top: 4px !important;
+            }
+            .mr-rsc-btn-vert {
+                padding: 7px 4px !important;
+                font-size: 11px !important;
+                font-weight: 700 !important;
+                line-height: 1.2 !important;
+                border-radius: 6px !important;
+                justify-content: center !important;
+                white-space: nowrap !important;
+                letter-spacing: -0.01em !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                gap: 4px !important;
+                box-sizing: border-box !important;
+            }
+            .mr-rsc-btn-vert svg {
+                width: 12px !important;
+                height: 12px !important;
+                flex-shrink: 0 !important;
+            }
+            .mr-rsc-sample-btn-vert {
+                padding: 5px 4px !important;
+                font-size: 10px !important;
+                font-weight: 600 !important;
+                line-height: 1.2 !important;
+                border-radius: 6px !important;
+                justify-content: center !important;
+                white-space: nowrap !important;
+                letter-spacing: -0.01em !important;
+                display: inline-flex !important;
+                align-items: center !important;
+                gap: 4px !important;
+                box-sizing: border-box !important;
+            }
+            .mr-rsc-sample-btn-vert svg {
+                width: 11px !important;
+                height: 11px !important;
+                flex-shrink: 0 !important;
             }
         }
 
-        /* Extra small phones (<= 360px, e.g. Galaxy Fold cover, small iPhones) */
+        /* Extra small phones (<= 360px) */
         @media (max-width: 360px) {
-            .mr-rsc-vert-media {
-                max-width: 175px !important;
+            .mr-rsc-wrapper {
+                padding: 8px 2px !important;
+            }
+            .mr-rsc-vertical-stack {
+                gap: 6px !important;
+            }
+            .mr-rsc-vert-card {
+                padding: 6px 4px !important;
             }
             .mr-rsc-vert-title {
-                font-size: 20px;
+                font-size: 12px !important;
+            }
+            .mr-rsc-vert-desc {
+                font-size: 10px !important;
+                line-height: 1.3 !important;
+                -webkit-line-clamp: 3 !important;
+            }
+            .mr-rsc-btn-vert {
+                font-size: 10px !important;
+                padding: 6px 3px !important;
+            }
+            .mr-rsc-sample-btn-vert {
+                font-size: 9px !important;
+                padding: 4px 3px !important;
             }
         }
 
