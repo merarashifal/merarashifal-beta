@@ -175,12 +175,11 @@ class MRCB_Publisher {
         $tag_names = array_unique( $tag_names );
 
         // Determine Timing & Status
-        $publish_time        = ! empty( $item['publish_time'] ) ? $item['publish_time'] : '07:00:00';
-        $scheduled_datetime  = $item['scheduled_date'] . ' ' . $publish_time;
-        $scheduled_timestamp = strtotime( $scheduled_datetime );
-        $current_timestamp   = current_time( 'timestamp' );
+        $publish_time       = ! empty( $item['publish_time'] ) ? $item['publish_time'] : '07:00:00';
+        $scheduled_datetime = $item['scheduled_date'] . ' ' . $publish_time;
+        $now_mysql          = current_time( 'mysql' );
 
-        $is_future = ( ! $force_publish_now && $scheduled_timestamp > $current_timestamp );
+        $is_future   = ( ! $force_publish_now && $scheduled_datetime > $now_mysql );
         $post_status = $is_future ? 'future' : 'publish';
 
         if ( $is_future ) {
@@ -192,6 +191,7 @@ class MRCB_Publisher {
         }
 
         $author_id = get_current_user_id() ?: ( (int) $item['approved_by'] ?: 1 );
+
 
         $post_data = [
             'post_title'    => wp_strip_all_tags( $post_title ),

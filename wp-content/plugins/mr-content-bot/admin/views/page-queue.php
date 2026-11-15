@@ -18,13 +18,18 @@ if ( $status_filter !== 'all' && ! empty( $status_filter ) ) {
     $where .= $wpdb->prepare( " AND q.admin_status = %s", $status_filter );
 }
 
-// Fetch queue items
+// Fetch queue items - pending_review drafts always stay visible until reviewed/approved
 $today = current_time( 'Y-m-d' );
+$date_where = '';
+if ( $status_filter === 'published' ) {
+    $date_where = " AND q.scheduled_date >= DATE_SUB('{$today}', INTERVAL 30 DAY)";
+}
+
 $items = $wpdb->get_results(
     "SELECT q.*, f.festival_name_hi, f.festival_name_en, f.tier 
      FROM {$t_queue} q
      LEFT JOIN {$t_fest} f ON q.festival_id = f.id
-     WHERE {$where} AND q.scheduled_date >= DATE_SUB('{$today}', INTERVAL 7 DAY)
+     WHERE {$where} {$date_where}
      ORDER BY q.scheduled_date ASC
      LIMIT 100",
     ARRAY_A
@@ -34,7 +39,6 @@ $items = $wpdb->get_results(
 $counts = $wpdb->get_results(
     "SELECT admin_status, COUNT(*) as cnt 
      FROM {$t_queue} 
-     WHERE scheduled_date >= DATE_SUB('{$today}', INTERVAL 7 DAY) AND scheduled_date <= DATE_ADD('{$today}', INTERVAL 45 DAY)
      GROUP BY admin_status",
     ARRAY_A
 );
@@ -42,6 +46,7 @@ $metrics = [ 'pending_review' => 0, 'approved' => 0, 'published' => 0, 'rejected
 foreach ( $counts as $c ) {
     $metrics[ $c['admin_status'] ] = (int) $c['cnt'];
 }
+
 ?>
 
 <div class="wrap mrcb-wrap">
