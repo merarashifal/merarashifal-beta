@@ -1992,39 +1992,95 @@ class MR_Reports_Showcase {
             display: none !important;
         }
 
-        /* Feature Media in Vertical (Center aligned to card height) */
+        /* ==========================================================================
+           Feature Media in Vertical (Square 1:1 Aspect Ratio on All Devices)
+           Prevents Letterboxing/Whitespace and Prevents Cropping Across All Screens
+           ========================================================================== */
         .mr-rsc-vert-media {
             position: relative;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            align-self: center; /* Center vertically against the card height */
-            width: 140px;
-            min-width: 140px;
-            height: 180px;
-            border-radius: 12px;
+            display: block;
+            width: 170px !important;
+            min-width: 170px !important;
+            max-width: 170px !important;
+            height: 170px !important;
+            aspect-ratio: 1 / 1 !important;
+            border-radius: 14px;
             overflow: hidden;
-            background: rgba(255, 255, 255, 0.65);
-            border: 1px solid rgba(217, 119, 6, 0.2);
-            flex-shrink: 0;
+            background: #ffffff;
+            border: 1px solid rgba(217, 119, 6, 0.22);
+            box-shadow: 0 4px 14px rgba(120, 53, 15, 0.1);
+            flex-shrink: 0 !important;
+            align-self: center !important;
             text-decoration: none;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        @media (max-width: 991px) and (min-width: 768px) {
+
+        /* Large Screen / Laptop (992px - 1199px) */
+        @media (max-width: 1199px) and (min-width: 992px) {
             .mr-rsc-vert-media {
-                width: 125px;
-                min-width: 125px;
-                height: 170px;
+                width: 150px !important;
+                min-width: 150px !important;
+                max-width: 150px !important;
+                height: 150px !important;
+                aspect-ratio: 1 / 1 !important;
             }
         }
+
+        /* Tablet (768px - 991px): 2 columns side-by-side */
+        @media (max-width: 991px) and (min-width: 768px) {
+            .mr-rsc-vert-media {
+                width: 135px !important;
+                min-width: 135px !important;
+                max-width: 135px !important;
+                height: 135px !important;
+                aspect-ratio: 1 / 1 !important;
+                border-radius: 12px;
+            }
+        }
+
+        /* Phablet / Small Tablet (641px - 767px): 1 column */
+        @media (max-width: 767px) and (min-width: 641px) {
+            .mr-rsc-vert-media {
+                width: 160px !important;
+                min-width: 160px !important;
+                max-width: 160px !important;
+                height: 160px !important;
+                aspect-ratio: 1 / 1 !important;
+            }
+        }
+
+        /* The Image element: full-bleed 100% fit, overcoming any theme `height: auto` */
         .mr-rsc-vert-img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s ease;
-            display: block;
+            width: 100% !important;
+            height: 100% !important;
+            max-width: 100% !important;
+            max-height: 100% !important;
+            min-width: 100% !important;
+            min-height: 100% !important;
+            object-fit: cover !important;
+            object-position: center !important;
+            display: block !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: none !important;
+            border-radius: inherit !important;
+            transition: transform 0.35s ease;
         }
         .mr-rsc-vert-card:hover .mr-rsc-vert-img {
-            transform: scale(1.06);
+            transform: scale(1.05);
+        }
+
+        /* Discount Badge inside Media Container */
+        .mr-rsc-vert-media .mr-rsc-badge-discount {
+            top: 8px !important;
+            right: 8px !important;
+            font-size: 10px !important;
+            padding: 4px 7px !important;
+            border-radius: 6px !important;
+            font-weight: 800 !important;
+            box-shadow: 0 2px 6px rgba(5, 150, 105, 0.4) !important;
         }
 
         /* Body column */
@@ -2125,21 +2181,32 @@ class MR_Reports_Showcase {
             font-size: 12px;
         }
 
-        /* Mobile & Responsive Adjustments */
+        /* Mobile & Responsive Adjustments (640px and below) */
         @media (max-width: 640px) {
             .mr-rsc-vert-card {
-                padding: 14px;
+                padding: 16px 14px;
                 gap: 14px;
-                flex-direction: column;
-                align-items: center;
+                flex-direction: column !important;
+                align-items: stretch !important;
             }
             .mr-rsc-vert-media {
-                width: 100%;
-                min-width: 100%;
-                height: 160px;
+                width: 100% !important;
+                max-width: 200px !important;
+                min-width: auto !important;
+                height: auto !important;
+                aspect-ratio: 1 / 1 !important;
+                margin: 0 auto !important;
+                align-self: center !important;
+                border-radius: 14px !important;
+                box-shadow: 0 4px 14px rgba(120, 53, 15, 0.12) !important;
+            }
+            .mr-rsc-vert-body {
+                width: 100% !important;
+                gap: 8px;
             }
             .mr-rsc-vert-title {
-                font-size: 24px;
+                font-size: 22px;
+                line-height: 1.25;
             }
             .mr-rsc-vert-desc {
                 -webkit-line-clamp: 2;
@@ -2148,6 +2215,16 @@ class MR_Reports_Showcase {
             .mr-rsc-vert-tag {
                 font-size: 10.5px;
                 padding: 2px 6px;
+            }
+        }
+
+        /* Extra small phones (<= 360px, e.g. Galaxy Fold cover, small iPhones) */
+        @media (max-width: 360px) {
+            .mr-rsc-vert-media {
+                max-width: 175px !important;
+            }
+            .mr-rsc-vert-title {
+                font-size: 20px;
             }
         }
 

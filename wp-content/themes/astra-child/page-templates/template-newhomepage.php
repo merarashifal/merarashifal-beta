@@ -165,40 +165,47 @@ get_header();
   box-shadow: 0 4px 12px rgba(245, 130, 32, 0.3);
 }
 
-/* Zodiac 4x3 Mobile Grid Card */
-.zodiac-grid-card {
-  border: 1px solid rgba(217, 119, 6, 0.18);
+/* Compact Card Elevations */
+.compact-card {
   background: #ffffff;
+  border: 1px solid rgba(217, 119, 6, 0.16);
+  border-radius: 0.875rem;
+  box-shadow: 0 2px 10px -2px rgba(150, 73, 0, 0.04);
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.zodiac-grid-card:hover, .zodiac-grid-card:active {
-  background: #fff8f6;
-  border-color: #f58220;
+.compact-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(150, 73, 0, 0.12);
+  border-color: rgba(245, 130, 32, 0.4);
+  box-shadow: 0 8px 20px -4px rgba(150, 73, 0, 0.12);
 }
 
-/* Life Problem Solution Gateway Cards */
-.gateway-card {
+/* Micro Zodiac Pill */
+.zodiac-pill {
   border: 1px solid rgba(217, 119, 6, 0.18);
   background: #ffffff;
-  transition: all 0.2s ease-in-out;
+  transition: all 0.18s ease-in-out;
 }
-.gateway-card:hover, .gateway-card:active {
-  border-color: #f58220;
+.zodiac-pill:hover, .zodiac-pill:active {
   background: #fff8f6;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(150, 73, 0, 0.1);
+  border-color: #f58220;
+  transform: translateY(-1.5px);
+  box-shadow: 0 4px 10px rgba(150, 73, 0, 0.1);
 }
 
-/* Deity Mobile Grid Avatar */
-.deity-circle-card {
-  transition: all 0.2s ease-in-out;
+/* Gateway Micro Chip */
+.gateway-chip {
+  border: 1px solid rgba(217, 119, 6, 0.15);
+  background: #ffffff;
+  transition: all 0.18s ease-in-out;
 }
-.deity-circle-card:hover .avatar-ring, .deity-circle-card:active .avatar-ring {
+.gateway-chip:hover, .gateway-chip:active {
   border-color: #f58220;
-  transform: scale(1.08);
-  box-shadow: 0 0 0 3px rgba(245, 130, 32, 0.2);
+  background: #fff8f6;
+  transform: translateY(-1px);
+}
+
+.blend-logo {
+  mix-blend-mode: multiply;
 }
 
 button, a, input, select {
@@ -302,32 +309,33 @@ foreach ($ordered_sections as $section_id => $sec_data) {
          * 1. ASTRONOMICAL STATUS STRIP
          * ========================================================== */
         case 'astronomical_bar':
+            $logo_url = home_url('/merarashifal-logo.png');
             ?>
-            <div class="border-b border-amber-900/10 bg-amber-100/70 text-on-surface-variant py-2 px-3 sm:px-6 lg:px-12 text-xs">
-              <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-1.5 sm:gap-3">
-                <!-- Line 1: Samvat & Tithi -->
-                <div class="flex items-center justify-between w-full sm:w-auto text-[11px] sm:text-xs">
-                  <span class="inline-flex items-center gap-1.5 text-primary font-bold">
+            <div class="border-b border-amber-900/10 bg-white/95 backdrop-blur-sm sticky top-0 z-40">
+              <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-12 py-2 flex items-center justify-between gap-3">
+                <!-- Left: Official Mera Rashifal Logo -->
+                <a href="<?php echo esc_url(home_url('/')); ?>" class="inline-flex items-center gap-2 shrink-0">
+                  <img src="<?php echo esc_url($logo_url); ?>" alt="<?php echo esc_attr(get_bloginfo('name')); ?>" class="h-8 sm:h-10 w-auto object-contain blend-logo" />
+                </a>
+
+                <!-- Right: Compact Live Celestial Strip -->
+                <div class="flex items-center gap-2 sm:gap-4 text-[11px] sm:text-xs text-on-surface-variant">
+                  <div class="flex items-center gap-1.5 font-bold text-primary">
                     <span class="w-2 h-2 rounded-full bg-primary-container animate-pulse shrink-0"></span>
-                    <span>VS <?php echo esc_html($vikram_samvat); ?></span>
-                    <span class="text-amber-400">|</span>
-                    <span class="text-secondary truncate"><?php echo esc_html($tithi_display); ?></span>
-                  </span>
-                  <span class="sm:hidden text-[10px] font-semibold text-tertiary">
-                    ☀️ <?php echo esc_html($sunrise_display); ?>
-                  </span>
-                </div>
-                <!-- Line 2: Astronomical Times -->
-                <div class="hidden sm:flex items-center space-x-3 text-[11px] text-on-surface-variant">
-                  <span>Nakshatra: <strong class="text-on-surface font-semibold"><?php echo esc_html($nakshatra_display); ?></strong></span>
+                    <span class="hidden md:inline">Vikram Samvat <?php echo esc_html($vikram_samvat); ?> (Pingala)</span>
+                    <span class="md:hidden">VS <?php echo esc_html($vikram_samvat); ?></span>
+                  </div>
                   <span class="text-amber-300">|</span>
-                  <span>☀️ Rise: <strong class="text-on-surface"><?php echo esc_html($sunrise_display); ?></strong></span>
-                  <span class="text-amber-300">|</span>
-                  <span>🌙 Moon: <strong class="text-on-surface"><?php echo esc_html($moonrise_display); ?></strong></span>
-                  <span class="hidden lg:inline-flex items-center gap-1 bg-white px-2 py-0.5 rounded-full border border-amber-900/10 text-tertiary text-[10px] font-semibold shadow-xs">
-                    <span class="material-symbols-outlined text-xs">tune</span>
-                    Drik Ganita • Ujjain Reference 23.17° N
+                  <span class="text-secondary font-semibold truncate max-w-[150px] sm:max-w-none">
+                    <?php echo esc_html($tithi_display); ?>
                   </span>
+                  <span class="hidden lg:inline text-amber-300">|</span>
+                  <span class="hidden lg:inline text-on-surface-variant font-medium">
+                    ☀️ <?php echo esc_html($sunrise_display); ?> • Ujjain 23.17° N
+                  </span>
+                  <a href="<?php echo esc_url(home_url('/pricing/')); ?>" class="bg-primary-container hover:bg-orange-600 text-white font-bold px-2.5 py-1 rounded-lg text-[10px] sm:text-xs shadow-2xs shrink-0 flex items-center gap-1">
+                    <span>₹99 Reports</span>
+                  </a>
                 </div>
               </div>
             </div>
@@ -335,7 +343,7 @@ foreach ($ordered_sections as $section_id => $sec_data) {
             break;
 
         /* ==========================================================
-         * 2. 1-TAP DAILY HOROSCOPE (ZODIAC SIGNS)
+         * 2. 1-TAP DAILY HOROSCOPE (ULTRA-COMPACT ZODIAC PILLS)
          * ========================================================== */
         case 'zodiac_horoscope':
             $zodiacs = [
@@ -353,71 +361,74 @@ foreach ($ordered_sections as $section_id => $sec_data) {
                 ['slug' => 'pisces',      'name' => 'Pisces',      'hi' => 'मीन',     'symbol' => '♓'],
             ];
             ?>
-            <section class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-12 pt-4 pb-2">
-              <div class="bg-white p-3 sm:p-5 rounded-2xl border border-amber-900/10 shadow-xs">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-1.5 pb-2.5 border-b border-amber-900/10">
+            <section class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-12 pt-3 pb-1">
+              <div class="bg-white p-2.5 sm:p-3.5 rounded-2xl border border-amber-900/10 shadow-2xs">
+                <!-- Sleek Header with Inline DOB Finder Toggle -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 pb-2 mb-2 border-b border-amber-900/10">
                   <div class="flex items-center gap-2">
-                    <span class="material-symbols-outlined text-primary-container text-xl sm:text-2xl">cyclone</span>
-                    <div>
-                      <h2 class="font-serif text-base sm:text-xl font-bold text-primary leading-tight">Daily Horoscope (दैनिक राशिफल)</h2>
-                      <p class="text-[11px] sm:text-xs text-on-surface-variant">Tap your Moon or Sun Sign for immediate planetary forecast</p>
-                    </div>
+                    <span class="material-symbols-outlined text-primary-container text-lg sm:text-xl">cyclone</span>
+                    <h2 class="font-serif text-sm sm:text-base font-bold text-primary leading-none">Daily Horoscope (दैनिक राशिफल)</h2>
+                    <span class="text-[10px] text-tertiary font-semibold bg-amber-50 border border-amber-200 px-1.5 py-0.2 rounded-full">
+                      Today: <?php echo date('d M'); ?>
+                    </span>
                   </div>
-                  <span class="text-[11px] sm:text-xs font-semibold text-tertiary bg-amber-50 border border-amber-200 px-2.5 py-0.5 rounded-full self-start sm:self-auto">
-                    Today: <?php echo date('d M Y'); ?>
-                  </span>
+                  
+                  <button type="button" id="mr-toggle-dob-btn" class="inline-flex items-center gap-1 text-[11px] font-bold text-tertiary hover:text-primary transition-colors self-start sm:self-auto">
+                    <span class="material-symbols-outlined text-xs sm:text-sm">search</span>
+                    <span>Don't know your Rashi? Enter DOB ▾</span>
+                  </button>
                 </div>
 
-                <!-- 12 Signs: 4x3 Compact Mobile Grid (Zero Horizontal Scroll!) -->
-                <div class="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-12 gap-1.5 sm:gap-2">
+                <!-- 12 Compact Zodiac Pills: 12-Col Desktop (Single 36px Row!) / 6-Col Tablet / 4x3 Micro-Pills Mobile -->
+                <div class="grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-12 gap-1 sm:gap-1.5">
                   <?php foreach ($zodiacs as $z): ?>
                     <a href="<?php echo esc_url(home_url('/horoscope/' . $z['slug'] . '/')); ?>"
-                       class="zodiac-grid-card p-2 sm:p-2.5 rounded-xl flex flex-col items-center justify-center text-center group">
-                      <span class="text-primary-container font-bold text-lg sm:text-2xl group-hover:scale-115 transition-transform"><?php echo esc_html($z['symbol']); ?></span>
-                      <span class="font-bold text-xs sm:text-sm text-on-surface group-hover:text-primary leading-tight mt-0.5"><?php echo esc_html($z['hi']); ?></span>
-                      <span class="text-[9px] sm:text-[11px] text-on-surface-variant font-medium leading-tight"><?php echo esc_html($z['name']); ?></span>
+                       class="zodiac-pill p-1 sm:p-1.5 rounded-lg flex items-center justify-center gap-1 text-center group">
+                      <span class="text-primary-container font-bold text-xs sm:text-sm group-hover:scale-110 transition-transform"><?php echo esc_html($z['symbol']); ?></span>
+                      <span class="font-bold text-[10px] sm:text-xs text-on-surface group-hover:text-primary leading-none"><?php echo esc_html($z['hi']); ?></span>
+                      <span class="hidden xl:inline text-[9px] text-on-surface-variant font-medium leading-none"><?php echo esc_html(substr($z['name'], 0, 3)); ?></span>
                     </a>
                   <?php endforeach; ?>
                 </div>
               </div>
             </section>
 
-            <!-- Life Problem Solution Gateway Pills (2-Col Mobile / 5-Col Desktop - Zero Horizontal Scroll) -->
-            <section class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-12 py-2">
-              <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2">
-                <a href="<?php echo esc_url(home_url('/dasha/')); ?>" class="gateway-card p-2.5 rounded-xl flex items-center gap-2">
-                  <span class="text-xl sm:text-2xl shrink-0">💼</span>
+            <!-- Life Problem Solution Gateway Pills (2-Col Mobile / 5-Col Desktop) -->
+            <section class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-12 py-1.5">
+              <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-1.5 sm:gap-2">
+                <a href="<?php echo esc_url(home_url('/dasha/')); ?>" class="gateway-chip p-2 rounded-xl flex items-center gap-2">
+                  <span class="text-lg shrink-0">💼</span>
                   <div class="overflow-hidden">
                     <span class="block text-xs font-bold text-on-surface leading-tight truncate">Career &amp; Growth</span>
-                    <span class="block text-[10px] text-on-surface-variant truncate">Varshaphal &amp; Dasha</span>
+                    <span class="block text-[9px] text-on-surface-variant truncate">Dasha &amp; Varshaphal</span>
                   </div>
                 </a>
-                <a href="<?php echo esc_url(home_url('/matchmaking-compatibility-check/')); ?>" class="gateway-card p-2.5 rounded-xl flex items-center gap-2">
-                  <span class="text-xl sm:text-2xl shrink-0">💍</span>
+                <a href="<?php echo esc_url(home_url('/matchmaking-compatibility-check/')); ?>" class="gateway-chip p-2 rounded-xl flex items-center gap-2">
+                  <span class="text-lg shrink-0">💍</span>
                   <div class="overflow-hidden">
                     <span class="block text-xs font-bold text-on-surface leading-tight truncate">Vivah &amp; Milan</span>
-                    <span class="block text-[10px] text-on-surface-variant truncate">36 Gun Matchmaking</span>
+                    <span class="block text-[9px] text-on-surface-variant truncate">36 Gun Matchmaking</span>
                   </div>
                 </a>
-                <a href="<?php echo esc_url(home_url('/muhurat-dates/')); ?>" class="gateway-card p-2.5 rounded-xl flex items-center gap-2">
-                  <span class="text-xl sm:text-2xl shrink-0">💰</span>
+                <a href="<?php echo esc_url(home_url('/muhurat-dates/')); ?>" class="gateway-chip p-2 rounded-xl flex items-center gap-2">
+                  <span class="text-lg shrink-0">💰</span>
                   <div class="overflow-hidden">
                     <span class="block text-xs font-bold text-on-surface leading-tight truncate">Shubh Muhurat</span>
-                    <span class="block text-[10px] text-on-surface-variant truncate">Choghadiya &amp; Dates</span>
+                    <span class="block text-[9px] text-on-surface-variant truncate">Choghadiya &amp; Dates</span>
                   </div>
                 </a>
-                <a href="<?php echo esc_url(home_url('/dosh/')); ?>" class="gateway-card p-2.5 rounded-xl flex items-center gap-2">
-                  <span class="text-xl sm:text-2xl shrink-0">🪐</span>
+                <a href="<?php echo esc_url(home_url('/dosh/')); ?>" class="gateway-chip p-2 rounded-xl flex items-center gap-2">
+                  <span class="text-lg shrink-0">🪐</span>
                   <div class="overflow-hidden">
                     <span class="block text-xs font-bold text-on-surface leading-tight truncate">Shani &amp; Dosha</span>
-                    <span class="block text-[10px] text-on-surface-variant truncate">Manglik &amp; Sade Sati</span>
+                    <span class="block text-[9px] text-on-surface-variant truncate">Manglik &amp; Sade Sati</span>
                   </div>
                 </a>
-                <a href="<?php echo esc_url(home_url('/baby-names/')); ?>" class="gateway-card p-2.5 rounded-xl flex items-center gap-2 col-span-2 sm:col-span-1">
-                  <span class="text-xl sm:text-2xl shrink-0">👶</span>
+                <a href="<?php echo esc_url(home_url('/baby-names/')); ?>" class="gateway-chip p-2 rounded-xl flex items-center gap-2 col-span-2 sm:col-span-1">
+                  <span class="text-lg shrink-0">👶</span>
                   <div class="overflow-hidden">
-                    <span class="block text-xs font-bold text-on-surface leading-tight truncate">Baby Names (नामकरण)</span>
-                    <span class="block text-[10px] text-on-surface-variant truncate">50k+ Nakshatra Names</span>
+                    <span class="block text-xs font-bold text-on-surface leading-tight truncate">Baby Names</span>
+                    <span class="block text-[9px] text-on-surface-variant truncate">50k+ Nakshatra Names</span>
                   </div>
                 </a>
               </div>
