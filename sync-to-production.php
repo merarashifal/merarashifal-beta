@@ -90,7 +90,15 @@ $authorized = $is_admin || (isset($_GET['token']) && $_GET['token'] === 'mr_depl
         
         <div class="log-box">
         <?php
-        // Files / folders to sync
+        // 1. Try pulling latest git changes from origin/beta
+        if (function_exists('exec')) {
+            $git_out = [];
+            $git_ret = -1;
+            @exec('git pull origin beta 2>&1', $git_out, $git_ret);
+            if (!empty($git_out)) {
+                echo "<div class='log-warn'><strong>Git Pull Output:</strong> " . esc_html(implode(' | ', $git_out)) . "</div>\n";
+            }
+        }
         $sync_targets = [
             'wp-content/plugins/mr-subscription-reports',
             'wp-content/plugins/mr-content-bot',
