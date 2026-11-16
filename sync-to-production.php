@@ -106,6 +106,7 @@ $authorized = $is_admin || (isset($_GET['token']) && $_GET['token'] === 'mr_depl
             'wp-content/themes/astra-child',
             'merarashifal-logo.png',
             'fix-pending-order.php',
+            'purge-cache.php',
         ];
 
         $ignored_patterns = [
@@ -185,6 +186,15 @@ $authorized = $is_admin || (isset($_GET['token']) && $_GET['token'] === 'mr_depl
         if (function_exists('opcache_reset')) {
             @opcache_reset();
             echo "<div class='log-success'>[CACHE] OPcache reset successfully.</div>\n";
+        }
+
+        // Trigger production cache purge endpoint
+        $purge_url = 'https://merarashifal.com/purge-cache.php?token=mr_deploy_2026';
+        $purge_res = @file_get_contents($purge_url);
+        if ($purge_res !== false) {
+            echo "<div class='log-success'>[PURGE] Live Cache Purge executed: <pre style='margin:4px 0; color:#34d399;'>" . esc_html(trim($purge_res)) . "</pre></div>\n";
+        } else {
+            echo "<div class='log-warn'>[PURGE] Note: Purge endpoint called, check response manually.</div>\n";
         }
 
         echo "</div>";
