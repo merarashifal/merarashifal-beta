@@ -86,6 +86,7 @@ add_filter('script_loader_tag', function($tag, $handle, $src) {
 add_action('wp_enqueue_scripts', function() {
     if (is_front_page()) {
         wp_dequeue_script('razorpay-checkout');
+        wp_dequeue_script('mr-razorpay-checkout');
     }
 }, 100);
 
@@ -104,6 +105,15 @@ function mr_optimize_images_and_lcp($content) {
     $content = preg_replace_callback('/<img\b([^>]+)>/i', function($matches) use (&$first_img) {
         $attrs = $matches[1];
         $is_lcp = false;
+
+        // Auto-inject missing width and height for common aspect ratios if missing
+        if (stripos($attrs, 'width=') === false && stripos($attrs, 'height=') === false) {
+            if (preg_match('/src=[\'"][^\'"]*300x300[^\'"]*[\'"]/i', $attrs)) {
+                $attrs .= ' width="300" height="300"';
+            } elseif (preg_match('/src=[\'"][^\'"]*150x150[^\'"]*[\'"]/i', $attrs)) {
+                $attrs .= ' width="150" height="150"';
+            }
+        }
 
         // Identify the above-the-fold hero banner
         if ($first_img || stripos($attrs, 'ea-rashifal') !== false || stripos($attrs, 'final banner') !== false || stripos($attrs, 'logo') !== false) {
@@ -127,6 +137,7 @@ function mr_optimize_images_and_lcp($content) {
 
     return $content;
 }
+
 
 
 

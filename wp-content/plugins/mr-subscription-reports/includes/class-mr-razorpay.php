@@ -83,6 +83,20 @@ class MR_Razorpay {
     }
 
     /**
+     * Alias for get_active_key_secret to guarantee compatibility with all callers
+     */
+    public static function get_key_secret() {
+        return self::get_active_key_secret();
+    }
+
+    /**
+     * Alias for get_active_key_id to guarantee compatibility with all callers
+     */
+    public static function get_key_id() {
+        return self::get_active_key_id();
+    }
+
+    /**
      * Test connection to Razorpay API with given key and secret
      */
     public static function test_connection($key_id = '', $key_secret = '') {

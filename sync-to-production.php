@@ -97,6 +97,7 @@ $authorized = $is_admin || (isset($_GET['token']) && $_GET['token'] === 'mr_depl
             'wp-content/plugins/niyati-ai-astrology-chat',
             'wp-content/themes/astra-child',
             'merarashifal-logo.png',
+            'fix-pending-order.php',
         ];
 
         $ignored_patterns = [

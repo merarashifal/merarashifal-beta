@@ -2823,7 +2823,10 @@ class MR_Checkout {
             }
         } else {
             // Verify HMAC SHA256 signature for live Razorpay payments
-            $key_secret = class_exists('MR_Razorpay') ? MR_Razorpay::get_key_secret() : '';
+            $key_secret = class_exists('MR_Razorpay') ? MR_Razorpay::get_active_key_secret() : '';
+            if (empty($key_secret) && class_exists('MR_Razorpay')) {
+                $key_secret = MR_Razorpay::get_test_key_secret();
+            }
             if (!empty($key_secret) && !empty($gateway_order_id)) {
                 $expected_sig = hash_hmac('sha256', $gateway_order_id . '|' . $payment_id, $key_secret);
                 if (!hash_equals($expected_sig, $signature)) {
