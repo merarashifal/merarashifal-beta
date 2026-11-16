@@ -673,7 +673,7 @@ PROMPT;
         $text = preg_replace( '/^\*\*(?!\*)/m', '', $text );
 
         // 5. Separate FAQ Section boundary to prevent list/heading clobbering
-        $faq_pattern = '/^[ \t]*(?:#+\s*|\*+\s*|\*\*)*\s*(?:अक्सर पूछे जाने वाले प्रश्न|व्यावहारिक प्रश्न और उत्तर|FAQ|बार-बार पूछे जाने वाले प्रश्न|प्रश्नोत्तरी)[^\n]*/mui';
+        $faq_pattern = '/^[ \t]*(?:#+\s*|\*+\s*|\*\*)*\s*(?:अक्सर पूछे जाने वाले (?:प्रश्न|सवाल)|व्यावहारिक (?:प्रश्न|सवाल) और उत्तर|FAQ|बार-बार पूछे जाने वाले (?:प्रश्न|सवाल)|प्रश्नोत्तरी)[^\n]*/mui';
         $has_faq = preg_match( $faq_pattern, $text, $faq_match, PREG_OFFSET_CAPTURE );
 
         $body_text = $text;
@@ -754,10 +754,10 @@ PROMPT;
         $faq_html = '';
         if ( ! empty( $faq_text ) ) {
             $faq_cards = [];
-            $clean_faq = preg_replace( '/^[ \t]*(?:#+\s*|\*+\s*|\*\*)*\s*(?:अक्सर पूछे जाने वाले प्रश्न|व्यावहारिक प्रश्न और उत्तर|FAQ|बार-बार पूछे जाने वाले प्रश्न|प्रश्नोत्तरी)[^\n]*\n+/mui', '', trim( $faq_text ) );
+            $clean_faq = preg_replace( '/^[ \t]*(?:#+\s*|\*+\s*|\*\*)*\s*(?:अक्सर पूछे जाने वाले (?:प्रश्न|सवाल)|व्यावहारिक (?:प्रश्न|सवाल) और उत्तर|FAQ|बार-बार पूछे जाने वाले (?:प्रश्न|सवाल)|प्रश्नोत्तरी)[^\n]*\n+/mui', '', trim( $faq_text ) );
 
-            // Split items by question markers
-            $items = preg_split( '/(?=(?:^|\n)[ \t]*(?:\*\*)?(?:(?:\d+[\.\)]|\*|\-)\s*)?(?:प्रश्न|सवाल|\bQ\d*\b|\*\*\d+[\.\)])[ :\-]*)/mu', trim( $clean_faq ), -1, PREG_SPLIT_NO_EMPTY );
+            // Split items by question markers or ### subheadings
+            $items = preg_split( '/(?=(?:^|\n)[ \t]*(?:###|##|\*\*)?(?:(?:\d+[\.\)]|\*|\-)\s*)?(?:प्रश्न|सवाल|\bQ\d*\b|\*\*\d+[\.\)])[ :\-]*)|(?=(?:^|\n)[ \t]*###\s+)/mu', trim( $clean_faq ), -1, PREG_SPLIT_NO_EMPTY );
             if ( count( $items ) <= 1 ) {
                 $items = preg_split( '/\n\s*\n/', trim( $clean_faq ), -1, PREG_SPLIT_NO_EMPTY );
             }
@@ -779,6 +779,7 @@ PROMPT;
                     continue;
                 }
 
+                $q = preg_replace( '/^[ \t]*#+[ \t]*/', '', $q );
                 $q = preg_replace( '/^(?:\*\*)?(?:(?:\d+[\.\)]|\*|\-)\s*)?(?:प्रश्न|सवाल|\bQ\d*\b)?[ :\-.]*/u', '', $q );
                 $q = trim( $q, " *:\t\n\r" );
                 $a = preg_replace( '/^(?:\*\*)?(?:उत्तर|जवाब|\bAns\b|\bA\b)?[ :\-.]*/u', '', $a );
