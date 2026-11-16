@@ -1,7 +1,7 @@
 <?php
 /**
  * Template Name: MeraRashifal Pricing & Plans
- * Description: High-converting, compact Vedic astrology pricing page (Chat Credits -> Single Reports -> Report Bundles).
+ * Description: High-converting, compact Vedic astrology pricing page (Chat Credits -> Single Reports -> Report Bundles -> Subscriptions).
  */
 
 if (!defined('ABSPATH')) {
@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) {
 
 get_header();
 ?>
-<main id="primary" class="site-main">
+<div class="mr-pricing-page-wrapper" style="width:100%; box-sizing:border-box;">
     <?php
     if (class_exists('MR_Pricing_Page')) {
         echo MR_Pricing_Page::render_shortcode();
@@ -18,6 +18,6 @@ get_header();
         echo do_shortcode('[mr_pricing]');
     }
     ?>
-</main>
+</div>
 <?php
 get_footer();
