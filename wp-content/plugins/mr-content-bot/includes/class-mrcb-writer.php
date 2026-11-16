@@ -63,7 +63,7 @@ class MRCB_Writer {
         }
 
         $active_model = self::get_model();
-        $candidate_models = array_unique( [ $active_model, 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-3.5-flash' ] );
+        $candidate_models = array_unique( [ $active_model, 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-3.7-flash', 'gemini-3.5-flash' ] );
 
         $payload = [
             'contents' => [
@@ -153,44 +153,106 @@ class MRCB_Writer {
     }
 
     /**
+     * Sanitize and format focus keyword strictly as clean Devanagari Hindi target (2-3 words)
+     * Strips Latin tag words (muhurat, vidhi, katha, upay, date, etc.) and repetitive tag combos
+     */
+    public static function sanitize_focus_keyword( $keyword, $festival_name_hi = '', $topic_title_hi = '', $topic_angle = '' ) {
+        $clean = trim( (string) $keyword );
+
+        // Strip Latin tag words often appended in blueprint mashups
+        $strip_latin = [
+            'muhurat', 'vidhi', 'katha', 'upay', 'date', 'shubh', 'timing', 'timings',
+            'puja', 'pujan', 'calendar', 'fast', 'vrat', 'aaj', 'ka', 'ki', 'ke', 'niyam',
+            'samagri', 'arghya', 'time', 'rules', 'importance', 'significance'
+        ];
+        $pattern = '/\b(' . implode( '|', $strip_latin ) . ')\b/i';
+        $clean = trim( preg_replace( $pattern, '', $clean ) );
+
+        // Strip Devanagari tag lists if appended at end like "मुहूर्त विधि कथा उपाय"
+        $clean = trim( preg_replace( '/(मुहूर्त|विधि|कथा|उपाय|नियम|सामग्री|आरती)\s+(मुहूर्त|विधि|कथा|उपाय|नियम|सामग्री|आरती)/u', '', $clean ) );
+
+        // Clean up multiple spaces
+        $clean = trim( preg_replace( '/\s+/', ' ', $clean ) );
+
+        $year = wp_date( 'Y' );
+
+        // If empty after stripping or contains no Devanagari, build clean Hindi keyphrase
+        if ( ! preg_match( '/[\x{0900}-\x{097F}]/u', $clean ) || mb_strlen( $clean ) < 3 ) {
+            if ( ! empty( $festival_name_hi ) ) {
+                if ( strpos( $topic_angle, 'kundali' ) !== false || ( $topic_title_hi && mb_strpos( $topic_title_hi, 'उपाय' ) !== false ) ) {
+                    $clean = $festival_name_hi . ' उपाय';
+                } elseif ( strpos( $topic_angle, 'katha' ) !== false || ( $topic_title_hi && mb_strpos( $topic_title_hi, 'कथा' ) !== false ) ) {
+                    $clean = $festival_name_hi . ' व्रत कथा';
+                } else {
+                    $clean = $festival_name_hi . ' ' . $year;
+                }
+            } elseif ( ! empty( $topic_title_hi ) ) {
+                $clean = mb_substr( $topic_title_hi, 0, 25 );
+            }
+        }
+
+        // Guarantee clean Devanagari and trim punctuation (unicode-safe)
+        $clean = preg_replace( '/^[\s\-:,।|]+|[\s\-:,।|]+$/u', '', $clean );
+        if ( empty( $clean ) ) {
+            $clean = ! empty( $festival_name_hi ) ? ( $festival_name_hi . ' ' . $year ) : 'त्योहार ' . $year;
+        }
+
+        return $clean;
+    }
+
+    /**
      * Senior Digital Magazine Editor Persona & Anti-AI Detection Editorial Manifesto
      */
     public static function get_editorial_persona() {
         return <<<PROMPT
-You are a senior professional digital magazine editor and experienced cultural astrologer writing for MeraRashifal.com.
+You are a senior Hindi features editor and cultural columnist writing for MeraRashifal.com (जैसे दैनिक भास्कर के रसरंग, नवभारत टाइम्स के विशेष संपादकीय या बीबीसी हिंदी के वरिष्ठ लेखक).
+Your writing must read 100% authentically human, intellectually grounded, and achieve ZERO (<15%) AI detection score on all major AI detectors (ZeroGPT, CopyLeaks, GPTZero).
 
-CORE EDITORIAL IDENTITY & VOICE:
-- Tone: Trustworthy, warm, informative, and mature.
-- Authority: The reader must feel that an experienced astrologer or seasoned digital magazine editor is explaining the topic with grounded clarity, genuine depth, and practical perspective.
-- Avoid Sensationalism & Exaggerations: Completely avoid superstitious hyperbole (e.g. "चमत्कारी लाभ", "सारे संकट पल भर में दूर", "ब्रह्मांड की दुर्लभ ऊर्जाएं", "जिंदगी पूरी तरह बदल जाएगी", "संजीवनी का काम करता है"). Present rituals and astrology with dignity, emotional grounding, mental peace, and practical lifestyle discipline.
-- Non-Promotional: Keep the article thoroughly engaging without sounding promotional, salesy, or commercial.
-- Avoid Spiritual Clichés: Do NOT overuse tired spiritual clichés, dramatic mythological metaphors, or theatrical expressions.
+STRICT BAN ON 25 LLM HINDI CLICHÉS (ZERO TOLERANCE - DO NOT USE ANY OF THESE):
+1. "...का पावन पर्व है" / "...का पावन अवसर है"
+2. "अत्यंत महत्वपूर्ण माना गया है" / "विशेष महत्व रखता है" / "विशेष महत्व है"
+3. "यह हमें अंधकार से प्रकाश की ओर बढ़ने की प्रेरणा देता है"
+4. "यह हमें सिखाता है कि परिवर्तन प्रकृति का नियम है"
+5. "अनुशासित जीवनशैली ही इस पर्व का वास्तविक उद्देश्य है"
+6. "परिणामस्वरूप, यह संक्रांति आत्मा के शोधन का..."
+7. "धार्मिक ग्रंथों में सूर्य की गति को काल का चक्र माना गया है"
+8. "ऊर्जा के संचार का प्रतीक है" / "सकारात्मक ऊर्जा का संचार होता है"
+9. "जैसा कि हम सभी जानते हैं"
+10. "आइए जानते हैं" / "आइए विस्तार से समझें" / "इस लेख में हम बताएंगे"
+11. "चमत्कारी लाभ" / "अचूक चमत्कार" / "दिव्य अनुभूति"
+12. "संजीवनी का काम करता है"
+13. "शुभ फल की प्राप्ति होती है" / "पुण्य फल की प्राप्ति"
+14. "जीवन में सुख-समृद्धि और खुशहाली आती है"
+15. "पापों का नाश होता है" / "समस्त पाप धुल जाते हैं"
+16. "अखंड सौभाग्य की प्राप्ति होती है"
+17. "मनोकामनाएं पूर्ण होती हैं" / "हर मनोकामना पूरी होगी"
+18. "समस्त कष्टों का निवारण होता है" / "सारे संकट पल भर में दूर"
+19. "निष्कर्ष के रूप में" / "संक्षेप में कहें तो" / "अतः यह कहा जा सकता है"
+20. "आज के इस आधुनिक युग में" / "आज की भागदौड़ भरी जिंदगी में"
+21. "ठिठुरती रातें" / "श्वेत चांदनी" / "कपूर और अगरबत्ती की सुगंध"
+22. "ब्रह्मांड की दुर्लभ ऊर्जाएं" / "अलौकिक संयोग"
+23. "अद्वितीय स्थान रखता है"
+24. "श्रद्धा और भक्ति के साथ"
+25. "आध्यात्मिक यात्रा का आरंभ"
 
-ANTI-AI DETECTION MANIFESTO (CRITICAL FOR ZERO AI DETECTABILITY):
-1. AVOID AI-STYLE INTRODUCTIONS:
-   - STRICTLY FORBIDDEN: Melodramatic sensory/weather openings (e.g., "कार्तिक मास की ठिठुरती रातों में जब श्वेत चाँदनी आँगन को नहलाती है, धूप-दीप और कपूर की सुगंध...").
-   - STRICTLY FORBIDDEN: Mechanical AI announcements ("आज हम जानेंगे...", "इस लेख में हम बताएंगे...", "आइए जानते हैं...", "नमस्कार पाठकों...", "जैसा कि हम सभी जानते हैं...").
-   - HOW TO START: Open directly with the calendar context, why this specific date matters, common dilemmas people face (like tithi calculation or calendar differences), or the real-world significance of the tradition.
-
-2. AVOID AI-STYLE CONCLUSIONS:
-   - STRICTLY FORBIDDEN: Formulaic summaries ("निष्कर्ष के रूप में", "संक्षेप में कहें तो", "इस प्रकार", "उपरोक्त बातों से", "अतः यह कहा जा सकता है").
-   - HOW TO END: Conclude naturally with a thoughtful practical tip, a balanced perspective on faith and self-discipline, or simple warm wishes.
-
-3. HUMAN RHYTHM, SENTENCE LENGTH & YOAST READABILITY:
-   - AI writes sentences of uniform length and predictable structure. You must break this pattern completely!
-   - Sentence Length (Yoast Readability Rule): Over 80% of sentences must be concise (between 8 and 16 words). Do NOT drag compound sentences past 20 words. Whenever an idea is complete, place a full stop (।) immediately. Break long multi-clause thoughts into two crisp, punchy sentences.
-   - Mix very short, crisp sentences (3 to 6 words) for emphasis. (e.g., "समय का ध्यान रखें।", "यह नियम काफी व्यावहारिक है।", "संयम ही इसका मूल आधार है।")
-   - Transition Words (Yoast Readability Rule): Ensure natural sentence flow by incorporating standard Hindi transition connectors (e.g. "इसलिए", "हालांकि", "इसके अलावा", "साथ ही", "दरअसल", "विशेष रूप से", "परिणामस्वरूप", "इसके साथ ही", "वस्तुतः", "अतः") in 25% to 30% of sentences.
-   - Vary paragraph sizes naturally: some paragraphs should be 1-2 sentences, some 3-4 sentences. Never stick to a rigid template!
-
-4. NATURAL CONTEMPORARY HINDI (NOT TRANSLATED ENGLISH):
-   - Write in authentic, fluent contemporary Hindi (सहज, व्यावहारिक, मानक हिंदी) as used by India's top publication editors (e.g. Navbharat Times, Dainik Bhaskar, Amar Ujala editorial).
-   - Use natural terms: "तारीख", "तिथि", "समय", "मान्यता", "संयम", "तैयारी", "परंपरा", "दिनचर्या", "सावधानी", "पूजा स्थल".
-   - Absolutely NO literal or mechanical translations from English (avoid "यह महत्वपूर्ण है कि आप ध्यान रखें", "यह याद रखना चाहिए").
-   - Avoid repetitive wording across sentences.
-
-5. FRESH INFORMATION IN EVERY SECTION:
-   - Every single section (H2/H3) must introduce new facts, practical timings, specific steps, or genuine insights. Never repeat introductory points in subsequent sections.
+HOW TO WRITE AS A REAL HUMAN JOURNALIST & SENIOR COLUMNIST:
+1. CONVERSATIONAL, GROUNDED & ANALYTICAL VOICE:
+   - Use natural Hindi phrasing: "सीधी बात यह है", "अक्सर लोग यहीं चूक करते हैं", "गौर करने वाली बात यह है", "आमतौर पर", "सच्चाई यह है", "तार्किक रूप से देखें तो", "दिखावे से ज्यादा जरूरी है संयम"।
+   - Avoid mechanical, textbook, or priest-like preaching. Speak directly to the thoughtful reader.
+2. HIGH BURSTINESS & RHYTHM VARIATION:
+   - AI writes monotonous sentences of predictable length. Break this completely!
+   - Mix ultra-short 2-5 word micro-sentences for emphasis: "संयम जरूरी है।" "वजह बहुत साफ है।" "दिखावे से बचें।" "तैयारी पहले से रखें।" "जल्दबाजी बिल्कुल न करें।" "नियम स्पष्ट हैं।"
+   - Ask thought-provoking rhetorical questions: "क्या सिर्फ औपचारिकता निभाना ही काफी है?" "आखिर इस परंपरा के पीछे की असली सोच क्या है?"
+   - Alternate between crisp observations (1 sentence) and reflective explanations (2-3 sentences). Never write uniform paragraphs.
+3. MODERN READER PERSPECTIVE (DIGITAL LIFESTYLE & WELLNESS CONNECTION):
+   - Connect ancient rituals to modern reality: How fasting or screen-free puja calms digital anxiety; why seasonal shifts (like Sankranti in November) require dietary changes like sesame (तिल) and jaggery (गुड़) for body warmth and immunity; why charity is an ego detox.
+4. EXACT PANCHANG TIMINGS (MANDATORY REAL HOURS & MINUTES):
+   - Never write vague lines like "दोपहर के समय से होगी" or "सुबह का समय शुभ है".
+   - Mandate specific hours and minutes based on traditional astronomical calculations:
+     e.g., "संक्रांति का क्षण: दोपहर 01:28 बजे", "महापुण्य काल: दोपहर 01:28 से 03:15 बजे तक", "पुण्य काल: दोपहर 01:28 से शाम 05:45 बजे तक", "सर्वश्रेष्ठ पूजन समय: सुबह 07:15 से 09:30 बजे तक"।
+5. NATURAL HEADINGS (STRICTLY NO KEYWORD STUFFING):
+   - Headings must look like newspaper or magazine editorial headlines, NOT SEO spam!
+   - Never stuff keywords into every heading.
 PROMPT;
     }
 
@@ -199,6 +261,10 @@ PROMPT;
      */
     public static function generate_pass1_draft( $topic_title_hi, $festival_name_hi, $topic_angle, $target_word_count = 1100, $focus_keyword = '', $festival_name_en = '' ) {
         $system = self::get_editorial_persona();
+        $year   = wp_date( 'Y' );
+
+        // Sanitize focus keyword to eliminate any appended tag mashups
+        $focus_keyword = self::sanitize_focus_keyword( $focus_keyword, $festival_name_hi, $topic_title_hi, $topic_angle );
 
         $kw_instruction = '';
         if ( ! empty( $focus_keyword ) ) {
@@ -206,11 +272,11 @@ PROMPT;
             $kw_instruction = <<<KWGUIDE
 6. YOAST SEO एवं कीवर्ड नियम (Strict Yoast SEO Rules):
    - मुख्य फोकस कीवर्ड (Focus Keyphrase): "{$focus_keyword}"
-   - पहले पैराग्राफ में कीवर्ड (Keyphrase in Introduction): लेख के सबसे पहले पैराग्राफ के पहले 1-2 वाक्यों में मुख्य कीवर्ड "{$focus_keyword}"{$en_part} को अनिवार्य रूप से शामिल करें (जैसे: "{$focus_keyword}{$en_part} का पावन पर्व...").
-   - सबहेडिंग्स में कीवर्ड (Keyphrase in Subheadings): कम से कम 2 सबहेडिंग्स (H2) में मुख्य कीवर्ड "{$focus_keyword}" का स्वाभाविक प्रयोग करें (जैसे: "## {$focus_keyword} का शुभ मुहूर्त और तिथि", "## {$focus_keyword}: पूजन सामग्री और विधि").
-   - कीवर्ड घनत्व (Keyphrase Density): पूरे लेख में यह कीवर्ड 4 से 6 बार अलग-अलग अनुच्छेदों में स्वाभाविक रूप से आना चाहिए (न ज्यादा, न कम).
-   - वाक्यों की लंबाई (Sentence Length): 80% से अधिक वाक्य 10 से 16 शब्दों के होने चाहिए। किसी भी वाक्य को 20 शब्दों से अधिक लंबा न खींचें। जहाँ बात पूरी हो, तुरंत पूर्णविराम (।) लगाएं।
-   - संयोजक शब्द (Transition Words): पठनीयता के लिए 'इसलिए', 'हालांकि', 'इसके अलावा', 'साथ ही', 'दरअसल', 'विशेष रूप से', 'परिणामस्वरूप', 'इसके साथ ही' का स्वाभाविक प्रयोग करें।
+   - पहले पैराग्राफ में कीवर्ड: पहले पैराग्राफ के पहले 1-2 वाक्यों में "{$focus_keyword}"{$en_part} को बिना किसी बनावटीपन के स्वाभाविक रूप से लाएं (जैसे: "वर्ष {$year} में {$focus_keyword} को लेकर श्रद्धालुओं में विशेष उत्सुकता है...", या "पंचांग के अनुसार {$focus_keyword} का समय इस बार बेहद खास माना जा रहा है...").
+   - सबहेडिंग्स में कीवर्ड: किसी एक या दो H2 सबहेडिंग्स में "{$focus_keyword}" को स्वाभाविक रूप से शामिल करें (जैसे: "## {$focus_keyword}: पंचांग समय और शुभ मुहूर्त", "## {$focus_keyword} पर पूजन की सही विधि")। हर हेडिंग में कीवर्ड ठूंसने (Keyword Stuffing) की सख्त मनाही है।
+   - कीवर्ड घनत्व (Keyphrase Density): पूरे लेख में यह कीवर्ड 3 से 5 बार अलग-अलग अनुच्छेदों में स्वाभाविक रूप से आना चाहिए।
+   - वाक्यों की लंबाई: 80% से अधिक वाक्य 10 से 16 शब्दों के हों। बात पूरी होते ही पूर्णविराम (।) लगाएं।
+   - संयोजक शब्द: 'इसलिए', 'हालांकि', 'इसके अलावा', 'साथ ही', 'दरअसल', 'विशेष रूप से', 'परिणामस्वरूप' का सहज प्रयोग करें।
 KWGUIDE;
         }
 
@@ -221,7 +287,7 @@ KWGUIDE;
             $angle_instructions = <<<GUIDE
 [मुख्य फोकस: शुभ मुहूर्त, तिथि गणना एवं व्यावहारिक तैयारी]
 - पहले पैराग्राफ में सीधे तारीख और पंचांग संदर्भ से शुरुआत करें। कोई नाटकीय मौसम या चांदनी का वर्णन न करें।
-- सही तिथि का आरंभ और समापन समय, प्रदोष काल व निशीथ काल की सटीक समय-सीमा दें। पंचांग भेद (तिथि को लेकर संशय) हो तो उसे शांत और स्पष्ट भाषा में सुलझाएं।
+- सही तिथि का आरंभ और समापन समय, सटीक घंटे और मिनट के साथ दें। पंचांग भेद (तिथि को लेकर संशय) हो तो उसे शांत और स्पष्ट भाषा में सुलझाएं।
 - घर में पूजन की व्यावहारिक तैयारी और आवश्यक सामग्री की सरल सूची दें।
 - दिनचर्या और व्रत पालन के व्यावहारिक नियम बताएं।
 GUIDE;
@@ -252,7 +318,7 @@ GUIDE;
         } elseif ( strpos( $topic_angle, 'practical_astrology' ) !== false ) {
             $angle_instructions = <<<GUIDE
 [मुख्य फोकस: व्यावहारिक पूजन गाइड + संतुलित ज्योतिषीय उपाय]
-- तिथि, शुभ चौघड़िया मुहूर्त और पूजा का श्रेष्ठ समय।
+- तिथि, शुभ चौघड़िया मुहूर्त और पूजा का श्रेष्ठ समय (सटीक घंटे और मिनट)।
 - संक्षिप्त व प्रमाणिक पूजन विधि और आवश्यक सामग्री।
 - कुंडली के ग्रह दोष निवारण और राशि अनुसार 3 से 4 प्रमुख प्रभावशाली उपाय।
 GUIDE;
@@ -267,7 +333,7 @@ GUIDE;
             $angle_instructions = <<<GUIDE
 [मुख्य फोकस: ऑल-इन-वन संपूर्ण महा-गाइड]
 संरचना स्पष्ट H2 शीर्षकों में होनी चाहिए:
-1. तिथि और शुभ मुहूर्त
+1. तिथि और शुभ मुहूर्त (सटीक समय)
 2. संपूर्ण पौराणिक व्रत कथा और इसका संदेश
 3. पूजन सामग्री और स्टेप-बाय-स्टेप पूजन विधि
 4. ज्योतिषीय महत्व: ग्रह शांति और राशि अनुसार उपाय
@@ -292,7 +358,7 @@ GUIDE;
 {$angle_instructions}
 
 संरचना नियम (Strict Structure Guidelines):
-1. मुख्य शीर्षक (H1): स्पष्ट, गरिमापूर्ण और स्वाभाविक हिंदी शीर्षक।
+1. मुख्य शीर्षक (H1): स्पष्ट, गरिमापूर्ण और स्वाभाविक हिंदी शीर्षक (कीवर्ड स्टफिंग न हो)।
 2. संतुलित शुरुआत: पहले 2-3 वाक्यों में सीधे विषय, पंचांग संदर्भ या पाठकों की मुख्य जिज्ञासा पर आएं। कोई काव्यात्मक मौसम, ठंड या अगरबत्ती की खुशबू जैसे बनावटी वाक्य न लिखें।
 3. मुख्य विषयवस्तु (3 से 5 H2 शीर्षकों में):
    - हर सेक्शन में बिल्कुल नई और काम की जानकारी हो।
@@ -314,32 +380,27 @@ PROMPT;
     public static function generate_pass2_humanizer( $raw_draft, $focus_keyword = '' ) {
         $kw_guard = '';
         if ( ! empty( $focus_keyword ) ) {
-            $kw_guard = "- मुख्य कीवर्ड '{$focus_keyword}' को पहले पैराग्राफ और सबहेडिंग्स में सुरक्षित रखें। इसे हटाएं नहीं।";
+            $kw_guard = "- मुख्य कीवर्ड '{$focus_keyword}' को पहले पैराग्राफ और सबहेडिंग्स में सुरक्षित रखें। इसे हटाएं नहीं और न ही इसमें कोई अतिरिक्त शब्द जोड़ें।";
         }
 
         $prompt = <<<PROMPT
-तुम एक अत्यंत अनुभवी, सीनियर डिजिटल मैगज़ीन संपादक (Senior Digital Magazine Editor) हो। तुम्हारा कार्य नीचे दिए गए ड्राफ्ट को पूरी तरह से प्राकृतिक, मानवीय, AI-मुक्त (Zero AI Detectable) और Yoast Readability मानकों के अनुरूप परिष्कृत करना है।
+तुम एक अत्यंत अनुभवी, वरिष्ठ हिंदी डिजिटल मैगज़ीन संपादक (Senior Digital Features Editor) हो। तुम्हारा कार्य नीचे दिए गए ड्राफ्ट को पूरी तरह से प्राकृतिक, मानवीय, AI-मुक्त (Zero AI Detectable) और Yoast Readability मानकों के अनुरूप परिष्कृत करना है।
 
 संपादकीय जांच सूची (Anti-AI & Readability Polish Checklist):
-1. कृत्रिम नाटकीयता और अतिशयोक्ति को जड़ से मिटाएं:
-   - यदि कहीं भी "ठिठुरती रातें", "श्वेत चांदनी", "अलौकिक शांति", "ब्रह्मांड की ऊर्जा", "दुर्लभ महासंयोग", "अचूक चमत्कार", "सारे कष्ट दूर" जैसी बनावटी या अतिशयोक्तिपूर्ण भाषा दिखे, तो उसे तुरंत हटाकर सहज, परिपक्व और प्रामाणिक शैली में लिखें।
-2. वाक्यों की लंबाई एवं बर्स्टीनेस (Sentence Length & Human Rhythm):
+1. 25 प्रतिबंधित AI मुहावरों को जड़ से हटाएं (CRITICAL):
+   - यदि कहीं भी "का पावन पर्व है", "अत्यंत महत्वपूर्ण माना गया है", "अंधकार से प्रकाश की ओर", "परिवर्तन प्रकृति का नियम है", "अनुशासित जीवनशैली ही वास्तविक उद्देश्य है", "ऊर्जा के संचार का प्रतीक है", "जैसा कि हम सभी जानते हैं", "आइए जानते हैं", "चमत्कारी लाभ", "संजीवनी का काम करता है", "सुख-समृद्धि और खुशहाली आती है", "पापों का नाश होता है", "अखंड सौभाग्य", "मनोकामनाएं पूर्ण होती हैं", "सारे संकट दूर", "निष्कर्ष के रूप में", "आज के इस आधुनिक युग में", "ठिठुरती रातें" जैसी भाषा दिखे—तो उसे तुरंत हटाकर सहज, प्रौढ़ और विचारशील पत्रकारिता शैली में बदलें।
+2. वाक्यों की लंबाई एवं बर्स्टीनेस (Burstiness & Human Rhythm):
    - 80% से अधिक वाक्य छोटे और मध्यम (10 से 16 शब्द) होने चाहिए।
    - 20 शब्दों से अधिक लंबे वाक्यों को दो छोटे वाक्यों में तोड़ें। बात पूरी होते ही तुरंत पूर्णविराम (।) लगाएं।
-   - छोटे, सीधे और धारदार वाक्यों (3-6 शब्द) का प्रयोग करें, फिर मध्यम और विचारपूर्ण वाक्यों को लाएं।
+   - छोटे, सीधे और धारदार वाक्यों (3-6 शब्द) का प्रयोग करें (उदा: "संयम जरूरी है।", "दिखावे से बचें।", "नियम स्पष्ट हैं।")।
    - पैराग्राफ की लंबाई में स्वाभाविक विविधता रखें (1-3 वाक्य प्रति पैराग्राफ)।
 3. स्वाभाविक संयोजक शब्द (Transition Words for Readability):
    - वाक्यों और विचारों के बीच स्वाभाविक प्रवाह के लिए हिंदी के संयोजक शब्दों (जैसे: इसलिए, हालांकि, इसके अलावा, साथ ही, दरअसल, विशेष रूप से, परिणामस्वरूप, इसके साथ ही) का सहज प्रयोग करें।
 4. समकालीन स्वाभाविक हिंदी:
    - भाषा ऐसी लगे जैसे कोई वरिष्ठ पत्रकार या अनुभवी विद्वान पाठक से आमने-सामने बैठकर व्यावहारिक रूप से बात कर रहा हो।
-   - अनुवादित या किताबी हिंदी न हो।
-5. मशीनी कनेक्टर्स हटाएं:
-   - "इस लेख में", "आइए जानते हैं", "निष्कर्ष के रूप में", "इस प्रकार", "जैसा कि हम जानते हैं", "अतः यह कहा जा सकता है" जैसे मशीनी कनेक्टर्स को पूरी तरह हटा दें।
-6. नए तथ्यों का प्रवाह:
-   - हर पैराग्राफ और हेडिंग में नई, उपयोगी जानकारी हो। दोहराव न हो।
-7. तथ्यों और कीवर्ड की सुरक्षा:
+5. तथ्यों और कीवर्ड की सुरक्षा:
    {$kw_guard}
-   - सभी तारीखें, समय, मुहूर्त, मंत्र और उपयोगी जानकारियां पूरी तरह सुरक्षित रहें।
+   - सभी तारीखें, समय (सटीक घंटे-मिनट), मुहूर्त, मंत्र और उपयोगी जानकारियां पूरी तरह सुरक्षित रहें।
 
 केवल और केवल शुद्ध परिष्कृत (Humanized) Markdown आलेख ही लौटाएं; कोई अपनी भूमिका, 'यहाँ है आपका लेख' जैसी टिप्पणी न लिखें।
 
@@ -377,7 +438,8 @@ PROMPT;
      */
     public static function generate_seo_metadata( $topic_title_hi, $festival_name_hi, $final_content, $preset_focus_kw = '' ) {
         $year = wp_date( 'Y' );
-        $default_kw = ! empty( $preset_focus_kw ) ? $preset_focus_kw : ( $festival_name_hi ? $festival_name_hi . ' ' . $year : mb_substr( $topic_title_hi, 0, 25 ) );
+        $raw_default = ! empty( $preset_focus_kw ) ? $preset_focus_kw : ( $festival_name_hi ? $festival_name_hi . ' ' . $year : mb_substr( $topic_title_hi, 0, 25 ) );
+        $default_kw = self::sanitize_focus_keyword( $raw_default, $festival_name_hi, $topic_title_hi );
 
         $prompt = <<<PROMPT
 निम्नलिखित हिंदी ब्लॉग पोस्ट के लिए Yoast SEO अनुकूल मेटाडाटा तैयार करें:
@@ -394,15 +456,15 @@ PROMPT;
 
 कृपया JSON फॉर्मेट में उत्तर दें:
 {
-  "focus_keyword": "हिंदी में 2 से 4 शब्दों का मुख्य कीवर्ड जो लेख का सटीक विषय हो (उदा: {$default_kw})",
-  "meta_title": "SEO टाइटल 50-60 अक्षरों के अंदर जो अनिवार्य रूप से मुख्य कीवर्ड से शुरू हो (उदा: {$default_kw}: शुभ मुहूर्त, पूजन विधि और उपाय | मेरा राशिफल)",
+  "focus_keyword": "हिंदी में 2 से 3 शब्दों का मुख्य कीवर्ड जो लेख का सटीक विषय हो (उदा: {$default_kw})",
+  "meta_title": "SEO टाइटल 50-60 अक्षरों के अंदर जो अनिवार्य रूप से मुख्य कीवर्ड से शुरू हो (उदा: {$default_kw}: शुभ मुहूर्त, पूजन विधि और उपाय)",
   "meta_desc": "SEO मेटा विवरण ठीक 130-150 अक्षरों में जिसमें मुख्य कीवर्ड शुरू में आए (कड़ाई से 154 अक्षरों से छोटा रखें)",
   "slug": "clean-english-url-slug-strictly-in-english-without-hindi-characters",
   "tags": "strictly-english-only-comma-separated-tags"
 }
 
 महत्वपूर्ण नियम:
-1. "focus_keyword" वही हिंदी शब्द होना चाहिए जो लेख के शीर्षक, पहले पैराग्राफ और सबहेडिंग में मौजूद है (उदा: {$default_kw})।
+1. "focus_keyword" वही हिंदी शब्द होना चाहिए जो लेख के शीर्षक, पहले पैराग्राफ और सबहेडिंग में मौजूद है (उदा: {$default_kw})। कोई अंग्रेजी शब्द या टैग न जोड़ें।
 2. "meta_title" अनिवार्य रूप से "focus_keyword" से ही शुरू होना चाहिए और 60 अक्षरों से कम होना चाहिए।
 3. "meta_desc" में "focus_keyword" शामिल होना चाहिए और लंबाई 130 से 150 अक्षरों के बीच होनी चाहिए (154 से अधिक होने पर Yoast त्रुटि देता है)।
 4. "tags" strictly 100% ENGLISH ONLY (lowercase words separated by comma). Never write Hindi or Devanagari in tags!
@@ -425,7 +487,7 @@ PROMPT;
         }
 
         // 1. Focus Keyword sanitization (strictly clean Hindi target)
-        $focus_kw = trim( $data['focus_keyword'] ?? '' );
+        $focus_kw = self::sanitize_focus_keyword( trim( $data['focus_keyword'] ?? '' ), $festival_name_hi, $topic_title_hi );
         if ( empty( $focus_kw ) ) {
             $focus_kw = $default_kw;
         }
@@ -434,9 +496,10 @@ PROMPT;
         // 2. SEO Title: Must start with focus keyword & stay under 60 characters
         $meta_title = trim( $data['meta_title'] ?? '' );
         if ( empty( $meta_title ) ) {
-            $meta_title = $focus_kw . ': शुभ मुहूर्त, पूजन विधि और उपाय | मेरा राशिफल';
-        } elseif ( mb_strpos( $meta_title, $focus_kw ) === false ) {
-            $meta_title = $focus_kw . ': ' . $meta_title;
+            $meta_title = $focus_kw . ': शुभ मुहूर्त, पूजन विधि और उपाय';
+        } elseif ( mb_strpos( $meta_title, $focus_kw ) !== 0 ) {
+            $clean_t = preg_replace( '/^[\s\-:|।]+|[\s\-:|।]+$/u', '', str_replace( $focus_kw, '', $meta_title ) );
+            $meta_title = $focus_kw . ': ' . $clean_t;
         }
         if ( mb_strlen( $meta_title ) > 60 ) {
             $meta_title = mb_substr( $meta_title, 0, 57 ) . '...';
@@ -595,111 +658,145 @@ PROMPT;
      * Convert markdown draft to clean, structured, and beautiful WordPress HTML
      */
     public static function markdown_to_html( $markdown ) {
-        // 1. Strip out any top H1 (# Title) since WordPress uses the post title as H1
-        $text = preg_replace( '/^#\s+.+$\n+/m', '', $markdown );
+        // 1. Normalize line breaks
+        $text = str_replace( ["\r\n", "\r"], "\n", $markdown );
 
-        // 2. Normalize line breaks
-        $text = str_replace( ["\r\n", "\r"], "\n", $text );
+        // 2. Strip out any top H1 (# Title) since WordPress uses the post title as H1
+        $text = preg_replace( '/^#\s+[^\n]+(?:\n+|$)/m', '', $text );
 
-        // 3. Headings: H2, H3, H4
-        $text = preg_replace( '/^####\s+(.+)$/m', '<h4>$1</h4>', $text );
-        $text = preg_replace( '/^###\s+(.+)$/m', '<h3>$1</h3>', $text );
-        $text = preg_replace( '/^##\s+(.+)$/m', '<h2>$1</h2>', $text );
+        // 3. Strip isolated asterisk lines, empty bullets, and standalone dashes
+        $text = preg_replace( '/^[ \t]*[\*\-_]{1,2}[ \t]*$/m', '', $text );
+        $text = preg_replace( '/^[ \t]*[\*\-_]{3,}[ \t]*$/m', '<hr />', $text );
 
-        // 4. Horizontal rules
-        $text = preg_replace( '/^---$/m', '<hr />', $text );
+        // 4. Clean dangling unclosed ** at line ends or starts
+        $text = preg_replace( '/(?<!\*)\*\*$/m', '', $text );
+        $text = preg_replace( '/^\*\*(?!\*)/m', '', $text );
 
-        // 5. Parse unordered bullet lists (* item or - item) BEFORE touching inline asterisks!
-        // We match blocks of lines that start with * or - and wrap them in <ul><li>...</li></ul>
-        $text = preg_replace_callback( '/((?:^[ \t]*[\*\-][ \t]+[^\n]+(?:\n|$))+)/m', function( $matches ) {
-            $lines = explode( "\n", trim( $matches[1] ) );
-            $items = [];
-            foreach ( $lines as $line ) {
-                $line = trim( $line );
-                if ( empty( $line ) ) continue;
-                $clean = preg_replace( '/^[\*\-][ \t]+/', '', $line );
-                $items[] = '  <li>' . $clean . '</li>';
-            }
-            return "<ul>\n" . implode( "\n", $items ) . "\n</ul>\n";
-        }, $text );
+        // 5. Separate FAQ Section boundary to prevent list/heading clobbering
+        $faq_pattern = '/^[ \t]*(?:#+\s*|\*+\s*|\*\*)*\s*(?:अक्सर पूछे जाने वाले प्रश्न|व्यावहारिक प्रश्न और उत्तर|FAQ|बार-बार पूछे जाने वाले प्रश्न|प्रश्नोत्तरी)[^\n]*/mui';
+        $has_faq = preg_match( $faq_pattern, $text, $faq_match, PREG_OFFSET_CAPTURE );
 
-        // 6. Parse ordered numbered lists (1. item)
-        $text = preg_replace_callback( '/((?:^[ \t]*\d+\.[ \t]+[^\n]+(?:\n|$))+)/m', function( $matches ) {
-            $lines = explode( "\n", trim( $matches[1] ) );
-            $items = [];
-            foreach ( $lines as $line ) {
-                $line = trim( $line );
-                if ( empty( $line ) ) continue;
-                $clean = preg_replace( '/^\d+\.[ \t]+/', '', $line );
-                $items[] = '  <li>' . $clean . '</li>';
-            }
-            return "<ol>\n" . implode( "\n", $items ) . "\n</ol>\n";
-        }, $text );
+        $body_text = $text;
+        $faq_text  = '';
+        if ( $has_faq ) {
+            $offset    = $faq_match[0][1];
+            $body_text = substr( $text, 0, $offset );
+            $faq_text  = substr( $text, $offset + strlen( $faq_match[0][0] ) );
+        }
 
-        // 7. Bold entities: **term**
-        $text = preg_replace( '/\*\*(.+?)\*\*/s', '<strong>$1</strong>', $text );
+        // Helper for markdown inline & block parsing on article body
+        $parse_blocks = function( $md ) {
+            // Headings
+            $md = preg_replace( '/^####\s+(.+)$/m', '<h4>$1</h4>', $md );
+            $md = preg_replace( '/^###\s+(.+)$/m', '<h3>$1</h3>', $md );
+            $md = preg_replace( '/^##\s+(.+)$/m', '<h2>$1</h2>', $md );
 
-        // 8. Italic entities / mantras: *term* or _term_ (ensuring no clobbering)
-        $text = preg_replace( '/(?<!\w)\*([^\*\n]+?)\*(?!\w)/u', '<em>$1</em>', $text );
-        $text = preg_replace( '/(?<!\w)_([^\_\n]+?)_(?!\w)/u', '<em>$1</em>', $text );
-
-        // 9. Markdown links [text](url)
-        $text = preg_replace( '/\[([^\]]+)\]\(([^)]+)\)/', '<a href="$2">$1</a>', $text );
-
-        // 10. Standalone sacred mantra lines: detect blocks that are solely mantras (e.g. <em>ॐ...</em>)
-        $text = preg_replace( '/^[ \t]*<em>(ॐ[^<\n]+)<\/em>[ \t]*$/mu', '<div class="mrcb-mantra-box"><em>$1</em></div>', $text );
-
-        // 11. Split into blocks and process FAQ cards vs normal paragraphs
-        $blocks = preg_split( '/\n\s*\n/', trim( $text ) );
-        $html_blocks = [];
-        $in_faq_mode = false;
-        $faq_cards = [];
-
-        foreach ( $blocks as $block ) {
-            $block = trim( $block );
-            if ( empty( $block ) ) {
-                continue;
-            }
-
-            // Check if this block is an FAQ heading
-            if ( preg_match( '/<h[23]>[^<]*(?:FAQ|अक्सर पूछे जाने वाले प्रश्न|बार-बार पूछे जाने वाले प्रश्न|प्रश्नोत्तरी)[^<]*<\/h[23]>/iu', $block ) ) {
-                $in_faq_mode = true;
-                $html_blocks[] = '<div class="mrcb-faq-section"><h3 class="mrcb-faq-header">अक्सर पूछे जाने वाले प्रश्न (FAQ)</h3>';
-                continue;
-            }
-
-            // If in FAQ mode, check if block contains Question / Answer
-            if ( $in_faq_mode ) {
-                if ( preg_match( '/(?:<strong>)?(?:प्रश्न|Q|Q\d+)[ :\-]+(.*?)(?:<\/strong>)?(?:\n|<br\s*\/?>)\s*(?:उत्तर|Ans|A)[ :\-]+(.*)/su', $block, $faq_m ) ) {
-                    $q = trim( strip_tags( $faq_m[1] ) );
-                    $a = trim( $faq_m[2] );
-                    $faq_cards[] = '<div class="mrcb-faq-card"><div class="mrcb-faq-q">❓ ' . $q . '</div><div class="mrcb-faq-a">' . $a . '</div></div>';
-                    continue;
-                } else {
-                    // Not an FAQ card or FAQ section ended
-                    if ( ! empty( $faq_cards ) ) {
-                        $html_blocks[] = implode( "\n", $faq_cards ) . "\n</div>";
-                        $faq_cards = [];
-                        $in_faq_mode = false;
+            // Bullet lists (* item or - item)
+            $md = preg_replace_callback( '/((?:^[ \t]*[\*\-][ \t]+[^\n]+(?:\n|$))+)/m', function( $m ) {
+                $lines = explode( "\n", trim( $m[1] ) );
+                $items = [];
+                foreach ( $lines as $line ) {
+                    $line = trim( $line );
+                    if ( empty( $line ) || $line === '*' || $line === '-' ) continue;
+                    $clean = preg_replace( '/^[\*\-][ \t]+/', '', $line );
+                    if ( ! empty( $clean ) ) {
+                        $items[] = '  <li>' . $clean . '</li>';
                     }
+                }
+                return ! empty( $items ) ? "<ul>\n" . implode( "\n", $items ) . "\n</ul>\n" : '';
+            }, $md );
+
+            // Ordered lists (1. item)
+            $md = preg_replace_callback( '/((?:^[ \t]*\d+\.[ \t]+[^\n]+(?:\n|$))+)/m', function( $m ) {
+                $lines = explode( "\n", trim( $m[1] ) );
+                $items = [];
+                foreach ( $lines as $line ) {
+                    $line = trim( $line );
+                    if ( empty( $line ) ) continue;
+                    $clean = preg_replace( '/^\d+\.[ \t]+/', '', $line );
+                    if ( ! empty( $clean ) ) {
+                        $items[] = '  <li>' . $clean . '</li>';
+                    }
+                }
+                return ! empty( $items ) ? "<ol>\n" . implode( "\n", $items ) . "\n</ol>\n" : '';
+            }, $md );
+
+            // Bold & Italic
+            $md = preg_replace( '/\*\*(.+?)\*\*/s', '<strong>$1</strong>', $md );
+            $md = preg_replace( '/(?<!\w)\*([^\*\n]+?)\*(?!\w)/u', '<em>$1</em>', $md );
+            $md = preg_replace( '/(?<!\w)_([^\_\n]+?)_(?!\w)/u', '<em>$1</em>', $md );
+
+            // Markdown links [text](url)
+            $md = preg_replace( '/\[([^\]]+)\]\(([^)]+)\)/', '<a href="$2">$1</a>', $md );
+
+            // Standalone sacred mantra boxes
+            $md = preg_replace( '/^[ \t]*<em>(ॐ[^<\n]+)<\/em>[ \t]*$/mu', '<div class="mrcb-mantra-box"><em>$1</em></div>', $md );
+            $md = preg_replace( '/^[ \t]*<strong>(ॐ[^<\n]+)<\/strong>[ \t]*$/mu', '<div class="mrcb-mantra-box"><em>$1</em></div>', $md );
+
+            // Paragraphs
+            $blocks = preg_split( '/\n\s*\n/', trim( $md ) );
+            $html_blocks = [];
+            foreach ( $blocks as $block ) {
+                $block = trim( $block );
+                if ( empty( $block ) ) continue;
+                if ( preg_match( '/^<(h2|h3|h4|hr|ul|ol|div|blockquote)/i', $block ) ) {
+                    $html_blocks[] = $block;
+                } else {
+                    $html_blocks[] = '<p class="mrcb-article-p">' . nl2br( $block ) . '</p>';
+                }
+            }
+            return implode( "\n\n", $html_blocks );
+        };
+
+        $body_html = $parse_blocks( $body_text );
+
+        // Parse FAQ cards bulletproof
+        $faq_html = '';
+        if ( ! empty( $faq_text ) ) {
+            $faq_cards = [];
+            $clean_faq = preg_replace( '/^[ \t]*(?:#+\s*|\*+\s*|\*\*)*\s*(?:अक्सर पूछे जाने वाले प्रश्न|व्यावहारिक प्रश्न और उत्तर|FAQ|बार-बार पूछे जाने वाले प्रश्न|प्रश्नोत्तरी)[^\n]*\n+/mui', '', trim( $faq_text ) );
+
+            // Split items by question markers
+            $items = preg_split( '/(?=(?:^|\n)[ \t]*(?:\*\*)?(?:(?:\d+[\.\)]|\*|\-)\s*)?(?:प्रश्न|सवाल|\bQ\d*\b|\*\*\d+[\.\)])[ :\-]*)/mu', trim( $clean_faq ), -1, PREG_SPLIT_NO_EMPTY );
+            if ( count( $items ) <= 1 ) {
+                $items = preg_split( '/\n\s*\n/', trim( $clean_faq ), -1, PREG_SPLIT_NO_EMPTY );
+            }
+
+            foreach ( $items as $item ) {
+                $item = trim( $item );
+                if ( empty( $item ) ) continue;
+
+                // Case A: Has "उत्तर:" / "Ans:" separator
+                if ( preg_match( '/^(.*?)(?:\n|<br\s*\/?>)\s*(?:\*\*)?(?:उत्तर|जवाब|\bAns\b|\bA\b)[ :\-]+(.*)$/su', $item, $m ) ) {
+                    $q = trim( strip_tags( $m[1] ) );
+                    $a = trim( $m[2] );
+                }
+                // Case B: First line is question (ends with ? or newline) and following lines are answer
+                elseif ( preg_match( '/^(.*?[\?？]|.*?[^\n]+)(?:\n|<br\s*\/?>)(.+)$/su', $item, $m ) ) {
+                    $q = trim( strip_tags( $m[1] ) );
+                    $a = trim( $m[2] );
+                } else {
+                    continue;
+                }
+
+                $q = preg_replace( '/^(?:\*\*)?(?:(?:\d+[\.\)]|\*|\-)\s*)?(?:प्रश्न|सवाल|\bQ\d*\b)?[ :\-.]*/u', '', $q );
+                $q = trim( $q, " *:\t\n\r" );
+                $a = preg_replace( '/^(?:\*\*)?(?:उत्तर|जवाब|\bAns\b|\bA\b)?[ :\-.]*/u', '', $a );
+                $a = trim( $a, " *:\t\n\r" );
+                $a = preg_replace( '/\*\*(.+?)\*\*/s', '<strong>$1</strong>', $a );
+                $a = preg_replace( '/(?<!\w)\*([^\*\n]+?)\*(?!\w)/u', '<em>$1</em>', $a );
+
+                if ( ! empty( $q ) && ! empty( $a ) ) {
+                    $faq_cards[] = '<div class="mrcb-faq-card"><div class="mrcb-faq-q">❓ ' . htmlspecialchars( $q, ENT_QUOTES, 'UTF-8' ) . '</div><div class="mrcb-faq-a">' . nl2br( $a ) . '</div></div>';
                 }
             }
 
-            // If block is already a block element like <h2>, <h3>, <ul>, <ol>, <hr>, <div>, <blockquote>
-            if ( preg_match( '/^<(h2|h3|h4|hr|ul|ol|div|blockquote)/i', $block ) ) {
-                $html_blocks[] = $block;
-            } else {
-                // Regular paragraph with generous line breaks and spacing class
-                $html_blocks[] = '<p class="mrcb-article-p">' . nl2br( $block ) . '</p>';
+            if ( ! empty( $faq_cards ) ) {
+                $faq_html = "\n\n<div class=\"mrcb-faq-section\">\n<h3 class=\"mrcb-faq-header\">अक्सर पूछे जाने वाले प्रश्न (FAQ)</h3>\n" . implode( "\n", $faq_cards ) . "\n</div>";
             }
         }
 
-        // Close FAQ section if still open at end of text
-        if ( $in_faq_mode && ! empty( $faq_cards ) ) {
-            $html_blocks[] = implode( "\n", $faq_cards ) . "\n</div>";
-        }
-
-        return implode( "\n\n", $html_blocks );
+        return $body_html . $faq_html;
     }
 
     /**
@@ -725,12 +822,9 @@ PROMPT;
             }
         }
 
-        $year = wp_date( 'Y' );
-        // Determine primary focus keyword upfront for consistency across title, introduction, subheadings & Yoast
-        $focus_kw = ! empty( $item['focus_keyword'] ) ? trim( $item['focus_keyword'] ) : '';
-        if ( empty( $focus_kw ) ) {
-            $focus_kw = ! empty( $festival_name_hi ) ? ( $festival_name_hi . ' ' . $year ) : mb_substr( $item['topic_title_hi'], 0, 25 );
-        }
+        // Determine primary clean focus keyword upfront (strictly clean Devanagari Hindi target)
+        $raw_kw   = ! empty( $item['focus_keyword'] ) ? trim( $item['focus_keyword'] ) : '';
+        $focus_kw = self::sanitize_focus_keyword( $raw_kw, $festival_name_hi, $item['topic_title_hi'], $item['topic_angle'] );
 
         // PASS 1: Raw Draft
         $pass1_res = self::generate_pass1_draft(
