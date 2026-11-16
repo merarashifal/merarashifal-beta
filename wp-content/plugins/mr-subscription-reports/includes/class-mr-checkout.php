@@ -2456,16 +2456,19 @@ class MR_Checkout {
                                         $('html, body').removeClass('mr-freeze-scroll');
                                     });
                                 }
-                                alert('Verification warning: ' + (res.data ? res.data.message : 'Please check your account.'));
+                                btn.prop('disabled', false).find('#mr-btn-pay-text').html('Pay &amp; Generate Invoice &rarr;');
+                                alert('Verification notice: ' + (res.data ? res.data.message : 'Please check your account.'));
                             }
                         },
-                        error: function() {
+                        error: function(xhr, status, error) {
                             if (freezeOverlay.length) {
                                 freezeOverlay.fadeOut(200, function() {
                                     $('html, body').removeClass('mr-freeze-scroll');
                                 });
                             }
+                            btn.prop('disabled', false).find('#mr-btn-pay-text').html('Pay &amp; Generate Invoice &rarr;');
                             alert('Payment captured! Your invoice will be delivered to your email and accessible in My Account.');
+                            window.location.href = '<?php echo esc_js(home_url('/my-account/#passbook')); ?>';
                         }
                     });
                 }
@@ -2823,13 +2826,24 @@ class MR_Checkout {
             }
         } else {
             // Verify HMAC SHA256 signature for live Razorpay payments
-            $key_secret = class_exists('MR_Razorpay') ? MR_Razorpay::get_active_key_secret() : '';
-            if (empty($key_secret) && class_exists('MR_Razorpay')) {
-                $key_secret = MR_Razorpay::get_test_key_secret();
+            $secrets_to_try = [];
+            if (class_exists('MR_Razorpay')) {
+                $active_sec = MR_Razorpay::get_active_key_secret();
+                $live_sec   = MR_Razorpay::get_live_key_secret();
+                $test_sec   = MR_Razorpay::get_test_key_secret();
+                $secrets_to_try = array_unique(array_filter([$active_sec, $live_sec, $test_sec]));
             }
-            if (!empty($key_secret) && !empty($gateway_order_id)) {
-                $expected_sig = hash_hmac('sha256', $gateway_order_id . '|' . $payment_id, $key_secret);
-                if (!hash_equals($expected_sig, $signature)) {
+
+            if (!empty($secrets_to_try) && !empty($gateway_order_id)) {
+                $sig_valid = false;
+                foreach ($secrets_to_try as $sec) {
+                    $expected_sig = hash_hmac('sha256', $gateway_order_id . '|' . $payment_id, $sec);
+                    if (hash_equals($expected_sig, $signature)) {
+                        $sig_valid = true;
+                        break;
+                    }
+                }
+                if (!$sig_valid) {
                     wp_send_json_error(['message' => 'Payment signature verification failed. Transaction was not confirmed by Razorpay.']);
                 }
             }

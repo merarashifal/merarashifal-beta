@@ -56,7 +56,7 @@ if ($action === 'complete' && $target_id > 0) {
             $email_sent = MR_Invoice::send_invoice_email($txn['id']);
         }
 
-        $inv_url = class_exists('MR_Invoice') ? MR_Invoice::get_invoice_url($txn['id']) : home_url('/invoice/?id=' . urlencode($txn['internal_txn_id']));
+        $inv_url = class_exists('MR_Invoice') ? MR_Invoice::get_invoice_url($txn) : home_url('/invoice/?id=' . urlencode($txn['internal_txn_id']));
 
         $message = "<strong>Success!</strong> Transaction #{$txn['id']} ({$txn['internal_txn_id']}) completed.<br>"
                  . "Invoice Assigned: <strong>{$inv_num}</strong><br>"
