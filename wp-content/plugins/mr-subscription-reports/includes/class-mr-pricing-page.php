@@ -61,9 +61,16 @@ class MR_Pricing_Page {
         $site_name       = get_bloginfo('name') ?: 'MeraRashifal';
         $og_image_url    = content_url('/uploads/2026/11/Mera-Rashifal-2027_-Himalayan-Zodiac-Sunrise.png');
 
-        $meta_title       = 'MeraRashifal Pricing | Vedic Astrology Reports, Bundles, Subscriptions & Niyati AI Chat Tokens';
-        $meta_description = 'Transparent pricing for MeraRashifal Vedic astrology reports from ₹99, value bundle packages from ₹192, membership subscriptions, and Niyati AI chat tokens from ₹40. 100% Swiss Ephemeris accuracy.';
-        $meta_keywords    = 'vedic astrology pricing, astrology reports price, astrology bundle reports, astrology subscription plans, buy kundli report bundle, kundali matching cost, niyati ai chat tokens, horoscope report price, palm reading price, janam kundali master report price, dasha timing report, merarashifal pricing';
+        $has_subs = !empty(self::get_subscription_packs());
+        $meta_title       = $has_subs
+            ? 'MeraRashifal Pricing | Vedic Astrology Reports, Bundles, Subscriptions & Niyati AI Chat Tokens'
+            : 'MeraRashifal Pricing | Vedic Astrology Reports, Combos & Niyati AI Chat Tokens';
+        $meta_description = $has_subs
+            ? 'Transparent pricing for MeraRashifal Vedic astrology reports from ₹99, value bundle packages from ₹192, membership subscriptions, and Niyati AI chat tokens from ₹40. 100% Swiss Ephemeris accuracy.'
+            : 'Transparent pricing for MeraRashifal Vedic astrology reports from ₹99, value bundle packages from ₹192, and Niyati AI chat tokens from ₹40. 100% Swiss Ephemeris accuracy.';
+        $meta_keywords    = $has_subs
+            ? 'vedic astrology pricing, astrology reports price, astrology bundle reports, astrology subscription plans, buy kundli report bundle, kundali matching cost, niyati ai chat tokens, horoscope report price, palm reading price, janam kundali master report price, dasha timing report, merarashifal pricing'
+            : 'vedic astrology pricing, astrology reports price, astrology bundle reports, buy kundli report bundle, kundali matching cost, niyati ai chat tokens, horoscope report price, palm reading price, janam kundali master report price, dasha timing report, merarashifal pricing';
 
         $schema_json = self::get_schema_json();
         ?>
@@ -359,236 +366,221 @@ class MR_Pricing_Page {
         // Sync with MR_Catalog_Manager database settings if active
         if (class_exists('MR_Catalog_Manager')) {
             $cards = MR_Catalog_Manager::get_all_cards();
-            foreach ($reports as $key => &$r) {
+            foreach ($reports as $key => $r) {
                 $lookup_key = $key;
                 if ($key === 'numerology_report' && !isset($cards['numerology_report']) && isset($cards['numerology'])) {
                     $lookup_key = 'numerology';
                 }
                 if (!empty($cards[$lookup_key])) {
                     $card = $cards[$lookup_key];
-                    if (!empty($card['name'])) $r['name'] = $card['name'];
-                    if (!empty($card['image_url'])) $r['image'] = $card['image_url'];
-                    if (!empty($card['pages_tag'])) $r['pages'] = $card['pages_tag'];
-                    if (isset($card['price_sale'])) $r['price_sale'] = floatval($card['price_sale']);
-                    if (isset($card['price_regular'])) $r['price_reg'] = floatval($card['price_regular']);
-                    if (!empty($card['discount_text'])) $r['discount'] = $card['discount_text'];
-                    if (!empty($card['highlights']) && is_array($card['highlights'])) $r['highlights'] = $card['highlights'];
-                    if (!empty($card['sample_url'])) $r['sample_url'] = $card['sample_url'];
+                    // STRICT CMS FILTER: Remove if disabled or inactive in CMS
+                    if (isset($card['is_active']) && empty($card['is_active'])) {
+                        unset($reports[$key]);
+                        continue;
+                    }
+                    if (!empty($card['name'])) $reports[$key]['name'] = $card['name'];
+                    if (!empty($card['image_url'])) $reports[$key]['image'] = $card['image_url'];
+                    if (!empty($card['pages_tag'])) $reports[$key]['pages'] = $card['pages_tag'];
+                    if (isset($card['price_sale'])) $reports[$key]['price_sale'] = floatval($card['price_sale']);
+                    if (isset($card['price_regular'])) $reports[$key]['price_reg'] = floatval($card['price_regular']);
+                    if (!empty($card['discount_text'])) $reports[$key]['discount'] = $card['discount_text'];
+                    if (!empty($card['highlights']) && is_array($card['highlights'])) $reports[$key]['highlights'] = $card['highlights'];
+                    if (!empty($card['sample_url'])) $reports[$key]['sample_url'] = $card['sample_url'];
                 }
             }
-            unset($r);
         }
 
         return array_values($reports);
     }
 
     /**
-     * Get Report Combos & Value Bundles (Synced with MR_Bundles)
+     * Get Report Combos & Value Bundles (Strictly dynamically synced with MR_Bundles CMS)
      */
     public static function get_bundles() {
+        if (!class_exists('MR_Bundles')) {
+            return [];
+        }
+
+        // STRICT CMS GLOBAL CHECK: Check if bundles feature is enabled in CMS
+        $global = MR_Bundles::get_global_settings();
+        if (empty($global['enabled'])) {
+            return [];
+        }
+
+        $all_bundles = MR_Bundles::get_all_bundles();
+        $cards = class_exists('MR_Catalog_Manager') ? MR_Catalog_Manager::get_all_cards() : [];
         $reports_list = self::get_reports();
         $rep_map = [];
         foreach ($reports_list as $r) {
             $rep_map[$r['id']] = $r;
         }
 
-        $bundles = [
-            [
-                'id'            => 'bundle_annual_timing_trio',
-                'title'         => 'Yearly Forecast + Kundli + Timing Master Trio',
-                'hindi_title'   => 'वार्षिक वर्षफल, कुण्डली एवं दशा महात्रयी',
-                'tagline'       => '3 Full Master Dossiers + 30 Bonus AI Consultations',
-                'badge'         => 'BEST VALUE • SAVE 91%',
-                'badge_class'   => 'bg-amber-600 text-white',
-                'tier'          => 'trio',
-                'landing_slug'  => 'yearly-horoscope-report',
-                'primary_slug'  => 'yearly_horoscope_long',
-                'price_sale'    => 278,
-                'price_reg'     => 2997,
-                'discount_pct'  => 91,
-                'chat_credits'  => 30,
-                'total_pages'   => '72 Pages Total',
-                'is_featured'   => true,
-                'report_keys'   => ['yearly_horoscope_long', 'mahadasha_timing', 'kundli_predictions'],
-                'cta_text'      => 'Order Combo (3 Reports) • ₹278 →',
-            ],
-            [
-                'id'            => 'bundle_kundli_remedial_trio',
-                'title'         => 'Complete Kundli, Timing & Remedial Suite',
-                'hindi_title'   => 'कुण्डली, दशा चक्र एवं सम्पूर्ण दोष निवारण',
-                'tagline'       => 'Birth Chart + Dasha Cycles + Shastric Upayas',
-                'badge'         => 'CLINICAL SUITE • SAVE 91%',
-                'badge_class'   => 'bg-purple-700 text-white',
-                'tier'          => 'trio',
-                'landing_slug'  => 'janam-kundali-master-report',
-                'primary_slug'  => 'kundli_predictions',
-                'price_sale'    => 261,
-                'price_reg'     => 2797,
-                'discount_pct'  => 91,
-                'chat_credits'  => 30,
-                'total_pages'   => '72 Pages Total',
-                'is_featured'   => false,
-                'report_keys'   => ['kundli_predictions', 'mahadasha_timing', 'dosh_remedial'],
-                'cta_text'      => 'Order Combo (3 Reports) • ₹261 →',
-            ],
-            [
-                'id'            => 'bundle_smart_duo',
-                'title'         => 'Yearly Forecast + Dasha Timing Smart Duo',
-                'hindi_title'   => 'वार्षिक भविष्यवाणी एवं दशा कालचक्र युगल',
-                'tagline'       => 'Annual Transits + 120-Year Vimshottari Timeline',
-                'badge'         => 'SMART DUO • SAVE 90%',
-                'badge_class'   => 'bg-orange-600 text-white',
-                'tier'          => 'duo',
-                'landing_slug'  => 'yearly-horoscope-report',
-                'primary_slug'  => 'yearly_horoscope_long',
-                'price_sale'    => 192,
-                'price_reg'     => 1998,
-                'discount_pct'  => 90,
-                'chat_credits'  => 15,
-                'total_pages'   => '52 Pages Total',
-                'is_featured'   => false,
-                'report_keys'   => ['yearly_horoscope_long', 'mahadasha_timing'],
-                'cta_text'      => 'Order Duo (2 Reports) • ₹192 →',
-            ],
-            [
-                'id'            => 'bundle_palmistry_trinity',
-                'title'         => 'Triple Divination: Palmistry + Kundli + Numerology',
-                'hindi_title'   => 'त्रिवेणी संगम: हस्तरेखा, कुण्डली एवं अंक ज्योतिष',
-                'tagline'       => 'Triple Divination Synthesis (Hand, Charts & Numbers)',
-                'badge'         => '3-IN-1 TRINITY • SAVE 92%',
-                'badge_class'   => 'bg-emerald-700 text-white',
-                'tier'          => 'trio',
-                'landing_slug'  => 'palm-reading-report',
-                'primary_slug'  => 'palmistry_report',
-                'price_sale'    => 278,
-                'price_reg'     => 3497,
-                'discount_pct'  => 92,
-                'chat_credits'  => 30,
-                'total_pages'   => '74 Pages Total',
-                'is_featured'   => false,
-                'report_keys'   => ['palmistry_report', 'kundli_predictions', 'numerology_report'],
-                'cta_text'      => 'Order Trinity (3 Reports) • ₹278 →',
-            ],
-        ];
+        $bundles = [];
 
-        // Enrich bundle items with live images and pages from rep_map
-        foreach ($bundles as &$b) {
-            $items = [];
-            foreach ($b['report_keys'] as $rk) {
-                if (!empty($rep_map[$rk])) {
-                    $items[] = [
-                        'name'  => $rep_map[$rk]['name'],
-                        'pages' => $rep_map[$rk]['pages'],
-                        'image' => $rep_map[$rk]['image'],
-                        'desc'  => !empty($rep_map[$rk]['highlights'][0]) ? $rep_map[$rk]['highlights'][0] : '',
+        foreach ($all_bundles as $primary_slug => $bundle_cfg) {
+            if (empty($bundle_cfg['bundle_enabled'])) {
+                continue;
+            }
+            if (isset($cards[$primary_slug]['is_active']) && empty($cards[$primary_slug]['is_active'])) {
+                continue;
+            }
+
+            // 1. Trio Tier (Bundle of 3)
+            if (!empty($bundle_cfg['tier_trio']['enabled'])) {
+                $trio = $bundle_cfg['tier_trio'];
+                $paired = (array)($trio['paired_reports'] ?? []);
+                $all_reports = array_values(array_filter(array_merge([$primary_slug], $paired)));
+
+                $all_active = true;
+                foreach ($all_reports as $r_slug) {
+                    if (isset($cards[$r_slug]['is_active']) && empty($cards[$r_slug]['is_active'])) {
+                        $all_active = false;
+                        break;
+                    }
+                }
+
+                if ($all_active && count($all_reports) >= 2) {
+                    $landing_slug = class_exists('MR_Reports_Showcase') && isset(MR_Reports_Showcase::get_child_slug_map()[$primary_slug]) 
+                        ? MR_Reports_Showcase::get_child_slug_map()[$primary_slug] 
+                        : str_replace('_', '-', $primary_slug);
+                    $badge = !empty($trio['badge']) ? $trio['badge'] : ('BEST BUY • SAVE ' . intval($trio['overall_discount_pct']) . '%');
+                    
+                    $total_pages_num = 0;
+                    $items = [];
+                    foreach ($all_reports as $rk) {
+                        if (!empty($rep_map[$rk])) {
+                            $p_num = intval(preg_replace('/[^0-9]/', '', $rep_map[$rk]['pages'] ?? '24'));
+                            $total_pages_num += $p_num;
+                            $items[] = [
+                                'name'  => $rep_map[$rk]['name'],
+                                'pages' => $rep_map[$rk]['pages'],
+                                'image' => $rep_map[$rk]['image'],
+                                'desc'  => !empty($rep_map[$rk]['highlights'][0]) ? $rep_map[$rk]['highlights'][0] : '',
+                            ];
+                        }
+                    }
+
+                    $bundles[] = [
+                        'id'            => 'bundle_' . $primary_slug . '_trio',
+                        'title'         => $trio['title'] ?: 'Master Trio Suite',
+                        'hindi_title'   => 'सम्पूर्ण वैदिक जीवन मार्गदर्शन त्रयी',
+                        'tagline'       => (!empty($trio['subtitle']) ? $trio['subtitle'] : '3 Master Dossiers') . ' + ' . intval($trio['chat_credits']) . ' Bonus AI Questions',
+                        'badge'         => strtoupper($badge),
+                        'badge_class'   => 'bg-amber-600 text-white',
+                        'tier'          => 'trio',
+                        'landing_slug'  => $landing_slug,
+                        'primary_slug'  => $primary_slug,
+                        'price_sale'    => round($trio['price_sale']),
+                        'price_reg'     => round($trio['price_regular']),
+                        'discount_pct'  => intval($trio['overall_discount_pct']),
+                        'chat_credits'  => intval($trio['chat_credits']),
+                        'total_pages'   => $total_pages_num . ' Pages Total',
+                        'is_featured'   => ($primary_slug === 'yearly_horoscope_long'),
+                        'reports'       => $items,
+                        'cta_text'      => 'Order Combo (' . count($items) . ' Reports) • ₹' . round($trio['price_sale']) . ' →',
                     ];
                 }
             }
-            $b['reports'] = $items;
-        }
-        unset($b);
 
-        return $bundles;
+            // 2. Duo Tier (Bundle of 2)
+            if (!empty($bundle_cfg['tier_duo']['enabled'])) {
+                $duo = $bundle_cfg['tier_duo'];
+                $paired = (array)($duo['paired_reports'] ?? []);
+                $all_reports = array_values(array_filter(array_merge([$primary_slug], $paired)));
+
+                $all_active = true;
+                foreach ($all_reports as $r_slug) {
+                    if (isset($cards[$r_slug]['is_active']) && empty($cards[$r_slug]['is_active'])) {
+                        $all_active = false;
+                        break;
+                    }
+                }
+
+                if ($all_active && count($all_reports) >= 2) {
+                    $landing_slug = class_exists('MR_Reports_Showcase') && isset(MR_Reports_Showcase::get_child_slug_map()[$primary_slug]) 
+                        ? MR_Reports_Showcase::get_child_slug_map()[$primary_slug] 
+                        : str_replace('_', '-', $primary_slug);
+                    $badge = !empty($duo['badge']) ? $duo['badge'] : ('SMART DUO • SAVE ' . intval($duo['overall_discount_pct']) . '%');
+                    
+                    $total_pages_num = 0;
+                    $items = [];
+                    foreach ($all_reports as $rk) {
+                        if (!empty($rep_map[$rk])) {
+                            $p_num = intval(preg_replace('/[^0-9]/', '', $rep_map[$rk]['pages'] ?? '24'));
+                            $total_pages_num += $p_num;
+                            $items[] = [
+                                'name'  => $rep_map[$rk]['name'],
+                                'pages' => $rep_map[$rk]['pages'],
+                                'image' => $rep_map[$rk]['image'],
+                                'desc'  => !empty($rep_map[$rk]['highlights'][0]) ? $rep_map[$rk]['highlights'][0] : '',
+                            ];
+                        }
+                    }
+
+                    $bundles[] = [
+                        'id'            => 'bundle_' . $primary_slug . '_duo',
+                        'title'         => $duo['title'] ?: 'Smart Duo Package',
+                        'hindi_title'   => 'पूरक वैदिक भविष्यफल युगल',
+                        'tagline'       => (!empty($duo['subtitle']) ? $duo['subtitle'] : '2 Complementary Master Dossiers') . ' + ' . intval($duo['chat_credits']) . ' Bonus AI Questions',
+                        'badge'         => strtoupper($badge),
+                        'badge_class'   => 'bg-orange-600 text-white',
+                        'tier'          => 'duo',
+                        'landing_slug'  => $landing_slug,
+                        'primary_slug'  => $primary_slug,
+                        'price_sale'    => round($duo['price_sale']),
+                        'price_reg'     => round($duo['price_regular']),
+                        'discount_pct'  => intval($duo['overall_discount_pct']),
+                        'chat_credits'  => intval($duo['chat_credits']),
+                        'total_pages'   => $total_pages_num . ' Pages Total',
+                        'is_featured'   => false,
+                        'reports'       => $items,
+                        'cta_text'      => 'Order Duo (' . count($items) . ' Reports) • ₹' . round($duo['price_sale']) . ' →',
+                    ];
+                }
+            }
+        }
+
+        // Deduplicate combinations and return top distinct bundles
+        $unique_bundles = [];
+        $seen = [];
+        foreach ($bundles as $b) {
+            $sorted_names = array_column($b['reports'], 'name');
+            sort($sorted_names);
+            $key = implode('|', $sorted_names);
+            if (!isset($seen[$key])) {
+                $seen[$key] = true;
+                $unique_bundles[] = $b;
+            }
+            if (count($unique_bundles) >= 4) {
+                break;
+            }
+        }
+
+        return $unique_bundles;
     }
 
     /**
-     * Get Vedic Astrology Subscription Membership Plans (Synced with MR_Packs)
+     * Get Vedic Astrology Subscription Membership Plans (Strictly checked against CMS)
      */
     public static function get_subscription_packs() {
-        return [
-            'monthly_vedic' => [
-                'key'            => 'monthly_vedic',
-                'cycle'          => 'monthly',
-                'name'           => 'Monthly Vedic Membership',
-                'hindi_name'     => 'मासिक वैदिक सदस्यता',
-                'tagline'        => 'Flexible month-by-month access for transits and life guidance',
-                'badge'          => 'Flexible Monthly',
-                'badge_class'    => 'bg-blue-600 text-white',
-                'price_inr'      => 499,
-                'price_usd'      => 6.99,
-                'duration_label' => '1 Month Access',
-                'chat_credits'   => 20,
-                'is_featured'    => false,
-                'quotas'         => [
-                    'Yearly Horoscope Snapshot Report' => '1 Report Included',
-                    'Monthly Horoscope Transit Reports' => '2 Reports Included',
-                    'Master Janma Kundali & Harmonics' => '2 Reports Included',
-                    'Vedic Dasha Life Timing Reports' => '2 Reports Included',
-                    'Kundali Dosh & Remedial Audits'   => '2 Reports Included',
-                    'Master Numerology Analysis'       => '1 Report Included',
-                ],
-                'cta_text'       => 'Subscribe Monthly • ₹499 →',
-            ],
-            'quarterly_vedic' => [
-                'key'            => 'quarterly_vedic',
-                'cycle'          => 'quarterly',
-                'name'           => 'Quarterly Vedic Membership',
-                'hindi_name'     => 'त्रैमासिक वैदिक सदस्यता',
-                'tagline'        => 'Quarterly tracking for major planetary transitions and events',
-                'badge'          => 'Save 15%',
-                'badge_class'    => 'bg-emerald-600 text-white',
-                'price_inr'      => 1199,
-                'price_usd'      => 14.99,
-                'duration_label' => '3 Months Access',
-                'chat_credits'   => 60,
-                'is_featured'    => true,
-                'quotas'         => [
-                    'Yearly Horoscope Reports'         => '2 Reports Included',
-                    'Monthly Horoscope Transit Reports' => '4 Reports Included',
-                    'Master Janma Kundali & Harmonics' => '4 Reports Included',
-                    'Vedic Dasha Life Timing Reports' => '4 Reports Included',
-                    'Kundali Dosh & Remedial Audits'   => '4 Reports Included',
-                    'Master Numerology & Palmistry'    => '2 Reports Included',
-                ],
-                'cta_text'       => 'Subscribe Quarterly • ₹1,199 →',
-            ],
-            'half_yearly_vedic' => [
-                'key'            => 'half_yearly_vedic',
-                'cycle'          => 'halfyearly',
-                'name'           => 'Half-Yearly Vedic Membership',
-                'hindi_name'     => 'अर्धवार्षिक वैदिक सदस्यता',
-                'tagline'        => '6 months of deep cosmic alignment and unlimited consultation',
-                'badge'          => 'Save 25%',
-                'badge_class'    => 'bg-purple-600 text-white',
-                'price_inr'      => 1999,
-                'price_usd'      => 24.99,
-                'duration_label' => '6 Months Access',
-                'chat_credits'   => 120,
-                'is_featured'    => false,
-                'quotas'         => [
-                    'Yearly Horoscope Reports'         => '4 Reports Included',
-                    'Monthly Horoscope Transit Reports' => '6 Reports Included',
-                    'Master Janma Kundali & Harmonics' => '6 Reports Included',
-                    'Vedic Dasha Life Timing Reports' => '6 Reports Included',
-                    'Kundali Dosh & Remedial Audits'   => '6 Reports Included',
-                    'Master Numerology & Palmistry'    => '4 Reports Included',
-                ],
-                'cta_text'       => 'Subscribe 6 Months • ₹1,999 →',
-            ],
-            'yearly_vedic' => [
-                'key'            => 'yearly_vedic',
-                'cycle'          => 'yearly',
-                'name'           => 'Annual VIP Vedic Membership',
-                'hindi_name'     => 'वार्षिक वीआईपी सम्पूर्ण सदस्यता',
-                'tagline'        => '365 days of comprehensive astrological coverage for the whole family',
-                'badge'          => 'Best Value • Save 40%',
-                'badge_class'    => 'bg-amber-600 text-white',
-                'price_inr'      => 3199,
-                'price_usd'      => 40.99,
-                'duration_label' => '12 Months Access',
-                'chat_credits'   => 250,
-                'is_featured'    => false,
-                'quotas'         => [
-                    'Yearly Horoscope Detailed Reports' => '6 Reports Included',
-                    'Monthly Horoscope Transit Reports' => '12 Reports Included',
-                    'Master Janma Kundali & Harmonics' => '12 Reports Included',
-                    'Vedic Dasha Life Timing Reports' => '12 Reports Included',
-                    'Kundali Dosh & Remedial Audits'   => '12 Reports Included',
-                    'Numerology & Palmistry Reports'   => '8 Reports Included',
-                ],
-                'cta_text'       => 'Subscribe 1 Year • ₹3,199 →',
-            ],
-        ];
+        // STRICT CMS CHECK: Only return subscription packs if actively enabled and configured in CMS
+        $subscriptions_enabled = get_option('mr_subscriptions_enabled', false) || get_option('mr_subscriptions_active', false);
+        if (!$subscriptions_enabled) {
+            return [];
+        }
+
+        $cms_packs = get_option('mr_subscription_plans_config', []);
+        if (!empty($cms_packs) && is_array($cms_packs)) {
+            $filtered = [];
+            foreach ($cms_packs as $k => $p) {
+                if (!empty($p['active'])) {
+                    $filtered[$k] = $p;
+                }
+            }
+            return $filtered;
+        }
+
+        return [];
     }
 
     /**
@@ -651,6 +643,7 @@ class MR_Pricing_Page {
             ];
         }
 
+        $has_subs = !empty(self::get_subscription_packs());
         $schema_graph = [
             [
                 '@type' => 'BreadcrumbList',
@@ -664,13 +657,13 @@ class MR_Pricing_Page {
                 '@type'        => 'WebPage',
                 '@id'          => $canonical_url . '#webpage',
                 'url'          => $canonical_url,
-                'name'         => 'MeraRashifal Pricing | Vedic Astrology Reports, Bundles & Niyati AI Chat Tokens',
+                'name'         => $has_subs ? 'MeraRashifal Pricing | Vedic Astrology Reports, Bundles, Subscriptions & Niyati AI Chat Tokens' : 'MeraRashifal Pricing | Vedic Astrology Reports, Combos & Niyati AI Chat Tokens',
                 'isPartOf'     => ['@type' => 'WebSite', '@id' => home_url('/#website'), 'name' => $site_name, 'url' => home_url('/')]
             ],
             [
                 '@type'           => 'ItemList',
                 '@id'             => $canonical_url . '#reports-catalog',
-                'name'            => 'Authentic Vedic Astrological Reports, Bundles & Subscriptions Catalog',
+                'name'            => $has_subs ? 'Authentic Vedic Astrological Reports, Bundles & Subscriptions Catalog' : 'Authentic Vedic Astrological Reports & Bundles Catalog',
                 'numberOfItems'   => count($schema_items),
                 'itemListElement' => $schema_items
             ],
@@ -812,22 +805,31 @@ class MR_Pricing_Page {
 
               <!-- Quick Switcher Tabs -->
               <div class="flex flex-wrap items-center justify-center gap-2 mt-5">
-                <a href="#section-chat-tokens" class="bg-[#964900] hover:bg-[#7c3d00] text-white px-4 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
-                  <i class="fa-solid fa-comments text-amber-300"></i>
-                  <span>1. AI Chat Credits (₹40)</span>
-                </a>
-                <a href="#section-individual-reports" class="bg-white hover:bg-orange-50 border border-gray-300 text-gray-700 px-4 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
-                  <i class="fa-solid fa-file-invoice text-orange-600"></i>
-                  <span>2. Single Reports (₹99)</span>
-                </a>
-                <a href="#section-report-bundles" class="bg-white hover:bg-orange-50 border border-amber-400 text-amber-900 px-4 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
-                  <i class="fa-solid fa-gift text-amber-600"></i>
-                  <span>3. Report Combos (Save 90%+)</span>
-                </a>
-                <a href="#section-subscriptions" class="bg-white hover:bg-purple-50 border border-purple-400 text-purple-900 px-4 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
-                  <i class="fa-solid fa-crown text-purple-600"></i>
-                  <span>4. Memberships &amp; Subscriptions</span>
-                </a>
+                <?php $jump_idx = 1; ?>
+                <?php if ($atts['show_tokens'] === 'yes' && !empty($niyati_packs)): ?>
+                  <a href="#section-chat-tokens" class="bg-[#964900] hover:bg-[#7c3d00] text-white px-4 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
+                    <i class="fa-solid fa-comments text-amber-300"></i>
+                    <span><?php echo $jump_idx++; ?>. AI Chat Credits (₹40)</span>
+                  </a>
+                <?php endif; ?>
+                <?php if ($atts['show_reports'] === 'yes' && !empty($reports_list)): ?>
+                  <a href="#section-individual-reports" class="bg-white hover:bg-orange-50 border border-gray-300 text-gray-700 px-4 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
+                    <i class="fa-solid fa-file-invoice text-orange-600"></i>
+                    <span><?php echo $jump_idx++; ?>. Single Reports (₹99)</span>
+                  </a>
+                <?php endif; ?>
+                <?php if ($atts['show_bundles'] === 'yes' && !empty($bundles_list)): ?>
+                  <a href="#section-report-bundles" class="bg-white hover:bg-orange-50 border border-amber-400 text-amber-900 px-4 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
+                    <i class="fa-solid fa-gift text-amber-600"></i>
+                    <span><?php echo $jump_idx++; ?>. Report Combos (Save 90%+)</span>
+                  </a>
+                <?php endif; ?>
+                <?php if ($atts['show_subscriptions'] === 'yes' && !empty($subscription_packs)): ?>
+                  <a href="#section-subscriptions" class="bg-white hover:bg-purple-50 border border-purple-400 text-purple-900 px-4 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
+                    <i class="fa-solid fa-crown text-purple-600"></i>
+                    <span><?php echo $jump_idx++; ?>. Memberships &amp; Subscriptions</span>
+                  </a>
+                <?php endif; ?>
               </div>
             </div>
             <?php endif; ?>
@@ -835,7 +837,7 @@ class MR_Pricing_Page {
             <!-- ========================================================= -->
             <!-- 2. SEQUENCE #1: NIYATI AI CHAT TOKENS                     -->
             <!-- ========================================================= -->
-            <?php if ($atts['show_tokens'] === 'yes'): ?>
+            <?php if ($atts['show_tokens'] === 'yes' && !empty($niyati_packs)): ?>
             <section id="section-chat-tokens" class="py-8">
               <div class="mr-pricing-wide-container">
                 <!-- Section Title Strip -->
@@ -925,7 +927,7 @@ class MR_Pricing_Page {
             <!-- ========================================================= -->
             <!-- 3. SEQUENCE #2: INDIVIDUAL ASTROLOGY REPORTS              -->
             <!-- ========================================================= -->
-            <?php if ($atts['show_reports'] === 'yes'): ?>
+            <?php if ($atts['show_reports'] === 'yes' && !empty($reports_list)): ?>
             <section id="section-individual-reports" class="py-10 border-t border-[#ebd8cb]">
               <div class="mr-pricing-wide-container">
                 <!-- Section Title Strip -->
@@ -938,12 +940,14 @@ class MR_Pricing_Page {
                       Computed mathematically via Swiss Ephemeris. Click <strong>"Get My Report"</strong> to enter birth details and download your personalized dossier.
                     </p>
                   </div>
+                  <?php if ($atts['show_bundles'] === 'yes' && !empty($bundles_list)): ?>
                   <div>
                     <a href="#section-report-bundles" class="inline-flex items-center gap-1.5 text-xs font-bold text-orange-600 hover:text-orange-800 bg-orange-50 border border-orange-200 px-3 py-1.5 rounded-full transition">
                       <span>View Report Combos (Save 90%+)</span>
                       <i class="fa-solid fa-arrow-down text-[10px]"></i>
                     </a>
                   </div>
+                  <?php endif; ?>
                 </div>
 
                 <?php 
@@ -964,7 +968,7 @@ class MR_Pricing_Page {
             <!-- ========================================================= -->
             <!-- 4. SEQUENCE #3: REPORT COMBINATIONS / BUNDLES             -->
             <!-- ========================================================= -->
-            <?php if ($atts['show_bundles'] === 'yes'): ?>
+            <?php if ($atts['show_bundles'] === 'yes' && !empty($bundles_list)): ?>
             <section id="section-report-bundles" class="py-10 border-t border-[#ebd8cb]">
               <div class="mr-pricing-wide-container">
                 <!-- Section Title Strip -->
@@ -1095,7 +1099,7 @@ class MR_Pricing_Page {
             <!-- ========================================================= -->
             <!-- 5. SEQUENCE #4: ASTROLOGY SUBSCRIPTION MEMBERSHIPS        -->
             <!-- ========================================================= -->
-            <?php if ($atts['show_subscriptions'] === 'yes'): ?>
+            <?php if ($atts['show_subscriptions'] === 'yes' && !empty($subscription_packs)): ?>
             <section id="section-subscriptions" class="py-10 border-t border-[#ebd8cb]">
               <div class="mr-pricing-wide-container">
                 <!-- Section Title Strip -->
@@ -1208,10 +1212,11 @@ class MR_Pricing_Page {
             <section id="faq-section" class="py-8 border-t border-[#ebd8cb]">
               <div class="mr-pricing-wide-container max-w-4xl mx-auto">
                 <h3 class="font-serif font-bold text-xl text-center text-[#2D221D] mb-4">
-                  Pricing, Subscriptions &amp; Delivery FAQs
+                  Pricing<?php echo !empty($subscription_packs) ? ', Subscriptions' : ''; ?> &amp; Delivery FAQs
                 </h3>
 
                 <div class="space-y-2.5">
+                  <?php if (!empty($bundles_list)): ?>
                   <details class="group bg-white border border-[#ebd8cb] rounded-xl p-3.5 text-xs">
                     <summary class="cursor-pointer font-bold text-gray-800 flex items-center justify-between list-none">
                       <span>What are Astrology Report Combos and what benefits do they offer?</span>
@@ -1221,7 +1226,9 @@ class MR_Pricing_Page {
                       Astrology Report Combos combine 2 or 3 complementary master dossiers at up to 92% off, giving you complete coverage across Birth Chart, Life Timing, and Remedies, plus up to 30 free Niyati AI Chat credits (lifetime validity) for follow-up questions.
                     </p>
                   </details>
+                  <?php endif; ?>
 
+                  <?php if (!empty($subscription_packs)): ?>
                   <details class="group bg-white border border-[#ebd8cb] rounded-xl p-3.5 text-xs">
                     <summary class="cursor-pointer font-bold text-gray-800 flex items-center justify-between list-none">
                       <span>How do Vedic Membership Subscriptions work?</span>
@@ -1231,6 +1238,7 @@ class MR_Pricing_Page {
                       Vedic Memberships provide recurring report quotas (Monthly Transits, Janma Kundali, Dasha Life Timing, and Remedial audits) that can be generated at any point during your active period, plus large bundles of Niyati AI Chat credits for personal queries.
                     </p>
                   </details>
+                  <?php endif; ?>
 
                   <details class="group bg-white border border-[#ebd8cb] rounded-xl p-3.5 text-xs">
                     <summary class="cursor-pointer font-bold text-gray-800 flex items-center justify-between list-none">
@@ -1242,6 +1250,7 @@ class MR_Pricing_Page {
                     </p>
                   </details>
 
+                  <?php if (!empty($niyati_packs)): ?>
                   <details class="group bg-white border border-[#ebd8cb] rounded-xl p-3.5 text-xs">
                     <summary class="cursor-pointer font-bold text-gray-800 flex items-center justify-between list-none">
                       <span>Do Niyati AI Chat Tokens expire?</span>
@@ -1251,6 +1260,7 @@ class MR_Pricing_Page {
                       No. All tokens come with 100% Lifetime Validity. Unused questions remain in your wallet forever.
                     </p>
                   </details>
+                  <?php endif; ?>
 
                   <details class="group bg-white border border-[#ebd8cb] rounded-xl p-3.5 text-xs">
                     <summary class="cursor-pointer font-bold text-gray-800 flex items-center justify-between list-none">
