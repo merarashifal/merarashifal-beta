@@ -770,108 +770,13 @@ class MR_Pricing_Page {
                 }
               }
 
-              /* Individual Reports 3x3 Card Styling (#FDF6E3 background as requested) */
-              .mr-pricing-report-card {
-                background-color: #FDF6E3 !important;
-                border: 1.5px solid #E8DCCF !important;
-                border-radius: 18px !important;
-                box-shadow: 0 4px 14px rgba(122, 31, 61, 0.05) !important;
-                transition: transform 0.22s ease, box-shadow 0.22s ease !important;
-                display: flex !important;
-                flex-direction: column !important;
-                justify-content: space-between !important;
-                padding: 1.25rem !important;
-              }
-              .mr-pricing-report-card:hover {
-                transform: translateY(-4px) !important;
-                box-shadow: 0 14px 28px rgba(122, 31, 61, 0.12) !important;
-                border-color: #D9A441 !important;
-              }
-
-              /* Center-aligned image container for crisp full fitting */
-              .mr-report-img-box {
-                background: #FFFFFF !important;
-                border: 1px solid #E8DCCF !important;
-                border-radius: 14px !important;
-                height: 195px !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                overflow: hidden !important;
-                margin: 0.75rem 0 !important;
-                padding: 0.5rem !important;
-              }
-              .mr-report-cover-img {
-                max-height: 100% !important;
+              /* Allow MR_Reports_Showcase vertical list to expand to full container width cleanly */
+              .mr-pricing-app .mr-rsc-wrapper {
                 max-width: 100% !important;
-                width: auto !important;
-                height: auto !important;
-                object-fit: contain !important;
-                margin: 0 auto !important;
-                transition: transform 0.3s ease !important;
-                filter: drop-shadow(0 4px 8px rgba(0,0,0,0.12)) !important;
-              }
-              .mr-pricing-report-card:hover .mr-report-cover-img {
-                transform: scale(1.04) !important;
-              }
-
-              /* Bold & bigger heading */
-              .mr-report-card-heading {
-                font-family: 'Playfair Display', Georgia, serif !important;
-                font-weight: 800 !important;
-                font-size: 1.25rem !important;
-                line-height: 1.35 !important;
-                color: #2D221D !important;
-              }
-
-              /* Filter buttons */
-              .mr-cat-filter-btn {
-                background-color: #FFFFFF;
-                color: #554841;
-                border: 1.5px solid #D8C7B8;
-                padding: 0.45rem 1rem;
-                border-radius: 9999px;
-                font-size: 0.8125rem;
-                font-weight: 600;
-                transition: all 0.2s ease;
-                cursor: pointer;
-              }
-              .mr-cat-filter-btn:hover {
-                border-color: #F58220;
-                color: #7A1F3D;
-                background-color: #FFF9F2;
-              }
-              .mr-cat-filter-btn.active {
-                background-color: #7A1F3D !important;
-                color: #FFFFFF !important;
-                border-color: #7A1F3D !important;
-                box-shadow: 0 4px 10px rgba(122, 31, 61, 0.25) !important;
-              }
-
-              /* Subcategory Filter Pills */
-              .mr-subcat-filter-bar {
-                display: none;
-                flex-wrap: wrap;
-                gap: 0.5rem;
-                margin-top: 0.75rem;
-                padding-top: 0.75rem;
-                border-top: 1px dashed #E8DCCF;
-              }
-              .mr-subcat-filter-btn {
-                background: #FFF;
-                color: #7A1F3D;
-                border: 1px solid #E8DCCF;
-                padding: 0.25rem 0.75rem;
-                border-radius: 6px;
-                font-size: 0.75rem;
-                font-weight: 600;
-                cursor: pointer;
-                transition: all 0.15s ease;
-              }
-              .mr-subcat-filter-btn.active, .mr-subcat-filter-btn:hover {
-                background: #F58220;
-                color: #FFF;
-                border-color: #F58220;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+                padding-top: 0 !important;
+                background: transparent !important;
               }
 
               /* Combo cover thumbnails */
@@ -1023,7 +928,7 @@ class MR_Pricing_Page {
             <?php if ($atts['show_reports'] === 'yes'): ?>
             <section id="section-individual-reports" class="py-10 border-t border-[#ebd8cb]">
               <div class="mr-pricing-wide-container">
-                <!-- Section Title & Filter Tabs -->
+                <!-- Section Title Strip -->
                 <div class="flex flex-col sm:flex-row sm:items-end justify-between border-b border-[#ebd8cb] pb-3 mb-6 gap-3">
                   <div>
                     <h2 class="font-serif text-xl sm:text-2xl font-bold text-[#2D221D]">
@@ -1033,134 +938,25 @@ class MR_Pricing_Page {
                       Computed mathematically via Swiss Ephemeris. Click <strong>"Get My Report"</strong> to enter birth details and download your personalized dossier.
                     </p>
                   </div>
-
-                  <!-- Category Filter Pills (Top of Widget as requested) -->
-                  <div class="flex flex-wrap items-center gap-1.5" id="report-filter-bar">
-                    <button type="button" onclick="filterPricingReports('all', '', this)" class="mr-cat-filter-btn active">
-                      All Reports (9)
-                    </button>
-                    <button type="button" onclick="filterPricingReports('horoscope', '', this)" class="mr-cat-filter-btn" data-cat="horoscope">
-                      Horoscope Report (3)
-                    </button>
-                    <button type="button" onclick="filterPricingReports('kundali', '', this)" class="mr-cat-filter-btn" data-cat="kundali">
-                      Kundali Report (4)
-                    </button>
-                    <button type="button" onclick="filterPricingReports('numerology', '', this)" class="mr-cat-filter-btn" data-cat="numerology">
-                      Numerology Report (1)
-                    </button>
-                    <button type="button" onclick="filterPricingReports('palmistry', '', this)" class="mr-cat-filter-btn" data-cat="palmistry">
-                      Palmistry Report (1)
-                    </button>
+                  <div>
+                    <a href="#section-report-bundles" class="inline-flex items-center gap-1.5 text-xs font-bold text-orange-600 hover:text-orange-800 bg-orange-50 border border-orange-200 px-3 py-1.5 rounded-full transition">
+                      <span>View Report Combos (Save 90%+)</span>
+                      <i class="fa-solid fa-arrow-down text-[10px]"></i>
+                    </a>
                   </div>
                 </div>
 
-                <!-- Subcategory Filter Bars (Revealed dynamically on category click) -->
-                <div id="subcat-bar-horoscope" class="mr-subcat-filter-bar">
-                  <span class="text-xs font-bold text-[#7A1F3D] mr-2">Filter Horoscope:</span>
-                  <button type="button" class="mr-subcat-filter-btn active" onclick="filterPricingSubcat('horoscope', 'all', this)">All Horoscopes</button>
-                  <button type="button" class="mr-subcat-filter-btn" onclick="filterPricingSubcat('horoscope', 'yearly-horoscope', this)">Yearly Horoscope</button>
-                  <button type="button" class="mr-subcat-filter-btn" onclick="filterPricingSubcat('horoscope', 'monthly-horoscope', this)">Monthly Horoscope</button>
-                </div>
-
-                <div id="subcat-bar-kundali" class="mr-subcat-filter-bar">
-                  <span class="text-xs font-bold text-[#7A1F3D] mr-2">Filter Kundali:</span>
-                  <button type="button" class="mr-subcat-filter-btn active" onclick="filterPricingSubcat('kundali', 'all', this)">All Kundali</button>
-                  <button type="button" class="mr-subcat-filter-btn" onclick="filterPricingSubcat('kundali', 'kundali-janam', this)">Janma Kundali</button>
-                  <button type="button" class="mr-subcat-filter-btn" onclick="filterPricingSubcat('kundali', 'kundali-dasha', this)">Dasha Life Timing</button>
-                  <button type="button" class="mr-subcat-filter-btn" onclick="filterPricingSubcat('kundali', 'kundali-dosh', this)">Kundali Dosh &amp; Remedies</button>
-                  <button type="button" class="mr-subcat-filter-btn" onclick="filterPricingSubcat('kundali', 'kundali-matching', this)">Kundali Matching (Gun Milan)</button>
-                </div>
-
-                <!-- 3x3 Responsive Reports Matrix (#FDF6E3 card background, centered clean images) -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 xl:gap-6 mt-6" id="reports-grid-container">
-                  <?php foreach ($reports_list as $report): 
-                    $checkout_url = class_exists('MR_Checkout') 
-                        ? MR_Checkout::get_checkout_url($report['id'], 'single') 
-                        : home_url('/checkout/?report=' . $report['id'] . '&tier=single');
-                    $is_free = ($report['price_sale'] == 0);
-                  ?>
-                    <div class="mr-pricing-report-card" data-category="<?php echo esc_attr($report['category']); ?>" data-subcategory="<?php echo esc_attr($report['subcategory']); ?>">
-                      <div>
-                        <!-- Card Header with Badges -->
-                        <div class="flex items-center justify-between gap-1 mb-2">
-                          <span class="<?php echo esc_attr($report['badge_class']); ?> px-2.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider">
-                            <?php echo esc_html($report['badge']); ?>
-                          </span>
-                          <span class="text-[11px] text-gray-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded font-semibold flex items-center gap-1">
-                            <i class="fa-regular fa-file-lines text-orange-500"></i>
-                            <?php echo esc_html($report['pages']); ?>
-                          </span>
-                        </div>
-
-                        <!-- Perfectly Centered Cover Image Box (Fits desktop & mobile cleanly with no cutoff) -->
-                        <div class="mr-report-img-box">
-                          <?php if (!empty($report['image'])): ?>
-                            <img 
-                              src="<?php echo esc_url($report['image']); ?>" 
-                              alt="<?php echo esc_attr($report['name']); ?>" 
-                              class="mr-report-cover-img" 
-                              loading="lazy" 
-                            />
-                          <?php else: ?>
-                            <div class="flex items-center justify-center text-gray-400">
-                              <i class="fa-solid fa-book-open text-4xl text-amber-300"></i>
-                            </div>
-                          <?php endif; ?>
-                        </div>
-
-                        <!-- Bold & Bigger Heading -->
-                        <h3 class="mr-report-card-heading line-clamp-2 min-h-[3rem] mt-1">
-                          <a href="<?php echo esc_url($checkout_url); ?>" class="hover:text-orange-600 transition">
-                            <?php echo esc_html($report['name']); ?>
-                          </a>
-                        </h3>
-                        <div class="text-xs text-[#7A1F3D] font-semibold mt-0.5 mb-2.5">
-                          <?php echo esc_html($report['hindi_name']); ?>
-                        </div>
-
-                        <!-- Key Inclusions Chips -->
-                        <div class="flex flex-wrap gap-1 mb-3">
-                          <?php foreach (array_slice($report['highlights'], 0, 3) as $hl): ?>
-                            <span class="bg-[#FFFDF9] border border-[#ECD9C9] text-[#6d4f3b] text-[11px] px-2 py-0.5 rounded">
-                              &bull; <?php echo esc_html($hl); ?>
-                            </span>
-                          <?php endforeach; ?>
-                        </div>
-                      </div>
-
-                      <!-- Card Bottom Action Row (Sample Preview + Buy) -->
-                      <div class="pt-3 border-t border-[#E8DCCF]">
-                        <div class="flex items-center justify-between mb-2.5">
-                          <div>
-                            <?php if ($is_free): ?>
-                              <span class="text-xl font-extrabold text-emerald-600 font-serif">FREE</span>
-                            <?php else: ?>
-                              <span class="text-2xl font-extrabold text-[#7A1F3D] font-serif">₹<?php echo esc_html($report['price_sale']); ?></span>
-                              <span class="text-xs text-gray-400 line-through ml-1">₹<?php echo esc_html($report['price_reg']); ?></span>
-                              <span class="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded ml-1"><?php echo esc_html($report['discount']); ?></span>
-                            <?php endif; ?>
-                          </div>
-
-                          <?php if (!empty($report['sample_url'])): ?>
-                            <button 
-                              type="button" 
-                              class="text-xs text-orange-600 hover:text-orange-800 font-bold underline cursor-pointer"
-                              onclick="window.mrOpenSampleModal ? window.mrOpenSampleModal('<?php echo esc_js($report['id']); ?>', '<?php echo esc_js($report['sample_url']); ?>') : window.open('<?php echo esc_url($report['sample_url']); ?>', '_blank')">
-                              <i class="fa-regular fa-eye mr-1"></i>Sample
-                            </button>
-                          <?php endif; ?>
-                        </div>
-
-                        <a 
-                          href="<?php echo esc_url($checkout_url); ?>" 
-                          class="w-full bg-[#F58220] hover:bg-orange-600 text-white font-bold text-xs py-2.5 px-4 rounded-xl transition flex items-center justify-center gap-1.5 shadow-xs">
-                          <span><?php echo esc_html($report['button_text']); ?></span>
-                          <i class="fa-solid fa-arrow-right text-[10px]"></i>
-                        </a>
-                      </div>
-                    </div>
-                  <?php endforeach; ?>
-                </div>
+                <?php 
+                if (class_exists('MR_Reports_Showcase')) {
+                    echo MR_Reports_Showcase::render_vertical_list([
+                        'show_header'      => 'no',
+                        'show_filter'      => 'yes',
+                        'show_description' => 'yes',
+                        'columns'          => 4,
+                        'button_text'      => 'Get My Report',
+                    ]);
+                }
+                ?>
               </div>
             </section>
             <?php endif; ?>
@@ -1477,71 +1273,7 @@ class MR_Pricing_Page {
             }
             ?>
 
-            <!-- Interactive Client Scripts for Filtering -->
-            <script>
-            function filterPricingReports(category, subcategory, btn) {
-              var container = btn.closest('.mr-pricing-app');
-              if (!container) container = document;
 
-              // Toggle category active state
-              var buttons = container.querySelectorAll('.mr-cat-filter-btn');
-              buttons.forEach(function(b) {
-                b.classList.remove('active');
-              });
-              btn.classList.add('active');
-
-              // Toggle subcategory bars
-              var subHoroscope = document.getElementById('subcat-bar-horoscope');
-              var subKundali = document.getElementById('subcat-bar-kundali');
-              if (subHoroscope) subHoroscope.style.display = (category === 'horoscope') ? 'flex' : 'none';
-              if (subKundali) subKundali.style.display = (category === 'kundali') ? 'flex' : 'none';
-
-              // Filter cards
-              var cards = container.querySelectorAll('.mr-pricing-report-card');
-              cards.forEach(function(card) {
-                var cardCat = card.getAttribute('data-category');
-                var cardSub = card.getAttribute('data-subcategory');
-                var match = false;
-
-                if (category === 'all') {
-                  match = true;
-                } else if (subcategory && subcategory !== 'all') {
-                  match = (cardSub === subcategory);
-                } else {
-                  match = (cardCat === category);
-                }
-
-                card.style.display = match ? 'flex' : 'none';
-              });
-            }
-
-            function filterPricingSubcat(category, subcategory, btn) {
-              var bar = btn.closest('.mr-subcat-filter-bar');
-              if (bar) {
-                var btns = bar.querySelectorAll('.mr-subcat-filter-btn');
-                btns.forEach(function(b) { b.classList.remove('active'); });
-                btn.classList.add('active');
-              }
-
-              var container = btn.closest('.mr-pricing-app');
-              if (!container) container = document;
-
-              var cards = container.querySelectorAll('.mr-pricing-report-card');
-              cards.forEach(function(card) {
-                var cardCat = card.getAttribute('data-category');
-                var cardSub = card.getAttribute('data-subcategory');
-                var match = false;
-
-                if (subcategory === 'all') {
-                  match = (cardCat === category);
-                } else {
-                  match = (cardSub === subcategory);
-                }
-
-                card.style.display = match ? 'flex' : 'none';
-              });
-            }
-            </script>
         </div>
         <!-- End MeraRashifal High-Conversion Pricing Container -->
         <?php
