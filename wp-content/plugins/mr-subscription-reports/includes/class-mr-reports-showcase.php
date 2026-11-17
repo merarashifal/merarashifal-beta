@@ -160,7 +160,7 @@ class MR_Reports_Showcase {
             'yearly_horoscope_long' => [
                 'name'          => 'Yearly Horoscope Detailed Long Report',
                 'sub_text'      => 'Comprehensive 26-page 12-month Vedic Varshaphal forecast covering career, wealth, relationships and finances.',
-                'image_url'     => content_url('/uploads/2026/11/Mera-Rashifal-2027_-Himalayan-Zodiac-Sunrise.png'),
+                'image_url'     => $plugin_img_base . 'yearly_horoscope_long.webp',
                 'price_sale'    => 99,
                 'price_regular' => 999,
                 'discount_text' => 'Save 90%',
@@ -177,7 +177,7 @@ class MR_Reports_Showcase {
             'yearly_horoscope_vedic' => [
                 'name'          => 'Yearly Horoscope Short Report (2026)',
                 'sub_text'      => 'Essential 5-page annual overview with key planetary transits and auspicious timing windows.',
-                'image_url'     => content_url('/uploads/2026/11/2027-Yearly-Horoscope-Under-the-Zodiac-Wheel.png'),
+                'image_url'     => $plugin_img_base . 'yearly_horoscope_vedic.webp',
                 'price_sale'    => 49,
                 'price_regular' => 499,
                 'discount_text' => 'Save 90%',
@@ -194,7 +194,7 @@ class MR_Reports_Showcase {
             'kundli_predictions' => [
                 'name'          => 'Master Janma Kundali & Harmonics Report',
                 'sub_text'      => 'Full 26-page birth chart analysis, 16 Shodashvarga harmonics, Shadbala metrics, yogas and lifetime trajectory.',
-                'image_url'     => content_url('/uploads/2026/11/Gemini_Generated_Image_s4glkgs4glkgs4gl.png'),
+                'image_url'     => $plugin_img_base . 'kundli_predictions.webp',
                 'price_sale'    => 99,
                 'price_regular' => 999,
                 'discount_text' => 'Save 90%',
@@ -211,7 +211,7 @@ class MR_Reports_Showcase {
             'mahadasha_timing' => [
                 'name'          => 'Master Vedic Dasha Life Timing Report',
                 'sub_text'      => 'Deep dive into your active Vimshottari Dasha cycles and event timing predictions.',
-                'image_url'     => $plugin_img_base . 'mahadasha_timing.png',
+                'image_url'     => $plugin_img_base . 'mahadasha_timing.webp',
                 'price_sale'    => 99,
                 'price_regular' => 999,
                 'discount_text' => 'Save 90%',
@@ -228,7 +228,7 @@ class MR_Reports_Showcase {
             'dosh_remedial' => [
                 'name'          => 'Master Kundali Dosh & Remedial Audit Report',
                 'sub_text'      => 'Clinical analysis of Manglik, Kaal Sarp, Pitra, or Sade Sati doshas with personalized Shastric remedies.',
-                'image_url'     => $plugin_img_base . 'dosh_remedial.png',
+                'image_url'     => $plugin_img_base . 'dosh_remedial.webp',
                 'price_sale'    => 79,
                 'price_regular' => 799,
                 'discount_text' => 'Save 90%',
@@ -245,7 +245,7 @@ class MR_Reports_Showcase {
             'kundli_matching' => [
                 'name'          => 'Master Kundali Matching (Gun Milan) Report',
                 'sub_text'      => '24-page Ashtakoot matching with 36 Gunas, Manglik compatibility, Papasamaya load balance and more.',
-                'image_url'     => $plugin_img_base . 'kundli_matching.png',
+                'image_url'     => $plugin_img_base . 'kundli_matching.webp',
                 'price_sale'    => 99,
                 'price_regular' => 1299,
                 'discount_text' => 'Save 92%',
@@ -262,7 +262,7 @@ class MR_Reports_Showcase {
             'numerology' => [
                 'name'          => 'Master Numerology & Vedic Integration Report',
                 'sub_text'      => '22-page Sankhya Shastra audit: Lo Shu 3x3 energy grid, core life paths, 8-1-6 Practical Arrow and 90-day roadmap.',
-                'image_url'     => $plugin_img_base . 'numerology.png',
+                'image_url'     => $plugin_img_base . 'numerology.webp',
                 'price_sale'    => 99,
                 'price_regular' => 999,
                 'discount_text' => 'Save 90%',
@@ -279,7 +279,7 @@ class MR_Reports_Showcase {
             'monthly_horoscope_vedic' => [
                 'name'          => 'Monthly Horoscope & Transit Subscription Report',
                 'sub_text'      => 'Detailed 13-page month-by-month planetary transits, auspicious days, sector ratings and guidance.',
-                'image_url'     => $plugin_img_base . 'monthly_horoscope_vedic.png',
+                'image_url'     => $plugin_img_base . 'monthly_horoscope_vedic.webp',
                 'price_sale'    => 49,
                 'price_regular' => 499,
                 'discount_text' => 'Save 90%',
@@ -296,7 +296,7 @@ class MR_Reports_Showcase {
             'palmistry_report' => [
                 'name'          => 'Master Hast Rekha & Palmistry Analysis Report',
                 'sub_text'      => 'Comprehensive 26-page Hast Rekha & Samudrik Shastra analysis: Major lines, Mounts, Career, Wealth & 5-phase age timeline.',
-                'image_url'     => $plugin_img_base . 'palmistry_report.png',
+                'image_url'     => $plugin_img_base . 'palmistry_report.webp',
                 'price_sale'    => 99,
                 'price_regular' => 1499,
                 'discount_text' => 'Save 93%',
@@ -574,6 +574,8 @@ class MR_Reports_Showcase {
                                 <?php if (!empty($rep['image_url'])): ?>
                                     <img src="<?php echo esc_url($rep['image_url']); ?>" 
                                          alt="<?php echo esc_attr($rep['name']); ?>" 
+                                         width="360" 
+                                         height="340" 
                                          loading="lazy" 
                                          decoding="async" 
                                          class="mr-rsc-img" />
@@ -756,6 +758,8 @@ class MR_Reports_Showcase {
                             <?php if (!empty($rep['image_url'])): ?>
                                 <img src="<?php echo esc_url($rep['image_url']); ?>" 
                                      alt="<?php echo esc_attr($rep['name']); ?>" 
+                                     width="360" 
+                                     height="340" 
                                      loading="lazy" 
                                      decoding="async" 
                                      class="mr-rsc-grid-img" />
@@ -1006,6 +1010,8 @@ class MR_Reports_Showcase {
                             <?php if (!empty($rep['image_url'])): ?>
                                 <img src="<?php echo esc_url($rep['image_url']); ?>" 
                                      alt="<?php echo esc_attr($rep['name']); ?>" 
+                                     width="360" 
+                                     height="340" 
                                      loading="lazy" 
                                      decoding="async" 
                                      class="mr-rsc-vert-img" />

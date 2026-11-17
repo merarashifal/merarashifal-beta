@@ -106,6 +106,31 @@ function mr_optimize_images_and_lcp($content) {
         $attrs = $matches[1];
         $is_lcp = false;
 
+        // 1. Rewrite heavy full-sized Zodiac cards (~100KB each) to optimized 150x150 thumbnails (~8KB each)
+        if (preg_match('/src=([\'"])([^\'"]*\/([a-zA-Z]+-?[cC]ropped))\.webp\1/i', $attrs, $zm)) {
+            if (stripos($zm[2], '-150x150') === false && stripos($zm[2], '-300x300') === false) {
+                $attrs = str_replace($zm[0], 'src=' . $zm[1] . $zm[2] . '-150x150.webp' . $zm[1], $attrs);
+                if (stripos($attrs, 'width=') === false) {
+                    $attrs .= ' width="150" height="150"';
+                }
+            }
+        }
+
+        // 2. Rewrite heavy full-sized Muhurat cards (~100KB each) to 150x150 thumbnails (~18KB each)
+        if (preg_match('/src=([\'"])([^\'"]*\/([a-zA-Z\-]+-Muhurat))\.webp\1/i', $attrs, $mm)) {
+            if (stripos($mm[2], '-150x150') === false && stripos($mm[2], '-300x300') === false) {
+                $attrs = str_replace($mm[0], 'src=' . $mm[1] . $mm[2] . '-150x150.webp' . $mm[1], $attrs);
+                if (stripos($attrs, 'width=') === false) {
+                    $attrs .= ' width="150" height="150"';
+                }
+            }
+        }
+
+        // 3. Rewrite header logo PNG (189KB) to WebP (51KB)
+        if (stripos($attrs, 'logo_for_webstie_2_-_Cropped-removebg-preview-1.png') !== false) {
+            $attrs = str_replace('logo_for_webstie_2_-_Cropped-removebg-preview-1.png', 'logo_for_webstie_2_-_Cropped-removebg-preview-1.webp', $attrs);
+        }
+
         // Auto-inject missing width and height for common aspect ratios if missing
         if (stripos($attrs, 'width=') === false && stripos($attrs, 'height=') === false) {
             if (preg_match('/src=[\'"][^\'"]*300x300[^\'"]*[\'"]/i', $attrs)) {
@@ -137,6 +162,70 @@ function mr_optimize_images_and_lcp($content) {
 
     return $content;
 }
+
+/* ==============================================================================
+   ACCESSIBILITY ENHANCEMENTS (WCAG AA & LIGHTHOUSE 95+)
+   ============================================================================== */
+
+add_action('wp_footer', function() {
+    if (is_admin()) return;
+    ?>
+    <script>
+    (function(){
+        function enhanceA11y(){
+            // 1. Ensure primary content has main landmark
+            var primary = document.getElementById('primary');
+            if (primary && !primary.getAttribute('role') && !document.querySelector('main')) {
+                primary.setAttribute('role', 'main');
+            }
+            // 2. Form Inputs aria-labels
+            var dob = document.getElementById('input1') || document.querySelector('.input-dob');
+            if (dob && !dob.getAttribute('aria-label')) dob.setAttribute('aria-label', 'Date of Birth');
+
+            var tob = document.getElementById('input4') || document.querySelector('.input-tob');
+            if (tob && !tob.getAttribute('aria-label')) tob.setAttribute('aria-label', 'Time of Birth');
+
+            var city = document.querySelector('input.js-city-autocomplete, input[data-places="city"]');
+            if (city && !city.getAttribute('aria-label')) city.setAttribute('aria-label', 'Birth City or Location');
+
+            // 3. Select fields
+            var selects = {
+                'alphabet': 'Select Starting Alphabet',
+                'gender': 'Select Gender',
+                'religion': 'Select Religion',
+                'rashi': 'Select Rashi or Zodiac Sign'
+            };
+            Object.keys(selects).forEach(function(name){
+                var el = document.querySelector('select[name="' + name + '"]');
+                if (el && !el.getAttribute('aria-label')) {
+                    el.setAttribute('aria-label', selects[name]);
+                }
+            });
+
+            // 4. Image links without discernible text
+            document.querySelectorAll('a img').forEach(function(img){
+                var a = img.closest('a');
+                if (a && !a.getAttribute('aria-label') && !a.innerText.trim()) {
+                    var alt = img.getAttribute('alt') || img.getAttribute('title') || 'Astrology Report or Service';
+                    a.setAttribute('aria-label', alt);
+                }
+            });
+        }
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', enhanceA11y);
+        } else {
+            enhanceA11y();
+        }
+    })();
+    </script>
+    <style>
+    /* WCAG AA Color Contrast Adjustments for Gold/Amber Text on Light Backgrounds */
+    .text-amber-500, .text-yellow-500, [class*="badge-gold"], .mr-rsc-badge-discount {
+        color: #92400e !important;
+    }
+    </style>
+    <?php
+}, 99);
 
 /* ==============================================================================
    SEO & INDEXING ENGINE: CANONICAL HARDENING & PARAMETER URL CONTROLS
