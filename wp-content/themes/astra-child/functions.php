@@ -53,13 +53,6 @@ add_action('template_redirect', function() {
     }
 });
 
-// Preload Above-The-Fold LCP Hero Banner to eliminate mobile 2.8s load delay
-add_action('wp_head', function() {
-    if (is_front_page()) {
-        echo '<link rel="preload" as="image" href="https://merarashifal.com/wp-content/uploads/2026/04/aaj-ka-rashifal-final-banner-1.webp" fetchpriority="high">' . "\n";
-    }
-}, 1);
-
 /* ==============================================================================
    PERFORMANCE: DEFER HEAVY NON-CRITICAL SCRIPTS & NATIVE LAZY LOADING
    ============================================================================== */
