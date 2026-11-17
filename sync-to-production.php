@@ -90,14 +90,11 @@ $authorized = $is_admin || (isset($_GET['token']) && $_GET['token'] === 'mr_depl
         
         <div class="log-box">
         <?php
-        // 1. Try pulling latest git changes from origin/beta
-        if (function_exists('exec')) {
-            $git_out = [];
-            $git_ret = -1;
-            @exec('git pull origin beta 2>&1', $git_out, $git_ret);
-            if (!empty($git_out)) {
-                echo "<div class='log-warn'><strong>Git Pull Output:</strong> " . esc_html(implode(' | ', $git_out)) . "</div>\n";
-            }
+        // 1. Auto-clean stale git index.lock if present
+        $lock_file = __DIR__ . '/.git/index.lock';
+        if (file_exists($lock_file)) {
+            @unlink($lock_file);
+            echo "<div class='log-warn'><strong>Cleaned stale .git/index.lock file.</strong></div>\n";
         }
         $sync_targets = [
             'wp-content/plugins/mr-subscription-reports',
