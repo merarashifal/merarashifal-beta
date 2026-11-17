@@ -107,6 +107,7 @@ $authorized = $is_admin || (isset($_GET['token']) && $_GET['token'] === 'mr_depl
             'merarashifal-logo.png',
             'fix-pending-order.php',
             'purge-cache.php',
+            'robots.txt',
         ];
 
         $ignored_patterns = [

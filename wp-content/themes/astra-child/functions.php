@@ -53,6 +53,13 @@ add_action('template_redirect', function() {
     }
 });
 
+// Preload Above-The-Fold LCP Hero Banner to eliminate mobile 2.8s load delay
+add_action('wp_head', function() {
+    if (is_front_page()) {
+        echo '<link rel="preload" as="image" href="https://merarashifal.com/wp-content/uploads/2026/04/aaj-ka-rashifal-final-banner-1.webp" fetchpriority="high">' . "\n";
+    }
+}, 1);
+
 /* ==============================================================================
    PERFORMANCE: DEFER HEAVY NON-CRITICAL SCRIPTS & NATIVE LAZY LOADING
    ============================================================================== */
@@ -138,6 +145,161 @@ function mr_optimize_images_and_lcp($content) {
     return $content;
 }
 
+/* ==============================================================================
+   SEO & INDEXING ENGINE: CANONICAL HARDENING & PARAMETER URL CONTROLS
+   Fixes GSC Crawl Waste (274,908 URLs) & Canonical Issues (46,069 URLs)
+   ============================================================================== */
 
+// 1. Identify if current request has crawl-waste / filter query parameters
+function mr_is_filter_or_parameter_request() {
+    $filter_params = [
+        'religion', 'rashi', 'nakshatra', 'f_year', 'f_month', 'f_lang',
+        'sort', 'filter', 'gender', 'order', 'orderby', 'view'
+    ];
+    foreach ($filter_params as $param) {
+        if (!empty($_GET[$param])) {
+            return true;
+        }
+    }
+    return false;
+}
 
+// 2. Enforce 'noindex, follow' on all filter/parameter queries
+add_filter('wpseo_robots', function($robots) {
+    if (mr_is_filter_or_parameter_request()) {
+        return 'noindex, follow';
+    }
+    return $robots;
+}, 9999);
 
+add_action('wp_head', function() {
+    if (mr_is_filter_or_parameter_request()) {
+        if (!defined('WPSEO_VERSION')) {
+            echo '<meta name="robots" content="noindex, follow" />' . "\n";
+        }
+    }
+}, 1);
+
+// 3. Strict Canonical URL Sanitization (Strip all parameters & ensure self-canonical)
+add_filter('wpseo_canonical', 'mr_sanitize_canonical_url', 9999);
+add_filter('get_canonical_url', 'mr_sanitize_canonical_url', 9999);
+
+function mr_sanitize_canonical_url($canonical) {
+    if (empty($canonical)) {
+        return $canonical;
+    }
+    // Strip query string completely
+    $parsed = parse_url($canonical);
+    $path = $parsed['path'] ?? '/';
+    // Ensure trailing slash for directory style URLs
+    if (pathinfo($path, PATHINFO_EXTENSION) === '' && substr($path, -1) !== '/') {
+        $path .= '/';
+    }
+    // Reconstruct clean canonical with HTTPS
+    $clean_canonical = 'https://merarashifal.com' . $path;
+    return $clean_canonical;
+}
+
+// 4. Schema.org Structured Data (Organization, WebSite & Breadcrumbs)
+add_action('wp_head', function() {
+    if (is_admin()) return;
+
+    $home_url = home_url('/');
+    
+    // WebSite & Organization Schema on Homepage
+    if (is_front_page()) {
+        $org_schema = [
+            '@context' => 'https://schema.org',
+            '@graph' => [
+                [
+                    '@type' => 'Organization',
+                    '@id' => $home_url . '#organization',
+                    'name' => 'MeraRashifal',
+                    'url' => $home_url,
+                    'logo' => [
+                        '@type' => 'ImageObject',
+                        '@id' => $home_url . '#logo',
+                        'url' => 'https://merarashifal.com/wp-content/themes/astra-child/assets/merarashifal-logo.png',
+                        'caption' => 'MeraRashifal - Authentic Vedic Astrology'
+                    ]
+                ],
+                [
+                    '@type' => 'WebSite',
+                    '@id' => $home_url . '#website',
+                    'url' => $home_url,
+                    'name' => 'MeraRashifal',
+                    'publisher' => ['@id' => $home_url . '#organization'],
+                    'potentialAction' => [
+                        '@type' => 'SearchAction',
+                        'target' => $home_url . '?s={search_term_string}',
+                        'query-input' => 'required name=search_term_string'
+                    ]
+                ]
+            ]
+        ];
+        echo '<script type="application/ld+json">' . json_encode($org_schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n";
+    }
+
+    // BreadcrumbList Schema on Baby Names, Horoscope, Panchang
+    $uri = $_SERVER['REQUEST_URI'] ?? '';
+    if (strpos($uri, '/baby-names/') !== false || strpos($uri, '/horoscope/') !== false || strpos($uri, '/panchang/') !== false) {
+        $clean_path = trim(parse_url($uri, PHP_URL_PATH), '/');
+        if (!empty($clean_path)) {
+            $parts = array_filter(explode('/', $clean_path));
+            $items = [];
+            $current_path = $home_url;
+            $items[] = [
+                '@type' => 'ListItem',
+                'position' => 1,
+                'name' => 'Home',
+                'item' => $home_url
+            ];
+            $pos = 2;
+            foreach ($parts as $part) {
+                $current_path .= $part . '/';
+                $items[] = [
+                    '@type' => 'ListItem',
+                    'position' => $pos++,
+                    'name' => ucwords(str_replace(['-', '_'], ' ', urldecode($part))),
+                    'item' => $current_path
+                ];
+            }
+            $breadcrumb_schema = [
+                '@context' => 'https://schema.org',
+                '@type' => 'BreadcrumbList',
+                'itemListElement' => $items
+            ];
+            echo '<script type="application/ld+json">' . json_encode($breadcrumb_schema, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>' . "\n";
+        }
+    }
+}, 20);
+
+// 5. Dynamic Horoscope & Panchang Metadata Freshness (Never show outdated date)
+add_filter('wpseo_title', function($title) {
+    if (is_admin()) return $title;
+
+    $uri = $_SERVER['REQUEST_URI'] ?? '';
+    $dt = new DateTime('now', new DateTimeZone('Asia/Kolkata'));
+    $today_en = $dt->format('d F Y');
+
+    if (is_front_page()) {
+        return "आज का राशिफल ({$today_en}) | दैनिक राशिफल, आज का पंचांग & कुंडली | MeraRashifal";
+    }
+
+    if (strpos($uri, '/panchang') !== false) {
+        if (strpos($uri, '/tithi') !== false) {
+            return "आज की तिथि ({$today_en}) | Today Tithi & Shubh Muhurat - MeraRashifal";
+        } elseif (strpos($uri, '/rahukaal') !== false) {
+            return "आज का राहुकाल समय ({$today_en}) | Today Rahu Kaal Timing - MeraRashifal";
+        } elseif (strpos($uri, '/nakshatra') !== false) {
+            return "आज का नक्षत्र ({$today_en}) | Today Nakshatra & Charan - MeraRashifal";
+        } elseif (strpos($uri, '/choghadiya') !== false) {
+            return "आज का चौघड़िया ({$today_en}) | Day & Night Choghadiya Muhurat - MeraRashifal";
+        } elseif (strpos($uri, '/abhijit') !== false) {
+            return "आज का अभिजीत मुहूर्त ({$today_en}) | Abhijit Muhurat Timing - MeraRashifal";
+        }
+        return "आज का पंचांग ({$today_en}) | Today Panchang, Tithi, Shubh Muhurat - MeraRashifal";
+    }
+
+    return $title;
+}, 999);

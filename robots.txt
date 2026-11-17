@@ -1,0 +1,32 @@
+User-agent: *
+Disallow: /wp-admin/
+Allow: /wp-admin/admin-ajax.php
+Allow: /wp-content/uploads/
+Allow: /*.js*
+Allow: /*.css*
+Allow: /*.png*
+Allow: /*.jpg*
+Allow: /*.jpeg*
+Allow: /*.webp*
+Allow: /*.svg*
+
+# Block Internal Search & Dynamic Query Search
+Disallow: /?s=
+Disallow: /search/
+Disallow: /baby-names/search/
+
+# Block Crawl Waste from Parameter URLs (Fixes 274k+ Crawled Not Indexed URLs)
+Disallow: /*?*religion=*
+Disallow: /*?*f_year=*
+Disallow: /*?*f_month=*
+Disallow: /*?*f_lang=*
+Disallow: /*?*rashi=*
+Disallow: /*?*nakshatra=*
+Disallow: /*?*sort=*
+Disallow: /*?*filter=*
+Disallow: /*?*gender=*
+Disallow: /*?*order=*
+Disallow: /*?*orderby=*
+
+# XML Sitemap Index
+Sitemap: https://merarashifal.com/sitemap.xml
