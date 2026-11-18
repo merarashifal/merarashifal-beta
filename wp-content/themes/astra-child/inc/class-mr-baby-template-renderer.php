@@ -23,8 +23,57 @@ class MR_Baby_Template_Renderer
      */
     public static function init()
     {
+        // 1. Direct shortcode handler interception (executes inside Elementor and standard WP)
+        add_action('wp_loaded', [__CLASS__, 'intercept_shortcode_handler'], 999);
+        add_action('init', [__CLASS__, 'intercept_shortcode_handler'], 999);
+
+        // 2. Shortcode output filter
         add_filter('do_shortcode_tag', [__CLASS__, 'filter_shortcode_output'], 100, 4);
+
+        // 3. Post content filter
         add_filter('the_content', [__CLASS__, 'filter_page_content'], 9999);
+    }
+
+    /**
+     * Directly intercepts the registered baby_name_engine shortcode callback in global $shortcode_tags
+     */
+    public static function intercept_shortcode_handler()
+    {
+        global $shortcode_tags;
+        if (isset($shortcode_tags['baby_name_engine']) && empty($shortcode_tags['baby_name_engine_wrapped'])) {
+            $original_cb = $shortcode_tags['baby_name_engine'];
+            $shortcode_tags['baby_name_engine_wrapped'] = true;
+
+            $shortcode_tags['baby_name_engine'] = function($atts = [], $content = null, $tag = 'baby_name_engine') use ($original_cb) {
+                $page      = get_query_var('baby_page');
+                $name_slug = get_query_var('baby_name');
+                $gender    = get_query_var('gender');
+                $char      = get_query_var('alphabet');
+                $religion  = get_query_var('religion') ?: ($_GET['religion'] ?? 'Hindu');
+
+                // Direct URI fallback if query vars not yet initialized
+                if (empty($name_slug)) {
+                    $uri = $_SERVER['REQUEST_URI'] ?? '';
+                    if (preg_match('#/baby-names/([a-z])/(boy|girl)/([^/?#]+)#i', $uri, $matches)) {
+                        $char      = $matches[1];
+                        $gender    = $matches[2];
+                        $name_slug = $matches[3];
+                        $page      = 'name_detail';
+                    }
+                }
+
+                if ($page === 'name_detail' && !empty($name_slug)) {
+                    $gender = !empty($gender) ? $gender : 'boy';
+                    $char   = !empty($char) ? $char : substr($name_slug, 0, 1);
+                    return self::render_detail($name_slug, $gender, $char, $religion);
+                }
+
+                if (is_callable($original_cb)) {
+                    return call_user_func($original_cb, $atts, $content, $tag);
+                }
+                return '';
+            };
+        }
     }
 
     /**
@@ -33,19 +82,25 @@ class MR_Baby_Template_Renderer
     public static function filter_shortcode_output($output, $tag, $attr, $m)
     {
         if (trim($tag) === 'baby_name_engine') {
-            $page = get_query_var('baby_page');
-            if ($page === 'name_detail') {
+            $page      = get_query_var('baby_page');
+            $name_slug = get_query_var('baby_name');
+
+            if (empty($name_slug)) {
+                $uri = $_SERVER['REQUEST_URI'] ?? '';
+                if (preg_match('#/baby-names/([a-z])/(boy|girl)/([^/?#]+)#i', $uri, $matches)) {
+                    $name_slug = $matches[3];
+                    $page      = 'name_detail';
+                }
+            }
+
+            if ($page === 'name_detail' && !empty($name_slug)) {
                 // If output already has modern template, don't duplicate
                 if (strpos($output, 'mr-baby-detail-wrap') !== false) {
                     return $output;
                 }
-                $name_slug = get_query_var('baby_name');
-                if (empty($name_slug)) {
-                    return $output;
-                }
-                $gender    = get_query_var('gender') ?: 'boy';
-                $char      = get_query_var('alphabet') ?: substr($name_slug, 0, 1);
-                $religion  = get_query_var('religion') ?: ($_GET['religion'] ?? 'Hindu');
+                $gender   = get_query_var('gender') ?: 'boy';
+                $char     = get_query_var('alphabet') ?: substr($name_slug, 0, 1);
+                $religion = get_query_var('religion') ?: ($_GET['religion'] ?? 'Hindu');
                 return self::render_detail($name_slug, $gender, $char, $religion);
             }
         }
@@ -57,24 +112,30 @@ class MR_Baby_Template_Renderer
      */
     public static function filter_page_content($content)
     {
-        $page = get_query_var('baby_page');
-        if ($page === 'name_detail') {
+        $page      = get_query_var('baby_page');
+        $name_slug = get_query_var('baby_name');
+
+        if (empty($name_slug)) {
+            $uri = $_SERVER['REQUEST_URI'] ?? '';
+            if (preg_match('#/baby-names/([a-z])/(boy|girl)/([^/?#]+)#i', $uri, $matches)) {
+                $name_slug = $matches[3];
+                $page      = 'name_detail';
+            }
+        }
+
+        if ($page === 'name_detail' && !empty($name_slug)) {
             if (strpos($content, 'mr-baby-detail-wrap') !== false) {
                 return $content;
             }
-            $name_slug = get_query_var('baby_name');
-            if (empty($name_slug)) {
-                return $content;
-            }
-            $gender    = get_query_var('gender') ?: 'boy';
-            $char      = get_query_var('alphabet') ?: substr($name_slug, 0, 1);
-            $religion  = get_query_var('religion') ?: ($_GET['religion'] ?? 'Hindu');
+            $gender   = get_query_var('gender') ?: 'boy';
+            $char     = get_query_var('alphabet') ?: substr($name_slug, 0, 1);
+            $religion = get_query_var('religion') ?: ($_GET['religion'] ?? 'Hindu');
 
             $new_markup = self::render_detail($name_slug, $gender, $char, $religion);
 
-            // If old banner card exists, replace the old baby detail container
+            // Replace old banner card and wrapper with support for unquoted / minified attributes
             if (strpos($content, 'name-detail-banner-card') !== false) {
-                $pattern = '/<div class="baby-detail-wrapper">.*?<\/div>\s*<\/div>\s*(?:<div class="similar-names-section">.*?<\/div>)?/s';
+                $pattern = '/<div[^>]*class=["\']?baby-detail-wrapper["\']?[^>]*>.*?<\/div>\s*<\/div>\s*(?:<div[^>]*class=["\']?similar-names-section["\']?[^>]*>.*?<\/div>)?/s';
                 $replaced = preg_replace($pattern, $new_markup, $content, 1);
                 if (!empty($replaced) && $replaced !== $content) {
                     return $replaced;
