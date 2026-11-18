@@ -416,7 +416,7 @@ PROMPT;
             ]
         ];
 
-        $candidate_models = array_unique([$model, 'gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', 'gemini-3.5-flash', 'gemini-flash-lite-latest']);
+        $candidate_models = array_unique([$model, 'gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-flash-8b']);
         $last_error = '';
 
         foreach ($candidate_models as $cand_model) {
@@ -473,6 +473,138 @@ PROMPT;
         return [
             'success' => false,
             'reply'   => $fallback_msg,
+            'error'   => $last_error
+        ];
+    }
+
+    /**
+     * Generate an in-depth, elaborated astrological deep-dive response (approx 200-250 words)
+     *
+     * @param string $question The original user question
+     * @param string $previous_reply The concise summary previously provided
+     * @param array $kundli_profile Native's planetary positions and houses
+     * @param string $user_lang Preferred language (en, hi, hinglish)
+     * @return array [success => bool, reply => string, error => string]
+     */
+    public static function generate_elaborated_response($question, $previous_reply, $kundli_profile, $user_lang = 'en') {
+        $api_key = self::get_api_key();
+        $model = self::get_model();
+
+        $resolved_lang = self::resolve_language($question, $user_lang);
+
+        if (empty($api_key)) {
+            return [
+                'success' => false,
+                'reply'   => ($resolved_lang === 'hi') ? 'क्षमा करें, AI सेवा कुंजी उपलब्ध नहीं है।' : 'Astrology service key is unavailable.',
+                'error'   => 'Missing API key'
+            ];
+        }
+
+        $system_instruction = self::build_system_instruction($kundli_profile, $resolved_lang);
+
+        // Add explicit Deep-Dive Elaboration directives
+        $elaboration_directive = ($resolved_lang === 'hi')
+            ? "\n\nविशेष निर्देश - विस्तृत व गहन विश्लेषण (Deep-Dive Analysis, 200-250 शब्द):\n" .
+              "जिज्ञासु ने अपने प्रश्न के विषय में अधिक विस्तृत एवं गूढ़ वैदिक ज्योतिषीय विश्लेषण (लगभग 200 से 250 शब्दों में) का अनुरोध किया है।\n" .
+              "1. कुंडली के संबंधित भावों, भावेशों (House Lords), ग्रहों की दृष्टि एवं युति का गहन विश्लेषण करें।\n" .
+              "2. वर्तमान महादशा, अंतर्दशा एवं संबंधित नक्षत्र स्वामी के प्रभाव को स्पष्ट रूप से समझाएं।\n" .
+              "3. आने वाले महीनों/वर्षों में ग्रहों के गोचर (Transits) और अनुकूल समय-सीमा (Timeframe) की संभावित खिड़की बताएं।\n" .
+              "4. कर्म, सावधानी और अचूक वैदिक उपाय (मंत्र, दान, व्रत, आचरण) विस्तारपूर्वक प्रदान करें।\n" .
+              "5. शब्द सीमा: लगभग 200 से 250 शब्द। स्पष्ट हेडिंग्स एवं बुलेट पॉइंट्स का उपयोग करें। निश्चितता का दावा न करें, संभावित योग एवं कर्म पर बल दें।"
+            : (($resolved_lang === 'hinglish')
+                ? "\n\nSPECIAL DIRECTIVE - DEEP-DIVE ELABORATED ANALYSIS (200-250 Words):\n" .
+                  "Seeker ne apne question par detailed aur deep-dive Vedic astrological explanation request kiya hai (approx 200 to 250 words).\n" .
+                  "1. Deep House & Planet Mechanics: Related Bhavas, House Lords ki sthiti, aspects aur conjunctions deeply explain karein.\n" .
+                  "2. Dasha & Nakshatra Dynamics: Current Mahadasha/Antardasha aur Nakshatra lords ka is matter par exact effect batayein.\n" .
+                  "3. Transit Activation & Timing Windows: Upcoming planetary transits aur favorable timeframes ko highlight karein.\n" .
+                  "4. Actionable Vedic Remedies & Karma Guidance: Specific mantras, daan, lifestyle modifications aur karmic efforts prescribe karein.\n" .
+                  "5. Length: Strictly 200 to 250 words. Use neat markdown headings and bullet points. Retain cautious, probabilistic phrasing (no absolute guarantees)."
+                : "\n\nSPECIAL DIRECTIVE - DEEP-DIVE ELABORATED ANALYSIS (200-250 Words):\n" .
+                  "The seeker has requested an in-depth, comprehensive astrological deep-dive on their question (approx 200 to 250 words).\n" .
+                  "1. Deep House & Planet Mechanics: Thoroughly analyze relevant Bhavas, Lord placements, aspects, and planetary strengths.\n" .
+                  "2. Dasha & Nakshatra Dynamics: Deeply evaluate the active Mahadasha, Antardasha, and Nakshatra lord's impact on this life area.\n" .
+                  "3. Transit Activation & Key Timings: Detail upcoming planetary transits and auspicious activation windows.\n" .
+                  "4. Actionable Vedic Remedies & Karma: Provide exact mantras, auspicious dana/donations, lifestyle tips, and conscious karma advice.\n" .
+                  "5. Length: Approximately 200 to 250 words. Format with clean bold markdown sections and bullet points. Maintain probabilistic, dignified Vedic wisdom (no absolute deterministic claims).");
+
+        $prompt_user = ($resolved_lang === 'hi')
+            ? "मेरा प्रश्न था: \"{$question}\"\n\nआपने संक्षेप में यह बताया था:\n\"{$previous_reply}\"\n\nकृपया अब मुझे अपनी जन्म कुंडली के आधार पर इसका संपूर्ण, विस्तृत एवं गूढ़ विश्लेषण (लगभग 200-250 शब्दों में) प्रदान करें जिसमें ग्रहों की स्थिति, दशा, गोचर और उपाय विस्तार से हों।"
+            : (($resolved_lang === 'hinglish')
+                ? "Mera question tha: \"{$question}\"\n\nAapne pehle yeh summary di thi:\n\"{$previous_reply}\"\n\nAb please meri birth chart ke basis par iska complete in-depth elaborated analysis (approx 200-250 words) provide karein jisme grahon ke yog, dasha, transit timing aur remedies detail mein hon."
+                : "My question was: \"{$question}\"\n\nYou previously summarized:\n\"{$previous_reply}\"\n\nPlease now provide a complete, in-depth astrological deep-dive (approx 200–250 words) based on my authentic chart, covering detailed house mechanics, active Dasha-transit dynamics, and specific Vedic remedies.");
+
+        $contents = [
+            [
+                'role'  => 'user',
+                'parts' => [['text' => $prompt_user]]
+            ]
+        ];
+
+        $payload = [
+            'system_instruction' => [
+                'parts' => [['text' => $system_instruction . $elaboration_directive]]
+            ],
+            'contents'           => $contents,
+            'generationConfig'   => [
+                'temperature'     => 0.7,
+                'topP'            => 0.9,
+                'maxOutputTokens' => 1200
+            ],
+            'safetySettings'     => [
+                ['category' => 'HARM_CATEGORY_HARASSMENT', 'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'],
+                ['category' => 'HARM_CATEGORY_HATE_SPEECH', 'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'],
+                ['category' => 'HARM_CATEGORY_SEXUALLY_EXPLICIT', 'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'],
+                ['category' => 'HARM_CATEGORY_DANGEROUS_CONTENT', 'threshold' => 'BLOCK_MEDIUM_AND_ABOVE']
+            ]
+        ];
+
+        $candidate_models = array_unique([$model, 'gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-flash-8b']);
+        $last_error = '';
+
+        foreach ($candidate_models as $cand_model) {
+            $url = 'https://generativelanguage.googleapis.com/v1beta/models/' . urlencode($cand_model) . ':generateContent?key=' . urlencode($api_key);
+
+            $response = wp_remote_post($url, [
+                'headers' => ['Content-Type' => 'application/json'],
+                'body'    => wp_json_encode($payload),
+                'timeout' => 30
+            ]);
+
+            if (is_wp_error($response)) {
+                $last_error = $response->get_error_message();
+                continue;
+            }
+
+            $code = wp_remote_retrieve_response_code($response);
+            $body = wp_remote_retrieve_body($response);
+            $json = json_decode($body, true);
+
+            if ($code === 200 && !empty($json['candidates'][0]['content']['parts'])) {
+                $reply_text = '';
+                foreach ($json['candidates'][0]['content']['parts'] as $part) {
+                    if (isset($part['text']) && (empty($part['thought']) || $part['thought'] !== true)) {
+                        $reply_text .= $part['text'];
+                    }
+                }
+                $reply_text = trim($reply_text);
+                if (!empty($reply_text)) {
+                    if (class_exists('Niyati_Linker')) {
+                        $reply_text = Niyati_Linker::auto_link_response($reply_text);
+                    }
+                    return [
+                        'success' => true,
+                        'reply'   => $reply_text,
+                        'model'   => $cand_model
+                    ];
+                }
+            }
+
+            $last_error = $json['error']['message'] ?? ('HTTP Error ' . $code);
+        }
+
+        return [
+            'success' => false,
+            'reply'   => ($resolved_lang === 'hi') ? 'विस्तृत विश्लेषण तैयार करने में विलंब हो रहा है। कृपया पुनः प्रयास करें।' : 'Unable to generate detailed analysis at this moment. Please try again.',
             'error'   => $last_error
         ];
     }

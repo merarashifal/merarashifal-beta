@@ -178,7 +178,20 @@ class MR_Baby_Template_Renderer
         ob_start();
         self::render_styles();
         ?>
-        <div class="mr-baby-detail-wrap" id="mr-baby-top">
+        <div class="baby-engine-container mr-baby-detail-wrap" id="mr-baby-top">
+            <div id="mr-baby-loader-overlay" class="mr-baby-loader-overlay" style="display:none;" aria-hidden="true">
+                <div class="mr-baby-loader-card">
+                    <div class="mr-loader-spinner"></div>
+                    <div class="mr-loader-heading">
+                        <span class="lang-en">✨ Loading Astrological Profile...</span>
+                        <span class="lang-hi">✨ ज्योतिषीय विवरण तैयार हो रहा है...</span>
+                    </div>
+                    <div class="mr-loader-subtext">
+                        <span class="lang-en">Please wait a few seconds</span>
+                        <span class="lang-hi">कृपया कुछ सेकंड प्रतीक्षा करें</span>
+                    </div>
+                </div>
+            </div>
             <?php
             // Top Language Toggle Bar (replaces breadcrumb)
             self::render_top_lang_bar();
@@ -235,10 +248,10 @@ class MR_Baby_Template_Renderer
                     <span class="lang-hi">🌐 भाषा चुनें:</span>
                 </span>
                 <div class="mr-lang-pill-group">
-                    <button type="button" class="mr-lang-btn active" data-lang="en" id="mr-btn-en" onclick="switchBabyLang('en', this)">
+                    <button type="button" class="mr-lang-btn af-z-lang-btn active" data-lang="en" id="mr-btn-en" onclick="switchBabyLang('en', this)">
                         English
                     </button>
-                    <button type="button" class="mr-lang-btn" data-lang="hi" id="mr-btn-hi" onclick="switchBabyLang('hi', this)">
+                    <button type="button" class="mr-lang-btn af-z-lang-btn" data-lang="hi" id="mr-btn-hi" onclick="switchBabyLang('hi', this)">
                         हिंदी
                     </button>
                 </div>
@@ -359,7 +372,9 @@ class MR_Baby_Template_Renderer
     {
         $etym        = $profile['etymology'] ?? [];
         $meaning_en  = esc_html($etym['literal_meaning'] ?? '');
-        $meaning_hi  = esc_html(self::translate_to_hindi($etym['literal_meaning'] ?? ''));
+        $meaning_hi  = !empty($etym['literal_meaning_hi'])
+            ? esc_html($etym['literal_meaning_hi'])
+            : esc_html(self::translate_to_hindi($etym['literal_meaning'] ?? ''));
         $syllables   = !empty($etym['syllables']) ? implode(' • ', array_map('esc_html', (array)$etym['syllables'])) : esc_html($profile['name']);
         $syl_count   = (int)($etym['syllable_count'] ?? 2);
         $ipa         = esc_html($etym['ipa_pronunciation'] ?? '');
@@ -861,10 +876,15 @@ class MR_Baby_Template_Renderer
             $paragraphs_en = [$narrative_en];
         }
 
-        $paragraphs_hi = [];
-        foreach ($paragraphs_en as $p) {
-            if (!empty($p)) {
-                $paragraphs_hi[] = self::translate_to_hindi($p);
+        $narrative_hi  = $profile['personality_and_character_insights_hi'] ?? '';
+        if (!empty($narrative_hi)) {
+            $paragraphs_hi = array_filter(array_map('trim', explode("\n", $narrative_hi)));
+        } else {
+            $paragraphs_hi = [];
+            foreach ($paragraphs_en as $p) {
+                if (!empty($p)) {
+                    $paragraphs_hi[] = self::translate_to_hindi($p);
+                }
             }
         }
         ?>
@@ -903,10 +923,15 @@ class MR_Baby_Template_Renderer
             $paragraphs_en = [$narrative_en];
         }
 
-        $paragraphs_hi = [];
-        foreach ($paragraphs_en as $p) {
-            if (!empty($p)) {
-                $paragraphs_hi[] = self::translate_to_hindi($p);
+        $narrative_hi  = $profile['career_and_success_predictions_hi'] ?? '';
+        if (!empty($narrative_hi)) {
+            $paragraphs_hi = array_filter(array_map('trim', explode("\n", $narrative_hi)));
+        } else {
+            $paragraphs_hi = [];
+            foreach ($paragraphs_en as $p) {
+                if (!empty($p)) {
+                    $paragraphs_hi[] = self::translate_to_hindi($p);
+                }
             }
         }
         ?>
@@ -945,7 +970,9 @@ class MR_Baby_Template_Renderer
         $compatibility_en   = esc_html($v['favorable_rashis_and_elements'] ?? 'Harmonious with compatible elemental zodiac signs.');
         $compatibility_hi   = esc_html(self::translate_to_hindi($compatibility_en));
         $dual_market_en     = esc_html($profile['global_metadata']['dual_market_appeal'] ?? '');
-        $dual_market_hi     = !empty($dual_market_en) ? esc_html(self::translate_to_hindi($dual_market_en)) : '';
+        $dual_market_hi     = !empty($profile['global_metadata']['dual_market_appeal_hi'])
+            ? esc_html($profile['global_metadata']['dual_market_appeal_hi'])
+            : (!empty($dual_market_en) ? esc_html(self::translate_to_hindi($dual_market_en)) : '');
         ?>
         <section class="mr-baby-section mr-section-compatibility">
             <h2 class="mr-section-title">
@@ -1143,8 +1170,8 @@ class MR_Baby_Template_Renderer
                     $a_en = esc_html($item['answer'] ?? '');
                     if (empty($q_en) || empty($a_en)) continue;
 
-                    $q_hi = esc_html(self::translate_to_hindi($q_en));
-                    $a_hi = esc_html(self::translate_to_hindi($a_en));
+                    $q_hi = !empty($item['question_hi']) ? esc_html($item['question_hi']) : esc_html(self::translate_to_hindi($q_en));
+                    $a_hi = !empty($item['answer_hi']) ? esc_html($item['answer_hi']) : esc_html(self::translate_to_hindi($a_en));
 
                     $schema_entries[] = [
                         '@type'          => 'Question',
@@ -2006,6 +2033,53 @@ class MR_Baby_Template_Renderer
                 box-shadow: 0 2px 8px rgba(255, 140, 0, 0.35);
             }
 
+            /* Full-page Responsive Astrological Loader */
+            .mr-baby-loader-overlay {
+                position: fixed;
+                top: 0; left: 0; right: 0; bottom: 0;
+                background: rgba(31, 41, 55, 0.45);
+                backdrop-filter: blur(4px);
+                z-index: 999999;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            .mr-baby-loader-card {
+                background: #FFFFFF;
+                border: 2px solid var(--primary-orange);
+                border-radius: 16px;
+                padding: 26px 36px;
+                box-shadow: 0 12px 35px rgba(0,0,0,0.22);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                gap: 12px;
+                text-align: center;
+                max-width: 90%;
+            }
+            .mr-loader-spinner {
+                width: 48px;
+                height: 48px;
+                border: 4px solid #FEF3C7;
+                border-top: 4px solid var(--primary-orange);
+                border-radius: 50%;
+                animation: mr-spin 0.75s linear infinite;
+            }
+            @keyframes mr-spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+            .mr-loader-heading {
+                font-family: 'Outfit', sans-serif;
+                font-size: 1.15rem;
+                font-weight: 700;
+                color: var(--heading-purple);
+            }
+            .mr-loader-subtext {
+                font-size: 0.88rem;
+                color: var(--text-grey);
+            }
+
             /* Breadcrumb Navigation - Suppress all redundant visual breadcrumbs */
             .mr-baby-breadcrumb,
             .ast-breadcrumbs,
@@ -2025,43 +2099,73 @@ class MR_Baby_Template_Renderer
             }
         </style>
         <script>
-        // Ensure seamless client-side bilingual switching on click without page reload
-        window.switchBabyLang = function(lang, btn) {
-            var isHi = (lang === 'hi');
-            var containers = document.querySelectorAll('.baby-engine-container, .mr-baby-detail-wrap, body');
-            containers.forEach(function(el) {
-                if (isHi) {
-                    el.classList.add('lang-hi-active');
-                } else {
-                    el.classList.remove('lang-hi-active');
+        (function() {
+            function applyLang(lang) {
+                var isHi = (lang === 'hi');
+                var targets = document.querySelectorAll('.baby-engine-container, .mr-baby-detail-wrap, body');
+                targets.forEach(function(el) {
+                    if (isHi) {
+                        el.classList.add('lang-hi-active');
+                    } else {
+                        el.classList.remove('lang-hi-active');
+                    }
+                });
+
+                document.querySelectorAll('.mr-lang-btn, .af-z-lang-btn').forEach(function(b) {
+                    var bLang = b.getAttribute('data-lang');
+                    if (!bLang) {
+                        bLang = (b.textContent.trim().indexOf('हिंदी') !== -1) ? 'hi' : 'en';
+                    }
+                    if (bLang === lang) {
+                        b.classList.add('active');
+                    } else {
+                        b.classList.remove('active');
+                    }
+                });
+
+                try { localStorage.setItem('mr_baby_lang', lang); } catch(e) {}
+            }
+
+            window.switchBabyLang = function(lang, btn) {
+                applyLang(lang);
+            };
+
+            // Global delegated click handler: guarantees language switch works even if external scripts interfere
+            document.addEventListener('click', function(e) {
+                var btn = e.target.closest('.mr-lang-btn, .af-z-lang-btn, [onclick*="switchBabyLang"]');
+                if (btn) {
+                    var lang = btn.getAttribute('data-lang');
+                    if (!lang) {
+                        var txt = btn.textContent || '';
+                        var oc = btn.getAttribute('onclick') || '';
+                        lang = (txt.indexOf('हिंदी') !== -1 || oc.indexOf('hi') !== -1) ? 'hi' : 'en';
+                    }
+                    applyLang(lang);
+                }
+
+                // Show visual loader when user clicks on any baby name link
+                var link = e.target.closest('a[href*="/baby-names/"]');
+                if (link && !link.target && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
+                    var href = link.getAttribute('href') || '';
+                    if (href.match(/\/baby-names\/[a-z0-9_-]+\/(boy|girl)\/[a-z0-9_-]+/i)) {
+                        var loader = document.getElementById('mr-baby-loader-overlay');
+                        if (loader) {
+                            loader.style.display = 'flex';
+                        }
+                    }
                 }
             });
 
-            // Synchronize active states across all language toggle buttons
-            document.querySelectorAll('.mr-lang-btn, .af-z-lang-btn').forEach(function(b) {
-                var bLang = b.getAttribute('data-lang');
-                if (!bLang) {
-                    bLang = (b.textContent.trim().indexOf('हिंदी') !== -1) ? 'hi' : 'en';
-                }
-                if (bLang === lang) {
-                    b.classList.add('active');
-                } else {
-                    b.classList.remove('active');
-                }
+            // Auto-restore saved language preference on page load
+            document.addEventListener('DOMContentLoaded', function() {
+                try {
+                    var saved = localStorage.getItem('mr_baby_lang');
+                    if (saved === 'hi') {
+                        applyLang('hi');
+                    }
+                } catch(e) {}
             });
-
-            try { localStorage.setItem('mr_baby_lang', lang); } catch(e) {}
-        };
-
-        // Auto-restore saved language preference on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            try {
-                var saved = localStorage.getItem('mr_baby_lang');
-                if (saved === 'hi') {
-                    window.switchBabyLang('hi');
-                }
-            } catch(e) {}
-        });
+        })();
         </script>
         <?php
     }
@@ -2073,13 +2177,49 @@ class MR_Baby_Template_Renderer
     private static $runtime_translations = [];
 
     /**
-     * Translates English text to authentic Hindi using cached Google Translate GTX endpoint.
+     * Translates English text to authentic Hindi with instant static dictionary and cached GTX fallback.
      * Strictly preserves Latin digits (0-9) to honor the "excluding number" directive.
      */
     public static function translate_to_hindi($text)
     {
         if (empty($text)) return '';
         $text = trim($text);
+
+        static $dict = [
+            'Hindu / Sanskrit' => 'हिंदू / संस्कृत',
+            'Hindu / Traditional' => 'हिंदू / पारंपरिक',
+            'Sanskrit / Traditional' => 'संस्कृत / पारंपरिक',
+            'Traditional' => 'पारंपरिक',
+            'Popular & Meaningful' => 'लोकप्रिय एवं अर्थपूर्ण',
+            'Trending Classic' => 'लोकप्रिय एवं पारंपरिक',
+            'White' => 'सफेद',
+            'Light Blue' => 'हल्का नीला',
+            'Silver' => 'चांदी',
+            'Yellow' => 'पीला',
+            'Orange' => 'नारंगी',
+            'Red' => 'लाल',
+            'Green' => 'हरा',
+            'Gold' => 'सुनहरा',
+            'Silver and Platinum' => 'चांदी और प्लेटिनम',
+            'Diamond / White Sapphire (Heera)' => 'हीरा / सफेद पुखराज',
+            'Ruby (Manikya)' => 'माणिक्य (Ruby)',
+            'Pearl (Moti)' => 'मोती (Pearl)',
+            'Emerald (Panna)' => 'पन्ना (Emerald)',
+            'Yellow Sapphire (Pukhraj)' => 'पुखराज (Yellow Sapphire)',
+            'Blue Sapphire (Neelam)' => 'नीलम (Blue Sapphire)',
+            'Hessonite (Gomed)' => 'गोमेद (Gomed)',
+            'Cat\'s Eye (Lehsuniya)' => 'लहसुनिया (Cat\'s Eye)',
+            'Coral (Moonga)' => 'मूंगा (Coral)',
+            'Friday, Wednesday' => 'शुक्रवार, बुधवार',
+            'West' => 'पश्चिम',
+            'North' => 'उत्तर',
+            'East' => 'पूर्व',
+            'South' => 'दक्षिण'
+        ];
+
+        if (isset($dict[$text])) {
+            return $dict[$text];
+        }
 
         if (isset(self::$runtime_translations[$text])) {
             return self::$runtime_translations[$text];
@@ -2094,7 +2234,7 @@ class MR_Baby_Template_Renderer
 
         $url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=hi&dt=t';
         $response = wp_remote_post($url, [
-            'timeout'    => 5,
+            'timeout'    => 2,
             'sslverify'  => false,
             'user-agent' => 'Mozilla/5.0',
             'body'       => ['q' => $text]

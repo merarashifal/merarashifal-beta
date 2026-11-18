@@ -19,14 +19,13 @@ class MR_Baby_Gemini_Service
     private static $instance = null;
 
     /**
-     * Candidate models in priority order for maximum uptime and latency optimization
+     * Official high-speed Gemini models in priority order for ultra-low latency (<2 seconds)
      */
     private $candidate_models = [
-        'gemini-3.1-flash-lite',
-        'gemini-flash-lite-latest',
-        'gemini-3.5-flash-lite',
-        'gemini-3.5-flash',
-        'gemini-3.8-flash'
+        'gemini-2.5-flash',
+        'gemini-2.0-flash',
+        'gemini-1.5-flash',
+        'gemini-1.5-flash-8b'
     ];
 
     public static function instance()
@@ -187,8 +186,8 @@ class MR_Baby_Gemini_Service
         }
 
         $system_instruction = "You are an astrological and baby naming expert for Indian parents at MeraRashifal.com. " .
-            "Write in very simple, clean, everyday English that is easily understood by common Indian people and parents. " .
-            "Avoid complex academic words, heavy sentences, or difficult jargon. Keep the tone warm, respectful, friendly, and simple. " .
+            "Provide output in simple everyday English AND authentic Hindi for Indian families. " .
+            "Avoid complex academic words or jargon. Keep numbers strictly in Latin digits (0-9). " .
             "Output strictly valid JSON with no markdown wrapping, no backticks, and exactly according to the required schema.";
 
         $rashi      = $astro_core['vedic_astrology']['rashi_moon_sign'];
@@ -198,51 +197,48 @@ class MR_Baby_Gemini_Service
         $chaldean   = $astro_core['numerology']['chaldean_number'];
         $pythagoras = $astro_core['numerology']['pythagorean_number'];
 
-        $prompt = "Generate a comprehensive baby name profile for the name '{$name}' (Gender: {$gender}, Religion: {$religion}) in very simple, easy-to-read English.\n\n" .
+        $prompt = "Generate a bilingual baby name profile for the name '{$name}' (Gender: {$gender}, Religion: {$religion}) for Indian parents.\n\n" .
             "Vedic & Numerology Anchors:\n" .
             "- Moon Sign (Rashi): {$rashi}\n" .
             "- Nakshatra: {$nakshatra}\n" .
             "- Ruling Planet: {$planet}\n" .
-            "- Vedic Element: {$element}\n" .
-            "- Chaldean Destiny Number: {$chaldean}\n" .
-            "- Pythagorean Expression Number: {$pythagoras}\n\n" .
-            "Guidelines (Write in very simple English for Indian families):\n" .
-            "1. 'personality_and_character_insights': Write 3 warm, easy-to-read paragraphs about their nature, friendly character, emotional strengths, and good qualities.\n" .
-            "2. 'career_and_success_predictions': Write 3 easy-to-read paragraphs about good career choices, studies, leadership skills, and success habits.\n" .
-            "3. 'faqs': Provide 5 helpful FAQ questions and answers that Indian parents commonly ask about this name.\n" .
-            "4. 'sibling_recommendations': 4 brother and 4 sister names that sound lovely with '{$name}'.\n\n" .
-            "Output JSON Schema:\n" .
+            "- Lucky Number: {$chaldean}\n\n" .
+            "Output strictly this JSON Schema:\n" .
             "{\n" .
-            '  "script": "Devanagari or native script (e.g. तुषार)",' . "\n" .
-            '  "primary_origin": "Linguistic root (e.g. Sanskrit / Hindu)",' . "\n" .
+            '  "script": "Devanagari script (e.g. आशाकिरण)",' . "\n" .
+            '  "primary_origin": "Origin (e.g. Sanskrit / Traditional)",' . "\n" .
             '  "gender_suitability": "' . ($gender === 'Boy' ? 'Male Only' : 'Female Only') . '",' . "\n" .
-            '  "popularity_badge": "Trending Classic | Ancient Vedic | Modern Heritage",' . "\n" .
+            '  "popularity_badge": "Popular & Meaningful",' . "\n" .
             '  "etymology": {' . "\n" .
-            '    "literal_meaning": "Deep definition, mythological allusions, and poetic imagery",' . "\n" .
-            '    "syllables": ["Syllable1", "Syllable2"],' . "\n" .
+            '    "literal_meaning": "Simple English meaning in one line",' . "\n" .
+            '    "literal_meaning_hi": "सरल हिंदी में अर्थ एक पंक्ति में",' . "\n" .
+            '    "syllables": ["' . $name . '"],' . "\n" .
             '    "syllable_count": 2,' . "\n" .
-            '    "ipa_pronunciation": "IPA phonetic notation",' . "\n" .
-            '    "phonetic_respelling": "English phonetic respelling (e.g. Too-shahr)"' . "\n" .
+            '    "ipa_pronunciation": "/' . strtolower($name) . '/",' . "\n" .
+            '    "phonetic_respelling": "' . $name . '"' . "\n" .
             '  },' . "\n" .
-            '  "personality_and_character_insights": "3 rich paragraphs...",' . "\n" .
-            '  "career_and_success_predictions": "3 rich paragraphs...",' . "\n" .
+            '  "personality_and_character_insights": "3 warm, easy-to-read paragraphs in English about nature, emotional qualities, and virtues.",' . "\n" .
+            '  "personality_and_character_insights_hi": "3 सुंदर और सरल पैराग्राफ हिंदी में स्वभाव, संस्कार और खूबियों के बारे में।",' . "\n" .
+            '  "career_and_success_predictions": "3 easy-to-read paragraphs in English about good career choices, studies, and success habits.",' . "\n" .
+            '  "career_and_success_predictions_hi": "3 सरल पैराग्राफ हिंदी में करियर, शिक्षा और जीवन में सफलता के बारे में।",' . "\n" .
             '  "global_metadata": {' . "\n" .
-            '    "popularity_india": "Status in India across regions",' . "\n" .
-            '    "popularity_us": "Status in North America and Global Diaspora",' . "\n" .
-            '    "variant_spellings": ["Variant1", "Variant2", "Variant3"],' . "\n" .
-            '    "nicknames": ["Nick1", "Nick2"],' . "\n" .
-            '    "dual_market_appeal": "Ease of cross-cultural articulation and modern adaptability"' . "\n" .
+            '    "popularity_india": "Status in India",' . "\n" .
+            '    "popularity_us": "Status globally",' . "\n" .
+            '    "variant_spellings": ["' . $name . '"],' . "\n" .
+            '    "nicknames": [],' . "\n" .
+            '    "dual_market_appeal": "Easy to pronounce across both Indian and international contexts.",' . "\n" .
+            '    "dual_market_appeal_hi": "भारत और विदेशों दोनों में आसानी से बोला जाने वाला नाम।"' . "\n" .
             '  },' . "\n" .
             '  "sibling_recommendations": {' . "\n" .
             '    "brother_names": ["Name1", "Name2", "Name3", "Name4"],' . "\n" .
             '    "sister_names": ["Name1", "Name2", "Name3", "Name4"]' . "\n" .
             '  },' . "\n" .
             '  "faqs": [' . "\n" .
-            '    {"question": "What is the meaning and origin of the name ' . $name . '?", "answer": "..."},' . "\n" .
-            '    {"question": "Which Rashi and Nakshatra govern ' . $name . '?", "answer": "..."},' . "\n" .
-            '    {"question": "What is the lucky numerology number for ' . $name . '?", "answer": "..."},' . "\n" .
-            '    {"question": "What are the personality traits associated with ' . $name . '?", "answer": "..."},' . "\n" .
-            '    {"question": "What are ideal brother and sister names for ' . $name . '?", "answer": "..."}' . "\n" .
+            '    {"question": "What is the meaning of the name ' . $name . '?", "question_hi": "' . $name . ' नाम का क्या अर्थ है?", "answer": "Simple English answer.", "answer_hi": "सरल हिंदी उत्तर।"},' . "\n" .
+            '    {"question": "Which Rashi governs the name ' . $name . '?", "question_hi": "' . $name . ' नाम की राशि क्या है?", "answer": "Simple English answer.", "answer_hi": "सरल हिंदी उत्तर।"},' . "\n" .
+            '    {"question": "What is the lucky number for ' . $name . '?", "question_hi": "' . $name . ' नाम का शुभ अंक क्या है?", "answer": "Simple English answer.", "answer_hi": "सरल हिंदी उत्तर।"},' . "\n" .
+            '    {"question": "What are the personality traits of ' . $name . '?", "question_hi": "' . $name . ' नाम के लोगों का स्वभाव कैसा होता है?", "answer": "Simple English answer.", "answer_hi": "सरल हिंदी उत्तर।"},' . "\n" .
+            '    {"question": "What are matching sibling names for ' . $name . '?", "question_hi": "' . $name . ' के साथ भाई-बहन के मिलते-जुलते नाम कौन से हैं?", "answer": "Simple English answer.", "answer_hi": "सरल हिंदी उत्तर।"}' . "\n" .
             '  ]' . "\n" .
             "}";
 
@@ -261,7 +257,7 @@ class MR_Baby_Gemini_Service
             ],
             'generationConfig' => [
                 'response_mime_type' => 'application/json',
-                'temperature'        => 0.4
+                'temperature'        => 0.3
             ]
         ];
 
@@ -272,7 +268,7 @@ class MR_Baby_Gemini_Service
 
             $response = wp_remote_post($url, [
                 'method'      => 'POST',
-                'timeout'     => 25,
+                'timeout'     => 10,
                 'sslverify'   => false,
                 'headers'     => ['Content-Type' => 'application/json'],
                 'body'        => $payload_json
@@ -314,41 +310,45 @@ class MR_Baby_Gemini_Service
     private function build_master_payload($name, $gender, $religion, array $astro_core, array $ai_data)
     {
         return [
-            'name'                               => $name,
-            'script'                             => $ai_data['script'] ?? $name,
-            'primary_origin'                     => $ai_data['primary_origin'] ?? ($religion . ' / Sanskrit'),
-            'gender_suitability'                 => $ai_data['gender_suitability'] ?? ($gender === 'Boy' ? 'Male Only' : 'Female Only'),
-            'popularity_badge'                   => $ai_data['popularity_badge'] ?? 'Trending Classic',
+            'name'                                  => $name,
+            'script'                                => $ai_data['script'] ?? $name,
+            'primary_origin'                        => $ai_data['primary_origin'] ?? ($religion . ' / Traditional'),
+            'gender_suitability'                    => $ai_data['gender_suitability'] ?? ($gender === 'Boy' ? 'Male Only' : 'Female Only'),
+            'popularity_badge'                      => $ai_data['popularity_badge'] ?? 'Popular & Meaningful',
 
-            'etymology'                          => [
-                'literal_meaning'    => $ai_data['etymology']['literal_meaning'] ?? "Sacred {$religion} name representing auspicious beginnings.",
+            'etymology'                             => [
+                'literal_meaning'    => $ai_data['etymology']['literal_meaning'] ?? "A beautiful and blessed {$religion} name meaning goodness, light, and happiness.",
+                'literal_meaning_hi' => $ai_data['etymology']['literal_meaning_hi'] ?? "एक सुंदर और शुभ नाम जिसका अर्थ अच्छाई, प्रकाश और खुशहाली है।",
                 'syllables'          => $ai_data['etymology']['syllables'] ?? [$name],
                 'syllable_count'     => (int)($ai_data['etymology']['syllable_count'] ?? 2),
                 'ipa_pronunciation'  => $ai_data['etymology']['ipa_pronunciation'] ?? '',
                 'phonetic_respelling'=> $ai_data['etymology']['phonetic_respelling'] ?? $name
             ],
 
-            'vedic_astrology'                    => $astro_core['vedic_astrology'],
-            'numerology'                         => $astro_core['numerology'],
-            'auspicious_attributes'              => $astro_core['auspicious_attributes'],
+            'vedic_astrology'                       => $astro_core['vedic_astrology'],
+            'numerology'                            => $astro_core['numerology'],
+            'auspicious_attributes'                 => $astro_core['auspicious_attributes'],
 
-            'personality_and_character_insights' => $ai_data['personality_and_character_insights'] ?? '',
-            'career_and_success_predictions'     => $ai_data['career_and_success_predictions'] ?? '',
+            'personality_and_character_insights'    => $ai_data['personality_and_character_insights'] ?? '',
+            'personality_and_character_insights_hi' => $ai_data['personality_and_character_insights_hi'] ?? '',
+            'career_and_success_predictions'        => $ai_data['career_and_success_predictions'] ?? '',
+            'career_and_success_predictions_hi'     => $ai_data['career_and_success_predictions_hi'] ?? '',
 
-            'global_metadata'                    => [
-                'popularity_india'   => $ai_data['global_metadata']['popularity_india'] ?? 'High across traditional households',
-                'popularity_us'      => $ai_data['global_metadata']['popularity_us'] ?? 'Cherished heritage name in global diaspora',
-                'variant_spellings'  => (array)($ai_data['global_metadata']['variant_spellings'] ?? []),
-                'nicknames'          => (array)($ai_data['global_metadata']['nicknames'] ?? []),
-                'dual_market_appeal' => $ai_data['global_metadata']['dual_market_appeal'] ?? 'Well-suited for both domestic and international contexts.'
+            'global_metadata'                       => [
+                'popularity_india'      => $ai_data['global_metadata']['popularity_india'] ?? 'High across traditional households',
+                'popularity_us'         => $ai_data['global_metadata']['popularity_us'] ?? 'Cherished heritage name in global diaspora',
+                'variant_spellings'     => (array)($ai_data['global_metadata']['variant_spellings'] ?? []),
+                'nicknames'             => (array)($ai_data['global_metadata']['nicknames'] ?? []),
+                'dual_market_appeal'    => $ai_data['global_metadata']['dual_market_appeal'] ?? 'Well-suited for both domestic and international contexts.',
+                'dual_market_appeal_hi' => $ai_data['global_metadata']['dual_market_appeal_hi'] ?? 'भारत एवं विदेशों दोनों में आसानी से बोला और समझा जाने वाला नाम।'
             ],
 
-            'sibling_recommendations'            => [
-                'brother_names'      => (array)($ai_data['sibling_recommendations']['brother_names'] ?? []),
-                'sister_names'       => (array)($ai_data['sibling_recommendations']['sister_names'] ?? [])
+            'sibling_recommendations'               => [
+                'brother_names'         => (array)($ai_data['sibling_recommendations']['brother_names'] ?? []),
+                'sister_names'          => (array)($ai_data['sibling_recommendations']['sister_names'] ?? [])
             ],
 
-            'faqs'                               => (array)($ai_data['faqs'] ?? [])
+            'faqs'                                  => (array)($ai_data['faqs'] ?? [])
         ];
     }
 
@@ -467,20 +467,24 @@ class MR_Baby_Gemini_Service
             'gender_suitability' => $gender === 'Boy' ? 'Male Only' : 'Female Only',
             'popularity_badge' => 'Popular & Meaningful',
             'etymology' => [
-                'literal_meaning' => "A beautiful and blessed {$religion} name meaning goodness, light, and happiness.",
-                'syllables' => [$name],
-                'syllable_count' => 2,
-                'ipa_pronunciation' => '/' . strtolower($name) . '/',
-                'phonetic_respelling' => $name
+                'literal_meaning'    => "A beautiful and blessed {$religion} name meaning goodness, light, and happiness.",
+                'literal_meaning_hi' => "एक सुंदर और शुभ नाम जिसका अर्थ अच्छाई, प्रकाश और खुशहाली है।",
+                'syllables'          => [$name],
+                'syllable_count'     => 2,
+                'ipa_pronunciation'  => '/' . strtolower($name) . '/',
+                'phonetic_respelling'=> $name
             ],
-            'personality_and_character_insights' => "A child named {$name} has a kind heart, honest nature, and strong willpower. Blessed by planet {$planet} and Moon sign {$rashi}, they make friends easily, love learning new things, and bring joy and happiness to their family.",
-            'career_and_success_predictions' => "With Lucky Number {$chaldean}, {$name} has great focus, hard work, and good decision-making skills. They can achieve high success in education, business, creative fields, or respected leadership jobs.",
+            'personality_and_character_insights'    => "A child named {$name} has a kind heart, honest nature, and strong willpower. Blessed by planet {$planet} and Moon sign {$rashi}, they make friends easily, love learning new things, and bring joy and happiness to their family.",
+            'personality_and_character_insights_hi' => "{$name} नाम का बच्चा कोमल हृदय, ईमानदार स्वभाव और मजबूत इच्छाशक्ति वाला होता है। ग्रह स्वामी {$planet} और चंद्र राशि {$rashi} के प्रभाव से यह बच्चा जल्दी दोस्त बनाता है और परिवार में खुशियां लाता है।",
+            'career_and_success_predictions'        => "With Lucky Number {$chaldean}, {$name} has great focus, hard work, and good decision-making skills. They can achieve high success in education, business, creative fields, or respected leadership jobs.",
+            'career_and_success_predictions_hi'     => "शुभ अंक {$chaldean} के शुभ प्रभाव से {$name} में एकाग्रता, परिश्रम और सही निर्णय लेने की बेहतरीन क्षमता होती है। यह शिक्षा, व्यापार, कला या प्रतिष्ठित सेवाओं में बड़ी सफलता प्राप्त करता है।",
             'global_metadata' => [
-                'popularity_india' => 'Widely respected classic across India',
-                'popularity_us' => 'Beloved cultural heritage name',
-                'variant_spellings' => [],
-                'nicknames' => [],
-                'dual_market_appeal' => 'Effortlessly pronounced across both Eastern and Western communities.'
+                'popularity_india'      => 'Widely respected classic across India',
+                'popularity_us'         => 'Beloved cultural heritage name',
+                'variant_spellings'     => [],
+                'nicknames'             => [],
+                'dual_market_appeal'    => 'Effortlessly pronounced across both Eastern and Western communities.',
+                'dual_market_appeal_hi' => 'भारत एवं विदेशों दोनों में आसानी से बोला और समझा जाने वाला नाम।'
             ],
             'sibling_recommendations' => [
                 'brother_names' => [],
@@ -488,8 +492,10 @@ class MR_Baby_Gemini_Service
             ],
             'faqs' => [
                 [
-                    'question' => "What is the Vedic significance of {$name}?",
-                    'answer' => "The name {$name} is governed by {$rashi} and {$planet}, carrying positive vibrational resonance."
+                    'question'    => "What is the meaning and Vedic significance of {$name}?",
+                    'question_hi' => "{$name} नाम का क्या अर्थ और ज्योतिषीय महत्व है?",
+                    'answer'      => "The name {$name} is governed by {$rashi} and planet {$planet}, carrying positive vibrational resonance for a bright future.",
+                    'answer_hi'   => "{$name} नाम पर {$rashi} राशि और स्वामी ग्रह {$planet} का शुभ प्रभाव है, जो एक उज्ज्वल और सफल भविष्य का संकेत देता है।"
                 ]
             ]
         ];
