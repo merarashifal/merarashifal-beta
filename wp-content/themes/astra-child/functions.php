@@ -18,6 +18,19 @@ add_action('get_header', function() {
 // Load Homepage Placement & Content Manager
 require_once get_stylesheet_directory() . '/inc/class-mr-homepage-manager.php';
 
+// Load MeraRashifal Baby Name Astrological & Numerology Engine
+require_once get_stylesheet_directory() . '/inc/class-mr-baby-astro-engine.php';
+
+// Load MeraRashifal Baby Name Gemini AI Prompt Service & Auto-Seeding Pipeline
+require_once get_stylesheet_directory() . '/inc/class-mr-baby-gemini-service.php';
+
+// Load MeraRashifal Baby Name 11-Section Template Renderer
+require_once get_stylesheet_directory() . '/inc/class-mr-baby-template-renderer.php';
+
+// Load MeraRashifal Baby Name Clean Religion Hubs, SEO & Sitemaps
+require_once get_stylesheet_directory() . '/inc/class-mr-baby-seo-rewrites.php';
+MR_Baby_SEO_Rewrites::instance();
+
 // Ensure Reports Showcase shortcode engine is loaded
 if (!class_exists('MR_Reports_Showcase') && file_exists(WP_PLUGIN_DIR . '/mr-subscription-reports/includes/class-mr-reports-showcase.php')) {
     require_once WP_PLUGIN_DIR . '/mr-subscription-reports/includes/class-mr-reports-showcase.php';
@@ -385,3 +398,82 @@ add_filter('wpseo_title', function($title) {
 
     return $title;
 }, 999);
+
+/* ==============================================================================
+   SOCIAL MEDIA OPEN GRAPH & TWITTER CARD PREVIEW ENGINE
+   Guarantees crisp, rich link previews on WhatsApp, Facebook, LinkedIn, X, Telegram
+   ============================================================================== */
+
+function mr_get_contextual_og_image() {
+    $theme_og_base = 'https://merarashifal.com/wp-content/themes/astra-child/assets/og-images/';
+    $uri = $_SERVER['REQUEST_URI'] ?? '';
+
+    // 1. Homepage
+    if (is_front_page()) {
+        return $theme_og_base . 'og-default-main.jpg';
+    }
+
+    // 2. Horoscope / Sun Sign pages (/horoscope/, /aaj-ka-rashifal/, /zodiac/)
+    if (strpos($uri, '/horoscope') !== false || strpos($uri, '/rashifal') !== false) {
+        return $theme_og_base . 'og-horoscope-main.jpg';
+    }
+
+    // 3. Panchang & Muhurat pages (/panchang/, /choghadiya/, /tithi/, /rahukaal/, /muhurat/)
+    if (strpos($uri, '/panchang') !== false || strpos($uri, '/choghadiya') !== false || strpos($uri, '/muhurat') !== false || strpos($uri, '/tithi') !== false || strpos($uri, '/rahukaal') !== false) {
+        return $theme_og_base . 'og-panchang-main.jpg';
+    }
+
+    // 4. Kundali, Gun Milan, Dasha & Dosh pages (/kundli/, /dasha/, /dosh/, /matching/)
+    if (strpos($uri, '/kundli') !== false || strpos($uri, '/dasha') !== false || strpos($uri, '/dosh') !== false || strpos($uri, '/matching') !== false) {
+        return $theme_og_base . 'og-kundli-dasha.jpg';
+    }
+
+    // 5. Baby Names (/baby-names/)
+    if (strpos($uri, '/baby-names') !== false) {
+        return $theme_og_base . 'og-baby-names.jpg';
+    }
+
+    // 6. Reports Store / Pricing (/reports/, /pricing/, /horoscope-report/)
+    if (strpos($uri, '/reports') !== false || strpos($uri, '/pricing') !== false || strpos($uri, '/horoscope-report') !== false) {
+        return $theme_og_base . 'og-reports-store.jpg';
+    }
+
+    // 7. Single Post: Use featured image ONLY if it is a valid JPEG/PNG
+    if (is_singular('post')) {
+        $thumb_id = get_post_thumbnail_id();
+        if ($thumb_id) {
+            $img_url = wp_get_attachment_url($thumb_id);
+            if ($img_url && preg_match('/\.(jpe?g|png)$/i', $img_url)) {
+                return $img_url;
+            }
+        }
+    }
+
+    // 8. Global Fallback
+    return $theme_og_base . 'og-default-main.jpg';
+}
+
+// Override Yoast Open Graph Image with contextual 1200x630 JPEG
+add_filter('wpseo_opengraph_image', 'mr_get_contextual_og_image', 9999);
+add_filter('wpseo_twitter_image', 'mr_get_contextual_og_image', 9999);
+
+// Ensure proper dimensions and mime type for Open Graph
+add_filter('wpseo_opengraph_image_size', function() {
+    return ['width' => 1024, 'height' => 536];
+}, 9999);
+
+// Set social locale to Hindi/India for high priority on Indian WhatsApp/FB clients
+add_filter('wpseo_locale', function() {
+    return 'hi_IN';
+}, 9999);
+
+// Inject fallback meta tags if Yoast does not output them
+add_action('wp_head', function() {
+    if (is_admin()) return;
+    $og_img = mr_get_contextual_og_image();
+    echo '<meta property="og:image:width" content="1024" />' . "\n";
+    echo '<meta property="og:image:height" content="536" />' . "\n";
+    echo '<meta property="og:image:type" content="image/jpeg" />' . "\n";
+    echo '<meta name="twitter:card" content="summary_large_image" />' . "\n";
+    echo '<meta name="twitter:image" content="' . esc_url($og_img) . '" />' . "\n";
+}, 30);
