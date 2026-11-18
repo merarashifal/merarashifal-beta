@@ -180,6 +180,9 @@ class MR_Baby_Template_Renderer
         ?>
         <div class="mr-baby-detail-wrap" id="mr-baby-top">
             <?php
+            // Top Language Toggle Bar (replaces breadcrumb)
+            self::render_top_lang_bar();
+
             // 1. Header & Badges
             self::render_section_1_header($profile);
 
@@ -219,53 +222,28 @@ class MR_Baby_Template_Renderer
     }
 
     /**
-     * Breadcrumbs
+     * Prominent Top Language Toggle Bar
+     * Positioned cleanly on top of the content area where the breadcrumb was.
      */
-    private static function render_breadcrumbs($profile, $letter, $gender)
+    private static function render_top_lang_bar()
     {
-        $home_url   = home_url('/');
-        $base_url   = home_url('/baby-names/');
-        $char_url   = home_url('/baby-names/' . strtolower($letter) . '/');
-        $gender_url = home_url('/baby-names/' . strtolower($letter) . '/' . strtolower($gender) . '/');
-        $name       = esc_html($profile['name']);
-        $script     = esc_html($profile['script'] ?? $name);
-        $gender_hi  = $gender === 'Girl' ? 'लड़की' : 'लड़का';
         ?>
-        <nav class="mr-baby-breadcrumb" aria-label="Breadcrumb">
-            <ol>
-                <li>
-                    <a href="<?php echo esc_url($home_url); ?>">
-                        <span class="lang-en">Home</span>
-                        <span class="lang-hi">होम</span>
-                    </a>
-                </li>
-                <li><span class="sep">&rsaquo;</span>
-                    <a href="<?php echo esc_url($base_url); ?>">
-                        <span class="lang-en">Baby Names</span>
-                        <span class="lang-hi">शिशु नाम</span>
-                    </a>
-                </li>
-                <li><span class="sep">&rsaquo;</span>
-                    <a href="<?php echo esc_url($char_url); ?>">
-                        <span class="lang-en"><?php echo esc_html($letter); ?> Names</span>
-                        <span class="lang-hi"><?php echo esc_html($letter); ?> से शुरू होने वाले नाम</span>
-                    </a>
-                </li>
-                <li><span class="sep">&rsaquo;</span>
-                    <a href="<?php echo esc_url($gender_url); ?>">
-                        <span class="lang-en"><?php echo esc_html($gender); ?></span>
-                        <span class="lang-hi"><?php echo esc_html($gender_hi); ?></span>
-                    </a>
-                </li>
-                <li aria-current="page">
-                    <span class="sep">&rsaquo;</span>
-                    <strong>
-                        <span class="lang-en"><?php echo $name; ?></span>
-                        <span class="lang-hi"><?php echo $script ?: $name; ?></span>
-                    </strong>
-                </li>
-            </ol>
-        </nav>
+        <div class="mr-baby-top-lang-bar">
+            <div class="mr-lang-switch-box">
+                <span class="mr-lang-hint">
+                    <span class="lang-en">🌐 Read in:</span>
+                    <span class="lang-hi">🌐 भाषा चुनें:</span>
+                </span>
+                <div class="mr-lang-pill-group">
+                    <button type="button" class="mr-lang-btn active" data-lang="en" id="mr-btn-en" onclick="switchBabyLang('en', this)">
+                        English
+                    </button>
+                    <button type="button" class="mr-lang-btn" data-lang="hi" id="mr-btn-hi" onclick="switchBabyLang('hi', this)">
+                        हिंदी
+                    </button>
+                </div>
+            </div>
+        </div>
         <?php
     }
 
@@ -300,12 +278,12 @@ class MR_Baby_Template_Renderer
                     <span class="lang-hi">🕉️ <?php echo $origin_hi; ?></span>
                 </span>
                 <span class="mr-badge mr-badge-status">
-                    <span class="lang-en">⭐ <?php echo $badge; ?></span>
-                    <span class="lang-hi">⭐ <?php echo $badge_hi; ?></span>
+                    <span class="lang-en">⭐ Popular & Meaningful Name</span>
+                    <span class="lang-hi">⭐ लोकप्रिय एवं अर्थपूर्ण नाम</span>
                 </span>
                 <span class="mr-badge mr-badge-comprehensive">
-                    <span class="lang-en">📚 1,000+ Word Astrological Profile</span>
-                    <span class="lang-hi">📚 1,000+ शब्दों का विस्तृत ज्योतिषीय विश्लेषण</span>
+                    <span class="lang-en">📚 Complete Name Details</span>
+                    <span class="lang-hi">📚 नाम की पूरी जानकारी</span>
                 </span>
             </div>
 
@@ -323,8 +301,8 @@ class MR_Baby_Template_Renderer
                     </span>
                 </h1>
                 <p class="mr-baby-sublead">
-                    <span class="lang-en">Complete Vedic Astrology, Chaldean Numerology Vibration, Linguistic Origin & Meaning of the Name <strong><?php echo $name; ?></strong>.</span>
-                    <span class="lang-hi"><strong><?php echo $script ?: $name; ?></strong> नाम का संपूर्ण वैदिक ज्योतिष, कीरो (Chaldean) अंक ज्योतिष, भाषाई उत्पत्ति और अर्थ का संपूर्ण विवरण।</span>
+                    <span class="lang-en">Complete meaning, origin, Rashi, Nakshatra, lucky numbers and personality details of the name <strong><?php echo $name; ?></strong>.</span>
+                    <span class="lang-hi"><strong><?php echo $script ?: $name; ?></strong> नाम का पूरा अर्थ, उत्पत्ति, राशि, नक्षत्र, शुभ अंक और स्वभाव की संपूर्ण जानकारी।</span>
                 </p>
             </div>
 
@@ -341,8 +319,8 @@ class MR_Baby_Template_Renderer
                 </div>
                 <div class="qs-item">
                     <span class="qs-label">
-                        <span class="lang-en">Nakshatra</span>
-                        <span class="lang-hi">नक्षत्र</span>
+                        <span class="lang-en">Birth Star (Nakshatra)</span>
+                        <span class="lang-hi">जन्म नक्षत्र</span>
                     </span>
                     <strong class="qs-val">
                         <span class="lang-en"><?php echo $nakshatra; ?></span>
@@ -351,8 +329,8 @@ class MR_Baby_Template_Renderer
                 </div>
                 <div class="qs-item">
                     <span class="qs-label">
-                        <span class="lang-en">Chaldean Destiny</span>
-                        <span class="lang-hi">कीरो भाग्य अंक</span>
+                        <span class="lang-en">Lucky Number</span>
+                        <span class="lang-hi">शुभ अंक</span>
                     </span>
                     <strong class="qs-val num-highlight">
                         <span class="lang-en">Number <?php echo $chaldean_no; ?></span>
@@ -375,7 +353,7 @@ class MR_Baby_Template_Renderer
     }
 
     /**
-     * Section 2: Linguistic Etymology & Phonetics
+     * Section 2: Name Meaning & Origin (Simple, clear English for Indian parents)
      */
     private static function render_section_2_etymology($profile)
     {
@@ -388,20 +366,22 @@ class MR_Baby_Template_Renderer
         $phonetic    = esc_html($etym['phonetic_respelling'] ?? $profile['name']);
         $origin_en   = esc_html($profile['primary_origin'] ?? 'Hindu / Sanskrit');
         $origin_hi   = esc_html(self::translate_to_hindi($profile['primary_origin'] ?? 'Hindu / Sanskrit'));
+        $name        = esc_html($profile['name']);
+        $script      = esc_html($profile['script'] ?? $name);
         ?>
         <section class="mr-baby-section mr-section-etymology">
             <h2 class="mr-section-title">
                 <span class="icon">📖</span>
-                <span class="lang-en">Linguistic Etymology & Phonetic Breakdown</span>
-                <span class="lang-hi">भाषाई उत्पत्ति एवं ध्वन्यात्मक विश्लेषण</span>
+                <span class="lang-en">Name Meaning, Origin & Pronunciation</span>
+                <span class="lang-hi">नाम का अर्थ, उत्पत्ति और सही उच्चारण</span>
             </h2>
 
             <div class="mr-etymology-meaning-box">
                 <div class="meaning-icon">💫</div>
                 <div class="meaning-body">
                     <h3>
-                        <span class="lang-en">Literal & Mythological Meaning</span>
-                        <span class="lang-hi">शाब्दिक एवं पौराणिक अर्थ</span>
+                        <span class="lang-en">What Does the Name <?php echo $name; ?> Mean?</span>
+                        <span class="lang-hi"><?php echo $script ?: $name; ?> नाम का क्या अर्थ है?</span>
                     </h3>
                     <p class="meaning-text">
                         <span class="lang-en"><?php echo $meaning_en; ?></span>
@@ -413,50 +393,50 @@ class MR_Baby_Template_Renderer
             <div class="mr-etymology-grid">
                 <div class="etym-card">
                     <span class="etym-label">
-                        <span class="lang-en">Linguistic Origin</span>
-                        <span class="lang-hi">भाषाई उत्पत्ति</span>
+                        <span class="lang-en">Language & Origin</span>
+                        <span class="lang-hi">मूल भाषा और उत्पत्ति</span>
                     </span>
                     <strong class="etym-val">
                         <span class="lang-en"><?php echo $origin_en; ?></span>
                         <span class="lang-hi"><?php echo $origin_hi; ?></span>
                     </strong>
                     <span class="etym-desc">
-                        <span class="lang-en">Ancient root classical language</span>
-                        <span class="lang-hi">प्राचीन शास्त्रीय मूल भाषा</span>
+                        <span class="lang-en">Where this name comes from</span>
+                        <span class="lang-hi">यह नाम कहाँ से आया है</span>
                     </span>
                 </div>
                 <div class="etym-card">
                     <span class="etym-label">
-                        <span class="lang-en">Syllable Cadence</span>
+                        <span class="lang-en">Parts of Name</span>
                         <span class="lang-hi">वर्ण एवं मात्राएं</span>
                     </span>
                     <strong class="etym-val"><?php echo $syllables; ?></strong>
                     <span class="etym-desc">
-                        <span class="lang-en"><?php echo $syl_count; ?> <?php echo $syl_count === 1 ? 'Syllable' : 'Syllables'; ?> meter</span>
-                        <span class="lang-hi"><?php echo $syl_count; ?> वर्णों का मधुर प्रवाह</span>
+                        <span class="lang-en"><?php echo $syl_count; ?> <?php echo $syl_count === 1 ? 'part' : 'parts'; ?> (smooth to say)</span>
+                        <span class="lang-hi"><?php echo $syl_count; ?> भागों में आसान उच्चारण</span>
                     </span>
                 </div>
                 <div class="etym-card">
                     <span class="etym-label">
-                        <span class="lang-en">Phonetic Respelling</span>
-                        <span class="lang-hi">उच्चारण ध्वनि</span>
+                        <span class="lang-en">How to Pronounce</span>
+                        <span class="lang-hi">सही उच्चारण</span>
                     </span>
                     <strong class="etym-val"><?php echo $phonetic; ?></strong>
                     <span class="etym-desc">
-                        <span class="lang-en">Natural pronunciation guide</span>
-                        <span class="lang-hi">स्वाभाविक उच्चारण निर्देश</span>
+                        <span class="lang-en">Simple speaking guide</span>
+                        <span class="lang-hi">बोलने का आसान तरीका</span>
                     </span>
                 </div>
                 <?php if ($ipa): ?>
                 <div class="etym-card">
                     <span class="etym-label">
-                        <span class="lang-en">IPA Notation</span>
-                        <span class="lang-hi">ध्वन्यात्मक लिपि (IPA)</span>
+                        <span class="lang-en">Sound Key</span>
+                        <span class="lang-hi">ध्वनि संकेत</span>
                     </span>
                     <strong class="etym-val ipa-font"><?php echo $ipa; ?></strong>
                     <span class="etym-desc">
-                        <span class="lang-en">International Phonetic Standard</span>
-                        <span class="lang-hi">अंतर्राष्ट्रीय ध्वन्यात्मक मानक</span>
+                        <span class="lang-en">Clear international sound key</span>
+                        <span class="lang-hi">सटीक उच्चारण ध्वनि</span>
                     </span>
                 </div>
                 <?php endif; ?>
@@ -487,12 +467,12 @@ class MR_Baby_Template_Renderer
         <section class="mr-baby-section mr-section-vedic">
             <h2 class="mr-section-title">
                 <span class="icon">🪐</span>
-                <span class="lang-en">Vedic Astrology & Planetary Governance</span>
-                <span class="lang-hi">वैदिक ज्योतिष एवं ग्रह स्वामित्व</span>
+                <span class="lang-en">Vedic Astrology & Kundli Details</span>
+                <span class="lang-hi">वैदिक ज्योतिष एवं कुंडली विवरण</span>
             </h2>
             <p class="section-intro">
-                <span class="lang-en">In classical Vedic Onomastics, every initial sound frequency resonates with a specific planetary sphere, Nakshatra quarter (Pada), and primal element:</span>
-                <span class="lang-hi">प्रामाणिक वैदिक नामकरण विज्ञान के अनुसार प्रत्येक प्रथम ध्वनि तरंग एक विशिष्ट ग्रह क्षेत्र, नक्षत्र चरण और पंचतत्व से जुड़ी होती है:</span>
+                <span class="lang-en">In Vedic astrology, every baby's name sound connects with a specific Moon Sign (Rashi), Birth Star (Nakshatra), and ruling planet:</span>
+                <span class="lang-hi">वैदिक ज्योतिष के अनुसार नाम का पहला अक्षर बच्चे की चंद्र राशि, जन्म नक्षत्र और स्वामी ग्रह से जुड़ा होता है:</span>
             </p>
 
             <div class="mr-vedic-grid">
@@ -508,8 +488,8 @@ class MR_Baby_Template_Renderer
                             <span class="lang-hi"><?php echo $rashi_hi; ?></span>
                         </h4>
                         <p class="v-desc">
-                            <span class="lang-en">Governs emotional temperament, instincts, and outer subconscious reactions.</span>
-                            <span class="lang-hi">मन की स्वाभाविक प्रवृत्ति, आंतरिक स्वभाव और भावनात्मक प्रतिक्रियाओं का नियंत्रक।</span>
+                            <span class="lang-en">Shapes your baby's nature, emotional balance, and natural habits.</span>
+                            <span class="lang-hi">बच्चे के स्वभाव, मन की शांति और स्वाभाविक आदतों को दर्शाता है।</span>
                         </p>
                     </div>
                 </div>
@@ -518,16 +498,16 @@ class MR_Baby_Template_Renderer
                     <div class="v-icon">✨</div>
                     <div class="v-content">
                         <span class="v-label">
-                            <span class="lang-en">Nakshatra & Pada</span>
-                            <span class="lang-hi">नक्षत्र एवं चरण</span>
+                            <span class="lang-en">Birth Star (Nakshatra) & Pada</span>
+                            <span class="lang-hi">जन्म नक्षत्र एवं चरण</span>
                         </span>
                         <h4 class="v-title">
                             <span class="lang-en"><?php echo $nak; ?> &bull; Pada <?php echo $pada; ?></span>
                             <span class="lang-hi"><?php echo $nak_hi; ?> &bull; चरण <?php echo $pada; ?></span>
                         </h4>
                         <p class="v-desc">
-                            <span class="lang-en">The lunar mansion channeling specific cosmic impulses and subtle vitality.</span>
-                            <span class="lang-hi">जन्म नक्षत्र जो जीवन के आंतरिक संस्कारों, प्राण ऊर्जा और प्रारब्ध को दिशा देता है।</span>
+                            <span class="lang-en">The birth star that guides your child's talent, energy, and life journey.</span>
+                            <span class="lang-hi">जन्म नक्षत्र जो बच्चे की प्रतिभा, ऊर्जा और जीवन के मार्ग को दिशा देता है।</span>
                         </p>
                     </div>
                 </div>
@@ -536,7 +516,7 @@ class MR_Baby_Template_Renderer
                     <div class="v-icon">👑</div>
                     <div class="v-content">
                         <span class="v-label">
-                            <span class="lang-en">Ruling Planet (Graha Swami)</span>
+                            <span class="lang-en">Ruling Planet (Graha)</span>
                             <span class="lang-hi">स्वामी ग्रह (राशेश)</span>
                         </span>
                         <h4 class="v-title">
@@ -544,8 +524,8 @@ class MR_Baby_Template_Renderer
                             <span class="lang-hi"><?php echo $planet_hi; ?></span>
                         </h4>
                         <p class="v-desc">
-                            <span class="lang-en">Bestows core strengths, vocational inclination, and magnetic charisma.</span>
-                            <span class="lang-hi">व्यक्तित्व में आकर्षण, नेतृत्व क्षमता और जीवन की मुख्य प्रेरणाएं प्रदान करता है।</span>
+                            <span class="lang-en">Brings natural confidence, intelligence, and leadership qualities.</span>
+                            <span class="lang-hi">बच्चे में आत्मविश्वास, बुद्धि और नेतृत्व क्षमता का विकास करता है।</span>
                         </p>
                     </div>
                 </div>
@@ -554,16 +534,16 @@ class MR_Baby_Template_Renderer
                     <div class="v-icon">🌪️</div>
                     <div class="v-content">
                         <span class="v-label">
-                            <span class="lang-en">Vedic Element (Tattva)</span>
-                            <span class="lang-hi">वैदिक तत्व (पंचमहाभूत)</span>
+                            <span class="lang-en">Nature Element (Tattva)</span>
+                            <span class="lang-hi">तत्व (पंचतत्व)</span>
                         </span>
                         <h4 class="v-title">
                             <span class="lang-en"><?php echo $element; ?></span>
                             <span class="lang-hi"><?php echo $element_hi; ?></span>
                         </h4>
                         <p class="v-desc">
-                            <span class="lang-en">Shapes behavioral fluidity, decision speed, and psychological composure.</span>
-                            <span class="lang-hi">निर्णय क्षमता, मानसिक स्थिरता और जीवन शक्ति के संतुलन को निर्धारित करता है।</span>
+                            <span class="lang-en">Helps maintain calm thinking, good health, and quick learning.</span>
+                            <span class="lang-hi">शांत स्वभाव, अच्छी सेहत और त्वरित निर्णय क्षमता बनाए रखने में सहायक।</span>
                         </p>
                     </div>
                 </div>
@@ -572,7 +552,7 @@ class MR_Baby_Template_Renderer
                     <div class="v-icon">🙏</div>
                     <div class="v-content">
                         <span class="v-label">
-                            <span class="lang-en">Presiding Rashi Deity</span>
+                            <span class="lang-en">Protector Deity (Ishta Devata)</span>
                             <span class="lang-hi">आराध्य देव</span>
                         </span>
                         <h4 class="v-title">
@@ -580,8 +560,8 @@ class MR_Baby_Template_Renderer
                             <span class="lang-hi"><?php echo $deity_hi; ?></span>
                         </h4>
                         <p class="v-desc">
-                            <span class="lang-en">Spiritual protector guiding fortune, moral clarity, and prosperity.</span>
-                            <span class="lang-hi">आध्यात्मिक संरक्षक जो धर्म, सद्बुद्धि, सौभाग्य और समृद्धि का आशीर्वाद देते हैं।</span>
+                            <span class="lang-en">Brings divine blessings, good fortune, and positive energy for life.</span>
+                            <span class="lang-hi">ईश्वरीय आशीर्वाद, सौभाग्य और जीवन में सकारात्मक ऊर्जा प्रदान करते हैं।</span>
                         </p>
                     </div>
                 </div>
@@ -590,13 +570,13 @@ class MR_Baby_Template_Renderer
                     <div class="v-icon">🗣️</div>
                     <div class="v-content">
                         <span class="v-label">
-                            <span class="lang-en">Auspicious Syllable (Akshara)</span>
+                            <span class="lang-en">Lucky Starting Sound (Akshar)</span>
                             <span class="lang-hi">शुभ नामाक्षर</span>
                         </span>
                         <h4 class="v-title"><?php echo $sound; ?></h4>
                         <p class="v-desc">
-                            <span class="lang-en">The golden phonetic trigger aligning this name with positive astral rays.</span>
-                            <span class="lang-hi">नामकरण संस्कार की शुभ ध्वनि तरंगें जो ग्रहों के अनुकूल प्रभाव को आकर्षित करती हैं।</span>
+                            <span class="lang-en">Auspicious letter sound as per traditional Namkaran ceremony.</span>
+                            <span class="lang-hi">नामकरण संस्कार अनुसार शुभ अक्षर जो अनुकूल प्रभाव लाता है।</span>
                         </p>
                     </div>
                 </div>
@@ -628,46 +608,46 @@ class MR_Baby_Template_Renderer
         <section class="mr-baby-section mr-section-numerology">
             <h2 class="mr-section-title">
                 <span class="icon">🔢</span>
-                <span class="lang-en">Chaldean & Pythagorean Numerology Matrix</span>
-                <span class="lang-hi">कीरो (Chaldean) एवं पाइथागोरस अंकशास्त्र चक्र</span>
+                <span class="lang-en">Lucky Numbers & Numerology Analysis</span>
+                <span class="lang-hi">शुभ अंक एवं अंकशास्त्र विश्लेषण</span>
             </h2>
             <p class="section-intro">
-                <span class="lang-en">Numerology decodes the sacred vibrational geometry encoded into the letters of <strong><?php echo $name; ?></strong> across both ancient Eastern (Chaldean) and Western (Pythagorean) systems.</span>
-                <span class="lang-hi">अंकशास्त्र <strong><?php echo $script ?: $name; ?></strong> नाम के अक्षरों में निहित सूक्ष्म ऊर्जा तरंगों को प्राचीन कीरो (Chaldean) एवं पश्चिमी पाइथागोरस पद्धतियों के आधार पर प्रकट करता है:</span>
+                <span class="lang-en">Numerology reveals the lucky energy numbers hidden in the letters of <strong><?php echo $name; ?></strong> using both Indian (Chaldean) and modern (Pythagorean) systems:</span>
+                <span class="lang-hi">अंकशास्त्र <strong><?php echo $script ?: $name; ?></strong> नाम के अक्षरों में छिपे शुभ अंकों को भारतीय कीरो और पाइथागोरस प्रणाली से स्पष्ट करता है:</span>
             </p>
 
             <div class="mr-numerology-grid">
                 <!-- Chaldean Destiny -->
                 <div class="num-card primary-num">
                     <div class="num-badge">
-                        <span class="lang-en">Vedic Chaldean</span>
-                        <span class="lang-hi">कीरो अंक</span>
+                        <span class="lang-en">Main Lucky Number</span>
+                        <span class="lang-hi">मुख्य शुभ अंक</span>
                     </div>
                     <div class="num-value"><?php echo $chaldean_no; ?></div>
                     <h4 class="num-title">
-                        <span class="lang-en">Chaldean Destiny Number</span>
+                        <span class="lang-en">Chaldean Lucky Number</span>
                         <span class="lang-hi">कीरो भाग्य अंक</span>
                     </h4>
                     <p class="num-meaning">
                         <span class="lang-en"><?php echo esc_html($meanings['chaldean_number'] ?? ''); ?></span>
-                        <span class="lang-hi">प्राचीन कीरो पद्धति से गणना किया गया अंक जो आपके बच्चे के मूल लौकिक भाग्य और जीवन के परम उद्देश्य को दर्शाता है।</span>
+                        <span class="lang-hi">यह नाम का सबसे महत्वपूर्ण अंक है जो बच्चे के भाग्य, सफलता और मुख्य जीवन उद्देश्य को दर्शाता है।</span>
                     </p>
                 </div>
 
                 <!-- Chaldean Compound -->
                 <div class="num-card">
                     <div class="num-badge">
-                        <span class="lang-en">Karmic Total</span>
-                        <span class="lang-hi">यौगिक अंक</span>
+                        <span class="lang-en">Compound Total</span>
+                        <span class="lang-hi">संयुक्त अंक</span>
                     </div>
                     <div class="num-value"><?php echo $chaldean_comp; ?></div>
                     <h4 class="num-title">
-                        <span class="lang-en">Chaldean Compound Number</span>
+                        <span class="lang-en">Compound Number</span>
                         <span class="lang-hi">संयुक्त यौगिक अंक</span>
                     </h4>
                     <p class="num-meaning">
                         <span class="lang-en"><?php echo esc_html($meanings['chaldean_compound'] ?? ''); ?></span>
-                        <span class="lang-hi">अघटित दो अंकों की यौगिक आवृत्ति जो अवचेतन शक्तियों, गूढ़ आध्यात्मिक प्रभाव और पूर्वजन्म के संचित कर्म सामर्थ्य को प्रकट करती है।</span>
+                        <span class="lang-hi">सभी अक्षरों के अंकों का कुल योग, जो बच्चे की भीतरी शक्तियों और गुप्त प्रतिभाओं को दिखाता है।</span>
                     </p>
                 </div>
 
@@ -675,7 +655,7 @@ class MR_Baby_Template_Renderer
                 <div class="num-card">
                     <div class="num-badge">
                         <span class="lang-en">Western System</span>
-                        <span class="lang-hi">पाइथागोरस</span>
+                        <span class="lang-hi">पाइथागोरस अंक</span>
                     </div>
                     <div class="num-value"><?php echo $pythagoras_no; ?></div>
                     <h4 class="num-title">
@@ -684,15 +664,15 @@ class MR_Baby_Template_Renderer
                     </h4>
                     <p class="num-meaning">
                         <span class="lang-en"><?php echo esc_html($meanings['pythagorean_number'] ?? ''); ?></span>
-                        <span class="lang-hi">पश्चिमी पाइथागोरस वर्ण-अंक प्रणाली द्वारा निर्धारित अंक, जो बच्चे की स्वाभाविक प्रतिभा, सांसारिक दृष्टिकोण और जन्मजात क्षमताओं का प्रतीक है।</span>
+                        <span class="lang-hi">यह अंक बच्चे के सीखने के तरीके, नए विचारों और दुनिया के प्रति नजरिए को बताता है।</span>
                     </p>
                 </div>
 
                 <!-- Soul Urge -->
                 <div class="num-card">
                     <div class="num-badge">
-                        <span class="lang-en">Vowels Total</span>
-                        <span class="lang-hi">आत्म इच्छा</span>
+                        <span class="lang-en">Heart's Wish</span>
+                        <span class="lang-hi">दिल की इच्छा</span>
                     </div>
                     <div class="num-value"><?php echo $soul_urge_no; ?></div>
                     <h4 class="num-title">
@@ -701,15 +681,15 @@ class MR_Baby_Template_Renderer
                     </h4>
                     <p class="num-meaning">
                         <span class="lang-en"><?php echo esc_html($meanings['soul_urge_number'] ?? ''); ?></span>
-                        <span class="lang-hi">केवल स्वरों से गणना किया गया अंक, जो हृदय की अंतरतम इच्छाओं, भावनात्मक प्रवृत्तियों और आत्मिक अभिलाषाओं को उजागर करता है।</span>
+                        <span class="lang-hi">नाम के स्वरों (A, E, I, O, U) से बना अंक, जो बच्चे की भीतरी पसंद और खुशियों को बताता है।</span>
                     </p>
                 </div>
 
                 <!-- Personality Number -->
                 <div class="num-card">
                     <div class="num-badge">
-                        <span class="lang-en">Consonants Total</span>
-                        <span class="lang-hi">व्यक्तित्व छवि</span>
+                        <span class="lang-en">First Impression</span>
+                        <span class="lang-hi">बाहरी प्रभाव</span>
                     </div>
                     <div class="num-value"><?php echo $personality_no; ?></div>
                     <h4 class="num-title">
@@ -718,15 +698,15 @@ class MR_Baby_Template_Renderer
                     </h4>
                     <p class="num-meaning">
                         <span class="lang-en"><?php echo esc_html($meanings['personality_number'] ?? ''); ?></span>
-                        <span class="lang-hi">केवल व्यंजनों से गणना किया गया अंक, जो बाह्य व्यक्तित्व, समाज में प्रभाव और प्रथम दृश्य प्रभाव को प्रदर्शित करता है।</span>
+                        <span class="lang-hi">लोग आपके बच्चे को पहली मुलाकात में कैसे देखते हैं और उसका समाज पर क्या प्रभाव पड़ता है।</span>
                     </p>
                 </div>
 
                 <!-- Expression Number -->
                 <div class="num-card">
                     <div class="num-badge">
-                        <span class="lang-en">Life Expression</span>
-                        <span class="lang-hi">कर्म अंक</span>
+                        <span class="lang-en">Talent & Work</span>
+                        <span class="lang-hi">कर्म व सफलता</span>
                     </div>
                     <div class="num-value"><?php echo $expression_no; ?></div>
                     <h4 class="num-title">
@@ -735,7 +715,7 @@ class MR_Baby_Template_Renderer
                     </h4>
                     <p class="num-meaning">
                         <span class="lang-en"><?php echo esc_html($meanings['expression_number'] ?? ''); ?></span>
-                        <span class="lang-hi">व्यक्तिगत क्षमताओं और स्वाभाविक दक्षताओं को मूर्त व्यावसायिक और व्यावहारिक उपलब्धियों में ढालने वाला अंक।</span>
+                        <span class="lang-hi">यह अंक बच्चे की प्राकृतिक प्रतिभाओं को जीवन में बड़ी उपलब्धियों और सफलता में बदलने में मदद करता है।</span>
                     </p>
                 </div>
             </div>
@@ -743,12 +723,12 @@ class MR_Baby_Template_Renderer
             <?php if (!empty($life_path_en)): ?>
             <div class="mr-life-path-box">
                 <span class="badge-tag">
-                    <span class="lang-en">Cosmic Synthesis</span>
-                    <span class="lang-hi">वैदिक समन्वय</span>
+                    <span class="lang-en">Summary</span>
+                    <span class="lang-hi">संक्षेप</span>
                 </span>
                 <h4>
-                    <span class="lang-en">Life Path & Planetary Vibration Analysis</span>
-                    <span class="lang-hi">जीवन पथ एवं ग्रह तरंगीय विश्लेषण</span>
+                    <span class="lang-en">Life Path & Planetary Summary</span>
+                    <span class="lang-hi">जीवन पथ एवं ग्रह प्रभाव सारांश</span>
                 </h4>
                 <p>
                     <span class="lang-en"><?php echo $life_path_en; ?></span>
@@ -781,12 +761,12 @@ class MR_Baby_Template_Renderer
         <section class="mr-baby-section mr-section-attributes">
             <h2 class="mr-section-title">
                 <span class="icon">💎</span>
-                <span class="lang-en">Auspicious Astrological Attributes & Lucky Alignments</span>
-                <span class="lang-hi">शुभ ज्योतिषीय गुण एवं भाग्यशाली योग</span>
+                <span class="lang-en">Lucky Colors, Gemstone, Days & Auspicious Details</span>
+                <span class="lang-hi">शुभ रंग, रत्न, दिन एवं भाग्यशाली विवरण</span>
             </h2>
             <p class="section-intro">
-                <span class="lang-en">Harnessing these planetary harmonizers magnifies positive cosmic rays and shields against discordant energies:</span>
-                <span class="lang-hi">इन ग्रहों के शुभ तत्वों और प्रतीकों को अपनाने से सकारात्मक ऊर्जा में वृद्धि होती है और प्रतिकूल प्रभावों से सुरक्षा मिलती है:</span>
+                <span class="lang-en">Using these lucky colors, favorable days, and elements brings positive vibes and good fortune for your child:</span>
+                <span class="lang-hi">इन शुभ रंगों, दिनों और धातुओं को अपनाने से सकारात्मक ऊर्जा में वृद्धि होती है और शुभ फल प्राप्त होते हैं:</span>
             </p>
 
             <div class="mr-attributes-table-wrap">
@@ -803,7 +783,7 @@ class MR_Baby_Template_Renderer
                         <tr>
                             <th scope="row">
                                 <span class="attr-icon">🎨</span>
-                                <span class="lang-en">Auspicious Colors</span>
+                                <span class="lang-en">Lucky Colors</span>
                                 <span class="lang-hi">शुभ रंग</span>
                             </th>
                             <td>
@@ -822,29 +802,29 @@ class MR_Baby_Template_Renderer
                         <tr>
                             <th scope="row">
                                 <span class="attr-icon">📅</span>
-                                <span class="lang-en">Favorable Days</span>
+                                <span class="lang-en">Lucky Days</span>
                                 <span class="lang-hi">शुभ दिन (वार)</span>
                             </th>
                             <td>
-                                <span class="lang-en"><strong><?php echo esc_html($days_en); ?></strong> (Best for ceremonies & education)</span>
-                                <span class="lang-hi"><strong><?php echo esc_html($days_hi); ?></strong> (शिक्षा और महत्वपूर्ण कार्यों के लिए श्रेष्ठ)</span>
+                                <span class="lang-en"><strong><?php echo esc_html($days_en); ?></strong> (Best for starting school & ceremonies)</span>
+                                <span class="lang-hi"><strong><?php echo esc_html($days_hi); ?></strong> (पढ़ाई और शुभ कार्यों के लिए श्रेष्ठ)</span>
                             </td>
                         </tr>
                         <tr>
                             <th scope="row">
                                 <span class="attr-icon">💍</span>
-                                <span class="lang-en">Beneficial Gemstone</span>
+                                <span class="lang-en">Lucky Gemstone</span>
                                 <span class="lang-hi">शुभ रत्न</span>
                             </th>
                             <td>
-                                <span class="lang-en"><strong><?php echo $gemstone_en; ?></strong> (Consult astrologer for Ratna Dharan)</span>
-                                <span class="lang-hi"><strong><?php echo $gemstone_hi; ?></strong> (रत्न धारण से पूर्व ज्योतिषी परामर्श लें)</span>
+                                <span class="lang-en"><strong><?php echo $gemstone_en; ?></strong> (Consult an astrologer before wearing)</span>
+                                <span class="lang-hi"><strong><?php echo $gemstone_hi; ?></strong> (रत्न पहनने से पहले ज्योतिषी से सलाह अवश्य लें)</span>
                             </td>
                         </tr>
                         <tr>
                             <th scope="row">
                                 <span class="attr-icon">🪙</span>
-                                <span class="lang-en">Favorable Metal</span>
+                                <span class="lang-en">Lucky Metal</span>
                                 <span class="lang-hi">शुभ धातु</span>
                             </th>
                             <td>
@@ -855,12 +835,12 @@ class MR_Baby_Template_Renderer
                         <tr>
                             <th scope="row">
                                 <span class="attr-icon">🧭</span>
-                                <span class="lang-en">Auspicious Direction</span>
+                                <span class="lang-en">Lucky Direction</span>
                                 <span class="lang-hi">शुभ दिशा</span>
                             </th>
                             <td>
-                                <span class="lang-en"><strong><?php echo $direction_en; ?></strong> (Optimal for study & sanctuary placement)</span>
-                                <span class="lang-hi"><strong><?php echo $direction_hi; ?></strong> (अध्ययन एवं साधना के लिए उत्तम)</span>
+                                <span class="lang-en"><strong><?php echo $direction_en; ?></strong> (Best direction for study desk and bedroom)</span>
+                                <span class="lang-hi"><strong><?php echo $direction_hi; ?></strong> (पढ़ाई की मेज और कमरे के लिए सर्वोत्तम दिशा)</span>
                             </td>
                         </tr>
                     </tbody>
@@ -891,8 +871,8 @@ class MR_Baby_Template_Renderer
         <section class="mr-baby-section mr-section-psychology">
             <h2 class="mr-section-title">
                 <span class="icon">🧠</span>
-                <span class="lang-en">Psychological Insights & Character Strengths</span>
-                <span class="lang-hi">मनोवैज्ञानिक विश्लेषण एवं व्यक्तित्व की विशेषताएं</span>
+                <span class="lang-en">Personality, Nature & Character Qualities</span>
+                <span class="lang-hi">स्वभाव, आदतें और व्यक्तित्व की विशेषताएं</span>
             </h2>
             <div class="mr-narrative-content lang-en">
                 <?php foreach ($paragraphs_en as $p): ?>
@@ -932,9 +912,9 @@ class MR_Baby_Template_Renderer
         ?>
         <section class="mr-baby-section mr-section-career">
             <h2 class="mr-section-title">
-                <span class="icon">🚀</span>
-                <span class="lang-en">Career Trajectory & Vocational Strengths</span>
-                <span class="lang-hi">करियर मार्गदर्शन एवं व्यावसायिक सफलता के क्षेत्र</span>
+                <span class="icon">💼</span>
+                <span class="lang-en">Best Career Fields, Studies & Success</span>
+                <span class="lang-hi">करियर, शिक्षा और सफलता के श्रेष्ठ क्षेत्र</span>
             </h2>
             <div class="mr-narrative-content lang-en">
                 <?php foreach ($paragraphs_en as $p): ?>
@@ -969,16 +949,16 @@ class MR_Baby_Template_Renderer
         ?>
         <section class="mr-baby-section mr-section-compatibility">
             <h2 class="mr-section-title">
-                <span class="icon">⚖️</span>
-                <span class="lang-en">Zodiac Compatibility & Global Appeal</span>
-                <span class="lang-hi">राशि अनुकूलता एवं वैश्विक प्रभाव</span>
+                <span class="icon">❤️</span>
+                <span class="lang-en">Friendly Zodiac Signs & Best Match</span>
+                <span class="lang-hi">अनुकूल राशियां और मित्रता</span>
             </h2>
 
             <div class="mr-compat-cards-grid">
                 <div class="mr-compat-card">
                     <h4>
-                        <span class="lang-en">Elemental Resonance (<?php echo $element_en; ?> Tattva)</span>
-                        <span class="lang-hi">तत्व सामंजस्य (<?php echo $element_hi; ?>)</span>
+                        <span class="lang-en">Zodiac & Nature Compatibility (<?php echo $element_en; ?> Element)</span>
+                        <span class="lang-hi">राशि व स्वभाव सामंजस्य (<?php echo $element_hi; ?> तत्व)</span>
                     </h4>
                     <p>
                         <span class="lang-en"><?php echo $compatibility_en; ?></span>
@@ -989,8 +969,8 @@ class MR_Baby_Template_Renderer
                 <?php if ($dual_market_en): ?>
                 <div class="mr-compat-card">
                     <h4>
-                        <span class="lang-en">Cross-Cultural & Global Appeal</span>
-                        <span class="lang-hi">वैश्विक स्वीकार्यता एवं प्रभाव</span>
+                        <span class="lang-en">Modern & Global Popularity</span>
+                        <span class="lang-hi">आधुनिक एवं वैश्विक पसंद</span>
                     </h4>
                     <p>
                         <span class="lang-en"><?php echo $dual_market_en; ?></span>
@@ -1015,19 +995,19 @@ class MR_Baby_Template_Renderer
         <section class="mr-baby-section mr-section-recommendations">
             <h2 class="mr-section-title">
                 <span class="icon">👶</span>
-                <span class="lang-en">Matching Sibling Names & Spelling Variants</span>
-                <span class="lang-hi">भाई-बहन के मिलते-जुलते नाम एवं वर्तनी विकल्प</span>
+                <span class="lang-en">Matching Names for Brothers & Sisters</span>
+                <span class="lang-hi">भाई-बहन के मिलते-जुलते सुंदर नाम</span>
             </h2>
             <p class="section-intro">
-                <span class="lang-en">All recommended sibling names and phonetic variants are validated in our database to provide seamless exploration:</span>
-                <span class="lang-hi">सुझाए गए सभी भाई-बहन के नाम और वर्तनी विकल्प हमारी डेटाबेस में उपलब्ध और सत्यापित हैं:</span>
+                <span class="lang-en">Looking for matching sibling names or alternate spellings? Explore these handpicked options:</span>
+                <span class="lang-hi">क्या आप भाई-बहन के लिए मिलते-जुलते नाम या अन्य स्पेलिंग खोज रहे हैं? यहाँ देखें:</span>
             </p>
 
             <?php if (!empty($variants)): ?>
             <div class="rec-group">
                 <h4 class="rec-group-title">
-                    <span class="lang-en">Spelling Variants & Alternate Transliterations</span>
-                    <span class="lang-hi">वैकल्पिक वर्तनी और उच्चारण</span>
+                    <span class="lang-en">Similar Spellings & Pronunciations</span>
+                    <span class="lang-hi">वैकल्पिक स्पेलिंग और उच्चारण</span>
                 </h4>
                 <div class="pills-container">
                     <?php foreach ($variants as $var):
@@ -1047,8 +1027,8 @@ class MR_Baby_Template_Renderer
             <?php if (!empty($brothers)): ?>
             <div class="rec-group">
                 <h4 class="rec-group-title">
-                    <span class="lang-en">👦 Harmonious Brother Names</span>
-                    <span class="lang-hi">👦 भाई के लिए शुभ नाम</span>
+                    <span class="lang-en">👦 Matching Brother Names</span>
+                    <span class="lang-hi">👦 भाई के लिए सुंदर नाम</span>
                 </h4>
                 <div class="pills-container">
                     <?php foreach ($brothers as $bro):
@@ -1068,8 +1048,8 @@ class MR_Baby_Template_Renderer
             <?php if (!empty($sisters)): ?>
             <div class="rec-group">
                 <h4 class="rec-group-title">
-                    <span class="lang-en">👧 Harmonious Sister Names</span>
-                    <span class="lang-hi">👧 बहन के लिए शुभ नाम</span>
+                    <span class="lang-en">👧 Matching Sister Names</span>
+                    <span class="lang-hi">👧 बहन के लिए सुंदर नाम</span>
                 </h4>
                 <div class="pills-container">
                     <?php foreach ($sisters as $sis):
@@ -1104,25 +1084,25 @@ class MR_Baby_Template_Renderer
             <div class="mr-hub-banner">
                 <div class="hub-content">
                     <span class="hub-badge">
-                        <span class="lang-en">🌟 Interactive Astrological Tools</span>
-                        <span class="lang-hi">🌟 ऑनलाइन ज्योतिषीय गणना यंत्र</span>
+                        <span class="lang-en">🌟 Free Astrological Calculators</span>
+                        <span class="lang-hi">🌟 निशुल्क ज्योतिषीय कैलकुलेटर</span>
                     </span>
                     <h3>
-                        <span class="lang-en">Check Name Harmony with Date of Birth</span>
+                        <span class="lang-en">Check Name Compatibility with Date of Birth</span>
                         <span class="lang-hi">जन्म तिथि के साथ नाम का सामंजस्य जांचें</span>
                     </h3>
                     <p>
-                        <span class="lang-en">Discover if <strong><?php echo $name; ?></strong> aligns with your baby's exact birth date using our computerized Lo-Shu Grid and Vedic Kundli calculator.</span>
-                        <span class="lang-hi">जानें कि क्या <strong><?php echo $script ?: $name; ?></strong> नाम आपके बच्चे की जन्म तिथि के साथ मेल खाता है। हमारे लो-शू ग्रिड और वैदिक कुंडली कैलकुलेटर का उपयोग करें।</span>
+                        <span class="lang-en">Find out if <strong><?php echo $name; ?></strong> perfectly matches your baby's exact date of birth using our computerized Lo-Shu Grid and Kundli match calculator.</span>
+                        <span class="lang-hi">जानें कि क्या <strong><?php echo $script ?: $name; ?></strong> नाम आपके बच्चे की जन्म तारीख के अनुसार पूरी तरह शुभ है। हमारे लो-शू ग्रिड और कुंडली कैलकुलेटर का उपयोग करें।</span>
                     </p>
                     <div class="hub-buttons">
                         <a href="<?php echo esc_url($ns_url); ?>" class="mr-btn mr-btn-primary">
-                            <span class="lang-en">Calculate Lo-Shu Grid &rarr;</span>
-                            <span class="lang-hi">लो-शू ग्रिड बनाएं &rarr;</span>
+                            <span class="lang-en">Check Lo-Shu Grid &rarr;</span>
+                            <span class="lang-hi">लो-शू ग्रिड चेक करें &rarr;</span>
                         </a>
                         <a href="<?php echo esc_url($baby_base); ?>" class="mr-btn mr-btn-secondary">
-                            <span class="lang-en">Find Names by Birth Star</span>
-                            <span class="lang-hi">जन्म नक्षत्र अनुसार नाम खोजें</span>
+                            <span class="lang-en">Find Names by Nakshatra</span>
+                            <span class="lang-hi">नक्षत्र अनुसार नाम खोजें</span>
                         </a>
                         <a href="<?php echo esc_url($horoscope_url); ?>" class="mr-btn mr-btn-outline">
                             <span class="lang-en">Read Today's Rashifal</span>
@@ -1973,8 +1953,69 @@ class MR_Baby_Template_Renderer
             }
             .mr-faq-answer p { margin: 0; }
 
+            /* Top Language Toggle Bar (Prominent at top of content) */
+            .mr-baby-top-lang-bar {
+                display: flex;
+                justify-content: flex-end;
+                align-items: center;
+                margin-bottom: 20px;
+                padding: 4px 0;
+            }
+            .mr-lang-switch-box {
+                display: inline-flex;
+                align-items: center;
+                gap: 12px;
+                background: #FFFFFF;
+                border: 1px solid var(--border-gold);
+                padding: 6px 14px;
+                border-radius: 50px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+            }
+            .mr-lang-hint {
+                font-size: 0.88rem;
+                font-weight: 700;
+                color: var(--text-grey);
+                display: inline-flex;
+                align-items: center;
+            }
+            .mr-lang-pill-group {
+                display: inline-flex;
+                background: #FEF3C7;
+                border-radius: 30px;
+                padding: 3px;
+                gap: 4px;
+            }
+            .mr-lang-btn {
+                border: none;
+                background: transparent;
+                padding: 6px 16px;
+                border-radius: 20px;
+                font-family: 'Outfit', 'Noto Sans', sans-serif;
+                font-size: 0.88rem;
+                font-weight: 700;
+                color: #78350F;
+                cursor: pointer;
+                transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            .mr-lang-btn:hover {
+                color: var(--primary-orange);
+            }
+            .mr-lang-btn.active {
+                background: var(--primary-orange);
+                color: #FFFFFF !important;
+                box-shadow: 0 2px 8px rgba(255, 140, 0, 0.35);
+            }
+
+            /* Breadcrumb Navigation - Suppress all redundant visual breadcrumbs */
+            .mr-baby-breadcrumb,
+            .ast-breadcrumbs,
+            .entry-header .ast-breadcrumbs {
+                display: none !important;
+            }
+
             /* Mobile Responsiveness */
             @media (max-width: 768px) {
+                .mr-baby-top-lang-bar { justify-content: center; }
                 .mr-baby-header-card { padding: 24px 18px; }
                 .mr-baby-title { font-size: 2.1rem; }
                 .mr-baby-title .script-tag { font-size: 1.4rem; }
@@ -1985,53 +2026,39 @@ class MR_Baby_Template_Renderer
         </style>
         <script>
         // Ensure seamless client-side bilingual switching on click without page reload
-        if (typeof window.switchBabyLang !== 'function') {
-            window.switchBabyLang = function(lang, btn) {
-                var containers = document.querySelectorAll('.baby-engine-container, .mr-baby-detail-wrap, body');
-                containers.forEach(function(el) {
-                    if (lang === 'hi') {
-                        el.classList.add('lang-hi-active');
-                    } else {
-                        el.classList.remove('lang-hi-active');
-                    }
-                });
-                document.querySelectorAll('.af-z-lang-btn').forEach(function(b) {
-                    b.classList.remove('active');
-                });
-                if (btn) {
-                    btn.classList.add('active');
+        window.switchBabyLang = function(lang, btn) {
+            var isHi = (lang === 'hi');
+            var containers = document.querySelectorAll('.baby-engine-container, .mr-baby-detail-wrap, body');
+            containers.forEach(function(el) {
+                if (isHi) {
+                    el.classList.add('lang-hi-active');
                 } else {
-                    var targetBtn = document.querySelector('.af-z-lang-btn[onclick*="' + lang + '"]');
-                    if (targetBtn) targetBtn.classList.add('active');
+                    el.classList.remove('lang-hi-active');
                 }
-                try { localStorage.setItem('mr_baby_lang', lang); } catch(e) {}
-            };
-        } else {
-            // Hook existing switchBabyLang to also update .mr-baby-detail-wrap and localStorage
-            var origSwitch = window.switchBabyLang;
-            window.switchBabyLang = function(lang, btn) {
-                origSwitch(lang, btn);
-                var detailWrap = document.querySelector('.mr-baby-detail-wrap');
-                if (detailWrap) {
-                    if (lang === 'hi') {
-                        detailWrap.classList.add('lang-hi-active');
-                        document.body.classList.add('lang-hi-active');
-                    } else {
-                        detailWrap.classList.remove('lang-hi-active');
-                        document.body.classList.remove('lang-hi-active');
-                    }
+            });
+
+            // Synchronize active states across all language toggle buttons
+            document.querySelectorAll('.mr-lang-btn, .af-z-lang-btn').forEach(function(b) {
+                var bLang = b.getAttribute('data-lang');
+                if (!bLang) {
+                    bLang = (b.textContent.trim().indexOf('हिंदी') !== -1) ? 'hi' : 'en';
                 }
-                try { localStorage.setItem('mr_baby_lang', lang); } catch(e) {}
-            };
-        }
+                if (bLang === lang) {
+                    b.classList.add('active');
+                } else {
+                    b.classList.remove('active');
+                }
+            });
+
+            try { localStorage.setItem('mr_baby_lang', lang); } catch(e) {}
+        };
 
         // Auto-restore saved language preference on page load
         document.addEventListener('DOMContentLoaded', function() {
             try {
                 var saved = localStorage.getItem('mr_baby_lang');
                 if (saved === 'hi') {
-                    var hiBtn = document.querySelector('.af-z-lang-btn[onclick*="hi"]');
-                    window.switchBabyLang('hi', hiBtn);
+                    window.switchBabyLang('hi');
                 }
             } catch(e) {}
         });

@@ -186,8 +186,9 @@ class MR_Baby_Gemini_Service
             return $this->get_fallback_ai_data($name, $gender, $religion, $astro_core);
         }
 
-        $system_instruction = "You are an authority on Vedic onomastics, Sanskrit etymology, and modern Indian diaspora naming conventions. " .
-            "You generate deep, culturally authentic, and academically rigorous baby name profiles. " .
+        $system_instruction = "You are an astrological and baby naming expert for Indian parents at MeraRashifal.com. " .
+            "Write in very simple, clean, everyday English that is easily understood by common Indian people and parents. " .
+            "Avoid complex academic words, heavy sentences, or difficult jargon. Keep the tone warm, respectful, friendly, and simple. " .
             "Output strictly valid JSON with no markdown wrapping, no backticks, and exactly according to the required schema.";
 
         $rashi      = $astro_core['vedic_astrology']['rashi_moon_sign'];
@@ -197,19 +198,19 @@ class MR_Baby_Gemini_Service
         $chaldean   = $astro_core['numerology']['chaldean_number'];
         $pythagoras = $astro_core['numerology']['pythagorean_number'];
 
-        $prompt = "Generate an extensive, 1,000-word comprehensive profile for the baby name '{$name}' (Gender: {$gender}, Religion: {$religion}).\n\n" .
-            "Vedic & Numerology Anchors (incorporate deterministically without contradicting):\n" .
+        $prompt = "Generate a comprehensive baby name profile for the name '{$name}' (Gender: {$gender}, Religion: {$religion}) in very simple, easy-to-read English.\n\n" .
+            "Vedic & Numerology Anchors:\n" .
             "- Moon Sign (Rashi): {$rashi}\n" .
             "- Nakshatra: {$nakshatra}\n" .
-            "- Ruling Planet (Graha Swami): {$planet}\n" .
+            "- Ruling Planet: {$planet}\n" .
             "- Vedic Element: {$element}\n" .
             "- Chaldean Destiny Number: {$chaldean}\n" .
             "- Pythagorean Expression Number: {$pythagoras}\n\n" .
-            "Requirements for Content Depth:\n" .
-            "1. 'personality_and_character_insights': Write 3 detailed paragraphs analyzing behavioral psychology, emotional resilience, and interpersonal strengths.\n" .
-            "2. 'career_and_success_predictions': Write 3 detailed paragraphs evaluating natural vocational aptitudes, leadership acumen, and financial habits.\n" .
-            "3. 'faqs': Provide 5 comprehensive FAQ items with detailed, helpful answers (at least 60 words per answer).\n" .
-            "4. 'sibling_recommendations': 4 brother and 4 sister names that phonetically harmonise with '{$name}'.\n\n" .
+            "Guidelines (Write in very simple English for Indian families):\n" .
+            "1. 'personality_and_character_insights': Write 3 warm, easy-to-read paragraphs about their nature, friendly character, emotional strengths, and good qualities.\n" .
+            "2. 'career_and_success_predictions': Write 3 easy-to-read paragraphs about good career choices, studies, leadership skills, and success habits.\n" .
+            "3. 'faqs': Provide 5 helpful FAQ questions and answers that Indian parents commonly ask about this name.\n" .
+            "4. 'sibling_recommendations': 4 brother and 4 sister names that sound lovely with '{$name}'.\n\n" .
             "Output JSON Schema:\n" .
             "{\n" .
             '  "script": "Devanagari or native script (e.g. तुषार)",' . "\n" .
@@ -462,18 +463,18 @@ class MR_Baby_Gemini_Service
 
         return [
             'script' => $name,
-            'primary_origin' => $religion . ' / Sanskrit',
+            'primary_origin' => $religion . ' / Traditional',
             'gender_suitability' => $gender === 'Boy' ? 'Male Only' : 'Female Only',
-            'popularity_badge' => 'Classic Heritage',
+            'popularity_badge' => 'Popular & Meaningful',
             'etymology' => [
-                'literal_meaning' => "Auspicious {$religion} name signifying dignity, strength, and divine blessings.",
+                'literal_meaning' => "A beautiful and blessed {$religion} name meaning goodness, light, and happiness.",
                 'syllables' => [$name],
                 'syllable_count' => 2,
                 'ipa_pronunciation' => '/' . strtolower($name) . '/',
                 'phonetic_respelling' => $name
             ],
-            'personality_and_character_insights' => "Individuals bearing the name {$name} resonate deeply with the governing rays of {$planet} and the vibration of {$rashi}. They possess natural poise, balanced emotional intelligence, and enduring integrity.",
-            'career_and_success_predictions' => "In vocational spheres, {$name} excels where visionary leadership, methodical dedication, and ethical values are rewarded, empowered by Chaldean destiny vibration {$chaldean}.",
+            'personality_and_character_insights' => "A child named {$name} has a kind heart, honest nature, and strong willpower. Blessed by planet {$planet} and Moon sign {$rashi}, they make friends easily, love learning new things, and bring joy and happiness to their family.",
+            'career_and_success_predictions' => "With Lucky Number {$chaldean}, {$name} has great focus, hard work, and good decision-making skills. They can achieve high success in education, business, creative fields, or respected leadership jobs.",
             'global_metadata' => [
                 'popularity_india' => 'Widely respected classic across India',
                 'popularity_us' => 'Beloved cultural heritage name',

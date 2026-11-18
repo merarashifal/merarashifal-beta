@@ -762,21 +762,21 @@ class MR_Baby_Astro_Engine
     private function get_life_path_resonance($chaldean, $pythagorean)
     {
         $meanings = [
-            1 => 'governed by the Sun, radiating leadership, pioneering spirit, and executive autonomy.',
-            2 => 'governed by the Moon, emphasizing diplomatic grace, intuitive empathy, and peacemaking.',
-            3 => 'governed by Jupiter, magnifying creative expression, optimism, and social charisma.',
-            4 => 'governed by Rahu/Uranus, embodying structural precision, perseverance, and pragmatic discipline.',
-            5 => 'governed by Mercury, vibrating with adaptability, communicative intellect, and dynamic curiosity.',
-            6 => 'governed by Venus, anchoring harmonious nurturing, domestic responsibility, and refined aesthetic taste.',
-            7 => 'governed by Ketu/Neptune, fostering philosophical depth, contemplative learning, and spiritual intellect.',
-            8 => 'governed by Saturn, catalyzing karmic mastery, executive materialization, and enduring authority.',
-            9 => 'governed by Mars, inspiring humanitarian vision, fearless courage, and universal compassion.'
+            1 => 'ruled by the Sun, bringing leadership, confidence, and strong courage.',
+            2 => 'ruled by the Moon, bringing kindness, caring nature, and peaceful friendships.',
+            3 => 'ruled by Jupiter, bringing creativity, happiness, and intelligence.',
+            4 => 'ruled by Rahu, bringing hard work, discipline, and honest focus.',
+            5 => 'ruled by Mercury, bringing sharp thinking, quick learning, and great communication skills.',
+            6 => 'ruled by Venus, bringing love, beauty, helpful nature, and family happiness.',
+            7 => 'ruled by Ketu, bringing wisdom, deep thinking, and spiritual blessings.',
+            8 => 'ruled by Saturn, bringing strong patience, success in work, and great achievements.',
+            9 => 'ruled by Mars, bringing bravery, high energy, and a generous heart.'
         ];
 
         $ch_text = $meanings[$chaldean] ?? $meanings[1];
         $py_text = $meanings[$pythagorean] ?? $meanings[6];
 
-        return "Holds a primary Chaldean vibration of {$chaldean} ({$ch_text}) synthesized with an Expression number of {$pythagorean} ({$py_text}) to produce balanced destiny flow.";
+        return "With Lucky Number {$chaldean} ({$ch_text}) and Expression Number {$pythagorean} ({$py_text}), this name brings balanced blessings and success in life.";
     }
 
     /**
@@ -796,17 +796,17 @@ class MR_Baby_Astro_Engine
     }
 
     /**
-     * Concise one-liner definitions for each numerological marker
+     * Concise one-liner definitions for each numerological marker in simple, everyday English
      */
     public static function get_numerology_meanings()
     {
         return [
-            'chaldean_number'    => 'Destiny vibration based on Vedic-Chaldean sound frequencies, revealing core spiritual and life path purpose.',
-            'chaldean_compound'  => 'Double-digit karmic sum reflecting subconscious strengths, occult lessons, and latent potentials.',
-            'pythagorean_number' => 'Western vibrational frequency reflecting outer worldly perception, mindset, and natural gifts.',
-            'expression_number'  => 'Channels individual talents and faculties into tangible vocational and life achievements.',
-            'soul_urge_number'   => 'Derived from name vowels, exposing the heart’s innermost passions and emotional aspirations.',
-            'personality_number' => 'Derived from name consonants, projecting the outer persona, charisma, and public first impression.'
+            'chaldean_number'    => 'The main lucky number that guides overall success, luck, and destiny in life.',
+            'chaldean_compound'  => 'The two-digit total that reveals hidden spiritual strengths and inner gifts.',
+            'pythagorean_number' => 'Shows how the child thinks, learns, and uses their natural talents.',
+            'expression_number'  => 'Shows natural skills, communication, and practical abilities at school and work.',
+            'soul_urge_number'   => 'Calculated from vowels (A, E, I, O, U); shows what the child truly loves in their heart.',
+            'personality_number' => 'Calculated from consonants; shows how the child behaves and makes friends.'
         ];
     }
 }
