@@ -455,13 +455,22 @@ function mr_get_contextual_og_image() {
     return $theme_og_base . 'og-default-main.jpg';
 }
 
-// Override Yoast Open Graph Image with contextual 1200x630 JPEG
+// Override Yoast Open Graph Image with contextual 1.91:1 JPEG
 add_filter('wpseo_opengraph_image', 'mr_get_contextual_og_image', 9999);
 add_filter('wpseo_twitter_image', 'mr_get_contextual_og_image', 9999);
 
-// Ensure proper dimensions and mime type for Open Graph
-add_filter('wpseo_opengraph_image_size', function() {
-    return ['width' => 1024, 'height' => 536];
+// Enforce image/jpeg mime type so WhatsApp/FB never read image/webp
+add_filter('wpseo_opengraph_image_type', function() {
+    return 'image/jpeg';
+}, 9999);
+
+// Enforce correct dimensions for 1024x536 card
+add_filter('wpseo_opengraph_image_width', function() {
+    return 1024;
+}, 9999);
+
+add_filter('wpseo_opengraph_image_height', function() {
+    return 536;
 }, 9999);
 
 // Set social locale to Hindi/India for high priority on Indian WhatsApp/FB clients
@@ -469,13 +478,8 @@ add_filter('wpseo_locale', function() {
     return 'hi_IN';
 }, 9999);
 
-// Inject fallback meta tags if Yoast does not output them
-add_action('wp_head', function() {
-    if (is_admin()) return;
+// Ensure og:image:secure_url is present for HTTPS compatibility
+add_action('wpseo_opengraph', function() {
     $og_img = mr_get_contextual_og_image();
-    echo '<meta property="og:image:width" content="1024" />' . "\n";
-    echo '<meta property="og:image:height" content="536" />' . "\n";
-    echo '<meta property="og:image:type" content="image/jpeg" />' . "\n";
-    echo '<meta name="twitter:card" content="summary_large_image" />' . "\n";
-    echo '<meta name="twitter:image" content="' . esc_url($og_img) . '" />' . "\n";
+    echo '<meta property="og:image:secure_url" content="' . esc_url($og_img) . '" />' . "\n";
 }, 30);
