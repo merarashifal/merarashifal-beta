@@ -424,6 +424,50 @@ class MR_Baby_Astro_Engine
     {
         // Auto-provision table on initialization if missing (ensures live deployment safety)
         $this->ensure_profiles_table();
+        $this->ensure_snippet_delegation();
+    }
+
+    /**
+     * Auto-patches Snippet 74 (Baby Names Engine) in Code Snippets database table
+     * to ensure live server seamlessly delegates name_detail rendering to MR_Baby_Template_Renderer.
+     */
+    public function ensure_snippet_delegation()
+    {
+        global $wpdb;
+        if (empty($wpdb)) {
+            return;
+        }
+
+        // Fast check using transient to avoid queries on every request
+        if (get_transient('mr_baby_snippet_delegation_v1')) {
+            return;
+        }
+
+        $table = $wpdb->prefix . 'snippets';
+        if ($wpdb->get_var("SHOW TABLES LIKE '{$table}'") !== $table) {
+            set_transient('mr_baby_snippet_delegation_v1', 1, DAY_IN_SECONDS);
+            return;
+        }
+
+        $snippet = $wpdb->get_row("SELECT id, code FROM {$table} WHERE name LIKE '%Baby Names Engine%' OR id = 74 LIMIT 1");
+        if (!$snippet || empty($snippet->code)) {
+            set_transient('mr_baby_snippet_delegation_v1', 1, DAY_IN_SECONDS);
+            return;
+        }
+
+        if (strpos($snippet->code, 'MR_Baby_Template_Renderer') === false) {
+            $needle = 'private function render_name_detail()';
+            if (strpos($snippet->code, $needle) !== false) {
+                $replacement = "private function render_name_detail()\n    {\n        if (class_exists('MR_Baby_Template_Renderer')) {\n            \$name_slug = get_query_var('baby_name');\n            \$gender = get_query_var('gender') ?: 'boy';\n            \$char = get_query_var('alphabet') ?: substr(\$name_slug, 0, 1);\n            \$religion = get_query_var('religion') ?: (\$_GET['religion'] ?? 'Hindu');\n            echo MR_Baby_Template_Renderer::render_detail(\$name_slug, \$gender, \$char, \$religion);\n            return;\n        }";
+
+                $new_code = preg_replace('/private\s+function\s+render_name_detail\s*\(\)\s*\{/i', $replacement, $snippet->code, 1);
+                if (!empty($new_code) && $new_code !== $snippet->code) {
+                    $wpdb->update($table, ['code' => $new_code], ['id' => $snippet->id]);
+                }
+            }
+        }
+
+        set_transient('mr_baby_snippet_delegation_v1', 1, DAY_IN_SECONDS);
     }
 
     /**

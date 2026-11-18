@@ -18,12 +18,13 @@ if (!defined('ABSPATH')) {
 class MR_Baby_Template_Renderer
 {
     /**
-     * Initializes shortcode filtering to guarantee seamless rendering on live server
-     * even if Code Snippets database has not yet been edited.
+     * Initializes shortcode filtering and content overriding to guarantee seamless rendering on live server
+     * across Elementor widgets, Code Snippets database, and standard WordPress templates.
      */
     public static function init()
     {
         add_filter('do_shortcode_tag', [__CLASS__, 'filter_shortcode_output'], 100, 4);
+        add_filter('the_content', [__CLASS__, 'filter_page_content'], 9999);
     }
 
     /**
@@ -31,7 +32,7 @@ class MR_Baby_Template_Renderer
      */
     public static function filter_shortcode_output($output, $tag, $attr, $m)
     {
-        if ($tag === 'baby_name_engine') {
+        if (trim($tag) === 'baby_name_engine') {
             $page = get_query_var('baby_page');
             if ($page === 'name_detail') {
                 // If output already has modern template, don't duplicate
@@ -39,6 +40,9 @@ class MR_Baby_Template_Renderer
                     return $output;
                 }
                 $name_slug = get_query_var('baby_name');
+                if (empty($name_slug)) {
+                    return $output;
+                }
                 $gender    = get_query_var('gender') ?: 'boy';
                 $char      = get_query_var('alphabet') ?: substr($name_slug, 0, 1);
                 $religion  = get_query_var('religion') ?: ($_GET['religion'] ?? 'Hindu');
@@ -46,6 +50,42 @@ class MR_Baby_Template_Renderer
             }
         }
         return $output;
+    }
+
+    /**
+     * Intercepts the post content at highest priority to guarantee modern 11-section template replacement
+     */
+    public static function filter_page_content($content)
+    {
+        $page = get_query_var('baby_page');
+        if ($page === 'name_detail') {
+            if (strpos($content, 'mr-baby-detail-wrap') !== false) {
+                return $content;
+            }
+            $name_slug = get_query_var('baby_name');
+            if (empty($name_slug)) {
+                return $content;
+            }
+            $gender    = get_query_var('gender') ?: 'boy';
+            $char      = get_query_var('alphabet') ?: substr($name_slug, 0, 1);
+            $religion  = get_query_var('religion') ?: ($_GET['religion'] ?? 'Hindu');
+
+            $new_markup = self::render_detail($name_slug, $gender, $char, $religion);
+
+            // If old banner card exists, replace the old baby detail container
+            if (strpos($content, 'name-detail-banner-card') !== false) {
+                $pattern = '/<div class="baby-detail-wrapper">.*?<\/div>\s*<\/div>\s*(?:<div class="similar-names-section">.*?<\/div>)?/s';
+                $replaced = preg_replace($pattern, $new_markup, $content, 1);
+                if (!empty($replaced) && $replaced !== $content) {
+                    return $replaced;
+                }
+            }
+
+            if (strpos($content, '[baby_name_engine]') !== false) {
+                return str_replace('[baby_name_engine]', $new_markup, $content);
+            }
+        }
+        return $content;
     }
 
     /**

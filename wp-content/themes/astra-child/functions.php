@@ -20,6 +20,7 @@ require_once get_stylesheet_directory() . '/inc/class-mr-homepage-manager.php';
 
 // Load MeraRashifal Baby Name Astrological & Numerology Engine
 require_once get_stylesheet_directory() . '/inc/class-mr-baby-astro-engine.php';
+MR_Baby_Astro_Engine::instance();
 
 // Load MeraRashifal Baby Name Gemini AI Prompt Service & Auto-Seeding Pipeline
 require_once get_stylesheet_directory() . '/inc/class-mr-baby-gemini-service.php';
