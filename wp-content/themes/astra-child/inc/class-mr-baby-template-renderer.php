@@ -180,9 +180,6 @@ class MR_Baby_Template_Renderer
         ?>
         <div class="mr-baby-detail-wrap" id="mr-baby-top">
             <?php
-            // Breadcrumbs Navigation
-            self::render_breadcrumbs($profile, $letter, $gender_clean);
-
             // 1. Header & Badges
             self::render_section_1_header($profile);
 
