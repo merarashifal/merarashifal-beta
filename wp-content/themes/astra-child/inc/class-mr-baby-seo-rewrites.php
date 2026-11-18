@@ -31,7 +31,10 @@ class MR_Baby_SEO_Rewrites
     private function __construct()
     {
         add_action('init', [$this, 'register_religion_rewrites'], 5);
+        add_action('init', [$this, 'register_sitemap_rewrites'], 10);
         add_filter('query_vars', [$this, 'register_query_vars']);
+        add_filter('redirect_canonical', [$this, 'filter_sitemap_canonical'], 10, 1);
+        add_action('template_redirect', [$this, 'handle_sitemap_request'], 5);
 
         // SEO Hooks for Yoast & WordPress Core
         add_filter('wpseo_canonical', [$this, 'filter_canonical'], 99);
@@ -42,11 +45,13 @@ class MR_Baby_SEO_Rewrites
         // Sitemap integration filter
         add_filter('mr_baby_sitemap_urls', [$this, 'inject_religion_sitemap_urls']);
 
-        // Dynamic Permalinks Flush to activate new clean routes
-        if (!get_transient('mr_baby_religion_rewrite_flushed_v1')) {
-            flush_rewrite_rules(false);
-            set_transient('mr_baby_religion_rewrite_flushed_v1', 1, DAY_IN_SECONDS);
-        }
+        // Dynamic Permalinks Flush to activate new clean routes safely on init
+        add_action('init', function() {
+            if (!get_option('mr_baby_religion_rewrite_flushed_v2')) {
+                flush_rewrite_rules(false);
+                update_option('mr_baby_religion_rewrite_flushed_v2', 1);
+            }
+        }, 99);
     }
 
     /**
@@ -122,6 +127,9 @@ class MR_Baby_SEO_Rewrites
         $vars[] = 'baby_name';
         $vars[] = 'religion';
         $vars[] = 'prefix';
+        $vars[] = 'afs_map';
+        $vars[] = 'afs_alpha';
+        $vars[] = 'afs_gender';
         return $vars;
     }
 
@@ -262,6 +270,159 @@ class MR_Baby_SEO_Rewrites
             return true;
         }
         return false;
+    }
+
+    /**
+     * Registers XML sitemap rewrite rules for baby names
+     */
+    public function register_sitemap_rewrites()
+    {
+        add_rewrite_rule('^sitemaps/baby-names-nav\\.xml(?:\\.gz)?/?$', 'index.php?afs_map=baby-names-nav', 'top');
+        add_rewrite_rule('^sitemaps/baby-names-([a-z])-(boy|girl)\\.xml(?:\\.gz)?/?$', 'index.php?afs_map=baby-names-names&afs_alpha=$matches[1]&afs_gender=$matches[2]', 'top');
+    }
+
+    /**
+     * Prevents WordPress trailing slash canonical redirect on XML sitemaps
+     */
+    public function filter_sitemap_canonical($redirect_url)
+    {
+        if (get_query_var('afs_map')) {
+            return false;
+        }
+        return $redirect_url;
+    }
+
+    /**
+     * Handles sitemap requests if Snippet 59 has not processed them
+     */
+    public function handle_sitemap_request()
+    {
+        $map = get_query_var('afs_map');
+        if (!$map || !in_array($map, ['baby-names-nav', 'baby-names-names'], true)) {
+            return;
+        }
+
+        // Allow Snippet 59 to handle if defined
+        if (function_exists('afs_baby_names_nav') && $map === 'baby-names-nav') {
+            return;
+        }
+        if (function_exists('afs_baby_names_names') && $map === 'baby-names-names') {
+            return;
+        }
+
+        if (!headers_sent()) {
+            header('Content-Type: application/xml; charset=utf-8');
+            header('X-Robots-Tag: noindex, follow');
+        }
+
+        if ($map === 'baby-names-nav') {
+            echo $this->generate_nav_sitemap_xml();
+            exit;
+        } elseif ($map === 'baby-names-names') {
+            echo $this->generate_names_sitemap_xml();
+            exit;
+        }
+    }
+
+    /**
+     * Fallback generator for baby-names-nav.xml
+     */
+    private function generate_nav_sitemap_xml()
+    {
+        global $wpdb;
+        $out = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+        $out .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+        $lastmod = gmdate('Y-m-d\TH:i:s+00:00');
+
+        $urls = [
+            '/baby-names/',
+            '/baby-names/boy-names/',
+            '/baby-names/girl-names/'
+        ];
+
+        foreach ($this->religions as $rel) {
+            $urls[] = "/baby-names/{$rel}/";
+            $urls[] = "/baby-names/{$rel}/boy/";
+            $urls[] = "/baby-names/{$rel}/girl/";
+        }
+
+        foreach (range('a', 'z') as $char) {
+            $urls[] = "/baby-names/{$char}/";
+            $urls[] = "/baby-names/{$char}/boy/";
+            $urls[] = "/baby-names/{$char}/girl/";
+        }
+
+        foreach ($urls as $u) {
+            $priority = ($u === '/baby-names/') ? '1.0' : (($u === '/baby-names/boy-names/' || $u === '/baby-names/girl-names/') ? '0.9' : '0.8');
+            $out .= "  <url>\n";
+            $out .= "    <loc>" . esc_url(home_url($u)) . "</loc>\n";
+            $out .= "    <lastmod>{$lastmod}</lastmod>\n";
+            $out .= "    <changefreq>weekly</changefreq>\n";
+            $out .= "    <priority>{$priority}</priority>\n";
+            $out .= "  </url>\n";
+        }
+
+        // Add 2-letter prefixes
+        $names_table = $wpdb->prefix . 'baby_names';
+        $prefixes = $wpdb->get_results("SELECT DISTINCT SUBSTRING(name, 1, 2) as prefix, gender FROM {$names_table} WHERE LENGTH(name) >= 2");
+        if ($prefixes) {
+            foreach ($prefixes as $p) {
+                $prefix = strtolower($p->prefix);
+                $gender = strtolower($p->gender);
+                $alpha  = substr($prefix, 0, 1);
+                if (preg_match('/^[a-z]{2}$/', $prefix) && in_array($gender, ['boy', 'girl'], true)) {
+                    $u = "/baby-names/{$alpha}/{$gender}/{$prefix}/";
+                    $out .= "  <url>\n";
+                    $out .= "    <loc>" . esc_url(home_url($u)) . "</loc>\n";
+                    $out .= "    <lastmod>{$lastmod}</lastmod>\n";
+                    $out .= "    <changefreq>monthly</changefreq>\n";
+                    $out .= "    <priority>0.7</priority>\n";
+                    $out .= "  </url>\n";
+                }
+            }
+        }
+
+        $out .= '</urlset>';
+        return $out;
+    }
+
+    /**
+     * Fallback generator for baby-names-{a-z}-{boy|girl}.xml
+     */
+    private function generate_names_sitemap_xml()
+    {
+        global $wpdb;
+        $alpha  = sanitize_text_field(get_query_var('afs_alpha'));
+        $gender = sanitize_text_field(get_query_var('afs_gender'));
+        $gender_uc = ucfirst(strtolower($gender));
+        $alpha_upper = strtoupper($alpha);
+
+        $out = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+        $out .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+        $lastmod = gmdate('Y-m-d\TH:i:s+00:00');
+
+        $names_table = $wpdb->prefix . 'baby_names';
+        $names = $wpdb->get_results($wpdb->prepare(
+            "SELECT name FROM {$names_table} WHERE starting_letter = %s AND gender = %s",
+            $alpha_upper,
+            $gender_uc
+        ));
+
+        if ($names) {
+            foreach ($names as $n) {
+                $name_lower = strtolower($n->name);
+                $u = "/baby-names/{$alpha}/" . strtolower($gender) . "/{$name_lower}/";
+                $out .= "  <url>\n";
+                $out .= "    <loc>" . esc_url(home_url($u)) . "</loc>\n";
+                $out .= "    <lastmod>{$lastmod}</lastmod>\n";
+                $out .= "    <changefreq>monthly</changefreq>\n";
+                $out .= "    <priority>0.6</priority>\n";
+                $out .= "  </url>\n";
+            }
+        }
+
+        $out .= '</urlset>';
+        return $out;
     }
 
     public function get_supported_religions()

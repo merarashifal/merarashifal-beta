@@ -18,6 +18,37 @@ if (!defined('ABSPATH')) {
 class MR_Baby_Template_Renderer
 {
     /**
+     * Initializes shortcode filtering to guarantee seamless rendering on live server
+     * even if Code Snippets database has not yet been edited.
+     */
+    public static function init()
+    {
+        add_filter('do_shortcode_tag', [__CLASS__, 'filter_shortcode_output'], 100, 4);
+    }
+
+    /**
+     * Intercepts [baby_name_engine] shortcode on name_detail requests
+     */
+    public static function filter_shortcode_output($output, $tag, $attr, $m)
+    {
+        if ($tag === 'baby_name_engine') {
+            $page = get_query_var('baby_page');
+            if ($page === 'name_detail') {
+                // If output already has modern template, don't duplicate
+                if (strpos($output, 'mr-baby-detail-wrap') !== false) {
+                    return $output;
+                }
+                $name_slug = get_query_var('baby_name');
+                $gender    = get_query_var('gender') ?: 'boy';
+                $char      = get_query_var('alphabet') ?: substr($name_slug, 0, 1);
+                $religion  = get_query_var('religion') ?: ($_GET['religion'] ?? 'Hindu');
+                return self::render_detail($name_slug, $gender, $char, $religion);
+            }
+        }
+        return $output;
+    }
+
+    /**
      * Renders the complete 11-section master baby name detail page
      *
      * @param string $name_slug Name slug or raw name
@@ -1914,8 +1945,10 @@ class MR_Baby_Template_Renderer
        TRANSLATION & LOCALIZATION HELPER METHODS
        ======================================================== */
 
+    private static $runtime_translations = [];
+
     /**
-     * Translates English text to Hindi using cached Google Translate GTX endpoint.
+     * Translates English text to authentic Hindi using cached Google Translate GTX endpoint.
      * Strictly preserves Latin digits (0-9) to honor the "excluding number" directive.
      */
     public static function translate_to_hindi($text)
@@ -1923,20 +1956,27 @@ class MR_Baby_Template_Renderer
         if (empty($text)) return '';
         $text = trim($text);
 
-        $cache_key = 'mr_b_hi_' . md5($text);
+        if (isset(self::$runtime_translations[$text])) {
+            return self::$runtime_translations[$text];
+        }
+
+        $cache_key = 'mrb_hi_' . md5($text);
         $cached = get_transient($cache_key);
         if ($cached !== false) {
+            self::$runtime_translations[$text] = $cached;
             return $cached;
         }
 
-        $url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=hi&dt=t&q=' . urlencode($text);
-        $response = wp_remote_get($url, [
+        $url = 'https://translate.googleapis.com/translate_a/single?client=gtx&sl=en&tl=hi&dt=t';
+        $response = wp_remote_post($url, [
             'timeout'    => 5,
             'sslverify'  => false,
-            'user-agent' => 'Mozilla/5.0'
+            'user-agent' => 'Mozilla/5.0',
+            'body'       => ['q' => $text]
         ]);
 
         if (is_wp_error($response)) {
+            self::$runtime_translations[$text] = $text;
             return $text;
         }
 
@@ -1956,9 +1996,13 @@ class MR_Baby_Template_Renderer
                 $translated        = str_replace($devanagari_digits, $latin_digits, $translated);
 
                 set_transient($cache_key, $translated, DAY_IN_SECONDS * 60);
+                self::$runtime_translations[$text] = $translated;
                 return $translated;
             }
         }
+
+        self::$runtime_translations[$text] = $text;
+        set_transient($cache_key, $text, HOUR_IN_SECONDS);
         return $text;
     }
 

@@ -82,18 +82,20 @@ class MR_Baby_Gemini_Service
         global $wpdb;
 
         $clean_name = ucfirst(strtolower(trim($name)));
-        $name_slug  = sanitize_title($clean_name);
-        $gender     = ucfirst(strtolower(trim($gender)));
-        $religion   = ucfirst(strtolower(trim($religion)));
+        $name_slug      = sanitize_title($clean_name);
+        $gender         = ucfirst(strtolower(trim($gender)));
+        $religion       = ucfirst(strtolower(trim($religion)));
+        $names_table    = $wpdb->prefix . 'baby_names';
+        $profiles_table = $wpdb->prefix . 'baby_name_profiles';
 
-        // 1. Resolve or establish record in af_baby_names
+        // 1. Resolve or establish record in baby_names table
         $baby_name_row = $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM af_baby_names WHERE LOWER(name) = LOWER(%s) LIMIT 1",
+            "SELECT * FROM {$names_table} WHERE LOWER(name) = LOWER(%s) LIMIT 1",
             $clean_name
         ));
 
         if (!$baby_name_row) {
-            $wpdb->insert('af_baby_names', [
+            $wpdb->insert($names_table, [
                 'name'                 => $clean_name,
                 'gender'               => $gender,
                 'starting_letter'      => strtoupper(substr($clean_name, 0, 1)),
@@ -113,10 +115,10 @@ class MR_Baby_Gemini_Service
             }
         }
 
-        // 2. Check Write-Through Cache (af_baby_name_profiles)
+        // 2. Check Write-Through Cache (baby_name_profiles table)
         if (!$force_refresh) {
             $cached_profile = $wpdb->get_row($wpdb->prepare(
-                "SELECT profile_json FROM af_baby_name_profiles WHERE baby_name_id = %d OR name_slug = %s LIMIT 1",
+                "SELECT profile_json FROM {$profiles_table} WHERE baby_name_id = %d OR name_slug = %s LIMIT 1",
                 $baby_name_id,
                 $name_slug
             ));
@@ -145,11 +147,11 @@ class MR_Baby_Gemini_Service
         // 7. Calculate Word Count across all narrative sections
         $word_count = $this->calculate_profile_word_count($master_profile);
 
-        // 8. Step 3 (Write-Through Cache): Persist Master JSON in af_baby_name_profiles
+        // 8. Step 3 (Write-Through Cache): Persist Master JSON in baby_name_profiles
         $master_json = wp_json_encode($master_profile, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
 
         $existing_profile_id = $wpdb->get_var($wpdb->prepare(
-            "SELECT id FROM af_baby_name_profiles WHERE baby_name_id = %d LIMIT 1",
+            "SELECT id FROM {$profiles_table} WHERE baby_name_id = %d LIMIT 1",
             $baby_name_id
         ));
 
@@ -166,9 +168,9 @@ class MR_Baby_Gemini_Service
         ];
 
         if ($existing_profile_id) {
-            $wpdb->update('af_baby_name_profiles', $data_to_store, ['id' => $existing_profile_id]);
+            $wpdb->update($profiles_table, $data_to_store, ['id' => $existing_profile_id]);
         } else {
-            $wpdb->insert('af_baby_name_profiles', $data_to_store);
+            $wpdb->insert($profiles_table, $data_to_store);
         }
 
         return $master_profile;
@@ -399,9 +401,10 @@ class MR_Baby_Gemini_Service
                 continue;
             }
 
-            // Check if already in af_baby_names
+            // Check if already in baby_names table
+            $names_table = $wpdb->prefix . 'baby_names';
             $exists = $wpdb->get_var($wpdb->prepare(
-                "SELECT id FROM af_baby_names WHERE LOWER(name) = LOWER(%s) LIMIT 1",
+                "SELECT id FROM {$names_table} WHERE LOWER(name) = LOWER(%s) LIMIT 1",
                 $raw_name
             ));
 
@@ -410,7 +413,7 @@ class MR_Baby_Gemini_Service
                     ? "Traditional variant spelling of {$parent_name} in {$religion} heritage."
                     : "Traditional {$religion} baby {$item['gender']} name harmoniously paired with {$parent_name}.";
 
-                $wpdb->insert('af_baby_names', [
+                $wpdb->insert($names_table, [
                     'name'                 => $raw_name,
                     'gender'               => $item['gender'],
                     'starting_letter'      => strtoupper(substr($raw_name, 0, 1)),

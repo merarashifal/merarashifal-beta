@@ -26,6 +26,7 @@ require_once get_stylesheet_directory() . '/inc/class-mr-baby-gemini-service.php
 
 // Load MeraRashifal Baby Name 11-Section Template Renderer
 require_once get_stylesheet_directory() . '/inc/class-mr-baby-template-renderer.php';
+MR_Baby_Template_Renderer::init();
 
 // Load MeraRashifal Baby Name Clean Religion Hubs, SEO & Sitemaps
 require_once get_stylesheet_directory() . '/inc/class-mr-baby-seo-rewrites.php';

@@ -427,7 +427,7 @@ class MR_Baby_Astro_Engine
     }
 
     /**
-     * Ensures af_baby_name_profiles table exists across all environments (Local, Staging, Live)
+     * Ensures baby_name_profiles table exists across all environments (Local, Staging, Live)
      */
     public function ensure_profiles_table()
     {
@@ -435,7 +435,7 @@ class MR_Baby_Astro_Engine
         if (empty($wpdb)) {
             return;
         }
-        $table = 'af_baby_name_profiles';
+        $table = $wpdb->prefix . 'baby_name_profiles';
 
         // Fast check using transient to avoid SHOW TABLES on every page request
         if (get_transient('mr_baby_profiles_table_verified')) {
@@ -446,21 +446,22 @@ class MR_Baby_Astro_Engine
         if ($exists !== $table) {
             $charset_collate = $wpdb->get_charset_collate();
             $sql = "CREATE TABLE IF NOT EXISTS `{$table}` (
-                `id` BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-                `baby_name_id` BIGINT UNSIGNED NOT NULL UNIQUE,
+                `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
+                `baby_name_id` BIGINT UNSIGNED NOT NULL,
                 `name_slug` VARCHAR(255) NOT NULL,
                 `gender` VARCHAR(20) NOT NULL,
                 `religion` VARCHAR(100) DEFAULT 'Hindu',
-                `rashi` VARCHAR(100),
-                `nakshatra` VARCHAR(100),
-                `numerology_number` INT,
+                `rashi` VARCHAR(100) DEFAULT NULL,
+                `nakshatra` VARCHAR(100) DEFAULT NULL,
+                `numerology_number` INT DEFAULT NULL,
                 `profile_json` LONGTEXT NOT NULL,
                 `word_count` INT DEFAULT 0,
                 `created_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-                INDEX `idx_slug` (`name_slug`),
-                INDEX `idx_rel_gender` (`religion`, `gender`),
-                FOREIGN KEY (`baby_name_id`) REFERENCES `af_baby_names`(`id`) ON DELETE CASCADE
+                PRIMARY KEY (`id`),
+                UNIQUE KEY `idx_baby_name_id` (`baby_name_id`),
+                KEY `idx_slug` (`name_slug`),
+                KEY `idx_rel_gender` (`religion`, `gender`)
             ) ENGINE=InnoDB {$charset_collate};";
 
             require_once ABSPATH . 'wp-admin/includes/upgrade.php';
