@@ -182,8 +182,17 @@
         isLoggedIn: (window.niyatiConfig && typeof window.niyatiConfig.is_logged_in === 'boolean') ? window.niyatiConfig.is_logged_in : false,
         loginUrl: (window.niyatiConfig && window.niyatiConfig.login_url) ? window.niyatiConfig.login_url : '/wp-login.php',
         chartToken: ((window.niyatiConfig && window.niyatiConfig.is_logged_in) ? (localStorage.getItem('niyati_chart_token') || '') : ''),
-        birthData: ((window.niyatiConfig && window.niyatiConfig.is_logged_in) ? JSON.parse(localStorage.getItem('niyati_birth_data') || 'null') : null),
-        history: ((window.niyatiConfig && window.niyatiConfig.is_logged_in) ? JSON.parse(localStorage.getItem('niyati_chat_history') || '[]') : []),
+        history: ((window.niyatiConfig && window.niyatiConfig.is_logged_in) ? (function () {
+            try {
+                var raw = JSON.parse(localStorage.getItem('niyati_chat_history') || '[]');
+                if (Array.isArray(raw)) {
+                    return raw.filter(function (m) {
+                        return m && m.text && typeof m.text === 'string' && m.text.indexOf('critical error') === -1 && m.text.indexOf('troubleshooting WordPress') === -1;
+                    });
+                }
+            } catch (e) {}
+            return [];
+        })() : []),
         savedProfiles: [],
         lang: (function () {
             var saved = localStorage.getItem('niyati_lang');
@@ -566,8 +575,29 @@
                     </div>
 
                     <!-- Chat Input -->
-                    <div class="niyati-input-bar">
+                    <div class="niyati-input-bar" id="niyati-input-bar">
+                        <!-- Active Voice Recording Bar (Hidden by default) -->
+                        <div id="niyati-voice-record-bar" class="niyati-voice-record-bar" style="display:none;">
+                            <div class="niyati-voice-rec-indicator">
+                                <span class="niyati-voice-rec-dot"></span>
+                                <span class="niyati-voice-timer" id="niyati-voice-timer">0:15</span>
+                            </div>
+                            <div class="niyati-voice-waveform-preview">
+                                <span></span><span></span><span></span><span></span><span></span>
+                            </div>
+                            <button type="button" id="niyati-btn-voice-cancel" class="niyati-voice-btn-cancel" title="Cancel Recording">✕</button>
+                            <button type="button" id="niyati-btn-voice-done" class="niyati-voice-btn-done" title="Send Voice Query">✓</button>
+                        </div>
+
                         <input type="text" id="niyati-user-input" placeholder="Ask Niyati a question..." autocomplete="off">
+                        <button type="button" id="niyati-btn-mic" class="niyati-mic-btn" style="width:38px; min-width:38px; max-width:38px; height:38px; border-radius:50%; background:#FFF7ED; border:1.5px solid #FDBA74; color:#EA580C; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; padding:0; box-shadow:0 2px 6px rgba(234,88,12,0.15);" title="Voice Consultation (5 Credits • Max 15s)">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#EA580C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:block; width:18px; height:18px; stroke:#EA580C;">
+                                <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                                <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                                <line x1="12" y1="19" x2="12" y2="23"></line>
+                                <line x1="8" y1="23" x2="16" y2="23"></line>
+                            </svg>
+                        </button>
                         <button id="niyati-btn-send" class="niyati-send-btn" title="Send">➤</button>
                     </div>
                 </div>
@@ -729,6 +759,11 @@
         el.suggestions = document.getElementById('niyati-suggestions');
         el.userInput = document.getElementById('niyati-user-input');
         el.btnSend = document.getElementById('niyati-btn-send');
+        el.btnMic = document.getElementById('niyati-btn-mic');
+        el.voiceRecordBar = document.getElementById('niyati-voice-record-bar');
+        el.voiceTimer = document.getElementById('niyati-voice-timer');
+        el.btnVoiceCancel = document.getElementById('niyati-btn-voice-cancel');
+        el.btnVoiceDone = document.getElementById('niyati-btn-voice-done');
         el.quotaBadge = document.getElementById('niyati-quota-badge');
         el.quotaFree = document.getElementById('niyati-quota-free');
         el.quotaValidity = document.getElementById('niyati-quota-validity');
@@ -837,6 +872,238 @@
 
         updateLoginNoticeUI();
     }
+
+    var VoiceCache = {
+        dbName: 'niyati_voice_cache_db',
+        storeName: 'audio_blobs',
+        db: null,
+        init: function () {
+            if (!window.indexedDB) return Promise.resolve(null);
+            var self = this;
+            return new Promise(function (resolve) {
+                try {
+                    var req = window.indexedDB.open(self.dbName, 1);
+                    req.onupgradeneeded = function (e) {
+                        var db = e.target.result;
+                        if (!db.objectStoreNames.contains(self.storeName)) {
+                            db.createObjectStore(self.storeName, { keyPath: 'key' });
+                        }
+                    };
+                    req.onsuccess = function (e) {
+                        self.db = e.target.result;
+                        resolve(self.db);
+                    };
+                    req.onerror = function () {
+                        resolve(null);
+                    };
+                } catch (err) {
+                    resolve(null);
+                }
+            });
+        },
+        getAudioBlob: function (key) {
+            var self = this;
+            return new Promise(function (resolve) {
+                if (!self.db) {
+                    self.init().then(function (db) {
+                        if (!db) return resolve(null);
+                        self.getAudioBlob(key).then(resolve);
+                    });
+                    return;
+                }
+                try {
+                    var tx = self.db.transaction([self.storeName], 'readonly');
+                    var store = tx.objectStore(self.storeName);
+                    var req = store.get(key);
+                    req.onsuccess = function () {
+                        resolve(req.result ? req.result.blob : null);
+                    };
+                    req.onerror = function () { resolve(null); };
+                } catch (e) { resolve(null); }
+            });
+        },
+        saveAudioBlob: function (key, blob) {
+            var self = this;
+            if (!self.db) {
+                self.init().then(function (db) {
+                    if (db) self.saveAudioBlob(key, blob);
+                });
+                return;
+            }
+            try {
+                var tx = self.db.transaction([self.storeName], 'readwrite');
+                var store = tx.objectStore(self.storeName);
+                store.put({ key: key, blob: blob, cached_at: Date.now() });
+            } catch (e) { }
+        }
+    };
+
+    var voiceRecorder = {
+        mediaRecorder: null,
+        audioChunks: [],
+        recordTimer: null,
+        startTime: 0,
+        maxDuration: 15, // Capped at exactly 15 seconds
+        isRecording: false,
+        stream: null,
+
+        start: function () {
+            if (!state.isLoggedIn) {
+                showLoginModal();
+                return;
+            }
+
+            var totalCredits = (state.quota && typeof state.quota.remaining !== 'undefined' ? state.quota.remaining : 0) + (state.paidCredits || 0);
+            if (totalCredits < 5) {
+                var msg = state.lang === 'hi'
+                    ? 'वॉयस परामर्श के लिए 5 क्रेडिट आवश्यक हैं। कृपया अपने क्रेडिट्स रिचार्ज करें।'
+                    : 'Voice consultations require 5 credits per reading. Please recharge your credits to continue.';
+                appendLimitExceededCard(msg);
+                openRechargeSheet();
+                return;
+            }
+
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                alert(state.lang === 'hi' ? 'आपके ब्राउज़र में माइक्रोफ़ोन सपोर्ट उपलब्ध नहीं है।' : 'Microphone recording is not supported in this browser.');
+                return;
+            }
+
+            var self = this;
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(function (stream) {
+                    self.stream = stream;
+                    self.audioChunks = [];
+
+                    var mimeType = 'audio/webm;codecs=opus';
+                    if (typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported) {
+                        if (!MediaRecorder.isTypeSupported(mimeType)) {
+                            mimeType = MediaRecorder.isTypeSupported('audio/webm') ? 'audio/webm' : (MediaRecorder.isTypeSupported('audio/mp4') ? 'audio/mp4' : '');
+                        }
+                    } else {
+                        mimeType = '';
+                    }
+
+                    try {
+                        self.mediaRecorder = mimeType ? new MediaRecorder(stream, { mimeType: mimeType }) : new MediaRecorder(stream);
+                    } catch (err) {
+                        self.mediaRecorder = new MediaRecorder(stream);
+                    }
+
+                    self.mediaRecorder.ondataavailable = function (e) {
+                        if (e.data && e.data.size > 0) {
+                            self.audioChunks.push(e.data);
+                        }
+                    };
+
+                    self.mediaRecorder.onstop = function () {
+                        if (self.stream) {
+                            self.stream.getTracks().forEach(function (t) { t.stop(); });
+                        }
+                        if (self.isRecording) {
+                            self.isRecording = false;
+                            self.dispatchAudio();
+                        }
+                    };
+
+                    self.isRecording = true;
+                    self.mediaRecorder.start(250);
+                    self.showRecordingUI(true);
+
+                    // Countdown timer from 15 seconds
+                    var secondsLeft = self.maxDuration;
+                    if (el.voiceTimer) {
+                        el.voiceTimer.textContent = '0:' + (secondsLeft < 10 ? '0' : '') + secondsLeft;
+                    }
+
+                    self.recordTimer = setInterval(function () {
+                        secondsLeft--;
+                        if (secondsLeft <= 0) {
+                            if (el.voiceTimer) el.voiceTimer.textContent = '0:00';
+                            self.stop();
+                        } else {
+                            if (el.voiceTimer) el.voiceTimer.textContent = '0:' + (secondsLeft < 10 ? '0' : '') + secondsLeft;
+                        }
+                    }, 1000);
+                })
+                .catch(function (err) {
+                    var errMsg = '';
+                    if (err && (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError')) {
+                        errMsg = (state.lang === 'hi')
+                            ? 'माइक्रोफ़ोन अनुमति ब्लॉक है।\n\nसमाधान:\n1. ब्राउज़र के एड्रेस बार में localhost के बाएँ ओर दिए गए लॉक/स्लाइडर आइकन पर क्लिक करें।\n2. Microphone को "Allow" (अनुमति दें) पर सेट करें और पेज रीफ़्रेश करें।'
+                            : 'Microphone permission was denied.\n\nHow to fix:\n1. In your browser address bar, click the lock/tune icon on the left of "localhost".\n2. Set Microphone permission to "Allow".\n3. Refresh this page and click the mic again.';
+                    } else if (err && (err.name === 'NotFoundError' || err.name === 'DevicesNotFoundError')) {
+                        errMsg = (state.lang === 'hi')
+                            ? 'आपके कंप्यूटर में कोई माइक्रोफ़ोन नहीं मिला। कृपया माइक या हेडफ़ोन कनेक्ट करें।'
+                            : 'No microphone was detected on your device. Please plug in a microphone or headset and try again.';
+                    } else if (err && err.name === 'NotReadableError') {
+                        errMsg = (state.lang === 'hi')
+                            ? 'माइक्रोफ़ोन किसी अन्य ऐप द्वारा उपयोग में है। कृपया अन्य ऑडियो ऐप बंद करके पुनः प्रयास करें।'
+                            : 'Microphone is currently in use by another application. Please close other audio apps and try again.';
+                    } else {
+                        errMsg = (state.lang === 'hi')
+                            ? 'माइक्रोफ़ोन एक्सेस त्रुटि: ' + (err.message || 'Permission denied')
+                            : 'Microphone error: ' + (err.message || 'Permission denied');
+                    }
+                    alert(errMsg);
+                });
+        },
+
+        stop: function () {
+            if (this.recordTimer) {
+                clearInterval(this.recordTimer);
+                this.recordTimer = null;
+            }
+            this.showRecordingUI(false);
+            if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+                this.mediaRecorder.stop();
+            }
+        },
+
+        cancel: function () {
+            this.isRecording = false;
+            if (this.recordTimer) {
+                clearInterval(this.recordTimer);
+                this.recordTimer = null;
+            }
+            if (this.stream) {
+                this.stream.getTracks().forEach(function (t) { t.stop(); });
+            }
+            if (this.mediaRecorder && this.mediaRecorder.state !== 'inactive') {
+                this.mediaRecorder.stop();
+            }
+            this.audioChunks = [];
+            this.showRecordingUI(false);
+        },
+
+        showRecordingUI: function (isRec) {
+            if (isRec) {
+                if (el.voiceRecordBar) el.voiceRecordBar.style.display = 'flex';
+                if (el.userInput) el.userInput.style.display = 'none';
+                if (el.btnMic) el.btnMic.style.display = 'none';
+                if (el.btnSend) el.btnSend.style.display = 'none';
+            } else {
+                if (el.voiceRecordBar) el.voiceRecordBar.style.display = 'none';
+                if (el.userInput) el.userInput.style.display = 'block';
+                if (el.btnMic) el.btnMic.style.display = 'inline-flex';
+                if (el.btnSend) el.btnSend.style.display = 'inline-flex';
+            }
+        },
+
+        dispatchAudio: function () {
+            if (!this.audioChunks.length) return;
+            var mimeType = this.mediaRecorder ? (this.mediaRecorder.mimeType || 'audio/webm') : 'audio/webm';
+            var blob = new Blob(this.audioChunks, { type: mimeType });
+            this.audioChunks = [];
+
+            var reader = new FileReader();
+            var self = this;
+            reader.onloadend = function () {
+                var base64data = reader.result;
+                sendVoiceMessage(base64data, mimeType, self.maxDuration);
+            };
+            reader.readAsDataURL(blob);
+        }
+    };
 
     function bindEvents() {
         // Toggle widget / Close
@@ -969,6 +1236,23 @@
                 sendMessage();
             }
         });
+
+        // Voice Consultation Buttons
+        if (el.btnMic) {
+            el.btnMic.addEventListener('click', function () {
+                voiceRecorder.start();
+            });
+        }
+        if (el.btnVoiceCancel) {
+            el.btnVoiceCancel.addEventListener('click', function () {
+                voiceRecorder.cancel();
+            });
+        }
+        if (el.btnVoiceDone) {
+            el.btnVoiceDone.addEventListener('click', function () {
+                voiceRecorder.stop();
+            });
+        }
 
         // Close city dropdown on outside click
         document.addEventListener('click', function (e) {
@@ -2133,8 +2417,27 @@
     function renderStoredHistory() {
         el.chatList.innerHTML = '';
         var lastBotMsg = null;
-        state.history.forEach(function (msg) {
-            var b = appendMessageBubble(msg.role, msg.text, { orderBtn: msg.order_btn, noScroll: true });
+        state.history = state.history.filter(function (msg) {
+            return msg && msg.text && typeof msg.text === 'string' && msg.text.indexOf('critical error') === -1 && msg.text.indexOf('troubleshooting WordPress') === -1;
+        });
+        try {
+            localStorage.setItem('niyati_chat_history', JSON.stringify(state.history));
+        } catch (e) {}
+
+        state.history.forEach(function (msg, idx) {
+            var hasNextElaborated = (state.history[idx + 1] && state.history[idx + 1].is_elaborated);
+            var canElab = (msg.can_elaborate && !hasNextElaborated && !msg.is_elaborated);
+            var b = appendMessageBubble(msg.role, msg.text, {
+                orderBtn: msg.order_btn,
+                noScroll: true,
+                canElaborate: canElab,
+                elaborateCost: msg.elaborate_cost || 1,
+                question: msg.question,
+                isElaborated: msg.is_elaborated,
+                isVoice: msg.is_voice,
+                audioUrl: msg.audio_url,
+                audioDuration: msg.audio_duration || 30
+            });
             if (msg.role === 'model' && b) {
                 lastBotMsg = b;
             }
@@ -2306,8 +2609,18 @@
             }
 
             if (data.success && data.reply) {
-                appendMessageBubble('model', data.reply);
-                state.history.push({ role: 'model', text: data.reply });
+                appendMessageBubble('model', data.reply, {
+                    canElaborate: data.can_elaborate,
+                    elaborateCost: data.elaborate_cost,
+                    question: data.question || text
+                });
+                state.history.push({
+                    role: 'model',
+                    text: data.reply,
+                    can_elaborate: data.can_elaborate,
+                    elaborate_cost: data.elaborate_cost,
+                    question: data.question || text
+                });
                 localStorage.setItem('niyati_chat_history', JSON.stringify(state.history));
             } else {
                 var curT = i18n[state.lang] || i18n['en'];
@@ -2323,6 +2636,279 @@
         });
     }
 
+    function sendVoiceMessage(audioData, mimeType, duration) {
+        showTyping(true, state.lang === 'hi' ? 'नियति आपका वॉयस संदेश सुन रही हैं...' : 'Niyati is listening to your voice note...');
+        state.isSending = true;
+        el.btnSend.disabled = true;
+        if (el.btnMic) el.btnMic.disabled = true;
+
+        var wpNonce = getWpNonce();
+        var wpUserId = (window.niyatiConfig && window.niyatiConfig.user_id) ? window.niyatiConfig.user_id : 0;
+
+        fetch(restBase + '/voice-chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-WP-Nonce': wpNonce
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({
+                audio_data: audioData,
+                mime_type: mimeType,
+                duration: duration || 15.0,
+                chart_token: state.chartToken,
+                lang: state.lang,
+                user_id: wpUserId
+            })
+        })
+        .then(function (res) {
+            var freshNonce = res.headers ? res.headers.get('X-WP-Nonce') : null;
+            if (freshNonce) {
+                state.nonce = freshNonce;
+                if (window.niyatiConfig) window.niyatiConfig.nonce = freshNonce;
+            }
+            return res.json();
+        })
+        .then(function (data) {
+            showTyping(false);
+            state.isSending = false;
+            el.btnSend.disabled = false;
+            if (el.btnMic) el.btnMic.disabled = false;
+
+            if (data.code === 'login_required' || (data.data && data.data.status === 401)) {
+                state.isLoggedIn = false;
+                updateLoginNoticeUI();
+                showLoginModal();
+                return;
+            }
+
+            if (data.quota) {
+                state.quota = data.quota;
+            }
+            if (typeof data.paid_credits !== 'undefined') {
+                state.paidCredits = data.paid_credits;
+            }
+            updateQuotaUI();
+
+            if (data.quota_exceeded) {
+                appendLimitExceededCard(data.reply);
+                openRechargeSheet();
+                return;
+            }
+
+            if (data.success && data.reply) {
+                var userText = '🎙️ ' + (data.transcription || (state.lang === 'hi' ? 'वॉयस संदेश' : 'Voice Query'));
+
+                // Append user voice bubble
+                appendMessageBubble('user', userText, { isVoice: true });
+                state.history.push({ role: 'user', text: userText, is_voice: true });
+
+                // Append model voice bubble
+                appendMessageBubble('model', data.reply, {
+                    isVoice: true,
+                    audioUrl: data.audio_url,
+                    audioDuration: data.audio_duration || 30
+                });
+
+                state.history.push({
+                    role: 'model',
+                    text: data.reply,
+                    is_voice: true,
+                    audio_url: data.audio_url,
+                    audio_duration: data.audio_duration || 30
+                });
+
+                localStorage.setItem('niyati_chat_history', JSON.stringify(state.history));
+            } else {
+                var curT = i18n[state.lang] || i18n['en'];
+                var errDetail = data.reply || data.error || data.message || curT.serverError;
+                if (typeof errDetail === 'string' && (errDetail.indexOf('critical error') !== -1 || errDetail.indexOf('<p>') !== -1)) {
+                    errDetail = curT.serverError;
+                }
+                appendMessageBubble('model', errDetail);
+            }
+        })
+        .catch(function () {
+            showTyping(false);
+            state.isSending = false;
+            el.btnSend.disabled = false;
+            if (el.btnMic) el.btnMic.disabled = false;
+            var curT = i18n[state.lang] || i18n['en'];
+            appendMessageBubble('model', curT.netError || 'Internet connection error. Please try again.');
+        });
+    }
+
+    function createVoicePlayerElement(text, audioUrl, duration) {
+        var card = document.createElement('div');
+        card.className = 'niyati-voice-player-card';
+
+        card.innerHTML = `
+            <button type="button" class="niyati-btn-audio-play" title="Play Voice Reading">
+                <span class="niyati-play-icon">▶</span>
+                <span class="niyati-pause-icon" style="display:none;">❚❚</span>
+            </button>
+            <div class="niyati-voice-track-wrap">
+                <div class="niyati-voice-track-header">
+                    <span class="niyati-voice-card-title">Niyati Voice Reading</span>
+                    <span class="niyati-voice-card-time">0:00 / 0:30</span>
+                </div>
+                <div class="niyati-voice-seek-bar">
+                    <div class="niyati-voice-seek-fill"></div>
+                </div>
+            </div>
+            <button type="button" class="niyati-btn-audio-replay" title="Replay">↺</button>
+        `;
+
+        var btnPlay = card.querySelector('.niyati-btn-audio-play');
+        var iconPlay = card.querySelector('.niyati-play-icon');
+        var iconPause = card.querySelector('.niyati-pause-icon');
+        var timeLabel = card.querySelector('.niyati-voice-card-time');
+        var seekFill = card.querySelector('.niyati-voice-seek-fill');
+        var btnReplay = card.querySelector('.niyati-btn-audio-replay');
+
+        var audio = new Audio();
+        var isAudioLoaded = false;
+        var totalSec = duration || 30;
+
+        function updateTimeDisplay(cur, total) {
+            var curM = Math.floor(cur / 60);
+            var curS = Math.floor(cur % 60);
+            var totM = Math.floor(total / 60);
+            var totS = Math.floor(total % 60);
+            timeLabel.textContent = curM + ':' + (curS < 10 ? '0' : '') + curS + ' / ' + totM + ':' + (totS < 10 ? '0' : '') + totS;
+            var pct = total > 0 ? (cur / total) * 100 : 0;
+            seekFill.style.width = Math.min(100, pct) + '%';
+        }
+
+        function setPlayingState(playing) {
+            if (playing) {
+                iconPlay.style.display = 'none';
+                iconPause.style.display = 'inline-block';
+                card.classList.add('playing');
+            } else {
+                iconPlay.style.display = 'inline-block';
+                iconPause.style.display = 'none';
+                card.classList.remove('playing');
+            }
+        }
+
+        function loadAndPlay() {
+            if (isAudioLoaded && audio.src) {
+                audio.play().then(function () {
+                    setPlayingState(true);
+                }).catch(function () {
+                    fallbackClientSpeech();
+                });
+                return;
+            }
+
+            if (!audioUrl) {
+                fallbackClientSpeech();
+                return;
+            }
+
+            // Check IndexedDB cache first
+            VoiceCache.getAudioBlob(audioUrl).then(function (blob) {
+                if (blob) {
+                    audio.src = URL.createObjectURL(blob);
+                    isAudioLoaded = true;
+                    audio.play().then(function () {
+                        setPlayingState(true);
+                    }).catch(function () {
+                        fallbackClientSpeech();
+                    });
+                } else {
+                    // Fetch and cache in IndexedDB
+                    fetch(audioUrl)
+                        .then(function (res) { return res.blob(); })
+                        .then(function (fetchedBlob) {
+                            VoiceCache.saveAudioBlob(audioUrl, fetchedBlob);
+                            audio.src = URL.createObjectURL(fetchedBlob);
+                            isAudioLoaded = true;
+                            audio.play().then(function () {
+                                setPlayingState(true);
+                            }).catch(function () {
+                                fallbackClientSpeech();
+                            });
+                        })
+                        .catch(function () {
+                            fallbackClientSpeech();
+                        });
+                }
+            });
+        }
+
+        function fallbackClientSpeech() {
+            if (!window.speechSynthesis) return;
+            if (window.speechSynthesis.speaking) {
+                window.speechSynthesis.cancel();
+                setPlayingState(false);
+                return;
+            }
+            var cleanText = text.replace(/[*_#`\[\]]/g, '').trim();
+            var utterance = new SpeechSynthesisUtterance(cleanText);
+            utterance.lang = state.lang === 'en' ? 'en-IN' : 'hi-IN';
+            utterance.rate = 0.95;
+            utterance.pitch = 1.05;
+
+            var voices = window.speechSynthesis.getVoices();
+            for (var i = 0; i < voices.length; i++) {
+                if (voices[i].lang.indexOf(state.lang === 'en' ? 'en' : 'hi') !== -1 && (voices[i].name.indexOf('Female') !== -1 || voices[i].name.indexOf('Google') !== -1)) {
+                    utterance.voice = voices[i];
+                    break;
+                }
+            }
+
+            utterance.onstart = function () { setPlayingState(true); };
+            utterance.onend = function () {
+                setPlayingState(false);
+                updateTimeDisplay(totalSec, totalSec);
+            };
+            utterance.onerror = function () { setPlayingState(false); };
+
+            window.speechSynthesis.speak(utterance);
+        }
+
+        audio.addEventListener('timeupdate', function () {
+            var cur = audio.currentTime;
+            var dur = audio.duration || totalSec;
+            updateTimeDisplay(cur, dur);
+        });
+
+        audio.addEventListener('ended', function () {
+            setPlayingState(false);
+            seekFill.style.width = '100%';
+        });
+
+        audio.addEventListener('pause', function () {
+            setPlayingState(false);
+        });
+
+        btnPlay.addEventListener('click', function () {
+            if (!audio.paused && !audio.ended && audio.currentTime > 0) {
+                audio.pause();
+                setPlayingState(false);
+            } else if (window.speechSynthesis && window.speechSynthesis.speaking) {
+                window.speechSynthesis.cancel();
+                setPlayingState(false);
+            } else {
+                loadAndPlay();
+            }
+        });
+
+        btnReplay.addEventListener('click', function () {
+            if (isAudioLoaded && audio.src) {
+                audio.currentTime = 0;
+                audio.play();
+                setPlayingState(true);
+            } else {
+                loadAndPlay();
+            }
+        });
+
+        return card;
+    }
+
     function appendMessageBubble(role, text, options) {
         if (!text) return;
         var targetContainer = (options && options.container) ? options.container : el.chatList;
@@ -2330,7 +2916,7 @@
         // If user message, render as single bubble
         if (role === 'user') {
             var userDiv = document.createElement('div');
-            userDiv.className = 'niyati-msg user';
+            userDiv.className = 'niyati-msg user' + (options && options.isVoice ? ' niyati-msg-voice-user' : '');
             var userBubble = document.createElement('div');
             userBubble.className = 'niyati-msg-bubble';
             userBubble.innerHTML = formatMarkdown(text);
@@ -2356,7 +2942,7 @@
         var botName = escapeHTML(config.bot_name || 'Niyati');
 
         var msgDiv = document.createElement('div');
-        msgDiv.className = 'niyati-msg bot';
+        msgDiv.className = 'niyati-msg bot' + (options && options.isElaborated ? ' niyati-msg-deepdive' : '') + (options && options.isVoice ? ' niyati-msg-voice' : '');
 
         // Avatar with Niyati's profile photo
         var avatarWrap = document.createElement('div');
@@ -2374,8 +2960,22 @@
 
         var authorHeader = document.createElement('div');
         authorHeader.className = 'niyati-msg-author';
-        authorHeader.innerHTML = '<span class="niyati-author-name">' + botName + '</span>';
+        var authorHtml = '<span class="niyati-author-name">' + botName + '</span>';
+        if (options && options.isElaborated) {
+            var deepBadgeText = (state.lang === 'hi') ? 'विस्तृत कुंडली विश्लेषण' : 'Detailed Analysis (Deep-Dive)';
+            authorHtml += '<span class="niyati-deepdive-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> ' + escapeHTML(deepBadgeText) + '</span>';
+        }
+        if (options && options.isVoice) {
+            authorHtml += '<span class="niyati-voice-badge">🎙️ 30s Voice Consultation</span>';
+        }
+        authorHeader.innerHTML = authorHtml;
         bodyWrap.appendChild(authorHeader);
+
+        // Embedded Audio Player Card for Voice Responses
+        if (options && options.isVoice) {
+            var playerCard = createVoicePlayerElement(text, options.audioUrl, options.audioDuration || 30);
+            bodyWrap.appendChild(playerCard);
+        }
 
         var bubble = document.createElement('div');
         bubble.className = 'niyati-msg-bubble';
@@ -2389,6 +2989,33 @@
             bubble.innerHTML = formattedParts.join('');
         }
         bodyWrap.appendChild(bubble);
+
+        // Elaborate Deep-Dive CTA Button
+        if (options && options.canElaborate && !options.isElaborated && targetContainer === el.chatList) {
+            var elabCost = options.elaborateCost || 1;
+            var elabCard = document.createElement('div');
+            elabCard.className = 'niyati-elaborate-cta-wrap';
+
+            var ctaBtn = document.createElement('button');
+            ctaBtn.type = 'button';
+            ctaBtn.className = 'niyati-btn-elaborate';
+            ctaBtn.setAttribute('data-cost', elabCost);
+
+            var btnLabel = state.lang === 'hi'
+                ? ('विस्तृत विश्लेषण प्राप्त करें (200-250 शब्द) • ' + elabCost + ' क्रेडिट')
+                : (state.lang === 'hinglish'
+                    ? ('Detailed reading dekhein (200-250 words) • ' + elabCost + ' Credit')
+                    : ('Get Elaborated Reading (200-250 words) • ' + elabCost + ' Credit' + (elabCost > 1 ? 's' : '')));
+
+            ctaBtn.innerHTML = '<span class="niyati-btn-elaborate-icon">✨</span><span class="niyati-btn-elaborate-text">' + escapeHTML(btnLabel) + '</span>';
+
+            var qText = options.question || '';
+            ctaBtn.addEventListener('click', function () {
+                handleElaborateClick(ctaBtn, qText, text, elabCost);
+            });
+            elabCard.appendChild(ctaBtn);
+            bodyWrap.appendChild(elabCard);
+        }
 
         // Assisted Order Dossier CTA card
         if (options && options.orderBtn) {
@@ -2423,6 +3050,120 @@
         }
 
         return msgDiv;
+    }
+
+    function handleElaborateClick(btn, questionText, answerText, cost) {
+        if (!state.isLoggedIn) {
+            showLoginModal();
+            return;
+        }
+
+        var totalAvailable = (state.quota && typeof state.quota.remaining !== 'undefined' ? state.quota.remaining : 0) + (state.paidCredits || 0);
+        if (totalAvailable < cost) {
+            var notEnoughMsg = state.lang === 'hi'
+                ? ('विस्तृत विश्लेषण (' + cost + ' क्रेडिट) के लिए पर्याप्त क्रेडिट नहीं हैं। कृपया रिचार्ज करें।')
+                : ('You need ' + cost + ' credit(s) for a detailed reading. Please recharge your credits.');
+            appendLimitExceededCard(notEnoughMsg);
+            openRechargeSheet();
+            return;
+        }
+
+        btn.disabled = true;
+        btn.classList.add('loading');
+        var originalContent = btn.innerHTML;
+        var loadingText = state.lang === 'hi' ? 'विस्तृत कुंडली विश्लेषण तैयार हो रहा है...' : 'Analyzing planetary positions in detail...';
+        btn.innerHTML = '<span class="niyati-spinner-inline"></span> ' + escapeHTML(loadingText);
+        showTyping(true, questionText);
+
+        var wpNonce = getWpNonce();
+        var wpUserId = (window.niyatiConfig && window.niyatiConfig.user_id) ? window.niyatiConfig.user_id : 0;
+
+        fetch(restBase + '/elaborate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-WP-Nonce': wpNonce
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({
+                question: questionText,
+                previous_reply: answerText,
+                chart_token: state.chartToken,
+                lang: state.lang,
+                user_id: wpUserId
+            })
+        })
+        .then(function (res) {
+            var freshNonce = res.headers ? res.headers.get('X-WP-Nonce') : null;
+            if (freshNonce) {
+                state.nonce = freshNonce;
+                if (window.niyatiConfig) window.niyatiConfig.nonce = freshNonce;
+            }
+            return res.json();
+        })
+        .then(function (data) {
+            showTyping(false);
+            if (data.code === 'login_required' || (data.data && data.data.status === 401)) {
+                btn.disabled = false;
+                btn.classList.remove('loading');
+                btn.innerHTML = originalContent;
+                state.isLoggedIn = false;
+                updateLoginNoticeUI();
+                showLoginModal();
+                return;
+            }
+
+            if (data.quota) {
+                state.quota = data.quota;
+            }
+            if (typeof data.paid_credits !== 'undefined') {
+                state.paidCredits = data.paid_credits;
+            }
+            updateQuotaUI();
+
+            if (data.quota_exceeded) {
+                btn.disabled = false;
+                btn.classList.remove('loading');
+                btn.innerHTML = originalContent;
+                appendLimitExceededCard(data.reply);
+                openRechargeSheet();
+                return;
+            }
+
+            if (data.success && data.reply) {
+                var ctaWrap = btn.closest('.niyati-elaborate-cta-wrap');
+                if (ctaWrap) {
+                    ctaWrap.style.display = 'none';
+                }
+
+                appendMessageBubble('model', data.reply, {
+                    isElaborated: true,
+                    question: questionText
+                });
+
+                state.history.push({
+                    role: 'model',
+                    text: data.reply,
+                    is_elaborated: true,
+                    question: questionText
+                });
+                localStorage.setItem('niyati_chat_history', JSON.stringify(state.history));
+            } else {
+                btn.disabled = false;
+                btn.classList.remove('loading');
+                btn.innerHTML = originalContent;
+                var curT = i18n[state.lang] || i18n['en'];
+                appendMessageBubble('model', data.reply || curT.serverError);
+            }
+        })
+        .catch(function () {
+            showTyping(false);
+            btn.disabled = false;
+            btn.classList.remove('loading');
+            btn.innerHTML = originalContent;
+            var curT = i18n[state.lang] || i18n['en'];
+            appendMessageBubble('model', curT.netError || 'Internet connection error. Please try again.');
+        });
     }
 
     function appendLimitExceededCard(customMsg) {

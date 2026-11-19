@@ -365,6 +365,46 @@ class Niyati_Wallet {
     }
 
     /**
+     * Deduct N credits atomically (e.g. 5 credits for voice consultation)
+     */
+    public static function consume_credits($visitor_id, $user_id = 0, $count = 1) {
+        global $wpdb;
+        $table_wallets = $wpdb->prefix . self::TABLE_WALLETS;
+        $count = max(1, intval($count));
+
+        $wallet = self::get_wallet($visitor_id, $user_id);
+        $current = intval($wallet->credits_balance);
+
+        if ($current < $count) {
+            return false;
+        }
+
+        // Check if validity expired
+        if (!empty($wallet->validity_expires_at) && $wallet->validity_expires_at !== '0000-00-00 00:00:00') {
+            if (strtotime($wallet->validity_expires_at) < current_time('timestamp')) {
+                return false;
+            }
+        }
+
+        $new_balance = $current - $count;
+        $new_consumed = intval($wallet->total_consumed) + $count;
+
+        $wpdb->update(
+            $table_wallets,
+            [
+                'credits_balance' => $new_balance,
+                'total_consumed'  => $new_consumed,
+                'updated_at'      => current_time('mysql')
+            ],
+            ['id' => $wallet->id]
+        );
+
+        self::record_credit_usage($visitor_id, $user_id, $count, 'Niyati Voice AI Consultation');
+
+        return $new_balance;
+    }
+
+    /**
      * Group multiple question pings within the same day/session into a single consolidated row
      *
      * @param string $visitor_id

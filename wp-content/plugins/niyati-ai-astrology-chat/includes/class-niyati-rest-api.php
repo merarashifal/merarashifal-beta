@@ -112,6 +112,27 @@ class Niyati_REST_API {
             'callback'            => [__CLASS__, 'handle_get_archive_session'],
             'permission_callback' => '__return_true',
         ]);
+
+        // Request Elaborated / Deep-Dive Astrological Reading
+        register_rest_route(self::NAMESPACE, '/elaborate', [
+            'methods'             => 'POST',
+            'callback'            => [__CLASS__, 'handle_elaborate'],
+            'permission_callback' => '__return_true',
+        ]);
+
+        // Voice Consultation Endpoint (15s input -> 30s Niyati output, burns 5 credits)
+        register_rest_route(self::NAMESPACE, '/voice-chat', [
+            'methods'             => 'POST',
+            'callback'            => [__CLASS__, 'handle_voice_chat'],
+            'permission_callback' => '__return_true',
+        ]);
+
+        // Secure Voice Media Streaming Endpoint (20 days caching)
+        register_rest_route(self::NAMESPACE, '/voice-media', [
+            'methods'             => 'GET',
+            'callback'            => [__CLASS__, 'handle_stream_voice_media'],
+            'permission_callback' => '__return_true',
+        ]);
     }
 
     /**
@@ -136,6 +157,7 @@ class Niyati_REST_API {
             'razorpay_key_secret'   => '',
             'razorpay_test_mode'    => '1',
             'archive_retention_days'=> 90,
+            'elaborate_credits_cost'=> 1,
         ];
 
         $saved = get_option('niyati_chat_settings', []);
@@ -644,12 +666,20 @@ class Niyati_REST_API {
                 Niyati_Storage::append_chat_turn($user_id, $message, $res['reply']);
             }
 
+            // Determine if this astrological answer is eligible for an in-depth elaboration (+credit)
+            $settings = self::get_settings();
+            $elaborate_cost = max(1, intval($settings['elaborate_credits_cost'] ?? 1));
+            $can_elaborate = (!$is_llm_guardrail && !$is_site_navigation && $used_credit_type !== 'none' && !self::is_meta_greeting($message, $res['reply']));
+
             return rest_ensure_response([
                 'success'          => true,
                 'reply'            => $res['reply'],
                 'used_credit_type' => $used_credit_type,
                 'quota'            => $updated_quota,
-                'paid_credits'     => $remaining_paid
+                'paid_credits'     => $remaining_paid,
+                'can_elaborate'    => $can_elaborate,
+                'elaborate_cost'   => $elaborate_cost,
+                'question'         => $message
             ]);
         }
 
@@ -737,6 +767,356 @@ class Niyati_REST_API {
             'success' => true,
             'session' => $session
         ]);
+    }
+
+    /**
+     * Check if a message is a meta greeting / introduction (not eligible for deep elaboration)
+     */
+    public static function is_meta_greeting($message, $reply = '') {
+        $msg = trim(mb_strtolower($message, 'UTF-8'));
+        $meta_patterns = [
+            '/^(hi|hello|hey|namaste|pranam|namaskar|good\s*(morning|afternoon|evening))\b/iu',
+            '/^(who\s*are\s*you|what\s*is\s*your\s*name|aap\s*kaun\s*ho|tum\s*kaun\s*ho|aapka\s*naam\s*kya\s*hai)\b/iu',
+            '/^(kya\s*karti\s*ho|what\s*can\s*you\s*do|kaise\s*madad\s*karogi)\b/iu',
+            '/^(thank\s*you|thanks|dhanyawad|shukriya|ok|okay|bye|alvida)\b/iu'
+        ];
+        foreach ($meta_patterns as $p) {
+            if (preg_match($p, $msg)) {
+                return true;
+            }
+        }
+        if (mb_strlen($msg, 'UTF-8') < 12 && preg_match('/^(hi|hello|hey|namaste|ok|thanks)/iu', $msg)) {
+            return true;
+        }
+        if (!empty($reply)) {
+            $lower_rep = mb_strtolower($reply, 'UTF-8');
+            if (preg_match('/^(i am niyati|main niyati hoon|main niyati hu|main aapki vedic astrologer hoon|namaste! main niyati)\b/iu', $lower_rep)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Handle Elaborated Deep-Dive Astrological Reading Request (Approx 200-250 words)
+     */
+    public static function handle_elaborate($request) {
+        $params = $request->get_json_params() ?: $request->get_params();
+
+        $user_id = get_current_user_id();
+        if (!$user_id && !empty($params['user_id'])) {
+            $user_id = absint($params['user_id']);
+        }
+
+        $lang = sanitize_text_field($params['lang'] ?? 'en');
+
+        if (!$user_id) {
+            return new WP_Error('login_required', ($lang === 'hi' ? 'कृपया पहले लॉगिन करें।' : 'Please log in to continue.'), ['status' => 401]);
+        }
+
+        $question       = sanitize_text_field($params['question'] ?? '');
+        $previous_reply = sanitize_textarea_field($params['previous_reply'] ?? '');
+        $chart_token    = sanitize_text_field($params['chart_token'] ?? '');
+        $visitor_id     = sanitize_text_field($params['visitor_id'] ?? Niyati_Limits::get_visitor_id());
+
+        if (empty($question)) {
+            return new WP_Error('missing_question', 'Original question is missing.', ['status' => 400]);
+        }
+
+        $settings = self::get_settings();
+        $cost = max(1, intval($settings['elaborate_credits_cost'] ?? 1));
+
+        // Retrieve visitor quota & paid credits
+        $free_quota   = Niyati_Limits::check_quota($visitor_id);
+        $paid_balance = Niyati_Wallet::get_balance($visitor_id, $user_id);
+
+        $has_free_credit = ($free_quota['remaining'] >= $cost);
+        $has_paid_credit = ($paid_balance >= $cost);
+
+        if (!$has_free_credit && !$has_paid_credit) {
+            $msg = ($lang === 'hi')
+                ? "गहन व विस्तृत विश्लेषण (+{$cost} क्रेडिट) प्राप्त करने के लिए कृपया क्रेडिट्स रिचार्ज करें।"
+                : "Please recharge credits to unlock the in-depth deep-dive analysis (+{$cost} Credit).";
+
+            return rest_ensure_response([
+                'success'        => false,
+                'quota_exceeded' => true,
+                'needs_recharge' => true,
+                'reply'          => $msg,
+                'quota'          => $free_quota,
+                'paid_credits'   => $paid_balance,
+                'packs'          => array_values(Niyati_Wallet::get_packs(true))
+            ]);
+        }
+
+        // Get chart data
+        $chart_data = null;
+        if (!empty($chart_token)) {
+            $chart_data = get_transient('niyati_sess_' . $chart_token);
+        }
+
+        // Fallback: load chart profile from user storage
+        if (!$chart_data && class_exists('Niyati_Storage') && $user_id > 0) {
+            $saved = Niyati_Storage::get_saved_kundlis($user_id, true);
+            if (!empty($saved)) {
+                $chart_data = reset($saved);
+            }
+        }
+
+        if (!$chart_data) {
+            return new WP_Error('missing_chart', 'Birth chart data not found. Please regenerate chart.', ['status' => 400]);
+        }
+
+        // Call Gemini for 200-250 word deep-dive
+        $res = Niyati_Gemini_API::generate_elaborated_response($question, $previous_reply, $chart_data, $lang);
+
+        if (!$res['success'] || empty($res['reply'])) {
+            return rest_ensure_response([
+                'success'      => false,
+                'reply'        => $res['reply'],
+                'error'        => $res['error'] ?? 'Generation failed',
+                'quota'        => $free_quota,
+                'paid_credits' => $paid_balance
+            ]);
+        }
+
+        $elaborated_reply = trim($res['reply']);
+
+        // Deduct credits
+        if ($has_free_credit) {
+            for ($i = 0; $i < $cost; $i++) {
+                $updated_quota = Niyati_Limits::increment_question_count($visitor_id);
+            }
+            $remaining_paid = $paid_balance;
+            $used_credit_type = 'free';
+        } else {
+            for ($i = 0; $i < $cost; $i++) {
+                $remaining_paid = Niyati_Wallet::consume_credit($visitor_id, $user_id);
+            }
+            $updated_quota = $free_quota;
+            $used_credit_type = 'paid';
+        }
+
+        // Append to user disk storage
+        if (class_exists('Niyati_Storage') && $user_id > 0) {
+            $turn_note = ($lang === 'hi') ? "✨ [विस्तृत विश्लेषण] {$question}" : "✨ [Deep-Dive Analysis] {$question}";
+            Niyati_Storage::append_chat_turn($user_id, $turn_note, $elaborated_reply, ['is_elaborated' => true]);
+        }
+
+        return rest_ensure_response([
+            'success'          => true,
+            'reply'            => $elaborated_reply,
+            'is_elaborated'    => true,
+            'cost'             => $cost,
+            'used_credit_type' => $used_credit_type,
+            'quota'            => $updated_quota,
+            'paid_credits'     => $remaining_paid
+        ]);
+    }
+
+    /**
+     * Handle Voice Consultation Turn
+     * Input voice capped at 15s -> Output voice ~30s (~65-75 words), burns 5 credits, stored for 20 days.
+     */
+    public static function handle_voice_chat($request) {
+        $params = $request->get_json_params() ?: $request->get_params();
+
+        $user_id = get_current_user_id();
+        if (!$user_id && !empty($params['user_id'])) {
+            $user_id = absint($params['user_id']);
+        }
+
+        $lang = sanitize_text_field($params['lang'] ?? 'hi');
+        if (!$user_id) {
+            return new WP_Error('login_required', ($lang === 'hi' ? 'वॉयस परामर्श के लिए कृपया पहले लॉगिन करें।' : 'Please log in to use voice consultations.'), ['status' => 401]);
+        }
+
+        $visitor_id  = sanitize_text_field($params['visitor_id'] ?? Niyati_Limits::get_visitor_id());
+        $chart_token = sanitize_text_field($params['chart_token'] ?? '');
+        $audio_data  = $params['audio_data'] ?? ''; // Base64 data string
+        $mime_type   = sanitize_text_field($params['mime_type'] ?? 'audio/webm');
+        $duration    = min(15.0, floatval($params['duration'] ?? 15.0)); // Strictly capped at 15 seconds
+
+        // Extract raw bytes if base64 data URI sent (e.g. data:audio/webm;codecs=opus;base64,xxxx)
+        if (preg_match('/^data:([^;]+(?:;[^;]+)*);base64,(.+)$/s', $audio_data, $matches)) {
+            $raw_mime = trim($matches[1]);
+            $audio_data = trim($matches[2]);
+            if (empty($mime_type) || $mime_type === 'audio/webm') {
+                $mime_type = explode(';', $raw_mime)[0];
+            }
+        }
+        $audio_data = str_replace(["\r", "\n", ' '], '', $audio_data);
+
+        // Normalize mime type
+        if (strpos($mime_type, ';') !== false) {
+            $mime_type = trim(explode(';', $mime_type)[0]);
+        }
+
+        if (empty($audio_data)) {
+            return new WP_Error('missing_audio', ($lang === 'hi' ? 'वॉयस ऑडियो डेटा प्राप्त नहीं हुआ।' : 'Audio voice data is required.'), ['status' => 400]);
+        }
+
+        $voice_cost = 5; // Exactly 5 credits per voice response
+
+        // Credit check
+        $free_quota   = Niyati_Limits::check_quota($visitor_id);
+        $paid_balance = Niyati_Wallet::get_balance($visitor_id, $user_id);
+
+        $has_enough_free = ($free_quota['remaining'] >= $voice_cost);
+        $has_enough_paid = ($paid_balance >= $voice_cost);
+
+        if (!$has_enough_free && !$has_enough_paid) {
+            $msg = ($lang === 'hi')
+                ? "वॉयस परामर्श के लिए 5 क्रेडिट आवश्यक हैं। कृपया अपने क्रेडिट्स रिचार्ज करें।"
+                : "Voice consultations require 5 credits per reading. Please recharge your wallet.";
+
+            return rest_ensure_response([
+                'success'        => false,
+                'quota_exceeded' => true,
+                'needs_recharge' => true,
+                'reply'          => $msg,
+                'quota'          => $free_quota,
+                'paid_credits'   => $paid_balance,
+                'packs'          => array_values(Niyati_Wallet::get_packs(true))
+            ]);
+        }
+
+        // Retrieve birth chart
+        $chart_data = null;
+        if (!empty($chart_token)) {
+            $chart_data = get_transient('niyati_sess_' . $chart_token);
+        }
+        if (!$chart_data && class_exists('Niyati_Storage') && $user_id > 0) {
+            $saved = Niyati_Storage::get_saved_kundlis($user_id, true);
+            if (!empty($saved)) {
+                $chart_data = reset($saved);
+            }
+        }
+        if (!$chart_data) {
+            $chart_data = [
+                'name'      => 'Jatak',
+                'ascendant' => 'Vedic Chart',
+                'moon_sign' => 'Rashi'
+            ];
+        }
+
+        // Decode audio bytes
+        $input_bytes = base64_decode($audio_data);
+
+        // Save user's input voice note on server disk (20-day retention)
+        $in_file_info = null;
+        if (class_exists('Niyati_Storage')) {
+            $in_ext = (strpos($mime_type, 'wav') !== false) ? 'wav' : ((strpos($mime_type, 'mp4') !== false) ? 'mp4' : 'webm');
+            $in_file_info = Niyati_Storage::save_voice_file($user_id, $input_bytes, $in_ext, 'user_in');
+        }
+
+        // Call Gemini Engine for Voice
+        $res = Niyati_Gemini_API::process_voice_query($audio_data, $mime_type, $chart_data, $lang);
+
+        if (!$res['success'] || empty($res['reply'])) {
+            return rest_ensure_response([
+                'success'      => false,
+                'reply'        => $res['reply'],
+                'error'        => $res['error'] ?? 'Voice processing failed',
+                'quota'        => $free_quota,
+                'paid_credits' => $paid_balance
+            ]);
+        }
+
+        $transcription = $res['transcription'];
+        $reply = $res['reply'];
+
+        // Save Niyati's generated audio if synthesized
+        $out_file_info = null;
+        $audio_stream_url = '';
+        if (!empty($res['audio_bytes']) && class_exists('Niyati_Storage')) {
+            $out_file_info = Niyati_Storage::save_voice_file($user_id, $res['audio_bytes'], $res['audio_ext'] ?? 'wav', 'niyati_out');
+            if ($out_file_info && !empty($out_file_info['relative_path'])) {
+                $audio_stream_url = rest_url(self::NAMESPACE . '/voice-media?file=' . urlencode($out_file_info['relative_path']) . '&u=' . $user_id);
+            }
+        }
+
+        // Deduct exactly 5 credits
+        if ($has_enough_paid) {
+            $remaining_paid = Niyati_Wallet::consume_credits($visitor_id, $user_id, $voice_cost);
+            $updated_quota = $free_quota;
+            $used_credit_type = 'paid';
+        } else {
+            for ($i = 0; $i < $voice_cost; $i++) {
+                $updated_quota = Niyati_Limits::increment_question_count($visitor_id);
+            }
+            $remaining_paid = $paid_balance;
+            $used_credit_type = 'free';
+        }
+
+        // Persist turn in user's chat history on disk
+        if (class_exists('Niyati_Storage') && $user_id > 0) {
+            $voice_meta = [
+                'is_voice'          => true,
+                'audio_url'         => $audio_stream_url,
+                'audio_duration'    => 30,
+                'transcription'     => $transcription,
+                'in_audio_rel'      => $in_file_info['relative_path'] ?? '',
+                'out_audio_rel'     => $out_file_info['relative_path'] ?? '',
+                'expires_at'        => time() + (20 * 86400)
+            ];
+            $turn_note = "🎙️ [वॉयस प्रश्न] " . $transcription;
+            Niyati_Storage::append_chat_turn($user_id, $turn_note, $reply, $voice_meta);
+        }
+
+        return rest_ensure_response([
+            'success'          => true,
+            'is_voice'         => true,
+            'transcription'    => $transcription,
+            'reply'            => $reply,
+            'audio_url'        => $audio_stream_url,
+            'audio_duration'   => 30,
+            'credits_deducted' => $voice_cost,
+            'used_credit_type' => $used_credit_type,
+            'quota'            => $updated_quota,
+            'paid_credits'     => $remaining_paid
+        ]);
+    }
+
+    /**
+     * Stream Voice Audio Media File with 20-Day Cache Headers
+     */
+    public static function handle_stream_voice_media($request) {
+        $params = $request->get_params();
+        $file = sanitize_text_field($params['file'] ?? '');
+
+        if (empty($file) || !class_exists('Niyati_Storage')) {
+            return new WP_Error('invalid_file', 'Voice media file parameter is missing.', ['status' => 400]);
+        }
+
+        $full_path = Niyati_Storage::get_voice_file_path($file);
+        if (!$full_path || !file_exists($full_path)) {
+            return new WP_Error('not_found', 'Voice file not found or expired.', ['status' => 404]);
+        }
+
+        $ext = strtolower(pathinfo($full_path, PATHINFO_EXTENSION));
+        $content_type = 'audio/mpeg';
+        if ($ext === 'wav') {
+            $content_type = 'audio/wav';
+        } elseif ($ext === 'webm') {
+            $content_type = 'audio/webm';
+        } elseif ($ext === 'ogg') {
+            $content_type = 'audio/ogg';
+        } elseif ($ext === 'mp4' || $ext === 'm4a') {
+            $content_type = 'audio/mp4';
+        }
+
+        $filesize = filesize($full_path);
+
+        header('Content-Type: ' . $content_type);
+        header('Content-Length: ' . $filesize);
+        header('Accept-Ranges: bytes');
+        header('Cache-Control: public, max-age=1728000'); // 20 days browser caching
+        header('Expires: ' . gmdate('D, d M Y H:i:s \G\M\T', time() + 1728000));
+
+        // Stream file directly and exit
+        @readfile($full_path);
+        exit;
     }
 
     /**

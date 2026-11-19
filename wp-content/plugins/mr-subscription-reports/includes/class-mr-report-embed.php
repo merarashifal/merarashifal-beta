@@ -56,21 +56,8 @@ class MR_Report_Embed {
             true
         );
 
-        // Enqueue Google Maps Places API for City Autocomplete using config key
-        $google_key = defined('GOOGLE_API_KEY') ? GOOGLE_API_KEY : '';
-        if (!empty($google_key)) {
-            if (!wp_script_is('google-maps-places', 'registered') && !wp_script_is('google-maps-places', 'enqueued')) {
-                wp_enqueue_script(
-                    'google-maps-places',
-                    'https://maps.googleapis.com/maps/api/js?key=' . urlencode($google_key) . '&libraries=places',
-                    [],
-                    null,
-                    true
-                );
-            } else {
-                wp_enqueue_script('google-maps-places');
-            }
-        }
+        // Google Maps Places API is loaded on-demand via Snippet #13 when city field is interacted with.
+        // Static enqueue removed to eliminate 394 KB JS overhead on page loads.
     }
 
     /**

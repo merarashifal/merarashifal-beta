@@ -63,6 +63,8 @@ add_action('plugins_loaded', function () {
             $settings = Niyati_REST_API::get_settings();
             $retention = isset($settings['archive_retention_days']) ? absint($settings['archive_retention_days']) : 90;
             Niyati_Storage::cleanup_old_archives($retention);
+            // 20-Day Voice Media Retention & Storage Lifecycle
+            Niyati_Storage::purge_expired_voice_media(20);
         }
     });
 

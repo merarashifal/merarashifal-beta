@@ -105,6 +105,9 @@ class Niyati_Admin {
         if (isset($_POST['free_limit_old_user'])) {
             $current_settings['free_limit_old_user'] = max(0, intval($_POST['free_limit_old_user']));
         }
+        if (isset($_POST['elaborate_credits_cost'])) {
+            $current_settings['elaborate_credits_cost'] = max(1, min(5, intval($_POST['elaborate_credits_cost'])));
+        }
         if (isset($_POST['limit_reset_period'])) {
             $current_settings['limit_reset_period'] = sanitize_key($_POST['limit_reset_period']);
         }
@@ -889,6 +892,13 @@ class Niyati_Admin {
                                 <td>
                                     <input type="number" min="0" max="100" id="free_limit_old_user" name="free_limit_old_user" value="<?php echo esc_attr($settings['free_limit_old_user']); ?>" class="small-text">
                                     <span class="description"><?php echo esc_html__('Number of free questions allowed for returning users (Default: 1)', 'merarashifal'); ?></span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row"><label for="elaborate_credits_cost"><?php echo esc_html__('Elaborated Answer Cost (Credits)', 'merarashifal'); ?></label></th>
+                                <td>
+                                    <input type="number" min="1" max="5" id="elaborate_credits_cost" name="elaborate_credits_cost" value="<?php echo esc_attr($settings['elaborate_credits_cost'] ?? 1); ?>" class="small-text">
+                                    <span class="description"><?php echo esc_html__('Number of credits required to unlock an in-depth 200-250 word elaborated reading (Default: 1 or 2 credits)', 'merarashifal'); ?></span>
                                 </td>
                             </tr>
                             <tr>

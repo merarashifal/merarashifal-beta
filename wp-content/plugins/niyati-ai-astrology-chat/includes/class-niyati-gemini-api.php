@@ -416,7 +416,7 @@ PROMPT;
             ]
         ];
 
-        $candidate_models = array_unique([$model, 'gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-flash-8b']);
+        $candidate_models = array_unique([$model, 'gemini-3.5-flash-lite', 'gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-3.8-flash']);
         $last_error = '';
 
         foreach ($candidate_models as $cand_model) {
@@ -558,7 +558,7 @@ PROMPT;
             ]
         ];
 
-        $candidate_models = array_unique([$model, 'gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash', 'gemini-1.5-flash-8b']);
+        $candidate_models = array_unique([$model, 'gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-3.8-flash']);
         $last_error = '';
 
         foreach ($candidate_models as $cand_model) {
@@ -607,5 +607,249 @@ PROMPT;
             'reply'   => ($resolved_lang === 'hi') ? 'विस्तृत विश्लेषण तैयार करने में विलंब हो रहा है। कृपया पुनः प्रयास करें।' : 'Unable to generate detailed analysis at this moment. Please try again.',
             'error'   => $last_error
         ];
+    }
+
+    /**
+     * Process Voice Consultation Turn (Max 15s user voice input -> ~30s Niyati voice response)
+     *
+     * @param string $audio_base64 Base64 encoded audio
+     * @param string $mime_type MIME type of the audio (e.g. 'audio/webm', 'audio/mp4', 'audio/ogg')
+     * @param array $kundli_profile Authentic birth chart profile
+     * @param string $user_lang User language preference ('hi', 'hinglish', 'en')
+     * @return array ['success' => bool, 'transcription' => string, 'reply' => string, 'audio_bytes' => string|null, 'mime_type' => string]
+     */
+    public static function process_voice_query($audio_base64, $mime_type = 'audio/webm', $kundli_profile = [], $user_lang = 'hi') {
+        $api_key = self::get_api_key();
+        if (empty($api_key)) {
+            return [
+                'success' => false,
+                'error'   => 'Gemini API key is not configured.',
+                'reply'   => 'AI service is not configured. Please check API settings.'
+            ];
+        }
+
+        $resolved_lang = in_array($user_lang, ['hi', 'hinglish', 'en'], true) ? $user_lang : 'hi';
+        $system_instruction = self::build_system_instruction($kundli_profile, $resolved_lang);
+
+        // Clean audio base64 if data URI prefix sent
+        if (preg_match('/^data:([^;]+(?:;[^;]+)*);base64,(.+)$/s', $audio_base64, $m)) {
+            $raw_mime = trim($m[1]);
+            $audio_base64 = trim($m[2]);
+            if (empty($mime_type) || $mime_type === 'audio/webm') {
+                $mime_type = explode(';', $raw_mime)[0];
+            }
+        }
+        $audio_base64 = str_replace(["\r", "\n", ' '], '', $audio_base64);
+
+        // Normalize MIME type
+        $clean_mime = 'audio/webm';
+        if (strpos($mime_type, 'wav') !== false) {
+            $clean_mime = 'audio/wav';
+        } elseif (strpos($mime_type, 'mp4') !== false || strpos($mime_type, 'm4a') !== false) {
+            $clean_mime = 'audio/mp4';
+        } elseif (strpos($mime_type, 'ogg') !== false || strpos($mime_type, 'opus') !== false) {
+            $clean_mime = 'audio/ogg';
+        } elseif (strpos($mime_type, 'webm') !== false) {
+            $clean_mime = 'audio/webm';
+        }
+
+        // Voice output prompt: strictly 65 to 75 words (~30 seconds spoken audio)
+        $voice_directive = ($resolved_lang === 'hi')
+            ? "\n\nविशेष निर्देश - 30-सेकंड वॉयस नोट मार्गदर्शन (Spoken Voice Note Output):\n" .
+              "जिज्ञासु ने एक छोटा वॉयस नोट (अधिकतम 15 सेकंड) भेजा है।\n" .
+              "1. सबसे पहले उपयोगकर्ता के बोले गए प्रश्न का सटीक ट्रांसक्रिप्शन (transcription) करें।\n" .
+              "2. कुंडली और वर्तमान गोचर/दशा के आधार पर नियति (Niyati) के रूप में एक आत्मीय, शांत और सकारात्मक वॉयस संदेश दें।\n" .
+              "3. शब्द सीमा STRICT CONSTRAINT: ठीक 65 से 75 शब्द (लगभग 28-32 सेकंड की बोलचाल गति)। न बहुत छोटा, न 75 शब्दों से अधिक!\n" .
+              "4. यह उत्तर ऑडियो रूप में बोला जाएगा, इसलिए कोई हेडिंग (#), बुलेट पॉइंट (*), या मार्कडाउन सिंबल का प्रयोग न करें। केवल मधुर, स्पष्ट और प्रवाहपूर्ण वाक्य बोलें।\n" .
+              "5. कभी भी पूर्ण निश्चितता का दावा न करें। 'संभावना बनती है', 'अनुकूल समय है', 'शुभ योग बन रहे हैं' जैसे संयमित शब्दों का प्रयोग करें।\n" .
+              "6. उत्तर JSON प्रारूप में दें: {\"transcription\": \"...\", \"reply\": \"...\"}"
+            : (($resolved_lang === 'hinglish')
+                ? "\n\nSPECIAL DIRECTIVE - 30-SECOND SPOKEN VOICE NOTE:\n" .
+                  "The seeker sent a short voice note (max 15 seconds).\n" .
+                  "1. Accurately transcribe what the user spoke into 'transcription'.\n" .
+                  "2. Respond as Niyati in warm, friendly Hinglish specifically written to be spoken aloud as audio.\n" .
+                  "3. STRICT LENGTH: Exactly 65 to 75 words (~30 seconds of speech). Not shorter, and not exceeding 75 words!\n" .
+                  "4. Do NOT use markdown symbols, headers, asterisks, or bullet points, as this is purely for audio speech playback.\n" .
+                  "5. Avoid absolute guarantees; emphasize planetary probabilities and positive karma.\n" .
+                  "6. Output JSON format: {\"transcription\": \"...\", \"reply\": \"...\"}"
+                : "\n\nSPECIAL DIRECTIVE - 30-SECOND SPOKEN VOICE NOTE:\n" .
+                  "The seeker sent a brief voice note (max 15 seconds).\n" .
+                  "1. Accurately transcribe the spoken question into 'transcription'.\n" .
+                  "2. Respond as Niyati in a serene, empathetic tone tailored for spoken voice playback.\n" .
+                  "3. STRICT LENGTH: Exactly 65 to 75 words (approx 28 to 32 seconds of speech).\n" .
+                  "4. Do NOT use any markdown formatting, asterisks, or headers because this text will be read aloud as audio.\n" .
+                  "5. Retain probabilistic, respectful Vedic phrasing (e.g. 'planets indicate favorable alignment', 'positive possibilities').\n" .
+                  "6. Output JSON format: {\"transcription\": \"...\", \"reply\": \"...\"}");
+
+        $payload = [
+            'system_instruction' => [
+                'parts' => [['text' => $system_instruction . $voice_directive]]
+            ],
+            'contents' => [
+                [
+                    'role'  => 'user',
+                    'parts' => [
+                        [
+                            'inlineData' => [
+                                'mimeType' => $clean_mime,
+                                'data'     => $audio_base64
+                            ]
+                        ],
+                        [
+                            'text' => 'Please listen carefully to this audio voice query, transcribe it accurately, and formulate Niyati\'s warm 30-second spoken Vedic astrology answer (strictly 65-75 words). Return JSON with "transcription" and "reply".'
+                        ]
+                    ]
+                ]
+            ],
+            'generationConfig' => [
+                'temperature'       => 0.6,
+                'topP'              => 0.9,
+                'maxOutputTokens'   => 800,
+                'responseMimeType'  => 'application/json'
+            ]
+        ];
+
+        // Models that support multimodal audio input
+        $candidate_models = ['gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-3.8-flash'];
+        $last_error = '';
+
+        foreach ($candidate_models as $cand_model) {
+            $url = 'https://generativelanguage.googleapis.com/v1beta/models/' . urlencode($cand_model) . ':generateContent?key=' . urlencode($api_key);
+
+            $response = wp_remote_post($url, [
+                'headers' => ['Content-Type' => 'application/json'],
+                'body'    => wp_json_encode($payload),
+                'timeout' => 35
+            ]);
+
+            if (is_wp_error($response)) {
+                $last_error = $response->get_error_message();
+                continue;
+            }
+
+            $code = wp_remote_retrieve_response_code($response);
+            $body = wp_remote_retrieve_body($response);
+            $json = json_decode($body, true);
+
+            if ($code === 200 && !empty($json['candidates'][0]['content']['parts'])) {
+                $raw_text = '';
+                foreach ($json['candidates'][0]['content']['parts'] as $part) {
+                    if (isset($part['text'])) {
+                        $raw_text .= $part['text'];
+                    }
+                }
+                $parsed = json_decode(trim($raw_text), true);
+                if (is_array($parsed) && !empty($parsed['reply'])) {
+                    $transcription = trim($parsed['transcription'] ?? '');
+                    $reply = trim($parsed['reply']);
+
+                    // Synthesize Niyati's spoken audio if TTS engine available
+                    $synth = self::synthesize_niyati_voice($reply, $resolved_lang);
+
+                    return [
+                        'success'       => true,
+                        'transcription' => $transcription ?: ($resolved_lang === 'hi' ? 'वॉयस संदेश' : 'Voice Query'),
+                        'reply'         => $reply,
+                        'audio_bytes'   => $synth['audio_bytes'] ?? null,
+                        'audio_ext'     => $synth['audio_ext'] ?? 'wav',
+                        'mime_type'     => $synth['mime_type'] ?? 'audio/wav',
+                        'duration'      => $synth['duration'] ?? 30,
+                        'model'         => $cand_model
+                    ];
+                }
+            }
+
+            $last_error = $json['error']['message'] ?? ('HTTP Error ' . $code);
+        }
+
+        return [
+            'success' => false,
+            'reply'   => ($resolved_lang === 'hi') ? 'वॉयस संदेश प्रोसेस करने में त्रुटि हुई। कृपया पुनः प्रयास करें।' : 'Unable to process voice message. Please try again.',
+            'error'   => $last_error
+        ];
+    }
+
+    /**
+     * Synthesize Niyati's Voice Audio
+     * Calls Gemini Native TTS with Aoede serene female voice profile, converted to standard WAV
+     */
+    public static function synthesize_niyati_voice($text, $lang = 'hi') {
+        $api_key = self::get_api_key();
+        if (empty($api_key) || empty($text)) {
+            return null;
+        }
+
+        $clean_speech = trim(preg_replace('/[*_#`\[\]]/', '', $text));
+        $tts_models = ['gemini-2.5-flash-preview-tts', 'gemini-3.8-flash-tts', 'gemini-3.1-flash-tts-preview'];
+        $voice_name = 'Aoede'; // Serene, dignified, warm female voice
+
+        foreach ($tts_models as $tts_model) {
+            $url = 'https://generativelanguage.googleapis.com/v1beta/models/' . urlencode($tts_model) . ':generateContent?key=' . urlencode($api_key);
+            $payload = [
+                'contents' => [
+                    ['role' => 'user', 'parts' => [['text' => $clean_speech]]]
+                ],
+                'generationConfig' => [
+                    'responseModalities' => ['AUDIO'],
+                    'speechConfig' => [
+                        'voiceConfig' => [
+                            'prebuiltVoiceConfig' => [
+                                'voiceName' => $voice_name
+                            ]
+                        ]
+                    ]
+                ]
+            ];
+
+            $response = wp_remote_post($url, [
+                'headers' => ['Content-Type' => 'application/json'],
+                'body'    => wp_json_encode($payload),
+                'timeout' => 20
+            ]);
+
+            if (!is_wp_error($response) && wp_remote_retrieve_response_code($response) === 200) {
+                $data = json_decode(wp_remote_retrieve_body($response), true);
+                if (!empty($data['candidates'][0]['content']['parts'][0]['inlineData']['data'])) {
+                    $raw_b64 = $data['candidates'][0]['content']['parts'][0]['inlineData']['data'];
+                    $pcm_bytes = base64_decode($raw_b64);
+                    if (!empty($pcm_bytes)) {
+                        $wav_bytes = self::pcm_to_wav($pcm_bytes, 24000, 1, 16);
+                        return [
+                            'audio_bytes' => $wav_bytes,
+                            'audio_ext'   => 'wav',
+                            'mime_type'   => 'audio/wav',
+                            'duration'    => 30
+                        ];
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Wrap raw 16-bit PCM mono samples into standard RIFF WAV container
+     */
+    public static function pcm_to_wav($pcm_bytes, $sample_rate = 24000, $channels = 1, $bits_per_sample = 16) {
+        $data_len = strlen($pcm_bytes);
+        $byte_rate = $sample_rate * $channels * ($bits_per_sample / 8);
+        $block_align = $channels * ($bits_per_sample / 8);
+
+        return pack('a4Va4a4VvvVVvva4V',
+            'RIFF',
+            36 + $data_len,
+            'WAVE',
+            'fmt ',
+            16,
+            1,
+            $channels,
+            $sample_rate,
+            $byte_rate,
+            $block_align,
+            $bits_per_sample,
+            'data',
+            $data_len
+        ) . $pcm_bytes;
     }
 }

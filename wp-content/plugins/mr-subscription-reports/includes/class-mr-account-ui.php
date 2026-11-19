@@ -341,19 +341,8 @@ class MR_Account_UI {
             true
         );
 
-        // Google Maps Places API for City Autocomplete if key is configured
-        $google_key = defined('GOOGLE_API_KEY') ? GOOGLE_API_KEY : '';
-        if (!empty($google_key)) {
-            if (!wp_script_is('google-maps-places', 'registered') && !wp_script_is('google-maps-places', 'enqueued')) {
-                wp_enqueue_script(
-                    'google-maps-places',
-                    'https://maps.googleapis.com/maps/api/js?key=' . urlencode($google_key) . '&libraries=places',
-                    [],
-                    null,
-                    true
-                );
-            }
-        }
+        // Google Maps Places API is loaded on-demand via Snippet #13 when city field is interacted with.
+        // Static enqueue removed to eliminate 394 KB JS overhead on page loads.
 
         $user_id = get_current_user_id();
         $account_url = self::get_account_page_url();

@@ -69,41 +69,117 @@ add_action('template_redirect', function() {
 });
 
 /* ==============================================================================
-   PERFORMANCE: DEFER HEAVY NON-CRITICAL SCRIPTS & NATIVE LAZY LOADING
+   PERFORMANCE: PRECONNECT, DEFER SCRIPTS, DEQUEUE UNUSED ASSETS & ADSENSE LOADER
    ============================================================================== */
 
-// Defer non-critical scripts to eliminate Total Blocking Time (TBT)
+// 1. Preconnect to Font & CDN Domains in <head>
+add_action('wp_head', function() {
+    ?>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://pagead2.googlesyndication.com">
+    <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+    <?php
+}, 1);
+
+// 2. Remove unnecessary jquery-migrate on frontend (saves 11 KB, zero console impact)
+add_action('wp_default_scripts', function($scripts) {
+    if (!is_admin() && isset($scripts->registered['jquery'])) {
+        $scripts->registered['jquery']->deps = array_diff($scripts->registered['jquery']->deps, ['jquery-migrate']);
+    }
+});
+
+// 3. Defer all non-critical Elementor, Astra & Plugin scripts to eliminate TBT
 add_filter('script_loader_tag', function($tag, $handle, $src) {
-    if (is_admin()) {
+    if (is_admin()) return $tag;
+
+    // Never defer jQuery core or inline configs
+    if ($handle === 'jquery' || $handle === 'jquery-core') {
         return $tag;
     }
 
-    $defer_scripts = [
+    $defer_handles = [
+        'elementor-frontend',
+        'elementor-pro-frontend',
+        'elementor-pro-elements-handlers',
+        'elementor-pro-webpack-pro-runtime',
+        'elementor-webpack-runtime',
+        'smartmenus',
+        'wp-bottom-menu',
+        'astra-theme-js',
+        'mr-reports',
+        'mr-account',
+        'mr-cookie-consent',
+        'imagesloaded',
+        'flatpickr',
+        'wp-i18n',
+        'wp-hooks',
         'google-maps-places',
         'global-city-autocomplete',
         'razorpay-checkout',
         'sbi_scripts',
         'sbi-scripts',
-        'niyati-chat-js',
-        'flatpickr',
+        'niyati-chat-js'
     ];
 
-    if (in_array($handle, $defer_scripts, true)) {
+    if (in_array($handle, $defer_handles, true) || strpos($src, 'elementor') !== false) {
         if (strpos($tag, 'defer') === false && strpos($tag, 'async') === false) {
             $tag = str_replace('<script ', '<script defer ', $tag);
         }
     }
 
     return $tag;
-}, 10, 3);
+}, 20, 3);
 
-// Dequeue Razorpay on homepage where no direct checkout occurs (saves 212 KB JS)
+// 4. Dequeue Unused Styles & Duplicate Font Awesome on Front Page (Reduces CSS from 45 to ~25)
 add_action('wp_enqueue_scripts', function() {
     if (is_front_page()) {
+        // Dequeue Instagram Feed styles (not visible above the fold on homepage)
+        wp_dequeue_style('sbi_styles');
+        wp_dequeue_style('sbi-tokens-local');
+        wp_dequeue_style('sb-elementor-shared-style');
+        // Dequeue Flatpickr CSS (only needed on Kundli/calculator pages)
+        wp_dequeue_style('flatpickr');
+        // Dequeue duplicate FontAwesome from WP Bottom Menu (uses main FontAwesome)
+        wp_dequeue_style('font-awesome-wpbm');
+        // Dequeue unused Elementor Pro blockquote widget CSS
+        wp_dequeue_style('hfe-widget-blockquote');
+        // Dequeue Razorpay on homepage where no direct checkout occurs (saves 212 KB JS)
         wp_dequeue_script('razorpay-checkout');
         wp_dequeue_script('mr-razorpay-checkout');
     }
-}, 100);
+}, 9999);
+
+// 5. Delay Google AdSense & Third-Party Trackers Until User Interaction
+// Eliminates 1,500ms+ of Total Blocking Time (TBT) on Mobile
+add_action('wp_footer', function() {
+    if (is_admin()) return;
+    ?>
+    <script>
+    (function() {
+        var adsLoaded = false;
+        function loadAdSense() {
+            if (adsLoaded) return;
+            adsLoaded = true;
+            window.removeEventListener('scroll', loadAdSense, {passive:true});
+            window.removeEventListener('touchstart', loadAdSense, {passive:true});
+            window.removeEventListener('mousemove', loadAdSense, {passive:true});
+            window.removeEventListener('keydown', loadAdSense, {passive:true});
+            var s = document.createElement('script');
+            s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2729656633217680';
+            s.async = true;
+            s.crossOrigin = 'anonymous';
+            document.head.appendChild(s);
+        }
+        window.addEventListener('scroll', loadAdSense, {passive:true, once:true});
+        window.addEventListener('touchstart', loadAdSense, {passive:true, once:true});
+        window.addEventListener('mousemove', loadAdSense, {passive:true, once:true});
+        window.addEventListener('keydown', loadAdSense, {passive:true, once:true});
+        setTimeout(loadAdSense, 3800);
+    })();
+    </script>
+    <?php
+}, 999);
 
 // Optimize Above-The-Fold LCP Image & Smart Lazy-Loading for Below-The-Fold
 add_filter('the_content', 'mr_optimize_images_and_lcp', 99);

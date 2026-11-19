@@ -17,6 +17,7 @@ class Niyati_Storage {
     const KUNDLI_FOLDER  = 'kundli';
     const CHATS_FOLDER   = 'chats';
     const ARCHIVE_FOLDER = 'archive';
+    const VOICE_FOLDER   = 'voice';
 
     const MAX_ACTIVE_MESSAGES = 60; // Max messages retained in active session file before rolling
 
@@ -594,6 +595,119 @@ class Niyati_Storage {
             'active_profile_name' => $data['active_profile_name'] ?? '',
             'chart_token'         => $data['chart_token'] ?? '',
             'messages'            => $data['messages'] ?? [],
+        ];
+    }
+
+    /* =========================================================================
+     * 4. VOICE AUDIO MEDIA STORAGE & 20-DAY RETENTION LIFECYCLE
+     * ========================================================================= */
+
+    /**
+     * Save voice audio file to server disk
+     *
+     * @param int $user_id
+     * @param string $file_bytes
+     * @param string $extension ('webm', 'mp3', 'ogg', 'wav')
+     * @param string $prefix ('user_in', 'niyati_out')
+     * @return array|false ['filename' => ..., 'relative_path' => ..., 'full_path' => ..., 'size' => ..., 'created_at' => ..., 'expires_at' => ...]
+     */
+    public static function save_voice_file($user_id, $file_bytes, $extension = 'webm', $prefix = 'niyati_out') {
+        if (empty($file_bytes)) {
+            return false;
+        }
+
+        $user_id = absint($user_id);
+        $voice_base = self::get_sub_dir(self::VOICE_FOLDER);
+
+        // Subdirectory partitioned by Year-Month to keep directories scalable
+        $sub_dir_name = date('Y-m');
+        $target_dir = trailingslashit($voice_base) . $sub_dir_name;
+        if (!file_exists($target_dir)) {
+            wp_mkdir_p($target_dir);
+        }
+
+        $clean_ext = in_array(strtolower($extension), ['webm', 'mp3', 'ogg', 'wav', 'mp4', 'm4a']) ? strtolower($extension) : 'webm';
+        $now = time();
+        $random_hash = wp_generate_password(8, false, false);
+        $filename = sprintf('%s_u%d_%d_%s.%s', $prefix, $user_id, $now, $random_hash, $clean_ext);
+        $full_path = trailingslashit($target_dir) . $filename;
+        $rel_path = "{$sub_dir_name}/{$filename}";
+
+        $written = @file_put_contents($full_path, $file_bytes);
+        if ($written === false) {
+            return false;
+        }
+
+        return [
+            'filename'      => $filename,
+            'relative_path' => $rel_path,
+            'full_path'     => $full_path,
+            'size_bytes'    => $written,
+            'created_at'    => $now,
+            'expires_at'    => $now + (20 * 86400) // Exactly 20 days retention
+        ];
+    }
+
+    /**
+     * Locate voice file on disk
+     */
+    public static function get_voice_file_path($relative_path) {
+        $relative_path = str_replace('\\', '/', trim($relative_path));
+        // Strict path traversal defense
+        if (strpos($relative_path, '..') !== false || !preg_match('/^[\w\-\/]+\.(webm|mp3|ogg|wav|mp4|m4a)$/i', $relative_path)) {
+            return false;
+        }
+
+        $voice_base = self::get_sub_dir(self::VOICE_FOLDER);
+        $full_path = trailingslashit($voice_base) . $relative_path;
+
+        return file_exists($full_path) ? $full_path : false;
+    }
+
+    /**
+     * Purge voice files older than 20 days
+     *
+     * @param int $retention_days (Default: 20)
+     * @return array ['deleted_count' => ..., 'freed_bytes' => ...]
+     */
+    public static function purge_expired_voice_media($retention_days = 20) {
+        $voice_base = self::get_sub_dir(self::VOICE_FOLDER);
+        $retention_days = max(1, intval($retention_days));
+        $cutoff_time = time() - ($retention_days * 86400);
+
+        $deleted_count = 0;
+        $freed_bytes = 0;
+
+        if (!is_dir($voice_base)) {
+            return ['deleted_count' => 0, 'freed_bytes' => 0];
+        }
+
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($voice_base, RecursiveDirectoryIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::CHILD_FIRST
+        );
+
+        foreach ($iterator as $item) {
+            if ($item->isFile()) {
+                $ext = strtolower($item->getExtension());
+                if (in_array($ext, ['webm', 'mp3', 'ogg', 'wav', 'mp4', 'm4a'])) {
+                    if ($item->getMTime() < $cutoff_time) {
+                        $size = $item->getSize();
+                        if (@unlink($item->getRealPath())) {
+                            $deleted_count++;
+                            $freed_bytes += $size;
+                        }
+                    }
+                }
+            } elseif ($item->isDir()) {
+                // Delete empty monthly folders
+                @rmdir($item->getRealPath());
+            }
+        }
+
+        return [
+            'deleted_count' => $deleted_count,
+            'freed_bytes'   => $freed_bytes
         ];
     }
 }

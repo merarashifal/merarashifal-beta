@@ -233,4 +233,15 @@ class Niyati_Vedic_API {
 
         return $profile;
     }
+
+    /**
+     * Retrieve cached Kundli profile by chart session token
+     */
+    public static function get_chart_by_token($chart_token) {
+        if (empty($chart_token)) {
+            return null;
+        }
+        $data = get_transient('niyati_sess_' . $chart_token);
+        return is_array($data) ? $data : null;
+    }
 }

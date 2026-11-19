@@ -132,6 +132,13 @@ class Niyati_Limits {
     }
 
     /**
+     * Alias for check_quota to ensure robust compatibility
+     */
+    public static function get_quota_info($visitor_id) {
+        return self::check_quota($visitor_id);
+    }
+
+    /**
      * Deduct one question upon successful response
      */
     public static function increment_question_count($visitor_id) {
