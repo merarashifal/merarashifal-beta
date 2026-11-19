@@ -2707,7 +2707,8 @@
                 appendMessageBubble('model', data.reply, {
                     isVoice: true,
                     audioUrl: data.audio_url,
-                    audioDuration: data.audio_duration || 30
+                    audioDuration: data.audio_duration || 30,
+                    autoPlay: true
                 });
 
                 state.history.push({
@@ -2738,7 +2739,7 @@
         });
     }
 
-    function createVoicePlayerElement(text, audioUrl, duration) {
+    function createVoicePlayerElement(text, audioUrl, duration, autoPlay) {
         var card = document.createElement('div');
         card.className = 'niyati-voice-player-card';
 
@@ -2906,6 +2907,12 @@
             }
         });
 
+        if (autoPlay) {
+            setTimeout(function () {
+                loadAndPlay();
+            }, 350);
+        }
+
         return card;
     }
 
@@ -2973,7 +2980,7 @@
 
         // Embedded Audio Player Card for Voice Responses
         if (options && options.isVoice) {
-            var playerCard = createVoicePlayerElement(text, options.audioUrl, options.audioDuration || 30);
+            var playerCard = createVoicePlayerElement(text, options.audioUrl, options.audioDuration || 30, options.autoPlay);
             bodyWrap.appendChild(playerCard);
         }
 

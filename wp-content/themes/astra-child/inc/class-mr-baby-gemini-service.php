@@ -117,7 +117,7 @@ class MR_Baby_Gemini_Service
         // 2. Check Write-Through Cache (baby_name_profiles table)
         if (!$force_refresh) {
             $cached_profile = $wpdb->get_row($wpdb->prepare(
-                "SELECT profile_json FROM {$profiles_table} WHERE baby_name_id = %d OR name_slug = %s LIMIT 1",
+                "SELECT id, profile_json FROM {$profiles_table} WHERE baby_name_id = %d OR name_slug = %s LIMIT 1",
                 $baby_name_id,
                 $name_slug
             ));
@@ -125,6 +125,33 @@ class MR_Baby_Gemini_Service
             if ($cached_profile && !empty($cached_profile->profile_json)) {
                 $decoded = json_decode($cached_profile->profile_json, true);
                 if (is_array($decoded) && !empty($decoded['name'])) {
+                    $needs_db_update = false;
+
+                    // Guarantee rich authentic Hindi for personality
+                    if (empty($decoded['personality_and_character_insights_hi']) || MR_Baby_Template_Renderer::is_mostly_english($decoded['personality_and_character_insights_hi'])) {
+                        $hi_paragraphs = MR_Baby_Template_Renderer::generate_vedic_hindi_personality($decoded);
+                        $decoded['personality_and_character_insights_hi'] = implode("\n\n", $hi_paragraphs);
+                        $needs_db_update = true;
+                    }
+
+                    // Guarantee rich authentic Hindi for career
+                    if (empty($decoded['career_and_success_predictions_hi']) || MR_Baby_Template_Renderer::is_mostly_english($decoded['career_and_success_predictions_hi'])) {
+                        $hi_career = MR_Baby_Template_Renderer::generate_vedic_hindi_career($decoded);
+                        $decoded['career_and_success_predictions_hi'] = implode("\n\n", $hi_career);
+                        $needs_db_update = true;
+                    }
+
+                    // Guarantee rich authentic Hindi for global appeal
+                    if (empty($decoded['global_metadata']['dual_market_appeal_hi']) || MR_Baby_Template_Renderer::is_mostly_english($decoded['global_metadata']['dual_market_appeal_hi'])) {
+                        $decoded['global_metadata']['dual_market_appeal_hi'] = MR_Baby_Template_Renderer::get_global_appeal_hindi($decoded);
+                        $needs_db_update = true;
+                    }
+
+                    if ($needs_db_update && !empty($cached_profile->id)) {
+                        $updated_json = wp_json_encode($decoded, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+                        $wpdb->update($profiles_table, ['profile_json' => $updated_json], ['id' => $cached_profile->id]);
+                    }
+
                     return $decoded;
                 }
             }

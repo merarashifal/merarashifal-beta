@@ -211,11 +211,15 @@ class MR_Baby_Template_Renderer
             // 5. Auspicious Attributes Table
             self::render_section_5_attributes($profile);
 
-            // 6. Psychological & Character Traits
-            self::render_section_6_psychology($profile);
-
-            // 7. Career & Success Outlook
-            self::render_section_7_career($profile);
+            // 6 & 7. Psychological & Career Outlook in compact twin grid
+            ?>
+            <div class="mr-baby-twin-grid">
+                <?php
+                self::render_section_6_psychology($profile);
+                self::render_section_7_career($profile);
+                ?>
+            </div>
+            <?php
 
             // 8. Zodiac Compatibility & Elemental Harmony
             self::render_section_8_compatibility($profile);
@@ -877,15 +881,11 @@ class MR_Baby_Template_Renderer
         }
 
         $narrative_hi  = $profile['personality_and_character_insights_hi'] ?? '';
-        if (!empty($narrative_hi)) {
-            $paragraphs_hi = array_filter(array_map('trim', explode("\n", $narrative_hi)));
-        } else {
-            $paragraphs_hi = [];
-            foreach ($paragraphs_en as $p) {
-                if (!empty($p)) {
-                    $paragraphs_hi[] = self::translate_to_hindi($p);
-                }
-            }
+        $paragraphs_hi = !empty($narrative_hi) ? array_filter(array_map('trim', explode("\n", $narrative_hi))) : [];
+
+        // Guarantee 100% authentic Hindi narrative without English fallback leaks
+        if (empty($paragraphs_hi) || self::is_mostly_english($paragraphs_hi)) {
+            $paragraphs_hi = self::generate_vedic_hindi_personality($profile);
         }
         ?>
         <section class="mr-baby-section mr-section-psychology">
@@ -924,15 +924,11 @@ class MR_Baby_Template_Renderer
         }
 
         $narrative_hi  = $profile['career_and_success_predictions_hi'] ?? '';
-        if (!empty($narrative_hi)) {
-            $paragraphs_hi = array_filter(array_map('trim', explode("\n", $narrative_hi)));
-        } else {
-            $paragraphs_hi = [];
-            foreach ($paragraphs_en as $p) {
-                if (!empty($p)) {
-                    $paragraphs_hi[] = self::translate_to_hindi($p);
-                }
-            }
+        $paragraphs_hi = !empty($narrative_hi) ? array_filter(array_map('trim', explode("\n", $narrative_hi))) : [];
+
+        // Guarantee 100% authentic Hindi narrative without English fallback leaks
+        if (empty($paragraphs_hi) || self::is_mostly_english($paragraphs_hi)) {
+            $paragraphs_hi = self::generate_vedic_hindi_career($profile);
         }
         ?>
         <section class="mr-baby-section mr-section-career">
@@ -968,11 +964,21 @@ class MR_Baby_Template_Renderer
         $element_en         = esc_html($v['vedic_element'] ?? 'Air');
         $element_hi         = esc_html(self::get_element_hindi($element_en));
         $compatibility_en   = esc_html($v['favorable_rashis_and_elements'] ?? 'Harmonious with compatible elemental zodiac signs.');
-        $compatibility_hi   = esc_html(self::translate_to_hindi($compatibility_en));
+        
+        $compatibility_hi   = !empty($v['favorable_rashis_and_elements_hi'])
+            ? esc_html($v['favorable_rashis_and_elements_hi'])
+            : esc_html(self::get_compatibility_hindi($profile));
+        if (empty($compatibility_hi) || self::is_mostly_english($compatibility_hi)) {
+            $compatibility_hi = esc_html(self::get_compatibility_hindi($profile));
+        }
+
         $dual_market_en     = esc_html($profile['global_metadata']['dual_market_appeal'] ?? '');
         $dual_market_hi     = !empty($profile['global_metadata']['dual_market_appeal_hi'])
             ? esc_html($profile['global_metadata']['dual_market_appeal_hi'])
-            : (!empty($dual_market_en) ? esc_html(self::translate_to_hindi($dual_market_en)) : '');
+            : esc_html(self::get_global_appeal_hindi($profile));
+        if (empty($dual_market_hi) || self::is_mostly_english($dual_market_hi)) {
+            $dual_market_hi = esc_html(self::get_global_appeal_hindi($profile));
+        }
         ?>
         <section class="mr-baby-section mr-section-compatibility">
             <h2 class="mr-section-title">
@@ -993,18 +999,16 @@ class MR_Baby_Template_Renderer
                     </p>
                 </div>
 
-                <?php if ($dual_market_en): ?>
                 <div class="mr-compat-card">
                     <h4>
                         <span class="lang-en">Modern & Global Popularity</span>
                         <span class="lang-hi">आधुनिक एवं वैश्विक पसंद</span>
                     </h4>
                     <p>
-                        <span class="lang-en"><?php echo $dual_market_en; ?></span>
+                        <span class="lang-en"><?php echo $dual_market_en ?: 'Well-suited for both domestic and international contexts.'; ?></span>
                         <span class="lang-hi"><?php echo $dual_market_hi; ?></span>
                     </p>
                 </div>
-                <?php endif; ?>
             </div>
         </section>
         <?php
@@ -1288,19 +1292,24 @@ class MR_Baby_Template_Renderer
                 display: inline-flex !important;
             }
 
+            .baby-engine-container.lang-hi-active div.colors-wrap.lang-hi,
+            .mr-baby-detail-wrap.lang-hi-active div.colors-wrap.lang-hi {
+                display: flex !important;
+            }
+
             .mr-baby-detail-wrap {
                 max-width: 1040px;
                 margin: 0 auto;
-                padding: 16px 16px 40px 16px;
+                padding: 10px 14px 28px 14px;
                 font-family: 'Noto Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
                 color: var(--text-dark);
-                line-height: 1.8;
+                line-height: 1.65;
             }
 
             /* Breadcrumb Navigation */
             .mr-baby-breadcrumb {
-                margin-bottom: 24px;
-                font-size: 0.92rem;
+                margin-bottom: 16px;
+                font-size: 0.88rem;
                 font-family: 'Noto Sans', sans-serif;
             }
             .mr-baby-breadcrumb ol {
@@ -1309,7 +1318,7 @@ class MR_Baby_Template_Renderer
                 margin: 0;
                 display: flex;
                 flex-wrap: wrap;
-                gap: 8px;
+                gap: 6px;
                 align-items: center;
             }
             .mr-baby-breadcrumb a {
@@ -1334,8 +1343,8 @@ class MR_Baby_Template_Renderer
                 background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
                 border: 1px solid var(--border-gold);
                 border-radius: var(--radius-lg);
-                padding: 36px 30px;
-                margin-bottom: 32px;
+                padding: 22px 24px;
+                margin-bottom: 20px;
                 box-shadow: var(--shadow-sm);
                 position: relative;
                 overflow: hidden;
@@ -1350,15 +1359,15 @@ class MR_Baby_Template_Renderer
             .mr-baby-badge-strip {
                 display: flex;
                 flex-wrap: wrap;
-                gap: 8px;
-                margin-bottom: 18px;
+                gap: 6px;
+                margin-bottom: 14px;
             }
             .mr-badge {
                 display: inline-flex;
                 align-items: center;
-                padding: 5px 14px;
+                padding: 4px 12px;
                 border-radius: 50px;
-                font-size: 0.85rem;
+                font-size: 0.8rem;
                 font-weight: 700;
                 letter-spacing: 0.02em;
             }
@@ -1392,33 +1401,33 @@ class MR_Baby_Template_Renderer
                 display: flex;
                 align-items: center;
                 flex-wrap: wrap;
-                gap: 14px;
-                margin: 0 0 12px 0;
+                gap: 12px;
+                margin: 0 0 8px 0;
                 font-family: 'Outfit', sans-serif !important;
-                font-size: 2.8rem;
+                font-size: 2.3rem;
                 font-weight: 800;
                 line-height: 1.2;
                 color: var(--primary-orange) !important;
-                letter-spacing: 1px;
+                letter-spacing: 0.5px;
                 text-shadow: 1px 2px 4px rgba(0,0,0,0.04);
             }
             .mr-baby-title .script-tag {
                 font-family: 'Noto Sans', sans-serif;
-                font-size: 1.8rem;
+                font-size: 1.5rem;
                 font-weight: 700;
                 color: var(--heading-purple);
                 background: #FFFFFF;
                 border: 1px solid var(--border-gold);
-                padding: 2px 14px;
-                border-radius: 8px;
+                padding: 2px 12px;
+                border-radius: 6px;
             }
             .mr-baby-sublead {
                 color: #4B5563;
                 font-family: 'Noto Sans', sans-serif;
-                font-size: 1.05rem;
-                margin: 0 0 26px 0;
+                font-size: 0.96rem;
+                margin: 0 0 16px 0;
                 max-width: 820px;
-                line-height: 1.7;
+                line-height: 1.6;
             }
             .mr-baby-sublead strong {
                 color: var(--primary-orange);
@@ -1426,32 +1435,32 @@ class MR_Baby_Template_Renderer
 
             .mr-baby-quick-strip {
                 display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-                gap: 14px;
+                grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+                gap: 10px;
                 background: #FFFFFF;
                 border: 1px solid var(--border-gold);
-                border-radius: 10px;
-                padding: 18px 20px;
+                border-radius: 8px;
+                padding: 12px 16px;
                 box-shadow: var(--shadow-sm);
             }
             .qs-item { display: flex; flex-direction: column; }
             .qs-label {
-                font-size: 0.75rem;
+                font-size: 0.72rem;
                 text-transform: uppercase;
                 letter-spacing: 0.05em;
                 color: var(--text-grey);
                 font-weight: 700;
-                margin-bottom: 3px;
+                margin-bottom: 2px;
             }
             .qs-val {
                 font-family: 'Outfit', sans-serif;
-                font-size: 1.15rem;
+                font-size: 1.05rem;
                 font-weight: 700;
                 color: var(--text-dark);
             }
             .qs-val.num-highlight {
                 color: var(--primary-orange);
-                font-size: 1.25rem;
+                font-size: 1.15rem;
                 font-weight: 800;
             }
 
@@ -1460,8 +1469,8 @@ class MR_Baby_Template_Renderer
                 background: var(--bg-card);
                 border: 1px solid var(--border-gold);
                 border-radius: var(--radius-md);
-                padding: 30px;
-                margin-bottom: 30px;
+                padding: 18px 22px;
+                margin-bottom: 18px;
                 box-shadow: var(--shadow-sm);
                 transition: var(--transition);
             }
@@ -1471,45 +1480,45 @@ class MR_Baby_Template_Renderer
             }
             .mr-section-title {
                 font-family: 'Outfit', sans-serif !important;
-                font-size: 1.55rem !important;
+                font-size: 1.25rem !important;
                 font-weight: 700 !important;
                 color: var(--heading-purple) !important;
-                margin: 0 0 16px 0;
+                margin: 0 0 10px 0;
                 display: flex;
                 align-items: center;
-                gap: 10px;
+                gap: 8px;
                 border-bottom: 2px solid var(--border-gold-light);
-                padding-bottom: 12px;
+                padding-bottom: 8px;
             }
             .mr-section-title .icon {
-                font-size: 1.6rem;
+                font-size: 1.35rem;
             }
             .section-intro {
                 color: var(--text-grey);
-                font-size: 0.98rem;
-                margin: 0 0 22px 0;
-                line-height: 1.7;
+                font-size: 0.92rem;
+                margin: 0 0 14px 0;
+                line-height: 1.55;
             }
 
             /* 2. Etymology Meaning Box */
             .mr-etymology-meaning-box {
                 display: flex;
-                gap: 16px;
+                gap: 14px;
                 background: #FFFBEB;
                 border: 1px dashed #F59E0B;
                 border-left: 5px solid #D97706;
                 border-radius: 8px;
-                padding: 22px;
-                margin-bottom: 22px;
+                padding: 14px 18px;
+                margin-bottom: 16px;
             }
             .meaning-icon {
-                font-size: 2rem;
+                font-size: 1.7rem;
                 line-height: 1;
             }
             .meaning-body h3 {
                 font-family: 'Outfit', sans-serif;
-                margin: 0 0 6px 0;
-                font-size: 1.2rem;
+                margin: 0 0 4px 0;
+                font-size: 1.1rem;
                 font-weight: 700;
                 color: #B45309;
             }
@@ -1517,40 +1526,40 @@ class MR_Baby_Template_Renderer
                 font-family: 'Noto Sans', sans-serif;
                 margin: 0;
                 color: #78350F;
-                font-size: 1.05rem;
-                line-height: 1.75;
+                font-size: 0.98rem;
+                line-height: 1.6;
                 font-weight: 500;
             }
 
             .mr-etymology-grid {
                 display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-                gap: 16px;
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+                gap: 12px;
             }
             .etym-card {
                 background: var(--bg-light-gold);
                 border: 1px solid var(--border-gold);
                 border-radius: 8px;
-                padding: 16px 18px;
+                padding: 12px 14px;
                 display: flex;
                 flex-direction: column;
             }
             .etym-label {
-                font-size: 0.75rem;
+                font-size: 0.72rem;
                 text-transform: uppercase;
                 color: var(--text-grey);
-                margin-bottom: 4px;
+                margin-bottom: 2px;
                 font-weight: 700;
             }
             .etym-val {
                 font-family: 'Outfit', sans-serif;
-                font-size: 1.2rem;
+                font-size: 1.1rem;
                 font-weight: 700;
                 color: var(--heading-purple);
-                margin-bottom: 4px;
+                margin-bottom: 2px;
             }
             .etym-desc {
-                font-size: 0.85rem;
+                font-size: 0.82rem;
                 color: var(--text-grey);
             }
             .ipa-font {
@@ -1562,16 +1571,16 @@ class MR_Baby_Template_Renderer
             /* 3. Vedic Astrology Grid */
             .mr-vedic-grid {
                 display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-                gap: 18px;
+                grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+                gap: 12px;
             }
             .vedic-item {
                 display: flex;
-                gap: 14px;
+                gap: 12px;
                 background: var(--bg-light-gold);
                 border: 1px solid var(--border-gold);
-                border-radius: 10px;
-                padding: 18px;
+                border-radius: 8px;
+                padding: 12px 14px;
                 transition: var(--transition);
             }
             .vedic-item:hover {
@@ -1580,45 +1589,45 @@ class MR_Baby_Template_Renderer
                 border-color: var(--accent-gold);
             }
             .v-icon {
-                font-size: 1.9rem;
+                font-size: 1.5rem;
                 line-height: 1;
             }
             .v-content { flex: 1; }
             .v-label {
-                font-size: 0.75rem;
+                font-size: 0.72rem;
                 text-transform: uppercase;
                 font-weight: 700;
                 color: var(--text-grey);
                 display: block;
-                margin-bottom: 4px;
+                margin-bottom: 2px;
             }
             .v-title {
                 font-family: 'Outfit', sans-serif;
-                font-size: 1.22rem;
+                font-size: 1.1rem;
                 font-weight: 700;
                 color: var(--primary-orange);
-                margin: 0 0 4px 0;
+                margin: 0 0 2px 0;
             }
             .v-desc {
                 font-family: 'Noto Sans', sans-serif;
-                font-size: 0.88rem;
+                font-size: 0.84rem;
                 color: #4B5563;
                 margin: 0;
-                line-height: 1.5;
+                line-height: 1.4;
             }
 
-            /* 4. Numerology Grid */
+            /* 4. Numerology Grid - Compact 3-Column Layout */
             .mr-numerology-grid {
                 display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-                gap: 18px;
-                margin-bottom: 22px;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 12px;
+                margin-bottom: 14px;
             }
             .num-card {
                 background: var(--bg-light-gold);
                 border: 1px solid var(--border-gold);
-                border-radius: 10px;
-                padding: 20px;
+                border-radius: 8px;
+                padding: 12px 14px;
                 display: flex;
                 flex-direction: column;
                 transition: var(--transition);
@@ -1634,69 +1643,69 @@ class MR_Baby_Template_Renderer
             }
             .num-badge {
                 align-self: flex-start;
-                font-size: 0.7rem;
+                font-size: 0.68rem;
                 text-transform: uppercase;
                 background: #FEF3C7;
                 color: #B45309;
                 border: 1px solid var(--border-gold);
-                padding: 3px 9px;
+                padding: 2px 7px;
                 border-radius: 4px;
                 font-weight: 700;
-                margin-bottom: 12px;
+                margin-bottom: 6px;
             }
             .num-value {
                 font-family: 'Outfit', sans-serif;
-                font-size: 3rem;
+                font-size: 2rem;
                 font-weight: 800;
                 color: var(--primary-orange);
                 line-height: 1;
-                margin-bottom: 8px;
+                margin-bottom: 2px;
             }
             .num-title {
                 font-family: 'Outfit', sans-serif;
-                font-size: 1.15rem;
+                font-size: 1rem;
                 font-weight: 700;
-                margin: 0 0 6px 0;
+                margin: 0 0 4px 0;
                 color: var(--heading-purple);
             }
             .num-meaning {
                 font-family: 'Noto Sans', sans-serif;
-                font-size: 0.86rem;
+                font-size: 0.82rem;
                 color: #4B5563;
                 margin: 0;
-                line-height: 1.55;
+                line-height: 1.45;
             }
 
             .mr-life-path-box {
                 background: #FFFBEB;
                 border: 1px solid var(--border-gold);
-                border-left: 5px solid var(--primary-orange);
+                border-left: 4px solid var(--primary-orange);
                 border-radius: 8px;
-                padding: 22px;
+                padding: 14px 18px;
             }
             .mr-life-path-box .badge-tag {
-                font-size: 0.75rem;
+                font-size: 0.72rem;
                 text-transform: uppercase;
                 background: #FEF3C7;
                 color: #B45309;
                 border: 1px solid var(--border-gold);
-                padding: 3px 9px;
+                padding: 2px 7px;
                 border-radius: 4px;
                 font-weight: 700;
             }
             .mr-life-path-box h4 {
                 font-family: 'Outfit', sans-serif;
-                margin: 8px 0 6px 0;
+                margin: 6px 0 4px 0;
                 color: #B45309;
-                font-size: 1.2rem;
+                font-size: 1.1rem;
                 font-weight: 700;
             }
             .mr-life-path-box p {
                 font-family: 'Noto Sans', sans-serif;
                 margin: 0;
                 color: #78350F;
-                font-size: 0.98rem;
-                line-height: 1.7;
+                font-size: 0.94rem;
+                line-height: 1.6;
             }
 
             /* 5. Auspicious Attributes Table */
@@ -1709,17 +1718,17 @@ class MR_Baby_Template_Renderer
                 border-collapse: collapse;
             }
             .mr-attributes-table th, .mr-attributes-table td {
-                padding: 14px 18px;
+                padding: 9px 12px;
                 border-bottom: 1px solid var(--border-gold-light);
                 text-align: left;
-                font-size: 0.98rem;
+                font-size: 0.92rem;
             }
             .mr-attributes-table tr:nth-child(even) td,
             .mr-attributes-table tr:nth-child(even) th {
                 background-color: var(--bg-light-gold);
             }
             .mr-attributes-table th {
-                width: 260px;
+                width: 220px;
                 color: var(--text-grey);
                 font-weight: 700;
             }
@@ -1729,83 +1738,98 @@ class MR_Baby_Template_Renderer
             }
             .attr-icon {
                 margin-right: 6px;
-                font-size: 1.1rem;
+                font-size: 1rem;
             }
             .colors-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
             .color-pill {
                 background: #FFFFFF;
                 border: 1px solid var(--border-gold);
-                padding: 3px 12px;
-                border-radius: 14px;
-                font-size: 0.88rem;
+                padding: 2px 10px;
+                border-radius: 12px;
+                font-size: 0.84rem;
                 font-weight: 600;
                 color: #4B5563;
             }
 
-            /* 6 & 7. Psychological Insights & Career Outlook */
+            /* 6 & 7. Side-by-Side Twin Grid for Personality & Career */
+            .mr-baby-twin-grid {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 18px;
+                margin-bottom: 18px;
+            }
+            .mr-baby-twin-grid .mr-baby-section {
+                margin-bottom: 0 !important;
+                display: flex;
+                flex-direction: column;
+                height: 100%;
+            }
+            .mr-baby-twin-grid .mr-narrative-content {
+                flex: 1;
+            }
             .mr-narrative-content p {
                 font-family: 'Noto Sans', sans-serif;
-                font-size: 1.05rem;
+                font-size: 0.95rem;
                 color: var(--text-body);
-                line-height: 1.85;
-                margin: 0 0 18px 0;
+                line-height: 1.62;
+                margin: 0 0 8px 0;
             }
             .mr-narrative-content p:last-child { margin-bottom: 0; }
 
             /* 8. Compatibility Cards */
             .mr-compat-cards-grid {
                 display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-                gap: 18px;
+                grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+                gap: 14px;
             }
             .mr-compat-card {
                 background: var(--bg-light-gold);
                 border: 1px solid var(--border-gold);
-                border-radius: 10px;
-                padding: 22px;
+                border-radius: 8px;
+                padding: 14px 16px;
             }
             .mr-compat-card h4 {
                 font-family: 'Outfit', sans-serif;
-                margin: 0 0 8px 0;
+                margin: 0 0 6px 0;
                 color: var(--primary-orange);
-                font-size: 1.15rem;
+                font-size: 1.05rem;
                 font-weight: 700;
             }
             .mr-compat-card p {
                 font-family: 'Noto Sans', sans-serif;
                 margin: 0;
-                font-size: 0.95rem;
+                font-size: 0.92rem;
                 color: #4B5563;
-                line-height: 1.7;
+                line-height: 1.6;
             }
 
             /* 9. Sibling & Variant Pills */
-            .rec-group { margin-bottom: 24px; }
+            .rec-group { margin-bottom: 16px; }
             .rec-group:last-child { margin-bottom: 0; }
             .rec-group-title {
                 font-family: 'Outfit', sans-serif;
-                font-size: 1rem;
+                font-size: 0.94rem;
                 color: var(--heading-purple);
                 font-weight: 700;
-                margin: 0 0 12px 0;
+                margin: 0 0 8px 0;
                 text-transform: uppercase;
                 letter-spacing: 0.04em;
             }
-            .pills-container { display: flex; flex-wrap: wrap; gap: 10px; }
+            .pills-container { display: flex; flex-wrap: wrap; gap: 8px; }
             .name-pill {
                 display: inline-flex;
                 align-items: center;
-                gap: 6px;
-                padding: 8px 18px;
+                gap: 5px;
+                padding: 6px 14px;
                 border-radius: 30px;
                 font-family: 'Outfit', sans-serif;
-                font-size: 0.92rem;
+                font-size: 0.88rem;
                 font-weight: 700;
                 text-decoration: none;
                 transition: var(--transition);
                 box-shadow: 0 2px 4px rgba(0,0,0,0.02);
             }
-            .name-pill .arr { font-size: 0.85rem; transition: transform 0.15s; }
+            .name-pill .arr { font-size: 0.82rem; transition: transform 0.15s; }
             .name-pill:hover .arr { transform: translateX(3px); }
 
             .pill-variant {
@@ -1847,7 +1871,8 @@ class MR_Baby_Template_Renderer
                 background: var(--heading-purple);
                 color: #FFFFFF;
                 border-radius: var(--radius-md);
-                padding: 36px 28px;
+                padding: 22px 20px;
+                margin-bottom: 18px;
                 text-align: center;
                 box-shadow: var(--shadow-md);
             }
@@ -1856,39 +1881,39 @@ class MR_Baby_Template_Renderer
                 background: rgba(255, 193, 7, 0.2);
                 color: #FFC107;
                 border: 1px solid rgba(255, 193, 7, 0.4);
-                padding: 4px 14px;
+                padding: 3px 12px;
                 border-radius: 20px;
-                font-size: 0.82rem;
+                font-size: 0.78rem;
                 font-weight: 700;
-                margin-bottom: 14px;
+                margin-bottom: 10px;
             }
             .hub-content h3 {
                 font-family: 'Outfit', sans-serif;
-                font-size: 1.9rem;
+                font-size: 1.45rem;
                 font-weight: 800;
                 color: #FFC107;
-                margin: 0 0 10px 0;
+                margin: 0 0 6px 0;
             }
             .hub-content p {
                 font-family: 'Noto Sans', sans-serif;
                 max-width: 650px;
-                margin: 0 auto 24px auto;
-                font-size: 1.02rem;
+                margin: 0 auto 16px auto;
+                font-size: 0.94rem;
                 color: rgba(255, 255, 255, 0.92);
-                line-height: 1.7;
+                line-height: 1.55;
             }
             .hub-buttons {
                 display: flex;
                 flex-wrap: wrap;
-                gap: 12px;
+                gap: 10px;
                 justify-content: center;
             }
             .mr-btn {
                 display: inline-block;
-                padding: 12px 24px;
+                padding: 10px 20px;
                 border-radius: 8px;
                 font-family: 'Outfit', sans-serif;
-                font-size: 0.96rem;
+                font-size: 0.92rem;
                 font-weight: 700;
                 text-decoration: none;
                 transition: var(--transition);
@@ -1926,7 +1951,7 @@ class MR_Baby_Template_Renderer
             .mr-faq-accordion {
                 display: flex;
                 flex-direction: column;
-                gap: 12px;
+                gap: 8px;
             }
             .mr-faq-item {
                 border: 1px solid var(--border-gold);
@@ -1939,10 +1964,10 @@ class MR_Baby_Template_Renderer
                 border-color: var(--accent-gold);
             }
             .mr-faq-question {
-                padding: 16px 20px;
+                padding: 11px 16px;
                 font-family: 'Outfit', sans-serif;
                 font-weight: 700;
-                font-size: 1.05rem;
+                font-size: 0.96rem;
                 color: var(--text-dark);
                 cursor: pointer;
                 display: flex;
@@ -1960,7 +1985,7 @@ class MR_Baby_Template_Renderer
                 border-bottom: 1px solid var(--border-gold-light);
             }
             .faq-toggle-icon {
-                font-size: 1.4rem;
+                font-size: 1.25rem;
                 line-height: 1;
                 color: var(--primary-orange);
                 font-weight: 800;
@@ -1971,11 +1996,11 @@ class MR_Baby_Template_Renderer
                 color: var(--heading-purple);
             }
             .mr-faq-answer {
-                padding: 16px 20px 20px 20px;
+                padding: 11px 16px 14px 16px;
                 color: #475569;
                 font-family: 'Noto Sans', sans-serif;
-                font-size: 0.98rem;
-                line-height: 1.8;
+                font-size: 0.92rem;
+                line-height: 1.55;
                 background: #FFFFFF;
             }
             .mr-faq-answer p { margin: 0; }
@@ -1985,21 +2010,21 @@ class MR_Baby_Template_Renderer
                 display: flex;
                 justify-content: flex-end;
                 align-items: center;
-                margin-bottom: 20px;
-                padding: 4px 0;
+                margin-bottom: 14px;
+                padding: 2px 0;
             }
             .mr-lang-switch-box {
                 display: inline-flex;
                 align-items: center;
-                gap: 12px;
+                gap: 10px;
                 background: #FFFFFF;
                 border: 1px solid var(--border-gold);
-                padding: 6px 14px;
+                padding: 4px 12px;
                 border-radius: 50px;
                 box-shadow: 0 2px 8px rgba(0,0,0,0.04);
             }
             .mr-lang-hint {
-                font-size: 0.88rem;
+                font-size: 0.84rem;
                 font-weight: 700;
                 color: var(--text-grey);
                 display: inline-flex;
@@ -2009,16 +2034,16 @@ class MR_Baby_Template_Renderer
                 display: inline-flex;
                 background: #FEF3C7;
                 border-radius: 30px;
-                padding: 3px;
+                padding: 2px;
                 gap: 4px;
             }
             .mr-lang-btn {
                 border: none;
                 background: transparent;
-                padding: 6px 16px;
+                padding: 5px 14px;
                 border-radius: 20px;
                 font-family: 'Outfit', 'Noto Sans', sans-serif;
-                font-size: 0.88rem;
+                font-size: 0.84rem;
                 font-weight: 700;
                 color: #78350F;
                 cursor: pointer;
@@ -2087,15 +2112,31 @@ class MR_Baby_Template_Renderer
                 display: none !important;
             }
 
-            /* Mobile Responsiveness */
+            /* Mobile Responsiveness & Grid Packing */
+            @media (max-width: 860px) {
+                .mr-baby-twin-grid {
+                    grid-template-columns: 1fr;
+                    gap: 16px;
+                }
+                .mr-numerology-grid {
+                    grid-template-columns: repeat(2, 1fr);
+                }
+            }
+
             @media (max-width: 768px) {
                 .mr-baby-top-lang-bar { justify-content: center; }
-                .mr-baby-header-card { padding: 24px 18px; }
-                .mr-baby-title { font-size: 2.1rem; }
-                .mr-baby-title .script-tag { font-size: 1.4rem; }
-                .mr-baby-section { padding: 20px 16px; }
-                .mr-attributes-table th { width: 140px; }
-                .hub-content h3 { font-size: 1.5rem; }
+                .mr-baby-header-card { padding: 18px 16px; }
+                .mr-baby-title { font-size: 1.85rem; }
+                .mr-baby-title .script-tag { font-size: 1.25rem; }
+                .mr-baby-section { padding: 16px 14px; }
+                .mr-attributes-table th { width: 130px; }
+                .hub-content h3 { font-size: 1.35rem; }
+            }
+
+            @media (max-width: 540px) {
+                .mr-numerology-grid {
+                    grid-template-columns: 1fr;
+                }
             }
         </style>
         <script>
@@ -2267,8 +2308,96 @@ class MR_Baby_Template_Renderer
         }
 
         self::$runtime_translations[$text] = $text;
-        set_transient($cache_key, $text, HOUR_IN_SECONDS);
         return $text;
+    }
+
+    /**
+     * Checks if text contains predominantly Latin characters (untranslated English)
+     */
+    public static function is_mostly_english($text)
+    {
+        if (empty($text)) return true;
+        if (is_array($text)) $text = implode(' ', $text);
+        $devanagari_count = preg_match_all('/[\x{0900}-\x{097F}]/u', $text);
+        $latin_count      = preg_match_all('/[a-zA-Z]/', $text);
+        return ($latin_count > 8 && $devanagari_count < 10);
+    }
+
+    /**
+     * Generates rich, authentic Vedic Hindi narrative for personality (3 warm paragraphs)
+     * Strictly preserves Latin digits (0-9).
+     */
+    public static function generate_vedic_hindi_personality($profile)
+    {
+        $name        = esc_html($profile['name'] ?? '');
+        $script      = esc_html($profile['script'] ?? $name);
+        if (empty($script)) $script = $name;
+        $gender      = ($profile['gender'] ?? 'Boy') === 'Girl' ? 'लड़की' : 'लड़का';
+        $v           = $profile['vedic_astrology'] ?? [];
+        $rashi       = esc_html($v['rashi_moon_sign'] ?? '');
+        $rashi_hi    = esc_html(self::get_rashi_hindi($rashi));
+        $planet      = esc_html($v['ruling_planet'] ?? '');
+        $planet_hi   = esc_html(self::get_planet_hindi($planet));
+        $nak         = esc_html($v['nakshatra'] ?? '');
+        $nak_hi      = esc_html(self::get_nakshatra_hindi($nak));
+        $element     = esc_html($v['vedic_element'] ?? 'Air');
+        $element_hi  = esc_html(self::get_element_hindi($element));
+        $chaldean_no = (int)($profile['numerology']['chaldean_number'] ?? 1);
+
+        $p1 = "{$script} नाम के बच्चे स्वाभाविक रूप से अत्यंत संवेदनशील, मिलनसार और दयालु हृदय के धनी होते हैं। {$rashi_hi} और स्वामी ग्रह {$planet_hi} के शुभ प्रभाव से इनके व्यक्तित्व में एक विशेष आकर्षण और आत्मविश्वास झलकता है। ये अपनी सौम्य और शांत बातचीत से बड़ों और मित्रों का आदर प्राप्त करते हैं तथा परिवार में सदैव सकारात्मक ऊर्जा और सुख-शांति बनाए रखते हैं।";
+
+        $p2 = "अंकशास्त्र के अनुसार मुख्य शुभ अंक {$chaldean_no} इन्हें जीवन में नई चीजें सीखने, रचनात्मक कार्यों और स्वतंत्र सोच की ओर प्रेरित करता है। जन्म नक्षत्र {$nak_hi} की कृपा से इनमें कठिन परिस्थितियों में भी धैर्यपूर्वक सही निर्णय लेने की स्वाभाविक क्षमता होती है। ये अपने मित्रों और संबंधियों के प्रति अत्यंत निष्ठावान और सहयोगी रहते हैं।";
+
+        $p3 = "{$element_hi} के सामंजस्य से इस नाम के बच्चों में त्वरित समझ और व्यावहारिक सोच का सुंदर संतुलन होता है। कला, संस्कृति और ज्ञान के प्रति इनकी स्वाभाविक रुचि बचपन से ही दिखने लगती है। इनका विनम्र स्वभाव और दूसरों की सहायता करने की भावना इन्हें समाज में अत्यधिक लोकप्रिय और सम्मानीय बनाती है।";
+
+        return [$p1, $p2, $p3];
+    }
+
+    /**
+     * Generates rich, authentic Vedic Hindi narrative for career (3 warm paragraphs)
+     * Strictly preserves Latin digits (0-9).
+     */
+    public static function generate_vedic_hindi_career($profile)
+    {
+        $name        = esc_html($profile['name'] ?? '');
+        $script      = esc_html($profile['script'] ?? $name);
+        if (empty($script)) $script = $name;
+        $v           = $profile['vedic_astrology'] ?? [];
+        $rashi       = esc_html($v['rashi_moon_sign'] ?? '');
+        $rashi_hi    = esc_html(self::get_rashi_hindi($rashi));
+        $planet      = esc_html($v['ruling_planet'] ?? '');
+        $planet_hi   = esc_html(self::get_planet_hindi($planet));
+        $chaldean_no = (int)($profile['numerology']['chaldean_number'] ?? 1);
+
+        $p1 = "{$script} नाम के जातक शिक्षा और बौद्धिक विकास के क्षेत्र में अपनी तीक्ष्ण बुद्धि और एकाग्रता के बल पर उत्कृष्ट प्रदर्शन करते हैं। स्वामी ग्रह {$planet_hi} की अनुकूल दृष्टि इन्हें नई अवधारणाओं को तेजी से सीखने और कठिन विषयों को सहजता से समझने की विशेष क्षमता प्रदान करती है।";
+
+        $p2 = "शुभ अंक {$chaldean_no} और {$rashi_hi} के प्रभाव से इनके लिए प्रशासनिक सेवाएं, प्रबंधन, शिक्षण, अनुसंधान, आईटी एवं कंप्यूटर विज्ञान, रचनात्मक लेखन तथा व्यापार जैसे क्षेत्र विशेष रूप से फलदायी और उन्नतिदायक सिद्ध होते हैं। ये किसी भी कार्य को योजनाबद्ध तरीके से पूरा करना पसंद करते हैं।";
+
+        $p3 = "इनमें जन्मजात नेतृत्व और टीम के साथ मिलकर कार्य करने का अद्भुत गुण होता है। नैतिक मूल्यों पर टिके रहकर अपने लक्ष्य की ओर निरंतर अग्रसर रहना इनकी सबसे बड़ी शक्ति है। समय प्रबंधन और परिश्रम के बल पर ये अपने कार्यक्षेत्र में निरंतर उच्च मुकाम और समाज में मान-सम्मान प्राप्त करते हैं।";
+
+        return [$p1, $p2, $p3];
+    }
+
+    /**
+     * Generates pure Hindi compatibility summary
+     */
+    public static function get_compatibility_hindi($profile)
+    {
+        $name       = esc_html($profile['name'] ?? '');
+        $script     = esc_html($profile['script'] ?? $name);
+        if (empty($script)) $script = $name;
+        $element_en = esc_html($profile['vedic_astrology']['vedic_element'] ?? 'Air');
+        $element_hi = esc_html(self::get_element_hindi($element_en));
+
+        return "{$element_hi} के साथ सामंजस्य रखने वाली राशियों और नक्षत्रों के साथ {$script} का तालमेल अत्यंत सहज, सुखद और प्रगाढ़ रहता है। ये अपने शांत और समझदार व्यवहार से मित्रों, परिजनों और सहयोगियों के साथ गहरा आत्मीय संबंध बनाने में सदैव सफल रहते हैं।";
+    }
+
+    /**
+     * Generates pure Hindi global appeal summary
+     */
+    public static function get_global_appeal_hindi($profile)
+    {
+        return "यह नाम अपने सरल उच्चारण, सुंदर अर्थ और सकारात्मक ध्वनि तरंगों के कारण पारंपरिक भारतीय परिवारों के साथ-साथ आधुनिक वैश्विक परिवेश में भी अत्यधिक लोकप्रिय और सर्वप्रिय है।";
     }
 
     public static function get_rashi_hindi($rashi)

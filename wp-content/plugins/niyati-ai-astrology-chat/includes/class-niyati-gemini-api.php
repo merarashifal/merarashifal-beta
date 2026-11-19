@@ -653,33 +653,28 @@ PROMPT;
             $clean_mime = 'audio/webm';
         }
 
-        // Voice output prompt: strictly 65 to 75 words (~30 seconds spoken audio)
-        $voice_directive = ($resolved_lang === 'hi')
-            ? "\n\nविशेष निर्देश - 30-सेकंड वॉयस नोट मार्गदर्शन (Spoken Voice Note Output):\n" .
-              "जिज्ञासु ने एक छोटा वॉयस नोट (अधिकतम 15 सेकंड) भेजा है।\n" .
-              "1. सबसे पहले उपयोगकर्ता के बोले गए प्रश्न का सटीक ट्रांसक्रिप्शन (transcription) करें।\n" .
-              "2. कुंडली और वर्तमान गोचर/दशा के आधार पर नियति (Niyati) के रूप में एक आत्मीय, शांत और सकारात्मक वॉयस संदेश दें।\n" .
-              "3. शब्द सीमा STRICT CONSTRAINT: ठीक 65 से 75 शब्द (लगभग 28-32 सेकंड की बोलचाल गति)। न बहुत छोटा, न 75 शब्दों से अधिक!\n" .
-              "4. यह उत्तर ऑडियो रूप में बोला जाएगा, इसलिए कोई हेडिंग (#), बुलेट पॉइंट (*), या मार्कडाउन सिंबल का प्रयोग न करें। केवल मधुर, स्पष्ट और प्रवाहपूर्ण वाक्य बोलें।\n" .
-              "5. कभी भी पूर्ण निश्चितता का दावा न करें। 'संभावना बनती है', 'अनुकूल समय है', 'शुभ योग बन रहे हैं' जैसे संयमित शब्दों का प्रयोग करें।\n" .
-              "6. उत्तर JSON प्रारूप में दें: {\"transcription\": \"...\", \"reply\": \"...\"}"
-            : (($resolved_lang === 'hinglish')
-                ? "\n\nSPECIAL DIRECTIVE - 30-SECOND SPOKEN VOICE NOTE:\n" .
-                  "The seeker sent a short voice note (max 15 seconds).\n" .
-                  "1. Accurately transcribe what the user spoke into 'transcription'.\n" .
-                  "2. Respond as Niyati in warm, friendly Hinglish specifically written to be spoken aloud as audio.\n" .
-                  "3. STRICT LENGTH: Exactly 65 to 75 words (~30 seconds of speech). Not shorter, and not exceeding 75 words!\n" .
-                  "4. Do NOT use markdown symbols, headers, asterisks, or bullet points, as this is purely for audio speech playback.\n" .
-                  "5. Avoid absolute guarantees; emphasize planetary probabilities and positive karma.\n" .
-                  "6. Output JSON format: {\"transcription\": \"...\", \"reply\": \"...\"}"
-                : "\n\nSPECIAL DIRECTIVE - 30-SECOND SPOKEN VOICE NOTE:\n" .
-                  "The seeker sent a brief voice note (max 15 seconds).\n" .
-                  "1. Accurately transcribe the spoken question into 'transcription'.\n" .
-                  "2. Respond as Niyati in a serene, empathetic tone tailored for spoken voice playback.\n" .
-                  "3. STRICT LENGTH: Exactly 65 to 75 words (approx 28 to 32 seconds of speech).\n" .
-                  "4. Do NOT use any markdown formatting, asterisks, or headers because this text will be read aloud as audio.\n" .
-                  "5. Retain probabilistic, respectful Vedic phrasing (e.g. 'planets indicate favorable alignment', 'positive possibilities').\n" .
-                  "6. Output JSON format: {\"transcription\": \"...\", \"reply\": \"...\"}");
+        // Rich 30-second Voice Consultation directive with full astrological depth
+        $voice_directive = 
+            "\n\nCRITICAL SPOKEN VOICE QUALITY DIRECTIVE (30-SECOND VEDIC CONSULTATION):\n" .
+            "1. AUTOMATIC SPOKEN LANGUAGE MATCHING:\n" .
+            "   - Carefully listen to the spoken words in the seeker's audio note.\n" .
+            "   - If the seeker speaks in HINDI or HINGLISH (e.g. 'meri shadi kab hogi', 'meri naukri kab lagegi'):\n" .
+            "     * 'transcription': Transcribe accurately in Hindi/Hinglish as spoken.\n" .
+            "     * 'reply': Respond entirely in pure, serene, affectionate, respectful HINDI (Devanagari script).\n" .
+            "   - If the seeker speaks in ENGLISH:\n" .
+            "     * 'transcription': English.\n" .
+            "     * 'reply': Serene Indian English.\n" .
+            "2. FULL VEDIC DEPTH & ACCURACY (STRICT TARGET: 75 TO 85 WORDS, ~30 SECONDS OF AUDIO):\n" .
+            "   - DO NOT give shallow generic answers! The seeker spent 5 credits for a deep astrological reading.\n" .
+            "   - Include the EXACT SAME high-caliber Vedic precision as our written consultations:\n" .
+            "     * Begin with our signature presumption framing if asking milestone timing (e.g. 'यदि हम यह मानकर चलें कि आप अभी अविवाहित हैं और विवाह की योजना बना रहे हैं...').\n" .
+            "     * Pinpoint the governing house (e.g. 7th house for marriage, 10th house for career) and planetary placements (e.g. Moon, Venus, Jupiter, Saturn) from the seeker's birth chart.\n" .
+            "     * State a concrete, upcoming favorable calendar window (e.g. 'फरवरी 2027 से मई 2027 के मध्य').\n" .
+            "     * Provide exactly ONE specific Vedic remedy with Day of the week, Deity, and sacred Mantra (e.g. 'प्रत्येक शुक्रवार को मां लक्ष्मी को सफेद पुष्प अर्पित करें और ॐ शुं शुक्राय नमः का जाप करें').\n" .
+            "     * Use cautious Vedic probabilistic phrasing ('योग बन सकते हैं', 'प्रबल संभावना है' - NEVER absolute promises like 'होगा' or 'मिलेगी').\n" .
+            "     * Remind them that Karma, diligent effort, and divine grace bring these planetary potentials to fruition.\n" .
+            "   - NO markdown formatting (no asterisks, no hashes, no bullet points, no URLs), only sweet, flowing spoken sentences.\n" .
+            "   - Output JSON format: {\"transcription\": \"...\", \"reply\": \"...\"}";
 
         $payload = [
             'system_instruction' => [
@@ -696,21 +691,21 @@ PROMPT;
                             ]
                         ],
                         [
-                            'text' => 'Please listen carefully to this audio voice query, transcribe it accurately, and formulate Niyati\'s warm 30-second spoken Vedic astrology answer (strictly 65-75 words). Return JSON with "transcription" and "reply".'
+                            'text' => 'Listen carefully to this audio voice query, detect the seeker\'s spoken language, transcribe it accurately, and formulate Niyati\'s full 75-85 word authentic Vedic astrology answer in the SAME spoken language with governing house, planetary placements, calendar timing window, and specific day/deity remedy. Return JSON with "transcription" and "reply".'
                         ]
                     ]
                 ]
             ],
             'generationConfig' => [
-                'temperature'       => 0.6,
+                'temperature'       => 0.3,
                 'topP'              => 0.9,
-                'maxOutputTokens'   => 800,
+                'maxOutputTokens'   => 500,
                 'responseMimeType'  => 'application/json'
             ]
         ];
 
-        // Models that support multimodal audio input
-        $candidate_models = ['gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-3.8-flash'];
+        // Models that support multimodal audio input - fastest first!
+        $candidate_models = ['gemini-3.1-flash-lite', 'gemini-3.5-flash'];
         $last_error = '';
 
         foreach ($candidate_models as $cand_model) {
@@ -719,7 +714,7 @@ PROMPT;
             $response = wp_remote_post($url, [
                 'headers' => ['Content-Type' => 'application/json'],
                 'body'    => wp_json_encode($payload),
-                'timeout' => 35
+                'timeout' => 25
             ]);
 
             if (is_wp_error($response)) {
@@ -743,8 +738,10 @@ PROMPT;
                     $transcription = trim($parsed['transcription'] ?? '');
                     $reply = trim($parsed['reply']);
 
+                    $detected_lang = preg_match('/[\x{0900}-\x{097F}]/u', $reply) ? 'hi' : $resolved_lang;
+
                     // Synthesize Niyati's spoken audio if TTS engine available
-                    $synth = self::synthesize_niyati_voice($reply, $resolved_lang);
+                    $synth = self::synthesize_niyati_voice($reply, $detected_lang);
 
                     return [
                         'success'       => true,
@@ -753,7 +750,7 @@ PROMPT;
                         'audio_bytes'   => $synth['audio_bytes'] ?? null,
                         'audio_ext'     => $synth['audio_ext'] ?? 'wav',
                         'mime_type'     => $synth['mime_type'] ?? 'audio/wav',
-                        'duration'      => $synth['duration'] ?? 30,
+                        'duration'      => $synth['duration'] ?? 20,
                         'model'         => $cand_model
                     ];
                 }
@@ -771,7 +768,7 @@ PROMPT;
 
     /**
      * Synthesize Niyati's Voice Audio
-     * Calls Gemini Native TTS with Aoede serene female voice profile, converted to standard WAV
+     * Calls Gemini Native TTS with Kore serene, harmonious Indian female voice profile, converted to standard WAV
      */
     public static function synthesize_niyati_voice($text, $lang = 'hi') {
         $api_key = self::get_api_key();
@@ -780,14 +777,19 @@ PROMPT;
         }
 
         $clean_speech = trim(preg_replace('/[*_#`\[\]]/', '', $text));
-        $tts_models = ['gemini-2.5-flash-preview-tts', 'gemini-3.8-flash-tts', 'gemini-3.1-flash-tts-preview'];
-        $voice_name = 'Aoede'; // Serene, dignified, warm female voice
+        // TTS Candidate models (with fallback across available endpoints)
+        $tts_models = ['gemini-2.5-flash-preview-tts', 'gemini-3.1-flash-tts-preview', 'gemini-3.8-flash-tts', 'gemini-3.8-flash-lite-tts'];
+        $voice_name = 'Kore'; // Serene, gentle, harmonious, calm female tone
+
+        $tts_prompt = ($lang === 'hi' || preg_match('/[\x{0900}-\x{097F}]/u', $clean_speech))
+            ? "Read this text aloud as Niyati, in a serene, affectionate, calm, and harmonious Indian voice:\n\n" . $clean_speech
+            : "Read this text aloud as Niyati, in a calm, soothing, and harmonious Indian English tone:\n\n" . $clean_speech;
 
         foreach ($tts_models as $tts_model) {
             $url = 'https://generativelanguage.googleapis.com/v1beta/models/' . urlencode($tts_model) . ':generateContent?key=' . urlencode($api_key);
             $payload = [
                 'contents' => [
-                    ['role' => 'user', 'parts' => [['text' => $clean_speech]]]
+                    ['role' => 'user', 'parts' => [['text' => $tts_prompt]]]
                 ],
                 'generationConfig' => [
                     'responseModalities' => ['AUDIO'],
@@ -804,22 +806,24 @@ PROMPT;
             $response = wp_remote_post($url, [
                 'headers' => ['Content-Type' => 'application/json'],
                 'body'    => wp_json_encode($payload),
-                'timeout' => 20
+                'timeout' => 25
             ]);
 
             if (!is_wp_error($response) && wp_remote_retrieve_response_code($response) === 200) {
                 $data = json_decode(wp_remote_retrieve_body($response), true);
                 if (!empty($data['candidates'][0]['content']['parts'][0]['inlineData']['data'])) {
                     $raw_b64 = $data['candidates'][0]['content']['parts'][0]['inlineData']['data'];
-                    $pcm_bytes = base64_decode($raw_b64);
-                    if (!empty($pcm_bytes)) {
-                        $wav_bytes = self::pcm_to_wav($pcm_bytes, 24000, 1, 16);
-                        return [
-                            'audio_bytes' => $wav_bytes,
-                            'audio_ext'   => 'wav',
-                            'mime_type'   => 'audio/wav',
-                            'duration'    => 30
-                        ];
+                    $raw_bytes = base64_decode($raw_b64);
+                    if (!empty($raw_bytes)) {
+                        $wav_bytes = self::clean_and_package_wav($raw_bytes, 24000);
+                        if (!empty($wav_bytes)) {
+                            return [
+                                'audio_bytes' => $wav_bytes,
+                                'audio_ext'   => 'wav',
+                                'mime_type'   => 'audio/wav',
+                                'duration'    => 30
+                            ];
+                        }
                     }
                 }
             }
@@ -829,27 +833,96 @@ PROMPT;
     }
 
     /**
-     * Wrap raw 16-bit PCM mono samples into standard RIFF WAV container
+     * Clean and package audio bytes into pristine, pop-free standard RIFF WAV
+     *
+     * Eliminates static electricity crackles and pops caused by:
+     * 1. Google Gemini TTS C2PA provenance metadata chunks being decoded as audio.
+     * 2. DC-offset transient clicks on abrupt cutoff (smoothed via 15ms linear fade-out).
+     * 3. Sample word misalignment (enforces even 16-bit boundaries).
+     * 4. Appends 50ms of pure digital silence at the end for smooth player termination.
      */
-    public static function pcm_to_wav($pcm_bytes, $sample_rate = 24000, $channels = 1, $bits_per_sample = 16) {
-        $data_len = strlen($pcm_bytes);
-        $byte_rate = $sample_rate * $channels * ($bits_per_sample / 8);
-        $block_align = $channels * ($bits_per_sample / 8);
+    public static function clean_and_package_wav($raw_bytes, $sample_rate = 24000) {
+        if (empty($raw_bytes)) {
+            return null;
+        }
 
-        return pack('a4Va4a4VvvVVvva4V',
+        $pcm = '';
+        // If Google returned an already-packaged RIFF container, extract strictly the 'data' subchunk
+        // This strips off any trailing C2PA / metadata chunks that cause static crackle!
+        if (substr($raw_bytes, 0, 4) === 'RIFF') {
+            $offset = 12;
+            $total_len = strlen($raw_bytes);
+            while ($offset < $total_len - 8) {
+                $chunk_id = substr($raw_bytes, $offset, 4);
+                $chunk_size = unpack('V', substr($raw_bytes, $offset + 4, 4))[1];
+                if ($chunk_id === 'data') {
+                    $pcm = substr($raw_bytes, $offset + 8, $chunk_size);
+                    break;
+                }
+                $offset += 8 + $chunk_size;
+                if ($chunk_size % 2 !== 0) {
+                    $offset++;
+                }
+            }
+        } else {
+            $pcm = $raw_bytes;
+        }
+
+        if (empty($pcm)) {
+            return null;
+        }
+
+        // Align to 16-bit mono boundary (2 bytes per sample)
+        $sample_count = intdiv(strlen($pcm), 2);
+        $pcm = substr($pcm, 0, $sample_count * 2);
+
+        // Apply a smooth 15ms fade-out (360 samples at 24kHz) to prevent DC-offset speaker pop
+        $fade_samples = min(360, $sample_count);
+        if ($fade_samples > 0) {
+            $start_idx = ($sample_count - $fade_samples) * 2;
+            for ($i = 0; $i < $fade_samples; $i++) {
+                $byte_pos = $start_idx + ($i * 2);
+                $val = unpack('s', substr($pcm, $byte_pos, 2))[1];
+                $factor = 1.0 - ($i / $fade_samples);
+                $new_val = (int)round($val * $factor);
+                $new_bytes = pack('s', $new_val);
+                $pcm[$byte_pos] = $new_bytes[0];
+                $pcm[$byte_pos + 1] = $new_bytes[1];
+            }
+        }
+
+        // Append 50ms of pure digital silence (1200 zero samples) for clean player cutoff
+        $pcm .= str_repeat("\x00\x00", 1200);
+
+        // Package into standard RIFF WAV container
+        $data_len = strlen($pcm);
+        $byte_rate = $sample_rate * 2;
+        $block_align = 2;
+        $bits_per_sample = 16;
+
+        $header = pack('a4Va4a4VvvVVvva4V',
             'RIFF',
             36 + $data_len,
             'WAVE',
             'fmt ',
             16,
-            1,
-            $channels,
+            1,              // PCM format
+            1,              // Mono
             $sample_rate,
             $byte_rate,
             $block_align,
             $bits_per_sample,
             'data',
             $data_len
-        ) . $pcm_bytes;
+        );
+
+        return $header . $pcm;
+    }
+
+    /**
+     * Backward-compatible alias for pcm_to_wav
+     */
+    public static function pcm_to_wav($pcm_bytes, $sample_rate = 24000, $channels = 1, $bits_per_sample = 16) {
+        return self::clean_and_package_wav($pcm_bytes, $sample_rate);
     }
 }
