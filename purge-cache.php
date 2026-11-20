@@ -91,16 +91,6 @@ if (file_exists($wp_load)) {
         echo "Razorpay Secret SHA1: " . (defined('Razorpay_Live_Secret_Key') ? sha1(Razorpay_Live_Secret_Key) : 'none') . "\n";
         echo "Razorpay Connection: " . ($rzp_test['success'] ? 'SUCCESS' : ('FAILED: ' . $rzp_test['message'])) . "\n";
     }
-    // Diagnostic: Check af_festivals on production
-    $t_check = $wpdb->get_var("SHOW TABLES LIKE 'af_festivals'");
-    echo "Table af_festivals exists: " . ($t_check ? 'YES' : 'NO') . "\n";
-    if ($t_check) {
-        $sample = $wpdb->get_results("SELECT festival_date, festival_eng_1 FROM af_festivals WHERE festival_date >= CURDATE() AND festival_eng_1 LIKE '%Ekadashi%' ORDER BY festival_date ASC LIMIT 3", ARRAY_A);
-        echo "Upcoming Ekadashis: " . json_encode($sample) . "\n";
-    }
-    if (class_exists('Niyati_Gemini_API')) {
-        echo "Panchang Grounding Output:\n" . Niyati_Gemini_API::get_panchang_grounding('Next Ekadashi kab hai?') . "\n";
-    }
 
     echo "ALL PURGE ROUTINES COMPLETED\n";
 }
