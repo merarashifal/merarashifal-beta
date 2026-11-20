@@ -15,23 +15,7 @@ if (file_exists(__DIR__ . '/wp-load.php')) {
 global $wpdb;
 $table = $wpdb->prefix . 'mr_transactions';
 
-if (isset($_GET['diag']) && $_GET['diag'] === 'mr_2026') {
-    header('Content-Type: text/plain; charset=utf-8');
-    echo "=== RAZORPAY GATEWAY DIAGNOSTICS ===\n";
-    echo "Mode: " . (class_exists('MR_Razorpay') ? MR_Razorpay::get_mode() : 'none') . "\n";
-    echo "Active Key ID: " . (class_exists('MR_Razorpay') ? MR_Razorpay::get_active_key_id() : 'none') . "\n";
-    echo "Live Key ID: " . (class_exists('MR_Razorpay') ? MR_Razorpay::get_live_key_id() : 'none') . "\n";
-    echo "Secret Length: " . (class_exists('MR_Razorpay') ? strlen(MR_Razorpay::get_active_key_secret()) : 0) . "\n";
-    echo "Secret SHA1: " . (defined('Razorpay_Live_Secret_Key') ? sha1(Razorpay_Live_Secret_Key) : 'none') . "\n";
-    echo "Defined Razorpay_Live_API_Key: " . (defined('Razorpay_Live_API_Key') ? Razorpay_Live_API_Key : 'NOT DEFINED') . "\n";
-    echo "Defined Razorpay_Live_Secret_Key (len): " . (defined('Razorpay_Live_Secret_Key') ? strlen(Razorpay_Live_Secret_Key) : 'NOT DEFINED') . "\n";
-    echo "Defined MR_RAZORPAY_MODE: " . (defined('MR_RAZORPAY_MODE') ? MR_RAZORPAY_MODE : 'NOT DEFINED') . "\n";
-    $test_res = class_exists('MR_Razorpay') ? MR_Razorpay::test_connection() : [];
-    echo "Test Connection: " . print_r($test_res, true) . "\n";
-    $latest = $wpdb->get_row("SELECT id, internal_txn_id, gateway, gateway_order_id, gateway_payment_id, status, net_amount, created_at FROM $table ORDER BY id DESC LIMIT 1", ARRAY_A);
-    echo "Latest Txn: " . print_r($latest, true) . "\n";
-    exit;
-}
+
 
 $action = sanitize_text_field($_GET['action'] ?? '');
 $target_id = intval($_GET['id'] ?? 0);
