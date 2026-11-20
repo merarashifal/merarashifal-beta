@@ -100,7 +100,7 @@ class Niyati_Gemini_API {
         }
 
         // 2. Transliterated Hindi words -> Hinglish
-        if (preg_match('/\b(kya|kab|kaise|mera|meri|mere|mujhe|hoga|hogi|hoge|hai|hain|tha|thi|the|batao|bataiye|karein|kare|karu|kyu|kyun|aur|se|ko|mein|mai|main|shadi|shaadi|naukri|gadi|gaadi|ghar|paisa|paise|kripya|namaste)\b/i', $trimmed)) {
+        if (preg_match('/\b(kya|kab|kaise|mera|meri|mere|mujhe|hoga|hogi|hoge|hai|hain|tha|thi|thay|batao|bataiye|karein|kare|karu|kyu|kyun|aur|ko|mein|mai|main|shadi|shaadi|naukri|gadi|gaadi|ghar|paisa|paise|kripya|namaste)\b/i', $trimmed)) {
             return ($requested_lang === 'hi') ? 'hi' : 'hinglish';
         }
 
@@ -109,9 +109,193 @@ class Niyati_Gemini_API {
     }
 
     /**
+     * Fetch authentic Panchang, Ekadashi, Vrat, and Festival Grounding from af_festivals table
+     *
+     * @param string $user_message
+     * @return string
+     */
+    public static function get_panchang_grounding($user_message = '') {
+        global $wpdb;
+
+        $t_fest = 'af_festivals';
+        $table_exists = $wpdb->get_var("SHOW TABLES LIKE '{$t_fest}'");
+        if (!$table_exists) {
+            return '';
+        }
+
+        $today_date = current_time('Y-m-d');
+        $query_lower = mb_strtolower(trim($user_message));
+        $specific_rows = [];
+        $topic_label = '';
+
+        // 1. Ekadashi Detection
+        if (mb_stripos($query_lower, 'ekadashi') !== false || mb_stripos($query_lower, 'ekadasi') !== false || mb_stripos($query_lower, 'एकादशी') !== false) {
+            $topic_label = 'Ekadashi Vrat (एकादशी व्रत)';
+            $specific_rows = $wpdb->get_results($wpdb->prepare(
+                "SELECT festival_date, festival_eng_1, festival_hin_1, tithi_eng, tithi_hin, event, event_category 
+                 FROM {$t_fest} 
+                 WHERE festival_date >= %s 
+                   AND (festival_eng_1 LIKE %s OR festival_hin_1 LIKE %s OR event_category = 'ekadashi') 
+                 ORDER BY festival_date ASC 
+                 LIMIT 3",
+                $today_date,
+                '%Ekadashi%',
+                '%एकादशी%'
+            ), ARRAY_A);
+        }
+        // 2. Pradosh Detection
+        elseif (mb_stripos($query_lower, 'pradosh') !== false || mb_stripos($query_lower, 'प्रदोष') !== false) {
+            $topic_label = 'Pradosh Vrat (प्रदोष व्रत)';
+            $specific_rows = $wpdb->get_results($wpdb->prepare(
+                "SELECT festival_date, festival_eng_1, festival_hin_1, tithi_eng, tithi_hin, event, event_category 
+                 FROM {$t_fest} 
+                 WHERE festival_date >= %s 
+                   AND (festival_eng_1 LIKE %s OR festival_hin_1 LIKE %s OR event_category = 'pradosh') 
+                 ORDER BY festival_date ASC 
+                 LIMIT 3",
+                $today_date,
+                '%Pradosh%',
+                '%प्रदोष%'
+            ), ARRAY_A);
+        }
+        // 3. Purnima Detection
+        elseif (mb_stripos($query_lower, 'purnima') !== false || mb_stripos($query_lower, 'poornima') !== false || mb_stripos($query_lower, 'पूर्णिमा') !== false) {
+            $topic_label = 'Purnima Tithi (पूर्णिमा)';
+            $specific_rows = $wpdb->get_results($wpdb->prepare(
+                "SELECT festival_date, festival_eng_1, festival_hin_1, tithi_eng, tithi_hin, event, event_category 
+                 FROM {$t_fest} 
+                 WHERE festival_date >= %s 
+                   AND (festival_eng_1 LIKE %s OR festival_hin_1 LIKE %s OR event_category = 'purnima') 
+                 ORDER BY festival_date ASC 
+                 LIMIT 3",
+                $today_date,
+                '%Purnima%',
+                '%पूर्णिमा%'
+            ), ARRAY_A);
+        }
+        // 4. Amavasya Detection
+        elseif (mb_stripos($query_lower, 'amavasya') !== false || mb_stripos($query_lower, 'amawasya') !== false || mb_stripos($query_lower, 'अमावस्या') !== false) {
+            $topic_label = 'Amavasya Tithi (अमावस्या)';
+            $specific_rows = $wpdb->get_results($wpdb->prepare(
+                "SELECT festival_date, festival_eng_1, festival_hin_1, tithi_eng, tithi_hin, event, event_category 
+                 FROM {$t_fest} 
+                 WHERE festival_date >= %s 
+                   AND (festival_eng_1 LIKE %s OR festival_hin_1 LIKE %s OR event_category = 'amavasya') 
+                 ORDER BY festival_date ASC 
+                 LIMIT 3",
+                $today_date,
+                '%Amavasya%',
+                '%अमावस्या%'
+            ), ARRAY_A);
+        }
+        // 5. Sankranti Detection
+        elseif (mb_stripos($query_lower, 'sankranti') !== false || mb_stripos($query_lower, 'संक्रांति') !== false) {
+            $topic_label = 'Sankranti (संक्रांति)';
+            $specific_rows = $wpdb->get_results($wpdb->prepare(
+                "SELECT festival_date, festival_eng_1, festival_hin_1, tithi_eng, tithi_hin, event, event_category 
+                 FROM {$t_fest} 
+                 WHERE festival_date >= %s 
+                   AND (festival_eng_1 LIKE %s OR festival_hin_1 LIKE %s OR event_category = 'sankranti') 
+                 ORDER BY festival_date ASC 
+                 LIMIT 3",
+                $today_date,
+                '%Sankranti%',
+                '%संक्रांति%'
+            ), ARRAY_A);
+        }
+        // 6. Named major festivals dictionary
+        else {
+            $named_festivals = [
+                ['tulsi vivah', 'Tulsi Vivah', 'तुलसी विवाह'],
+                ['dev diwali', 'Dev Diwali', 'देव दीपावली'],
+                ['shivratri', 'Shivratri', 'शिवरात्रि'],
+                ['janmashtami', 'Janmashtami', 'जन्माष्टमी'],
+                ['ganesh chaturthi', 'Ganesh Chaturthi', 'गणेश चतुर्थी'],
+                ['navratri', 'Navratri', 'नवरात्रि'],
+                ['dussehra', 'Dussehra', 'दशहरा'],
+                ['diwali', 'Diwali', 'दीपावली'],
+                ['deepavali', 'Diwali', 'दीपावली'],
+                ['dhanteras', 'Dhanteras', 'धनतेरस'],
+                ['bhai dooj', 'Bhai Dooj', 'भाई दूज'],
+                ['chhath', 'Chhath', 'छठ पूजा'],
+                ['chath', 'Chhath', 'छठ पूजा'],
+                ['holi', 'Holi', 'होली'],
+                ['karwa chauth', 'Karwa Chauth', 'करवा चौथ'],
+                ['raksha bandhan', 'Raksha Bandhan', 'रक्षाबंधन'],
+                ['ram navami', 'Ram Navami', 'रामनवमी'],
+                ['hanuman jayanti', 'Hanuman Jayanti', 'हनुमान जयंती'],
+                ['guru purnima', 'Guru Purnima', 'गुरु पूर्णिमा'],
+                ['akshaya tritiya', 'Akshaya Tritiya', 'अक्षय तृतीया'],
+            ];
+
+            foreach ($named_festivals as $item) {
+                if (mb_stripos($query_lower, $item[0]) !== false || mb_stripos($query_lower, $item[1]) !== false || mb_stripos($query_lower, $item[2]) !== false) {
+                    $topic_label = $item[1] . ' (' . $item[2] . ')';
+                    $specific_rows = $wpdb->get_results($wpdb->prepare(
+                        "SELECT festival_date, festival_eng_1, festival_hin_1, tithi_eng, tithi_hin, event, event_category 
+                         FROM {$t_fest} 
+                         WHERE festival_date >= %s 
+                           AND (festival_eng_1 LIKE %s OR festival_hin_1 LIKE %s) 
+                         ORDER BY festival_date ASC 
+                         LIMIT 2",
+                        $today_date,
+                        '%' . $wpdb->esc_like($item[1]) . '%',
+                        '%' . $wpdb->esc_like($item[2]) . '%'
+                    ), ARRAY_A);
+                    break;
+                }
+            }
+        }
+
+        // Always fetch next 4 upcoming major events for general chronological context
+        $general_upcoming = $wpdb->get_results($wpdb->prepare(
+            "SELECT festival_date, festival_eng_1, festival_hin_1, tithi_eng, tithi_hin, event, event_category 
+             FROM {$t_fest} 
+             WHERE festival_date >= %s 
+               AND event_category IN ('major', 'fasting', 'ekadashi', 'pradosh', 'purnima') 
+             ORDER BY festival_date ASC 
+             LIMIT 4",
+            $today_date
+        ), ARRAY_A);
+
+        $output = "AUTHENTIC PANCHANG & FESTIVAL GROUNDING (MERARASHIFAL VERIFIED DRIK GANITA EPHEMERIS):\n";
+        $output .= "- Reference Date: " . wp_date('l, F j, Y', current_time('timestamp')) . "\n";
+
+        if (!empty($specific_rows)) {
+            $output .= "\n*** VERIFIED MATCH FOR USER QUERY ({$topic_label}) ***\n";
+            foreach ($specific_rows as $row) {
+                $f_date = wp_date('l, F j, Y', strtotime($row['festival_date']));
+                $name = $row['festival_eng_1'] . (!empty($row['festival_hin_1']) ? " ({$row['festival_hin_1']})" : "");
+                $tithi = trim(($row['tithi_hin'] ?? '') . ' / ' . ($row['tithi_eng'] ?? ''), ' /');
+                $desc = !empty($row['event']) ? " - " . $row['event'] : "";
+                $link_str = '';
+                if (class_exists('MR_Homepage_Manager')) {
+                    $smart_link = MR_Homepage_Manager::get_festival_smart_link($row['festival_eng_1'], $row['festival_hin_1'] ?? '');
+                    if (!empty($smart_link['url'])) {
+                        $link_str = " [Guide URL: {$smart_link['url']}]";
+                    }
+                }
+                $output .= "* {$name}: {$f_date} [Tithi: {$tithi}]{$desc}{$link_str}\n";
+            }
+            $output .= "CRITICAL ENFORCEMENT: The user is asking about {$topic_label}. You MUST use the exact dates and tithis listed above. Never estimate, guess, or state any different date!\n";
+        }
+
+        if (!empty($general_upcoming)) {
+            $output .= "\nUpcoming Near-Term Sacred Festivals & Vrats:\n";
+            foreach ($general_upcoming as $row) {
+                $f_date = wp_date('M j, Y', strtotime($row['festival_date']));
+                $name = $row['festival_eng_1'] . (!empty($row['festival_hin_1']) ? " ({$row['festival_hin_1']})" : "");
+                $output .= "* {$name}: {$f_date}\n";
+            }
+        }
+
+        return $output;
+    }
+
+    /**
      * Build the persona system instruction for Niyati
      */
-    public static function build_system_instruction($kundli_profile, $user_lang = 'en') {
+    public static function build_system_instruction($kundli_profile, $user_lang = 'en', $user_message = '') {
         $bot_name = 'Niyati';
         $settings = get_option('niyati_chat_settings', []);
         if (!empty($settings['bot_name'])) {
@@ -131,6 +315,7 @@ class Niyati_Gemini_API {
         $gender_display    = ($gender === 'male') ? 'Male (पुरुष)' : (($gender === 'female') ? 'Female (महिला)' : 'Unspecified');
 
         $chart_json = wp_json_encode($kundli_profile, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+        $panchang_grounding = self::get_panchang_grounding($user_message);
 
         // Tailor language rules and natural contextual framing strictly to the active language
         if ($user_lang === 'hi') {
@@ -174,6 +359,8 @@ CURRENT DATE & CALENDAR ANCHOR:
   * 5 to 6 months from now: around {$plus_6m_str}
   * 1 year from now: around {$plus_12m_str}
 All time predictions, dasha timings, and upcoming planetary transits MUST be strictly calculated relative to TODAY ({$today_str}).
+
+{$panchang_grounding}
 
 CLIENT'S AUTHENTIC KUNDLI:
 {$chart_json}
@@ -345,6 +532,14 @@ NAVIGATION DIRECTIVES & PROTOCOL:
      CRITICAL: Do NOT show bare URLs in text. The URL must be mapped strictly behind the button title in markdown syntax [Button Title](URL).
 - ZERO CREDIT DEDUCTION POLICY: Site navigation and directory links are 100% complimentary. NEVER mention chat credits in your text; the system backend automatically handles all credit preservation and display.
 - ONLY recommend genuine links from the official directory above. NEVER invent or hallucinate URL paths outside this directory.
+ 
+11. MANDATORY RULES FOR FESTIVAL, EKADASHI, VRAT & PANCHANG QUERIES:
+- If the seeker asks when an Ekadashi, Pradosh, Purnima, Amavasya, Vrat, or festival falls (e.g. "Next Ekadashi kab hai?", "When is Pradosh?", "Diwali kab hai?", "अगली एकादशी कब है?"):
+  * ABSOLUTE SOURCE OF TRUTH: You MUST use ONLY the exact dates, weekdays, and tithis specified in the AUTHENTIC PANCHANG & FESTIVAL GROUNDING section above. You are STRICTLY FORBIDDEN from guessing, estimating, or calculating different dates from pre-training memory.
+  * DIRECT & RELEVANT FORMAT (NO FORCED KUNDLI ANALYSIS):
+    - Paragraph 1 (Direct Date & Tithi): Directly state the exact upcoming date, day of the week, the sacred festival/Ekadashi name in bold (**Utpanna Ekadashi**), and its tithi. State briefly what the holy day commemorates.
+    - Paragraph 2 (Spiritual Upay & Vidhi): State the authentic Sattvic worship and fasting guidelines (e.g. for Ekadashi, devotion to **Lord Vishnu** with Tulsi, maintaining a pure mind, avoiding grains). If an official Guide URL is provided in the grounding data above, you may invite the user to read the full Vrat Katha and Parana timings on MeraRashifal: e.g. [Read Utpanna Ekadashi Katha & Muhurat](Guide_URL).
+  * DO NOT force-fit personal birth chart analysis, Lagna, or Mahadasha onto a pure calendar question unless the user specifically asks how the festival affects their personal birth chart!
 PROMPT;
 
         return $instruction;
@@ -376,7 +571,7 @@ PROMPT;
             ];
         }
 
-        $system_instruction = self::build_system_instruction($kundli_profile, $resolved_lang);
+        $system_instruction = self::build_system_instruction($kundli_profile, $resolved_lang, $user_message);
 
         // Build contents structure
         $contents = [];
@@ -518,7 +713,7 @@ PROMPT;
             return $sync;
         }
 
-        $system_instruction = self::build_system_instruction($kundli_profile, $resolved_lang);
+        $system_instruction = self::build_system_instruction($kundli_profile, $resolved_lang, $user_message);
 
         $contents = [];
         $recent_history = array_slice($history, -8);
@@ -659,7 +854,7 @@ PROMPT;
             ];
         }
 
-        $system_instruction = self::build_system_instruction($kundli_profile, $resolved_lang);
+        $system_instruction = self::build_system_instruction($kundli_profile, $resolved_lang, $question);
 
         // Add explicit Deep-Dive Elaboration directives
         $elaboration_directive = ($resolved_lang === 'hi')
