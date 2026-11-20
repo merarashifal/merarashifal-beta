@@ -400,8 +400,7 @@ PROMPT;
             'generationConfig'   => [
                 'temperature'     => 0.7,
                 'topP'            => 0.9,
-                'maxOutputTokens' => 800,
-                'thinkingConfig'  => ['thinkingBudget' => 0]
+                'maxOutputTokens' => 800
             ],
             'safetySettings'     => [
                 ['category' => 'HARM_CATEGORY_HARASSMENT', 'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'],
@@ -411,7 +410,7 @@ PROMPT;
             ]
         ];
 
-        $candidate_models = array_unique([$model, 'gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', 'gemini-3.8-flash']);
+        $candidate_models = array_unique([$model, 'gemini-3.5-flash-lite', 'gemini-3.5-flash', 'gemini-3.8-flash', 'gemini-3.1-flash-lite']);
         $last_error = '';
 
         foreach ($candidate_models as $cand_model) {
@@ -423,7 +422,7 @@ PROMPT;
                     'x-goog-api-key' => $api_key
                 ],
                 'body'    => wp_json_encode($payload),
-                'timeout' => 12
+                'timeout' => 20
             ]);
 
             if (is_wp_error($response)) {
@@ -691,13 +690,12 @@ PROMPT;
                 'temperature'       => 0.2,
                 'topP'              => 0.9,
                 'maxOutputTokens'   => 250,
-                'responseMimeType'  => 'application/json',
-                'thinkingConfig'    => ['thinkingBudget' => 0]
+                'responseMimeType'  => 'application/json'
             ]
         ];
 
         // Models that support multimodal audio input - fastest first!
-        $candidate_models = ['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', 'gemini-3.8-flash'];
+        $candidate_models = ['gemini-3.5-flash-lite', 'gemini-3.5-flash', 'gemini-3.8-flash', 'gemini-3.1-flash-lite'];
         $last_error = '';
 
         foreach ($candidate_models as $cand_model) {

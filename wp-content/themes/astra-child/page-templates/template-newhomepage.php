@@ -782,7 +782,7 @@ foreach ($ordered_sections as $section_id => $sec_data) {
                 <div>
                   <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-tertiary text-2xl">event_upcoming</span>
-                    <h2 class="font-serif text-2xl sm:text-3xl font-bold text-primary">Upcoming Vrats, Fasts &amp; Sacred Festivals</h2>
+                    <h2 class="font-serif text-2xl sm:text-3xl font-bold text-primary">Upcoming Vrats, Fasts &amp; Sacred Festivals (आगामी व्रत एवं त्यौहार)</h2>
                   </div>
                   <p class="text-xs sm:text-sm text-on-surface-variant mt-1">
                     Calculated using authentic Drik Ganita planetary positions and Shastric Sunrise (Udaya Tithi) timings.
@@ -889,7 +889,7 @@ foreach ($ordered_sections as $section_id => $sec_data) {
                 <div>
                   <div class="flex items-center gap-2">
                     <span class="material-symbols-outlined text-primary-container text-2xl">menu_book</span>
-                    <h2 class="font-serif text-2xl sm:text-3xl font-bold text-primary">Vedic Astrology Master Reports</h2>
+                    <h2 class="font-serif text-2xl sm:text-3xl font-bold text-primary">Vedic Astrology Master Reports (वैदिक ज्योतिष मास्टर रिपोर्ट)</h2>
                   </div>
                   <p class="text-xs sm:text-sm text-on-surface-variant mt-1">
                     Comprehensive 20-26 page shastric dossiers computed by high-precision mathematical algorithms and verified by traditional pandits.
@@ -984,7 +984,7 @@ foreach ($ordered_sections as $section_id => $sec_data) {
               <div class="border-b border-amber-900/10 pb-3 mb-5">
                 <div class="flex items-center gap-2">
                   <span class="material-symbols-outlined text-secondary text-2xl">child_care</span>
-                  <h2 class="font-serif text-2xl sm:text-3xl font-bold text-primary">Sacred Vedic Baby Names Engine (नामकरण)</h2>
+                  <h2 class="font-serif text-2xl sm:text-3xl font-bold text-primary">Sacred Vedic Baby Names Engine (शिशु नामकरण संस्कार)</h2>
                 </div>
                 <p class="text-xs sm:text-sm text-on-surface-variant mt-1">
                   Discover auspicious boy &amp; girl names starting with your child's birth nakshatra syllables and numerological harmony.
@@ -1045,7 +1045,7 @@ foreach ($ordered_sections as $section_id => $sec_data) {
               <div class="border-b border-amber-900/10 pb-3 mb-6">
                 <div class="flex items-center gap-2">
                   <span class="material-symbols-outlined text-tertiary text-2xl">calculate</span>
-                  <h2 class="font-serif text-2xl sm:text-3xl font-bold text-primary">Vedic Calculators &amp; Shastric Engines</h2>
+                  <h2 class="font-serif text-2xl sm:text-3xl font-bold text-primary">Vedic Calculators &amp; Shastric Engines (वैदिक ज्योतिष कैलकुलेटर)</h2>
                 </div>
                 <p class="text-xs sm:text-sm text-on-surface-variant mt-1">
                   Instant, ad-free computations based on ancient Brihat Parashara Hora Shastra and Surya Siddhanta principles.
@@ -1088,7 +1088,7 @@ foreach ($ordered_sections as $section_id => $sec_data) {
               <div class="border-b border-amber-900/10 pb-3 mb-6">
                 <div class="flex items-center gap-2">
                   <span class="material-symbols-outlined text-primary-container text-2xl">temple_hindu</span>
-                  <h2 class="font-serif text-2xl sm:text-3xl font-bold text-primary">Sanatan Devotional &amp; Spiritual Corner</h2>
+                  <h2 class="font-serif text-2xl sm:text-3xl font-bold text-primary">Sanatan Devotional &amp; Spiritual Corner (सनातन भक्ति एवं अध्यात्म)</h2>
                 </div>
                 <p class="text-xs sm:text-sm text-on-surface-variant mt-1">
                   Sacred stotras, authentic vrat kathas, and timeless arti sangrah for your daily puja anushthan.
@@ -1122,7 +1122,7 @@ foreach ($ordered_sections as $section_id => $sec_data) {
                   <div>
                     <div class="flex items-center gap-2 pb-3 border-b border-amber-900/10 mb-3">
                       <span class="material-symbols-outlined text-primary text-xl">auto_stories</span>
-                      <h3 class="font-serif font-bold text-base text-primary">Trending Vrat Kathas</h3>
+                      <h3 class="font-serif font-bold text-base text-primary">Trending Vrat Kathas (प्रमुख व्रत कथाएं)</h3>
                     </div>
                     <div class="space-y-2.5">
                       <a href="<?php echo esc_url(home_url('/vrat-katha/')); ?>" class="block p-2.5 rounded-xl bg-amber-50/60 hover:bg-amber-100/70 transition">
@@ -1158,7 +1158,7 @@ foreach ($ordered_sections as $section_id => $sec_data) {
                   <div>
                     <div class="flex items-center gap-2 pb-3 border-b border-amber-900/10 mb-3">
                       <span class="material-symbols-outlined text-tertiary text-xl">library_music</span>
-                      <h3 class="font-serif font-bold text-base text-primary">Daily Aarti Sangrah</h3>
+                      <h3 class="font-serif font-bold text-base text-primary">Daily Aarti Sangrah (दैनिक आरती संग्रह)</h3>
                     </div>
                     <div class="space-y-2.5">
                       <div class="p-2.5 rounded-xl bg-amber-50/60 flex items-center justify-between">
@@ -1200,7 +1200,7 @@ foreach ($ordered_sections as $section_id => $sec_data) {
                   <div>
                     <div class="flex items-center gap-2 pb-3 border-b border-amber-900/10 mb-3">
                       <span class="material-symbols-outlined text-secondary text-xl">graphic_eq</span>
-                      <h3 class="font-serif font-bold text-base text-primary">Sacred Chants &amp; Mantras</h3>
+                      <h3 class="font-serif font-bold text-base text-primary">Sacred Chants &amp; Mantras (पावन मंत्र एवं स्तोत्र)</h3>
                     </div>
                     <div class="space-y-2.5">
                       <a href="<?php echo esc_url(home_url('/vrat-katha/')); ?>" class="block p-2.5 rounded-xl bg-amber-50/60 hover:bg-amber-100/70 transition">
