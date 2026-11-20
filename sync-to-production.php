@@ -49,7 +49,15 @@ $authorized = $is_admin || (isset($_GET['token']) && $_GET['token'] === 'mr_depl
     
     <div class="paths">
         <strong>Source (Beta):</strong> <?php echo esc_html($source_dir); ?><br>
-        <strong>Target (Live):</strong> <?php echo esc_html($target_dir ?: 'NOT FOUND'); ?>
+        <strong>Target (Live):</strong> <?php echo esc_html($target_dir ?: 'NOT FOUND'); ?><br>
+        <?php
+        if (function_exists('shell_exec')) {
+            $current_commit = @shell_exec('git log -1 --oneline 2>&1');
+            if ($current_commit) {
+                echo '<strong>Active Beta Commit:</strong> ' . esc_html(trim($current_commit)) . '<br>';
+            }
+        }
+        ?>
     </div>
 
     <?php
@@ -96,6 +104,36 @@ $authorized = $is_admin || (isset($_GET['token']) && $_GET['token'] === 'mr_depl
             @unlink($lock_file);
             echo "<div class='log-warn'><strong>Cleaned stale .git/index.lock file.</strong></div>\n";
         }
+
+        // 2. Fetch and pull latest changes from git remote if shell_exec is available
+        if (function_exists('shell_exec')) {
+            $git_output = @shell_exec('git fetch origin beta 2>&1 && git reset --hard origin/beta 2>&1');
+            if ($git_output) {
+                echo "<div class='log-warn'><strong>[GIT SYNC]:</strong> " . esc_html(trim($git_output)) . "</div>\n";
+            }
+            $active_commit = @shell_exec('git log -1 --oneline 2>&1');
+            if ($active_commit) {
+                echo "<div class='log-success'><strong>[UPDATED COMMIT]:</strong> " . esc_html(trim($active_commit)) . "</div>\n";
+            }
+        }
+
+        // 3. Clean legacy plain-text API keys from beta DB if available
+        global $wpdb;
+        if (!empty($wpdb)) {
+            $keys_to_clean = [
+                'mr_gemini_api_key',
+                'mr_vedic_api_key',
+                'mr_browserless_token',
+                'mr_razorpay_live_key_id',
+                'mr_razorpay_live_key_secret',
+                'mr_razorpay_test_key_id',
+                'mr_razorpay_test_key_secret',
+            ];
+            $placeholders = implode("','", array_map('esc_sql', $keys_to_clean));
+            $deleted = $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name IN ('{$placeholders}')");
+            echo "<div class='log-success'><strong>[DB CLEANUP]:</strong> Cleaned {$deleted} legacy plaintext key options from database.</div>\n";
+        }
+
         $sync_targets = [
             'wp-content/plugins/mr-subscription-reports',
             'wp-content/plugins/mr-content-bot',
@@ -104,6 +142,7 @@ $authorized = $is_admin || (isset($_GET['token']) && $_GET['token'] === 'mr_depl
             'merarashifal-logo.png',
             'fix-pending-order.php',
             'purge-cache.php',
+            'check-integrity.php',
             'robots.txt',
         ];
 

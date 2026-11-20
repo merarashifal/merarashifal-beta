@@ -50,5 +50,22 @@ if (file_exists($wp_load)) {
         echo "WP clean_post_cache(7313): SUCCESS\n";
     }
 
+    // 6. Security: Wipe legacy plain-text API keys from wp_options
+    global $wpdb;
+    if (!empty($wpdb)) {
+        $keys_to_clean = [
+            'mr_gemini_api_key',
+            'mr_vedic_api_key',
+            'mr_browserless_token',
+            'mr_razorpay_live_key_id',
+            'mr_razorpay_live_key_secret',
+            'mr_razorpay_test_key_id',
+            'mr_razorpay_test_key_secret',
+        ];
+        $placeholders = implode("','", array_map('esc_sql', $keys_to_clean));
+        $deleted = $wpdb->query("DELETE FROM {$wpdb->options} WHERE option_name IN ('{$placeholders}')");
+        echo "Database Cleanup: {$deleted} legacy plain-text key records removed from database.\n";
+    }
+
     echo "ALL PURGE ROUTINES COMPLETED\n";
 }
