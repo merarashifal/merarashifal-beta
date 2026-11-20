@@ -533,6 +533,40 @@ global $wpdb;
         echo "<div class='log-success'>✅ [EKADASHI TABLE]: Synced {$updated_urls} canonical Ekadashi URLs in {$ek_table}.</div>\n";
     }
 
+    // ---------------------------------------------------------
+    // 7. UPGRADE SNIPPET 47 (MUHURAT CODE) & CREATE 2027 HUBS
+    // ---------------------------------------------------------
+    $snip_file = __DIR__ . '/snippet_47_new.php';
+    if (file_exists($snip_file)) {
+        $snip_code = file_get_contents($snip_file);
+        $snip_code = preg_replace('/^<\?php\s*/', '', $snip_code);
+        $snip_code = str_replace('mr_final_muhurat_viewer_theme_v2', 'mr_final_muhurat_viewer_theme', $snip_code);
+        if (strpos($snip_code, "add_shortcode('muhurat_viewer'") === false) {
+            $snip_code = "add_shortcode('muhurat_viewer', 'mr_final_muhurat_viewer_theme');\n" . $snip_code;
+        }
+
+        $res_snip = $wpdb->update($snippets_table, ['code' => $snip_code], ['id' => 47]);
+        if ($res_snip !== false) {
+            echo "<div class='log-success'>✅ [SNIPPET 47]: Upgraded Muhurat Code snippet with 2027 hubs, slug normalization, and bilingual support.</div>\n";
+        } else {
+            echo "<div class='log-warn'>⚠️ [SNIPPET 47]: Could not update Snippet 47 (already up-to-date or error).</div>\n";
+        }
+    }
+
+    // CREATE OR UPDATE 2027 HUBS
+    $hub_file = __DIR__ . '/create_2027_muhurat_pages.php';
+    if (file_exists($hub_file)) {
+        require_once $hub_file;
+        echo "<div class='log-success'>✅ [2027 HUBS]: Verified and synced 2027 Shubh Muhurat Hub Pages.</div>\n";
+    }
+
+    // UPDATE PAGE 2538 (/muhurat-dates/)
+    $p2538_file = __DIR__ . '/update_page_2538.php';
+    if (file_exists($p2538_file)) {
+        require_once $p2538_file;
+        echo "<div class='log-success'>✅ [PAGE 2538]: Updated Shubh Muhurat Dates hub with 2027 cards and single H1.</div>\n";
+    }
+
     // Flush OPcache
     if (function_exists('opcache_reset')) {
         @opcache_reset();
