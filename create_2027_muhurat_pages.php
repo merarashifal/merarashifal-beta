@@ -19,9 +19,9 @@ $pages = [
     <span>Vivah Muhurat 2027</span>
   </nav>
 
-  <h1 style="color:#8c2514; font-size:28px; line-height:1.3; font-weight:700; margin-bottom:12px;">
+  <h2 style="color:#8c2514; font-size:24px; line-height:1.3; font-weight:700; margin-bottom:12px;">
     विवाह मुहूर्त 2027: शुभ विवाह तिथियां, नक्षत्र एवं सावे (Vivah Muhurat 2027)
-  </h1>
+  </h2>
   
   <p style="font-size:16px; color:#4a3b32; margin-bottom:20px;">
     वैदिक ज्योतिष में विवाह को 16 संस्कारों में सबसे महत्वपूर्ण माना गया है। वर्ष 2027 में अपने वैवाहिक जीवन की सुखद एवं मंगलमय शुरुआत के लिए शास्त्र सम्मत शुभ लग्न, नक्षत्र एवं तिथियों का चयन अत्यंत आवश्यक है। नीचे वर्ष 2027 के समस्त शुभ विवाह मुहूर्त, लग्न समय, शुभ नक्षत्र एवं चंद्र राशि की विस्तृत सूची दी गई है।
@@ -96,9 +96,9 @@ HTML
     <span>Griha Pravesh Muhurat 2027</span>
   </nav>
 
-  <h1 style="color:#8c2514; font-size:28px; line-height:1.3; font-weight:700; margin-bottom:12px;">
+  <h2 style="color:#8c2514; font-size:24px; line-height:1.3; font-weight:700; margin-bottom:12px;">
     गृह प्रवेश मुहूर्त 2027: नए घर में प्रवेश की शुभ तिथियां एवं नक्षत्र (Griha Pravesh Muhurat 2027)
-  </h1>
+  </h2>
   
   <p style="font-size:16px; color:#4a3b32; margin-bottom:20px;">
     नया घर खरीदना या बनवाना प्रत्येक व्यक्ति के जीवन का बड़ा स्वप्न होता है। नए घर में सुख, शांति, समृद्धि और सकारात्मक ऊर्जा के स्थायी वास के लिए वैदिक रीति अनुसार गृह प्रवेश मुहूर्त का चयन करना अत्यंत मंगलकारी होता है। नीचे वर्ष 2027 के समस्त गृह प्रवेश शुभ मुहूर्त, नक्षत्र एवं समय उपलब्ध हैं।
@@ -168,9 +168,9 @@ HTML
     <span>Vehicle & Property Purchase Muhurat 2027</span>
   </nav>
 
-  <h1 style="color:#8c2514; font-size:28px; line-height:1.3; font-weight:700; margin-bottom:12px;">
+  <h2 style="color:#8c2514; font-size:24px; line-height:1.3; font-weight:700; margin-bottom:12px;">
     वाहन एवं संपत्ति खरीद मुहूर्त 2027: शुभ तिथियां, नक्षत्र एवं समय (Vehicle & Property 2027)
-  </h1>
+  </h2>
   
   <p style="font-size:16px; color:#4a3b32; margin-bottom:20px;">
     नई कार, दोपहिया वाहन अथवा भूमि, मकान व व्यावसायिक संपत्ति खरीदना जीवन की बड़ी उपलब्धियां हैं। शुभ मुहूर्त में वाहन खरीदने से यात्राएं सुरक्षित व सुखद रहती हैं तथा शुभ समय में संपत्ति खरीदने से कानूनी बाधाएं दूर होती हैं और मूल्य में निरंतर वृद्धि होती है।
@@ -248,9 +248,9 @@ HTML
     <span>Vehicle Purchase Muhurat 2027</span>
   </nav>
 
-  <h1 style="color:#8c2514; font-size:28px; line-height:1.3; font-weight:700; margin-bottom:12px;">
+  <h2 style="color:#8c2514; font-size:24px; line-height:1.3; font-weight:700; margin-bottom:12px;">
     वाहन खरीद मुहूर्त 2027: कार, बाइक एवं वाहन डिलीवरी शुभ समय (Vehicle Purchase 2027)
-  </h1>
+  </h2>
   <p style="font-size:16px; color:#4a3b32; margin-bottom:20px;">
     वर्ष 2027 में नए वाहन (कार, स्कूटर, बाइक या कमर्शियल वाहन) के क्रय, रजिस्ट्रेशन एवं डिलीवरी के सभी शुभ मुहूर्त, श्रेष्ठ नक्षत्र एवं लग्न समय नीचे देखें:
   </p>
@@ -279,9 +279,9 @@ HTML
     <span>Property Purchase Muhurat 2027</span>
   </nav>
 
-  <h1 style="color:#8c2514; font-size:28px; line-height:1.3; font-weight:700; margin-bottom:12px;">
+  <h2 style="color:#8c2514; font-size:24px; line-height:1.3; font-weight:700; margin-bottom:12px;">
     संपत्ति खरीद मुहूर्त 2027: जमीन, मकान एवं फ्लैट रजिस्ट्री शुभ समय (Property Purchase 2027)
-  </h1>
+  </h2>
   <p style="font-size:16px; color:#4a3b32; margin-bottom:20px;">
     वर्ष 2027 में अचल संपत्ति (प्लॉट, फ्लैट, दुकान, कृषि भूमि) के क्रय, एग्रीमेंट एवं कानूनी रजिस्ट्री के लिए शास्त्र सम्मत शुभ मुहूर्त व नक्षत्र:
   </p>

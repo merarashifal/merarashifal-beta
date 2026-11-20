@@ -173,6 +173,12 @@ class Niyati_Frontend {
         $custom_color = $settings['theme_color'] ?? '#FF8C00';
         $custom_css = ":root { --niyati-primary: {$custom_color}; --niyati-primary-dark: #B3541E; --niyati-bg: #FFFBEB; }";
         wp_add_inline_style('niyati-chat-css', $custom_css);
+
+        // Enqueue floating chat widget globally when enabled
+        if (!empty($settings['floating_enabled']) && $settings['floating_enabled'] === '1') {
+            wp_enqueue_style('niyati-chat-css');
+            wp_enqueue_script('niyati-chat-js');
+        }
     }
 
     public static function render_floating_widget() {
