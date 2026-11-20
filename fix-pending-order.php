@@ -22,6 +22,7 @@ if (isset($_GET['diag']) && $_GET['diag'] === 'mr_2026') {
     echo "Active Key ID: " . (class_exists('MR_Razorpay') ? MR_Razorpay::get_active_key_id() : 'none') . "\n";
     echo "Live Key ID: " . (class_exists('MR_Razorpay') ? MR_Razorpay::get_live_key_id() : 'none') . "\n";
     echo "Secret Length: " . (class_exists('MR_Razorpay') ? strlen(MR_Razorpay::get_active_key_secret()) : 0) . "\n";
+    echo "Secret SHA1: " . (defined('Razorpay_Live_Secret_Key') ? sha1(Razorpay_Live_Secret_Key) : 'none') . "\n";
     echo "Defined Razorpay_Live_API_Key: " . (defined('Razorpay_Live_API_Key') ? Razorpay_Live_API_Key : 'NOT DEFINED') . "\n";
     echo "Defined Razorpay_Live_Secret_Key (len): " . (defined('Razorpay_Live_Secret_Key') ? strlen(Razorpay_Live_Secret_Key) : 'NOT DEFINED') . "\n";
     echo "Defined MR_RAZORPAY_MODE: " . (defined('MR_RAZORPAY_MODE') ? MR_RAZORPAY_MODE : 'NOT DEFINED') . "\n";
