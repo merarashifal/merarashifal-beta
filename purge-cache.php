@@ -90,6 +90,7 @@ if (file_exists($wp_load)) {
         echo "Razorpay Active Key ID: " . MR_Razorpay::get_active_key_id() . "\n";
         echo "Razorpay Secret SHA1: " . (defined('Razorpay_Live_Secret_Key') ? sha1(Razorpay_Live_Secret_Key) : 'none') . "\n";
         echo "Razorpay Connection: " . ($rzp_test['success'] ? 'SUCCESS' : ('FAILED: ' . $rzp_test['message'])) . "\n";
+    }
     // Diagnostic: Check af_festivals on production
     $t_check = $wpdb->get_var("SHOW TABLES LIKE 'af_festivals'");
     echo "Table af_festivals exists: " . ($t_check ? 'YES' : 'NO') . "\n";
