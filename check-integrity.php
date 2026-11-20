@@ -17,6 +17,9 @@ $files = [
     'wp-content/plugins/mr-content-bot/includes/class-mrcb-scheduler.php',
     'wp-content/plugins/mr-content-bot/includes/class-mrcb-publisher.php',
     'wp-content/plugins/niyati-ai-astrology-chat/includes/class-niyati-rest-api.php',
+    'wp-content/plugins/niyati-ai-astrology-chat/niyati-ai-astrology-chat.php',
+    'wp-content/plugins/niyati-ai-astrology-chat/assets/js/niyati-chat.js',
+    'wp-content/plugins/niyati-ai-astrology-chat/assets/css/niyati-chat.css',
     'wp-content/themes/astra-child/page-templates/template-pricing.php',
     'wp-content/themes/astra-child/page-templates/template-newhomepage.php',
     'merarashifal-logo.png',
@@ -60,3 +63,17 @@ foreach ($files as $rel) {
 
 echo str_repeat("-", 85) . "\n";
 echo $all_synced ? "RESULT: 100% IN SYNC - ALL FILES MATCH ON BETA AND LIVE!\n" : "RESULT: SOME FILES DIFFER OR PENDING DEPLOY.\n";
+
+if (file_exists($live_dir . '/wp-load.php')) {
+    require_once $live_dir . '/wp-load.php';
+    global $wpdb;
+    $active = get_option('active_plugins', []);
+    echo "\n=== LIVE DATABASE ACTIVE PLUGINS ===\n";
+    foreach ($active as $p) {
+        if (strpos($p, 'niyati') !== false) {
+            echo " -> [ACTIVE] " . $p . "\n";
+        }
+    }
+    $settings = get_option('niyati_chat_settings', []);
+    echo "Live floating_enabled setting: " . var_export($settings['floating_enabled'] ?? 'NOT SET', true) . "\n";
+}
