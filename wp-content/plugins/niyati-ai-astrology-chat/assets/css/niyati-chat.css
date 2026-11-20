@@ -3399,5 +3399,24 @@ button.niyati-chip:active,
     transform: rotate(-45deg);
 }
 
+/* Real-Time SSE Streaming Cursor & Bubble */
+.niyati-bubble-streaming {
+    min-height: 24px;
+    position: relative;
+}
+
+.niyati-typing-cursor {
+    display: inline-block;
+    color: var(--niyati-primary, #d97706);
+    font-weight: 700;
+    margin-left: 2px;
+    animation: niyatiCursorBlink 0.75s infinite ease-in-out;
+}
+
+@keyframes niyatiCursorBlink {
+    0%, 100% { opacity: 1; transform: scaleY(1); }
+    50% { opacity: 0; transform: scaleY(0.7); }
+}
+
 
 

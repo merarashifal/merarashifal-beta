@@ -64,6 +64,13 @@ class Niyati_REST_API {
             'permission_callback' => '__return_true',
         ]);
 
+        // Chat Message (Streaming Server-Sent Events)
+        register_rest_route(self::NAMESPACE, '/chat-stream', [
+            'methods'             => 'POST',
+            'callback'            => [__CLASS__, 'handle_chat_stream'],
+            'permission_callback' => '__return_true',
+        ]);
+
         // Create Payment Order for Credits
         register_rest_route(self::NAMESPACE, '/create-order', [
             'methods'             => 'POST',
@@ -687,6 +694,231 @@ class Niyati_REST_API {
             'quota'        => $free_quota,
             'paid_credits' => $paid_balance
         ]);
+    }
+
+    /**
+     * Send SSE HTTP headers and flush buffers
+     */
+    public static function send_sse_headers() {
+        if (function_exists('apache_setenv')) {
+            @apache_setenv('no-gzip', '1');
+        }
+        @ini_set('zlib.output_compression', '0');
+        @ini_set('output_buffering', 'off');
+        @ini_set('implicit_flush', '1');
+
+        if (!headers_sent()) {
+            header('Content-Type: text/event-stream; charset=utf-8');
+            header('Cache-Control: no-cache, no-transform, must-revalidate');
+            header('Connection: keep-alive');
+            header('X-Accel-Buffering: no');
+            header('Content-Encoding: none');
+        }
+        while (ob_get_level()) {
+            @ob_end_flush();
+        }
+        if (function_exists('ob_implicit_flush')) {
+            @ob_implicit_flush(true);
+        }
+        // Send initial 2KB SSE comment padding to immediately defeat Apache/FastCGI/proxy buffering
+        echo ":" . str_repeat(" ", 2048) . "\n\n";
+        @flush();
+    }
+
+    /**
+     * Handle Streaming Chat Message via Server-Sent Events (SSE)
+     */
+    public static function handle_chat_stream($request) {
+        $params = $request->get_json_params() ?: $request->get_params();
+
+        $message     = sanitize_text_field($params['message'] ?? '');
+        $chart_token = sanitize_text_field($params['chart_token'] ?? '');
+        $history     = $params['history'] ?? [];
+        $lang        = sanitize_text_field($params['lang'] ?? 'en');
+        if (class_exists('Niyati_Gemini_API')) {
+            $lang = Niyati_Gemini_API::resolve_language($message, $lang);
+        }
+
+        if (empty($message)) {
+            return new WP_Error('empty_message', 'Message cannot be empty', ['status' => 400]);
+        }
+
+        $visitor_id = Niyati_Limits::get_visitor_id();
+        $user_id = get_current_user_id();
+        if (!$user_id) {
+            $cookie_user = wp_validate_auth_cookie('', 'logged_in');
+            if ($cookie_user) {
+                $user_id = $cookie_user;
+                wp_set_current_user($user_id);
+            }
+        }
+        if (!$user_id && !empty($params['user_id'])) {
+            $user_id = absint($params['user_id']);
+        }
+
+        if (!$user_id) {
+            $login_err = ($lang === 'hi') 
+                ? 'नियति से चैट जारी रखने के लिए कृपया पहले अपने खाते में लॉगिन करें।' 
+                : 'Please log in to your account first to continue chatting with Niyati.';
+            return new WP_Error('login_required', $login_err, [
+                'status'    => 401,
+                'login_url' => wp_login_url(wp_get_referer() ?: home_url())
+            ]);
+        }
+
+        $free_quota = Niyati_Limits::check_quota($visitor_id);
+        $paid_balance = Niyati_Wallet::get_balance($visitor_id, $user_id);
+
+        $has_free_credit = $free_quota['allowed'];
+        $has_paid_credit = ($paid_balance > 0);
+        $is_nav_query = self::is_navigation_query($message);
+
+        // Tier 1 Guardrails: Fast Deterministic Check
+        if (class_exists('Niyati_Guardrails')) {
+            $guardrail = Niyati_Guardrails::check_message($message, $lang);
+            if (!empty($guardrail['triggered'])) {
+                if (class_exists('Niyati_Storage') && $user_id > 0) {
+                    Niyati_Storage::append_chat_turn($user_id, $message, $guardrail['reply']);
+                }
+                self::send_sse_headers();
+                echo "data: " . wp_json_encode(['token' => $guardrail['reply']]) . "\n\n";
+                echo "data: " . wp_json_encode([
+                    'done'             => true,
+                    'guardrail'        => true,
+                    'category'         => $guardrail['category'],
+                    'full_text'        => $guardrail['reply'],
+                    'used_credit_type' => 'none',
+                    'quota'            => $free_quota,
+                    'paid_credits'     => $paid_balance,
+                    'question'         => $message
+                ]) . "\n\n";
+                exit;
+            }
+        }
+
+        // Quota check
+        if (!$has_free_credit && !$has_paid_credit && !$is_nav_query) {
+            $msg = ($lang === 'hi') 
+                ? ($free_quota['limit_exceeded_msg']['hi'] ?? 'आपकी निःशुल्क प्रश्न सीमा समाप्त हो चुकी है। कृपया चैट जारी रखने के लिए क्रेडिट्स रिचार्ज करें।')
+                : ($free_quota['limit_exceeded_msg']['en'] ?? 'You have reached your free question limit. Please recharge credits to continue chatting with Niyati.');
+
+            return rest_ensure_response([
+                'success'        => false,
+                'quota_exceeded' => true,
+                'needs_recharge' => true,
+                'reply'          => $msg,
+                'quota'          => $free_quota,
+                'paid_credits'   => 0,
+                'packs'          => array_values(Niyati_Wallet::get_packs(true))
+            ]);
+        }
+
+        $profile = get_transient('niyati_sess_' . $chart_token);
+        if (!$profile || !is_array($profile)) {
+            $profile = [
+                'name'      => 'Jatak',
+                'ascendant' => 'Vedic Chart',
+                'moon_sign' => 'Rashi',
+            ];
+        }
+
+        self::send_sse_headers();
+
+        $res = Niyati_Gemini_API::stream_chat_response($message, $profile, $history, $lang, function($token) {
+            echo "data: " . wp_json_encode(['token' => $token]) . "\n\n";
+            if (ob_get_level()) {
+                @ob_flush();
+            }
+            flush();
+        });
+
+        if ($res['success']) {
+            $is_llm_guardrail = false;
+            if (preg_match('/\[DECL[A-Z_]*\]/i', $res['reply'])) {
+                $is_llm_guardrail = true;
+                $res['reply'] = trim(preg_replace('/\[DECL[A-Z_]*\]/i', '', $res['reply']));
+                if (class_exists('Niyati_Guardrails')) {
+                    $res['reply'] .= Niyati_Guardrails::get_credit_preservation_note($lang);
+                }
+            } elseif (class_exists('Niyati_Guardrails') && Niyati_Guardrails::is_guardrail_response($res['reply'])) {
+                $is_llm_guardrail = true;
+                $res['reply'] = trim(preg_replace('/\[DECL[A-Z_]*\]/i', '', $res['reply']));
+                if (strpos($res['reply'], 'credit') === false && strpos($res['reply'], 'क्रेडिट') === false) {
+                    $res['reply'] .= Niyati_Guardrails::get_credit_preservation_note($lang);
+                }
+            }
+
+            $is_site_navigation = false;
+            if (!$is_llm_guardrail && !empty($is_nav_query)) {
+                if (self::is_site_navigation_response($res['reply'], $message)) {
+                    $is_site_navigation = true;
+                }
+            }
+
+            $res['reply'] = trim(preg_replace('/\[(?:DECL|NAV)[A-Z_]*\]/i', '', $res['reply']));
+
+            if ($is_llm_guardrail || $is_site_navigation) {
+                if ($is_site_navigation && strpos($res['reply'], 'credit') === false && strpos($res['reply'], 'क्रेडिट') === false) {
+                    $res['reply'] .= self::get_navigation_credit_preservation_note($lang);
+                }
+                if (class_exists('Niyati_Storage') && $user_id > 0) {
+                    Niyati_Storage::append_chat_turn($user_id, $message, $res['reply']);
+                }
+                echo "data: " . wp_json_encode([
+                    'done'             => true,
+                    'guardrail'        => $is_llm_guardrail,
+                    'navigation'       => $is_site_navigation,
+                    'full_text'        => $res['reply'],
+                    'used_credit_type' => 'none',
+                    'quota'            => $free_quota,
+                    'paid_credits'     => $paid_balance,
+                    'question'         => $message
+                ]) . "\n\n";
+                exit;
+            }
+
+            $res['reply'] = preg_replace('/\s*\*\s*\((?:Note|सूचना):[^\)]*(?:credit|क्रेडिट)[^\)]*\)\s*\*\s*/iu', '', $res['reply']);
+            $res['reply'] = trim($res['reply']);
+
+            $used_credit_type = 'free';
+            if ($has_free_credit) {
+                $updated_quota = Niyati_Limits::increment_question_count($visitor_id);
+                $remaining_paid = $paid_balance;
+                $used_credit_type = 'free';
+            } else {
+                $remaining_paid = Niyati_Wallet::consume_credit($visitor_id, $user_id);
+                $updated_quota = $free_quota;
+                $used_credit_type = 'paid';
+            }
+
+            if (class_exists('Niyati_Storage') && $user_id > 0) {
+                Niyati_Storage::append_chat_turn($user_id, $message, $res['reply']);
+            }
+
+            $settings = self::get_settings();
+            $elaborate_cost = max(1, intval($settings['elaborate_credits_cost'] ?? 1));
+            $can_elaborate = ($used_credit_type !== 'none' && !self::is_meta_greeting($message, $res['reply']));
+
+            echo "data: " . wp_json_encode([
+                'done'             => true,
+                'full_text'        => $res['reply'],
+                'used_credit_type' => $used_credit_type,
+                'quota'            => $updated_quota,
+                'paid_credits'     => $remaining_paid,
+                'can_elaborate'    => $can_elaborate,
+                'elaborate_cost'   => $elaborate_cost,
+                'question'         => $message
+            ]) . "\n\n";
+            exit;
+        }
+
+        echo "data: " . wp_json_encode([
+            'error'        => true,
+            'reply'        => $res['reply'],
+            'quota'        => $free_quota,
+            'paid_credits' => $paid_balance
+        ]) . "\n\n";
+        exit;
     }
 
     /**

@@ -2565,21 +2565,99 @@
 
         var wpNonce = getWpNonce();
         var wpUserId = (window.niyatiConfig && window.niyatiConfig.user_id) ? window.niyatiConfig.user_id : 0;
+        var supportsStreaming = (window.ReadableStream && window.fetch && window.TextDecoder);
 
-        fetch(restBase + '/chat', {
+        var payload = {
+            message: text,
+            chart_token: state.chartToken,
+            lang: state.lang,
+            user_id: wpUserId,
+            history: state.history.slice(-6)
+        };
+
+        if (!supportsStreaming) {
+            // Traditional fallback fetch for legacy environments
+            fetch(restBase + '/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-WP-Nonce': wpNonce
+                },
+                credentials: 'same-origin',
+                body: JSON.stringify(payload)
+            })
+            .then(function (res) {
+                var freshNonce = res.headers ? res.headers.get('X-WP-Nonce') : null;
+                if (freshNonce) {
+                    state.nonce = freshNonce;
+                    if (window.niyatiConfig) window.niyatiConfig.nonce = freshNonce;
+                }
+                return res.json();
+            })
+            .then(function (data) {
+                showTyping(false);
+                state.isSending = false;
+                el.btnSend.disabled = false;
+                localStorage.setItem('niyati_last_active_time', Date.now().toString());
+
+                if (data.code === 'login_required' || (data.data && data.data.status === 401)) {
+                    state.isLoggedIn = false;
+                    updateLoginNoticeUI();
+                    showLoginModal();
+                    return;
+                }
+                if (data.quota) state.quota = data.quota;
+                if (typeof data.paid_credits !== 'undefined') state.paidCredits = data.paid_credits;
+                updateQuotaUI();
+
+                if (data.quota_exceeded) {
+                    appendLimitExceededCard(data.reply);
+                    openRechargeSheet();
+                    return;
+                }
+
+                if (data.success && data.reply) {
+                    appendMessageBubble('model', data.reply, {
+                        canElaborate: data.can_elaborate,
+                        elaborateCost: data.elaborate_cost,
+                        question: data.question || text
+                    });
+                    state.history.push({
+                        role: 'model',
+                        text: data.reply,
+                        can_elaborate: data.can_elaborate,
+                        elaborate_cost: data.elaborate_cost,
+                        question: data.question || text
+                    });
+                    localStorage.setItem('niyati_chat_history', JSON.stringify(state.history));
+                } else {
+                    var curT = i18n[state.lang] || i18n['en'];
+                    appendMessageBubble('model', data.reply || curT.serverError);
+                }
+            })
+            .catch(function () {
+                showTyping(false);
+                state.isSending = false;
+                el.btnSend.disabled = false;
+                var curT = i18n[state.lang] || i18n['en'];
+                appendMessageBubble('model', curT.netError || 'Internet connection error. Please try again.');
+            });
+            return;
+        }
+
+        // Modern Real-Time SSE Streaming Reader
+        var streamBubble = null;
+        var accumulatedReply = '';
+        var finalMetadata = null;
+
+        fetch(restBase + '/chat-stream', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'X-WP-Nonce': wpNonce
             },
             credentials: 'same-origin',
-            body: JSON.stringify({
-                message: text,
-                chart_token: state.chartToken,
-                lang: state.lang,
-                user_id: wpUserId,
-                history: state.history.slice(-6)
-            })
+            body: JSON.stringify(payload)
         })
         .then(function (res) {
             var freshNonce = res.headers ? res.headers.get('X-WP-Nonce') : null;
@@ -2587,55 +2665,118 @@
                 state.nonce = freshNonce;
                 if (window.niyatiConfig) window.niyatiConfig.nonce = freshNonce;
             }
-            return res.json();
-        })
-        .then(function (data) {
-            showTyping(false);
-            state.isSending = false;
-            el.btnSend.disabled = false;
-            localStorage.setItem('niyati_last_active_time', Date.now().toString());
 
-            if (data.code === 'login_required' || (data.data && data.data.status === 401)) {
-                state.isLoggedIn = false;
-                updateLoginNoticeUI();
-                showLoginModal();
-                return;
-            }
+            var contentType = res.headers.get('Content-Type') || '';
+            // If server returned direct JSON (401, quota exceeded, or error before stream init)
+            if (contentType.indexOf('application/json') !== -1 || res.status !== 200) {
+                return res.json().then(function (data) {
+                    showTyping(false);
+                    state.isSending = false;
+                    el.btnSend.disabled = false;
 
-            if (data.quota) {
-                state.quota = data.quota;
-            }
-            if (typeof data.paid_credits !== 'undefined') {
-                state.paidCredits = data.paid_credits;
-            }
-            updateQuotaUI();
+                    if (data.code === 'login_required' || (data.data && data.data.status === 401)) {
+                        state.isLoggedIn = false;
+                        updateLoginNoticeUI();
+                        showLoginModal();
+                        return;
+                    }
+                    if (data.quota) state.quota = data.quota;
+                    if (typeof data.paid_credits !== 'undefined') state.paidCredits = data.paid_credits;
+                    updateQuotaUI();
 
-            if (data.quota_exceeded) {
-                appendLimitExceededCard(data.reply);
-                openRechargeSheet();
-                return;
-            }
-
-            if (data.success && data.reply) {
-                appendMessageBubble('model', data.reply, {
-                    canElaborate: data.can_elaborate,
-                    elaborateCost: data.elaborate_cost,
-                    question: data.question || text
+                    if (data.quota_exceeded) {
+                        appendLimitExceededCard(data.reply);
+                        openRechargeSheet();
+                        return;
+                    }
+                    var curT = i18n[state.lang] || i18n['en'];
+                    appendMessageBubble('model', data.reply || curT.serverError);
                 });
-                state.history.push({
-                    role: 'model',
-                    text: data.reply,
-                    can_elaborate: data.can_elaborate,
-                    elaborate_cost: data.elaborate_cost,
-                    question: data.question || text
-                });
-                localStorage.setItem('niyati_chat_history', JSON.stringify(state.history));
-            } else {
-                var curT = i18n[state.lang] || i18n['en'];
-                appendMessageBubble('model', data.reply || curT.serverError);
             }
+
+            // Stream response chunk by chunk
+            var reader = res.body.getReader();
+            var decoder = new TextDecoder('utf-8');
+            var buffer = '';
+
+            function readNextChunk() {
+                return reader.read().then(function (result) {
+                    if (result.done) {
+                        showTyping(false);
+                        state.isSending = false;
+                        el.btnSend.disabled = false;
+                        localStorage.setItem('niyati_last_active_time', Date.now().toString());
+
+                        if (streamBubble) {
+                            var cleanReply = (finalMetadata && finalMetadata.full_text) ? finalMetadata.full_text : accumulatedReply;
+                            var options = {
+                                canElaborate: finalMetadata ? finalMetadata.can_elaborate : false,
+                                elaborateCost: finalMetadata ? finalMetadata.elaborate_cost : 1,
+                                question: (finalMetadata && finalMetadata.question) ? finalMetadata.question : text
+                            };
+                            streamBubble.finalize(cleanReply, options);
+
+                            state.history.push({
+                                role: 'model',
+                                text: cleanReply,
+                                can_elaborate: options.canElaborate,
+                                elaborate_cost: options.elaborateCost,
+                                question: options.question
+                            });
+                            localStorage.setItem('niyati_chat_history', JSON.stringify(state.history));
+                        }
+
+                        if (finalMetadata) {
+                            if (finalMetadata.quota) state.quota = finalMetadata.quota;
+                            if (typeof finalMetadata.paid_credits !== 'undefined') state.paidCredits = finalMetadata.paid_credits;
+                            updateQuotaUI();
+                        }
+                        return;
+                    }
+
+                    buffer += decoder.decode(result.value, { stream: true });
+                    var lines = buffer.split('\n');
+                    buffer = lines.pop(); // Keep partial line in buffer
+
+                    for (var i = 0; i < lines.length; i++) {
+                        var line = lines[i].trim();
+                        if (line.indexOf('data: ') === 0) {
+                            try {
+                                var evt = JSON.parse(line.substring(6));
+                                if (evt.token) {
+                                    if (!streamBubble) {
+                                        showTyping(false);
+                                        streamBubble = createStreamingBubble();
+                                    }
+                                    accumulatedReply += evt.token;
+                                    streamBubble.update(accumulatedReply);
+                                }
+                                if (evt.done) {
+                                    finalMetadata = evt;
+                                }
+                                if (evt.error) {
+                                    if (streamBubble) streamBubble.remove();
+                                    showTyping(false);
+                                    state.isSending = false;
+                                    el.btnSend.disabled = false;
+                                    var curT = i18n[state.lang] || i18n['en'];
+                                    appendMessageBubble('model', evt.reply || curT.serverError);
+                                    return;
+                                }
+                            } catch (e) {
+                                // Ignore non-JSON SSE heartbeat or blank lines
+                            }
+                        }
+                    }
+
+                    return readNextChunk();
+                });
+            }
+
+            return readNextChunk();
         })
         .catch(function () {
+            if (streamBubble) streamBubble.remove();
             showTyping(false);
             state.isSending = false;
             el.btnSend.disabled = false;
@@ -2922,6 +3063,60 @@
         }
 
         return card;
+    }
+
+    function createStreamingBubble() {
+        var avatarUrl = state.avatarUrl || (config && config.avatar_url) || '/wp-content/plugins/niyati-ai-astrology-chat/assets/images/niyati-avatar.jpg';
+        var botName = escapeHTML(config.bot_name || 'Niyati');
+
+        var msgDiv = document.createElement('div');
+        msgDiv.className = 'niyati-msg bot niyati-msg-streaming';
+
+        var avatarWrap = document.createElement('div');
+        avatarWrap.className = 'niyati-msg-avatar';
+        var avatarImg = document.createElement('img');
+        avatarImg.src = avatarUrl;
+        avatarImg.alt = botName;
+        avatarImg.className = 'niyati-msg-avatar-img';
+        avatarWrap.appendChild(avatarImg);
+        msgDiv.appendChild(avatarWrap);
+
+        var bodyWrap = document.createElement('div');
+        bodyWrap.className = 'niyati-msg-body';
+
+        var authorHeader = document.createElement('div');
+        authorHeader.className = 'niyati-msg-author';
+        authorHeader.innerHTML = '<span class="niyati-author-name">' + botName + '</span>';
+        bodyWrap.appendChild(authorHeader);
+
+        var bubble = document.createElement('div');
+        bubble.className = 'niyati-msg-bubble niyati-bubble-streaming';
+        bodyWrap.appendChild(bubble);
+
+        msgDiv.appendChild(bodyWrap);
+        el.chatList.appendChild(msgDiv);
+        scrollToBottom();
+
+        return {
+            msgDiv: msgDiv,
+            bodyWrap: bodyWrap,
+            bubble: bubble,
+            update: function (text) {
+                bubble.innerHTML = formatMarkdown(text) + '<span class="niyati-typing-cursor">▌</span>';
+                scrollToBottom();
+            },
+            finalize: function (text, options) {
+                if (msgDiv.parentNode) {
+                    msgDiv.parentNode.removeChild(msgDiv);
+                }
+                appendMessageBubble('model', text, options);
+            },
+            remove: function () {
+                if (msgDiv.parentNode) {
+                    msgDiv.parentNode.removeChild(msgDiv);
+                }
+            }
+        };
     }
 
     function appendMessageBubble(role, text, options) {

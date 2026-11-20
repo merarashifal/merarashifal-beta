@@ -414,7 +414,7 @@ PROMPT;
             ]
         ];
 
-        $candidate_models = array_unique([$model, 'gemini-3.1-flash-lite', 'gemini-3.5-flash-lite']);
+        $candidate_models = array_unique(['gemini-3.1-flash-lite', $model, 'gemini-3.5-flash-lite']);
         $last_error = '';
 
         foreach ($candidate_models as $cand_model) {
@@ -465,6 +465,160 @@ PROMPT;
 
         if (!empty($last_error)) {
             error_log('[Niyati AI] Gemini API all models failed. Last error: ' . $last_error);
+        }
+
+        $fallback_msg = ($user_lang === 'hi') 
+            ? 'ग्रहों की स्थिति का अध्ययन करने में विलंब हो रहा है। कृपया कुछ क्षणों बाद पुनः पूछें।' 
+            : 'The celestial alignment is taking a moment to process. Please ask your question again shortly.';
+
+        return [
+            'success' => false,
+            'reply'   => $fallback_msg,
+            'error'   => $last_error
+        ];
+    }
+
+    /**
+     * Stream response from Gemini using SSE (Server-Sent Events)
+     *
+     * @param string $user_message
+     * @param array $kundli_profile
+     * @param array $history Chat history [['role' => 'user'|'model', 'text' => '...']]
+     * @param string $user_lang
+     * @param callable $token_callback function(string $token)
+     * @return array [success => bool, reply => string, error => string]
+     */
+    public static function stream_chat_response($user_message, $kundli_profile, $history = [], $user_lang = 'en', $token_callback = null) {
+        $api_key = self::get_api_key();
+        $model = self::get_model();
+
+        $resolved_lang = self::resolve_language($user_message, $user_lang);
+
+        if (empty($api_key)) {
+            $err_msg = ($resolved_lang === 'hi') 
+                ? 'क्षमा करें, AI ज्योतिषी सेवा कुंजी (API Key) उपलब्ध नहीं है। कृपया एडमिन से संपर्क करें।' 
+                : 'Astrology service key is currently unavailable. Please contact the administrator.';
+            return [
+                'success' => false,
+                'reply'   => $err_msg,
+                'error'   => 'Missing API key'
+            ];
+        }
+
+        // If curl is unavailable, fall back to synchronous generation
+        if (!function_exists('curl_init')) {
+            $sync = self::generate_chat_response($user_message, $kundli_profile, $history, $resolved_lang);
+            if ($sync['success'] && is_callable($token_callback)) {
+                call_user_func($token_callback, $sync['reply']);
+            }
+            return $sync;
+        }
+
+        $system_instruction = self::build_system_instruction($kundli_profile, $resolved_lang);
+
+        $contents = [];
+        $recent_history = array_slice($history, -8);
+        foreach ($recent_history as $msg) {
+            $role = ($msg['role'] === 'user') ? 'user' : 'model';
+            $text = sanitize_text_field($msg['text'] ?? '');
+            if (!empty($text)) {
+                $contents[] = [
+                    'role'  => $role,
+                    'parts' => [['text' => $text]]
+                ];
+            }
+        }
+
+        $contents[] = [
+            'role'  => 'user',
+            'parts' => [['text' => sanitize_text_field($user_message)]]
+        ];
+
+        $payload = [
+            'system_instruction' => [
+                'parts' => [['text' => $system_instruction]]
+            ],
+            'contents'           => $contents,
+            'generationConfig'   => [
+                'temperature'     => 0.7,
+                'topP'            => 0.9,
+                'maxOutputTokens' => 350
+            ],
+            'safetySettings'     => [
+                ['category' => 'HARM_CATEGORY_HARASSMENT', 'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'],
+                ['category' => 'HARM_CATEGORY_HATE_SPEECH', 'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'],
+                ['category' => 'HARM_CATEGORY_SEXUALLY_EXPLICIT', 'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'],
+                ['category' => 'HARM_CATEGORY_DANGEROUS_CONTENT', 'threshold' => 'BLOCK_MEDIUM_AND_ABOVE']
+            ]
+        ];
+
+        $candidate_models = array_unique(['gemini-3.1-flash-lite', $model, 'gemini-3.5-flash-lite']);
+        $last_error = '';
+
+        foreach ($candidate_models as $cand_model) {
+            $url = 'https://generativelanguage.googleapis.com/v1beta/models/' . urlencode($cand_model) . ':streamGenerateContent?alt=sse&key=' . urlencode($api_key);
+            $accumulated_text = '';
+            $buffer = '';
+
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, wp_json_encode($payload));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'x-goog-api-key: ' . $api_key
+            ]);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 12);
+            curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+
+            curl_setopt($ch, CURLOPT_WRITEFUNCTION, function($ch, $data) use (&$accumulated_text, &$buffer, $token_callback) {
+                $buffer .= $data;
+                while (($pos = strpos($buffer, "\n")) !== false) {
+                    $line = substr($buffer, 0, $pos);
+                    $buffer = substr($buffer, $pos + 1);
+                    $line = trim($line);
+                    if (strpos($line, 'data: ') === 0) {
+                        $json_str = substr($line, 6);
+                        $json = json_decode($json_str, true);
+                        if (!empty($json['candidates'][0]['content']['parts'])) {
+                            foreach ($json['candidates'][0]['content']['parts'] as $part) {
+                                if (isset($part['text']) && (empty($part['thought']) || $part['thought'] !== true)) {
+                                    $chunk = $part['text'];
+                                    $accumulated_text .= $chunk;
+                                    if (is_callable($token_callback)) {
+                                        call_user_func($token_callback, $chunk);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                return strlen($data);
+            });
+
+            curl_exec($ch);
+            $code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $curl_err = curl_error($ch);
+            curl_close($ch);
+
+            if ($code === 200 && !empty($accumulated_text)) {
+                $accumulated_text = trim($accumulated_text);
+                if (class_exists('Niyati_Linker')) {
+                    $accumulated_text = Niyati_Linker::auto_link_response($accumulated_text);
+                }
+
+                return [
+                    'success' => true,
+                    'reply'   => $accumulated_text
+                ];
+            }
+
+            $last_error = $curl_err ?: ('HTTP Error ' . $code);
+        }
+
+        if (!empty($last_error)) {
+            error_log('[Niyati AI] Gemini Stream all models failed. Last error: ' . $last_error);
         }
 
         $fallback_msg = ($user_lang === 'hi') 
