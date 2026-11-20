@@ -68,6 +68,12 @@ if (file_exists($wp_load)) {
     }
 
     // 7. Verify Razorpay Gateway Status
+    if (!class_exists('MR_Razorpay')) {
+        $rzp_file = __DIR__ . '/wp-content/plugins/mr-subscription-reports/includes/class-mr-razorpay.php';
+        if (file_exists($rzp_file)) {
+            require_once $rzp_file;
+        }
+    }
     if (class_exists('MR_Razorpay')) {
         $rzp_test = MR_Razorpay::test_connection();
         echo "Razorpay Active Key ID: " . MR_Razorpay::get_active_key_id() . "\n";
