@@ -2726,10 +2726,29 @@ class MR_Checkout {
                 if (!empty($body['id'])) {
                     $gateway_order_id = $body['id'];
                 }
+            } else {
+                $err_desc = 'Payment gateway error.';
+                if (is_wp_error($res)) {
+                    $err_desc = 'Gateway network error: ' . $res->get_error_message();
+                } else {
+                    $body = json_decode(wp_remote_retrieve_body($res), true);
+                    if (!empty($body['error']['description'])) {
+                        $err_desc = 'Razorpay Error: ' . $body['error']['description'];
+                    } else {
+                        $err_desc = 'Gateway error (HTTP ' . wp_remote_retrieve_response_code($res) . ')';
+                    }
+                }
+                error_log('[MR_Checkout] Razorpay order creation failed: ' . $err_desc);
+                wp_send_json_error(['message' => $err_desc . '. Please verify your Razorpay API Key and Secret.']);
+                return;
             }
+        } elseif (MR_Razorpay::get_mode() === 'live') {
+            wp_send_json_error(['message' => 'Razorpay live credentials are not configured in wp-config.php.']);
+            return;
         }
 
         if (empty($gateway_order_id)) {
+            // Local sandbox fallback only when live keys are not configured
             $gateway_order_id = 'order_' . bin2hex(random_bytes(7));
         }
 

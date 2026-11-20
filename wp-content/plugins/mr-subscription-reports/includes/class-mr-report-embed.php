@@ -1410,7 +1410,22 @@ class MR_Report_Embed {
                 if (!empty($rzp_data['id'])) {
                     $rzp_order_id = $rzp_data['id'];
                 }
+            } else {
+                $err_msg = 'Unable to create Razorpay order.';
+                if (is_wp_error($rzp_res)) {
+                    $err_msg = 'Gateway network error: ' . $rzp_res->get_error_message();
+                } else {
+                    $rzp_err_data = json_decode(wp_remote_retrieve_body($rzp_res), true);
+                    if (!empty($rzp_err_data['error']['description'])) {
+                        $err_msg = 'Razorpay Error: ' . $rzp_err_data['error']['description'];
+                    }
+                }
+                wp_send_json_error(['message' => $err_msg . ' Please check Razorpay keys in wp-config.php.']);
+                return;
             }
+        } elseif (MR_Razorpay::get_mode() === 'live') {
+            wp_send_json_error(['message' => 'Razorpay live credentials are not configured in wp-config.php.']);
+            return;
         }
 
         if (empty($rzp_order_id)) {
