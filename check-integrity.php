@@ -76,4 +76,12 @@ if (file_exists($live_dir . '/wp-load.php')) {
     }
     $settings = get_option('niyati_chat_settings', []);
     echo "Live floating_enabled setting: " . var_export($settings['floating_enabled'] ?? 'NOT SET', true) . "\n";
+
+    if (isset($_GET['fix_floating']) && $_GET['fix_floating'] === '1') {
+        $settings['floating_enabled'] = '1';
+        update_option('niyati_chat_settings', $settings);
+        echo "FIX APPLIED: floating_enabled updated to '1' in live database!\n";
+        $refreshed = get_option('niyati_chat_settings', []);
+        echo "Verified new setting: " . var_export($refreshed['floating_enabled'] ?? 'NOT SET', true) . "\n";
+    }
 }

@@ -38,9 +38,10 @@ if (file_exists($wp_load)) {
             echo "WPStackCache: post_purge_cache(7313) SUCCESS\n";
         }
         if (method_exists($sc, 'purge')) {
+            $sc->purge('https://merarashifal.com/');
             $sc->purge('https://merarashifal.com/pricing/');
             $sc->purge('https://merarashifal.com/pricing');
-            echo "WPStackCache: purge(/pricing/) SUCCESS\n";
+            echo "WPStackCache: purge(/ and /pricing/) SUCCESS\n";
         }
     }
 
@@ -67,7 +68,17 @@ if (file_exists($wp_load)) {
         echo "Database Cleanup: {$deleted} legacy plain-text key records removed from database.\n";
     }
 
-    // 7. Verify Razorpay Gateway Status
+    // 7. Ensure Niyati floating chat widget is enabled in database
+    $niyati_settings = get_option('niyati_chat_settings', []);
+    if (empty($niyati_settings['floating_enabled']) || $niyati_settings['floating_enabled'] !== '1') {
+        $niyati_settings['floating_enabled'] = '1';
+        update_option('niyati_chat_settings', $niyati_settings);
+        echo "Niyati Settings: floating_enabled updated to '1'\n";
+    } else {
+        echo "Niyati Settings: floating_enabled is already '1'\n";
+    }
+
+    // 8. Verify Razorpay Gateway Status
     if (!class_exists('MR_Razorpay')) {
         $rzp_file = __DIR__ . '/wp-content/plugins/mr-subscription-reports/includes/class-mr-razorpay.php';
         if (file_exists($rzp_file)) {
