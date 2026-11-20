@@ -228,18 +228,20 @@ global $wpdb;
         if ($el_json) {
             $data = json_decode($el_json, true);
             $fn_254 = function(&$elements) use (&$fn_254) {
+                if (!is_array($elements)) return;
                 foreach ($elements as &$el) {
                     if (isset($el['widgetType']) && $el['widgetType'] === 'heading') {
-                        if ($el['id'] === 'h_h1_a8b269a' || ($el['settings']['header_size'] ?? '') === 'h1') {
+                        $t = $el['settings']['title'] ?? '';
+                        if (strpos($t, 'MeraRashifal - Authentic Vedic Astrology') !== false || ($el['settings']['header_size'] ?? '') === 'h1') {
                             $el['settings']['title'] = 'आज का राशिफल, दैनिक पंचांग एवं जन्म कुंडली | MeraRashifal - Vedic Astrology & Daily Horoscope';
                             $el['settings']['header_size'] = 'h1';
-                        } elseif ($el['id'] === '9b910f0') {
+                        } elseif (strpos($t, 'Get Your Personalized Report') !== false) {
                             $el['settings']['title'] = 'व्यक्तिगत जन्म कुंडली रिपोर्ट | Get Your Personalized Report';
-                        } elseif ($el['id'] === '0f3618f') {
+                        } elseif (strpos($t, 'Vrat Katha - Hindi') !== false) {
                             $el['settings']['title'] = 'सम्पूर्ण व्रत कथा | Sacred Vrat Katha in Hindi';
-                        } elseif ($el['id'] === 'feb5324') {
+                        } elseif (strpos($t, 'Aarti Sangrah') !== false) {
                             $el['settings']['title'] = 'आरती संग्रह | Sampoorna Aarti Sangrah';
-                        } elseif ($el['id'] === '18459b4') {
+                        } elseif (strpos($t, 'Hindu Gods - Aarti, Katha, Festivals') !== false) {
                             $el['settings']['title'] = 'हिन्दू देवी-देवता | Hindu Deities - Aarti, Katha & Festivals';
                         }
                     }
@@ -249,20 +251,23 @@ global $wpdb;
                 }
             };
             $fn_254($data);
-            update_post_meta(254, '_elementor_data', wp_slash(json_encode($data)));
+            $new_json = json_encode($data, JSON_UNESCAPED_UNICODE);
+            update_post_meta(254, '_elementor_data', wp_slash($new_json));
         }
 
         $c254 = $page_254->post_content;
-        $c254 = preg_replace(
-            '/<h1>.*?<\/h1>/is',
-            '<h1>आज का राशिफल, दैनिक पंचांग एवं जन्म कुंडली | MeraRashifal - Vedic Astrology & Daily Horoscope</h1>',
-            $c254
-        );
+        $c254 = str_replace('MeraRashifal - Authentic Vedic Astrology, Daily Panchang &amp; Kundali Portal', 'आज का राशिफल, दैनिक पंचांग एवं जन्म कुंडली | MeraRashifal - Vedic Astrology &amp; Daily Horoscope', $c254);
+        $c254 = str_replace('MeraRashifal - Authentic Vedic Astrology, Daily Panchang & Kundali Portal', 'आज का राशिफल, दैनिक पंचांग एवं जन्म कुंडली | MeraRashifal - Vedic Astrology & Daily Horoscope', $c254);
         $c254 = str_replace('Get Your Personalized Report', 'व्यक्तिगत जन्म कुंडली रिपोर्ट | Get Your Personalized Report', $c254);
         $c254 = str_replace('Vrat Katha - Hindi', 'सम्पूर्ण व्रत कथा | Sacred Vrat Katha in Hindi', $c254);
         $c254 = str_replace('Aarti Sangrah', 'आरती संग्रह | Sampoorna Aarti Sangrah', $c254);
         $c254 = str_replace('Hindu Gods - Aarti, Katha, Festivals', 'हिन्दू देवी-देवता | Hindu Deities - Aarti, Katha & Festivals', $c254);
         wp_update_post(['ID' => 254, 'post_content' => $c254]);
+
+        // Clear Elementor CSS cache
+        if (class_exists('\Elementor\Plugin')) {
+            \Elementor\Plugin::$instance->files_manager->clear_cache();
+        }
         echo "<div class='log-success'>✅ [H1 &amp; BILINGUAL BRIDGE]: Homepage 254 updated with primary target keyword H1 and Devanagari sub-headings.</div>\n";
     }
 
