@@ -171,33 +171,23 @@ class Niyati_REST_API {
         if (defined('Razorpay_Live_API_Key') && !empty(Razorpay_Live_API_Key)) {
             return trim(Razorpay_Live_API_Key);
         }
-        if (class_exists('MR_Razorpay')) {
-            $key = MR_Razorpay::get_active_key_id();
-            if (!empty($key)) {
-                return $key;
-            }
+        if (defined('MR_RAZORPAY_LIVE_KEY_ID') && !empty(MR_RAZORPAY_LIVE_KEY_ID)) {
+            return trim(MR_RAZORPAY_LIVE_KEY_ID);
         }
-        $settings = self::get_settings();
-        $fallback = get_option('mr_razorpay_test_key_id', '');
-        return !empty($settings['razorpay_key_id']) ? trim($settings['razorpay_key_id']) : $fallback;
+        return '';
     }
 
     /**
-     * Get active Razorpay Key Secret (prioritizes Central MR_Razorpay gateway)
+     * Get active Razorpay Key Secret (strictly from wp-config.php)
      */
     public static function get_razorpay_key_secret() {
         if (defined('Razorpay_Live_Secret_Key') && !empty(Razorpay_Live_Secret_Key)) {
             return trim(Razorpay_Live_Secret_Key);
         }
-        if (class_exists('MR_Razorpay')) {
-            $secret = MR_Razorpay::get_active_key_secret();
-            if (!empty($secret)) {
-                return $secret;
-            }
+        if (defined('MR_RAZORPAY_LIVE_KEY_SECRET') && !empty(MR_RAZORPAY_LIVE_KEY_SECRET)) {
+            return trim(MR_RAZORPAY_LIVE_KEY_SECRET);
         }
-        $settings = self::get_settings();
-        $fallback = get_option('mr_razorpay_test_key_secret', '');
-        return !empty($settings['razorpay_key_secret']) ? trim($settings['razorpay_key_secret']) : $fallback;
+        return '';
     }
 
     /**
@@ -282,6 +272,7 @@ class Niyati_REST_API {
             'saved_profiles'     => $saved_profiles,
             'active_chart_token' => $active_chart_token,
             'checkout_url'       => class_exists('MR_Checkout') ? MR_Checkout::get_checkout_url() : home_url('/checkout/'),
+            'voice_enabled'      => defined('NIYATI_VOICE_ENABLED') && NIYATI_VOICE_ENABLED === true,
         ]);
     }
 
@@ -925,6 +916,10 @@ class Niyati_REST_API {
      * Input voice capped at 15s -> Output voice ~30s (~65-75 words), burns 5 credits, stored for 20 days.
      */
     public static function handle_voice_chat($request) {
+        if (!defined('NIYATI_VOICE_ENABLED') || NIYATI_VOICE_ENABLED !== true) {
+            return new WP_Error('voice_disabled', 'Voice consultation is currently disabled.', ['status' => 403]);
+        }
+
         $params = $request->get_json_params() ?: $request->get_params();
 
         $user_id = get_current_user_id();

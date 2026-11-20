@@ -20,13 +20,8 @@ class Niyati_Vedic_API {
         if (defined('VEDICASTRO_API_KEY') && !empty(VEDICASTRO_API_KEY)) {
             return trim(VEDICASTRO_API_KEY);
         }
-        $settings = get_option('niyati_chat_settings', []);
-        if (!empty($settings['vedic_api_key'])) {
-            return trim($settings['vedic_api_key']);
-        }
-        $fallback = get_option('mr_vedic_api_key', '');
-        if (!empty($fallback)) {
-            return trim($fallback);
+        if (defined('MR_VEDIC_API_KEY') && !empty(MR_VEDIC_API_KEY)) {
+            return trim(MR_VEDIC_API_KEY);
         }
         return '';
     }

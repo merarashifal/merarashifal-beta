@@ -3128,21 +3128,25 @@ button.niyati-chip:active,
    VOICE CONSULTATION & AUDIO PLAYER STYLES (15s Input, 30s Output, 5 Credits)
    ========================================================================== */
 
-/* Microphone Button in Input Bar */
+/* Microphone Button in Input Bar (Hidden by default until voice feature is publicly launched) */
 .niyati-mic-btn {
+    display: none !important;
     width: 38px;
     height: 38px;
     border-radius: 50%;
     background: #FFF7ED;
     border: 1.5px solid #FDBA74;
     color: #EA580C;
-    display: inline-flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     flex-shrink: 0;
     transition: all 0.2s ease;
     box-shadow: 0 2px 6px rgba(234, 88, 12, 0.15);
+}
+
+.niyati-voice-active .niyati-mic-btn {
+    display: inline-flex !important;
 }
 
 .niyati-mic-btn:hover {

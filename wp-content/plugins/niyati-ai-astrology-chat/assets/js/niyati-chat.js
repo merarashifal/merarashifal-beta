@@ -590,7 +590,7 @@
                         </div>
 
                         <input type="text" id="niyati-user-input" placeholder="Ask Niyati a question..." autocomplete="off">
-                        <button type="button" id="niyati-btn-mic" class="niyati-mic-btn" style="width:38px; min-width:38px; max-width:38px; height:38px; border-radius:50%; background:#FFF7ED; border:1.5px solid #FDBA74; color:#EA580C; display:inline-flex; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; padding:0; box-shadow:0 2px 6px rgba(234,88,12,0.15);" title="Voice Consultation (5 Credits • Max 15s)">
+                        <button type="button" id="niyati-btn-mic" class="niyati-mic-btn" style="width:38px; min-width:38px; max-width:38px; height:38px; border-radius:50%; background:#FFF7ED; border:1.5px solid #FDBA74; color:#EA580C; display:none !important; align-items:center; justify-content:center; cursor:pointer; flex-shrink:0; padding:0; box-shadow:0 2px 6px rgba(234,88,12,0.15);" title="Voice Consultation (5 Credits • Max 15s)">
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#EA580C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="display:block; width:18px; height:18px; stroke:#EA580C;">
                                 <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
                                 <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
@@ -1678,6 +1678,14 @@
                 state.razorpayKey = data.razorpay_key_id || '';
                 state.razorpayTestMode = data.razorpay_test_mode;
                 state.visitorId = data.visitor_id || '';
+                state.voiceEnabled = (data.voice_enabled === true);
+                if (state.voiceEnabled && el.btnMic) {
+                    el.btnMic.style.setProperty('display', 'inline-flex', 'important');
+                    if (el.widget) el.widget.classList.add('niyati-voice-active');
+                } else {
+                    if (el.btnMic) el.btnMic.style.setProperty('display', 'none', 'important');
+                    if (el.widget) el.widget.classList.remove('niyati-voice-active');
+                }
 
                 // Cross-device sync: if server returns active chat history from disk, sync it
                 if (data.chat_history && Array.isArray(data.chat_history) && data.chat_history.length > 0) {

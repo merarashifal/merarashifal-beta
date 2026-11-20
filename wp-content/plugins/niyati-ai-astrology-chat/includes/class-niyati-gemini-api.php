@@ -22,18 +22,6 @@ class Niyati_Gemini_API {
         if (defined('MR_GEMINI_API_KEY') && !empty(MR_GEMINI_API_KEY)) {
             return trim(MR_GEMINI_API_KEY);
         }
-        $settings = get_option('niyati_chat_settings', []);
-        if (!empty($settings['gemini_api_key'])) {
-            return trim($settings['gemini_api_key']);
-        }
-        $fallback = get_option('mr_gemini_api_key', '');
-        if (!empty($fallback)) {
-            return trim($fallback);
-        }
-        $fallback2 = get_option('ppb_gemini_api_key', '');
-        if (!empty($fallback2)) {
-            return trim($fallback2);
-        }
         return '';
     }
 
@@ -412,7 +400,8 @@ PROMPT;
             'generationConfig'   => [
                 'temperature'     => 0.7,
                 'topP'            => 0.9,
-                'maxOutputTokens' => 800
+                'maxOutputTokens' => 800,
+                'thinkingConfig'  => ['thinkingBudget' => 0]
             ],
             'safetySettings'     => [
                 ['category' => 'HARM_CATEGORY_HARASSMENT', 'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'],
@@ -422,16 +411,19 @@ PROMPT;
             ]
         ];
 
-        $candidate_models = array_unique([$model, 'gemini-3.5-flash-lite', 'gemini-3.5-flash', 'gemini-3.1-flash-lite', 'gemini-3.8-flash']);
+        $candidate_models = array_unique([$model, 'gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', 'gemini-3.8-flash']);
         $last_error = '';
 
         foreach ($candidate_models as $cand_model) {
             $url = 'https://generativelanguage.googleapis.com/v1beta/models/' . urlencode($cand_model) . ':generateContent?key=' . urlencode($api_key);
 
             $response = wp_remote_post($url, [
-                'headers' => ['Content-Type' => 'application/json'],
+                'headers' => [
+                    'Content-Type'   => 'application/json',
+                    'x-goog-api-key' => $api_key
+                ],
                 'body'    => wp_json_encode($payload),
-                'timeout' => 25
+                'timeout' => 12
             ]);
 
             if (is_wp_error($response)) {
@@ -699,19 +691,23 @@ PROMPT;
                 'temperature'       => 0.2,
                 'topP'              => 0.9,
                 'maxOutputTokens'   => 250,
-                'responseMimeType'  => 'application/json'
+                'responseMimeType'  => 'application/json',
+                'thinkingConfig'    => ['thinkingBudget' => 0]
             ]
         ];
 
         // Models that support multimodal audio input - fastest first!
-        $candidate_models = ['gemini-3.1-flash-lite', 'gemini-3.5-flash'];
+        $candidate_models = ['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', 'gemini-3.8-flash'];
         $last_error = '';
 
         foreach ($candidate_models as $cand_model) {
             $url = 'https://generativelanguage.googleapis.com/v1beta/models/' . urlencode($cand_model) . ':generateContent?key=' . urlencode($api_key);
 
             $response = wp_remote_post($url, [
-                'headers' => ['Content-Type' => 'application/json'],
+                'headers' => [
+                    'Content-Type'   => 'application/json',
+                    'x-goog-api-key' => $api_key
+                ],
                 'body'    => wp_json_encode($payload),
                 'timeout' => 8
             ]);
@@ -831,7 +827,10 @@ PROMPT;
             ];
 
             $response = wp_remote_post($url, [
-                'headers' => ['Content-Type' => 'application/json'],
+                'headers' => [
+                    'Content-Type'   => 'application/json',
+                    'x-goog-api-key' => $api_key
+                ],
                 'body'    => wp_json_encode($payload),
                 'timeout' => 6 // Fast 6-second timeout per model
             ]);
