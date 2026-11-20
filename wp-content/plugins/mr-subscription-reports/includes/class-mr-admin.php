@@ -330,13 +330,13 @@ class MR_Admin {
         $vedic_key  = MR_Vedic_API::get_api_key();
         $chart_style = MR_Vedic_API::get_chart_style();
 
-        $razorpay_mode        = class_exists('MR_Razorpay') ? MR_Razorpay::get_mode() : 'test';
-        $razorpay_test_key_id = class_exists('MR_Razorpay') ? MR_Razorpay::get_test_key_id() : 'rzp_test_TpIAA4q3WP1EYF';
-        $razorpay_test_secret = class_exists('MR_Razorpay') ? MR_Razorpay::get_test_key_secret() : '4YJwgnmeWvKdYEaKmpiv9pH1';
+        $razorpay_mode        = class_exists('MR_Razorpay') ? MR_Razorpay::get_mode() : 'live';
+        $razorpay_test_key_id = class_exists('MR_Razorpay') ? MR_Razorpay::get_test_key_id() : '';
+        $razorpay_test_secret = class_exists('MR_Razorpay') ? MR_Razorpay::get_test_key_secret() : '';
         $razorpay_live_key_id = class_exists('MR_Razorpay') ? MR_Razorpay::get_live_key_id() : '';
         $razorpay_live_secret = class_exists('MR_Razorpay') ? MR_Razorpay::get_live_key_secret() : '';
         $razorpay_webhook     = class_exists('MR_Razorpay') ? MR_Razorpay::get_webhook_secret() : '';
-        $active_rzp_key_id    = class_exists('MR_Razorpay') ? MR_Razorpay::get_active_key_id() : $razorpay_test_key_id;
+        $active_rzp_key_id    = class_exists('MR_Razorpay') ? MR_Razorpay::get_active_key_id() : $razorpay_live_key_id;
         $smtp_settings        = class_exists('MR_Mailer') ? MR_Mailer::get_settings() : [];
         ?>
         <div class="wrap">
@@ -360,11 +360,10 @@ class MR_Admin {
                             <?php echo esc_html__('API Keys & Astrological Engine Configuration', 'merarashifal'); ?>
                         </h2>
 
-                        <table class="form-table">
                         <div style="background: #ecfdf5; border-left: 4px solid #10b981; padding: 14px 18px; margin: 15px 0 24px 0; border-radius: 4px;">
-                            <strong style="color: #065f46; font-size: 14px;">🔒 High-Security Configuration Active:</strong><br>
+                            <strong style="color: #065f46; font-size: 14px;">🔒 Secure Environment Configuration:</strong><br>
                             <span style="color: #047857; font-size: 13px;">
-                                API keys and gateway secrets are loaded strictly from server-level environment configurations in <code>wp-config.php</code>. Key editing has been permanently disabled from this web dashboard to prevent leaks and credential exposure.
+                                All API keys and secrets are loaded directly from <code>wp-config.php</code>. Key management and plain-text exposure are disabled here for security.
                             </span>
                         </div>
 
@@ -372,14 +371,13 @@ class MR_Admin {
                             <!-- Gemini AI API Key -->
                             <tr>
                                 <th scope="row">
-                                    <label><strong><?php echo esc_html__('Google Gemini API Key', 'merarashifal'); ?></strong></label>
+                                    <label><strong><?php echo esc_html__('Google Gemini AI Engine', 'merarashifal'); ?></strong></label>
                                 </th>
                                 <td>
-                                    <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+                                    <div style="margin-bottom:8px;">
                                         <span class="badge" style="background:#e0f2fe; color:#0369a1; padding:4px 8px; border-radius:4px; font-weight:600; font-size:12px;">
-                                            <?php echo !empty($gemini_key) ? '✔ Configured in wp-config.php' : '✖ Not Found in wp-config.php'; ?>
+                                            <?php echo !empty($gemini_key) ? '✔ Active (Configured in wp-config.php)' : '✖ Missing in wp-config.php'; ?>
                                         </span>
-                                        <code style="background:#f1f5f9; padding:4px 8px; border-radius:4px;"><?php echo !empty($gemini_key) ? esc_html(substr($gemini_key, 0, 8) . '••••••••' . substr($gemini_key, -4)) : 'None'; ?></code>
                                     </div>
                                     <p class="description">
                                         <?php echo esc_html__('Powers conversational tone, monthly themes, 60-second weather summaries, and weekly advice.', 'merarashifal'); ?>
@@ -394,14 +392,13 @@ class MR_Admin {
                             <!-- VedicAstroAPI Key -->
                             <tr>
                                 <th scope="row">
-                                    <label><strong><?php echo esc_html__('VedicAstroAPI Key', 'merarashifal'); ?></strong></label>
+                                    <label><strong><?php echo esc_html__('VedicAstroAPI Engine', 'merarashifal'); ?></strong></label>
                                 </th>
                                 <td>
-                                    <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+                                    <div style="margin-bottom:8px;">
                                         <span class="badge" style="background:#e0f2fe; color:#0369a1; padding:4px 8px; border-radius:4px; font-weight:600; font-size:12px;">
-                                            <?php echo !empty($vedic_key) ? '✔ Configured in wp-config.php' : '✖ Not Found in wp-config.php'; ?>
+                                            <?php echo !empty($vedic_key) ? '✔ Active (Configured in wp-config.php)' : '✖ Missing in wp-config.php'; ?>
                                         </span>
-                                        <code style="background:#f1f5f9; padding:4px 8px; border-radius:4px;"><?php echo !empty($vedic_key) ? esc_html(substr($vedic_key, 0, 8) . '••••••••' . substr($vedic_key, -4)) : 'None'; ?></code>
                                     </div>
                                     <p class="description">
                                         <?php echo esc_html__('From api.vedicastroapi.com. Calculates D1/D9 diamond charts, planetary coordinates, dashas, doshas, and panchang.', 'merarashifal'); ?>
@@ -452,14 +449,13 @@ class MR_Admin {
                             <!-- Browserless.io API Token -->
                             <tr>
                                 <th scope="row">
-                                    <label><strong><?php echo esc_html__('Browserless.io API Token', 'merarashifal'); ?></strong></label>
+                                    <label><strong><?php echo esc_html__('Browserless.io Cloud PDF Engine', 'merarashifal'); ?></strong></label>
                                 </th>
                                 <td>
-                                    <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+                                    <div style="margin-bottom:8px;">
                                         <span class="badge" style="background:#e0f2fe; color:#0369a1; padding:4px 8px; border-radius:4px; font-weight:600; font-size:12px;">
-                                            <?php echo !empty($browserless_token) ? '✔ Configured in wp-config.php' : '✖ Not Found in wp-config.php'; ?>
+                                            <?php echo !empty($browserless_token) ? '✔ Active (Configured in wp-config.php)' : '✖ Missing in wp-config.php'; ?>
                                         </span>
-                                        <code style="background:#f1f5f9; padding:4px 8px; border-radius:4px;"><?php echo !empty($browserless_token) ? esc_html(substr($browserless_token, 0, 8) . '••••••••' . substr($browserless_token, -4)) : 'None'; ?></code>
                                     </div>
                                     <p class="description">
                                         <?php echo esc_html__('From cloud.browserless.io. Provides cloud headless PDF compilation with zero server dependencies.', 'merarashifal'); ?>
@@ -497,19 +493,18 @@ class MR_Admin {
                             <!-- Live Credentials Status -->
                             <tr>
                                 <th scope="row">
-                                    <label><strong><?php echo esc_html__('Razorpay Live Credentials', 'merarashifal'); ?></strong></label>
+                                    <label><strong><?php echo esc_html__('Razorpay Gateway Credentials', 'merarashifal'); ?></strong></label>
                                 </th>
                                 <td>
-                                    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:12px 16px; margin-bottom:10px; max-width:520px;">
-                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                                            <span><strong>Live Key ID:</strong></span>
-                                            <code style="background:#f1f5f9; padding:2px 6px; border-radius:3px;"><?php echo !empty($razorpay_live_key_id) ? esc_html(substr($razorpay_live_key_id, 0, 14) . '••••••') : '<span style="color:#ef4444;">Missing</span>'; ?></code>
-                                        </div>
-                                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                                            <span><strong>Live Secret:</strong></span>
-                                            <code style="background:#f1f5f9; padding:2px 6px; border-radius:3px;"><?php echo !empty($razorpay_live_secret) ? '●●●●●●●●●●●● (Protected in wp-config.php)' : '<span style="color:#ef4444;">Missing</span>'; ?></code>
-                                        </div>
+                                    <?php $has_rzp_keys = !empty(MR_Razorpay::get_live_key_id()) && !empty(MR_Razorpay::get_live_key_secret()); ?>
+                                    <div style="margin-bottom:8px;">
+                                        <span class="badge" style="background:#e0f2fe; color:#0369a1; padding:4px 8px; border-radius:4px; font-weight:600; font-size:12px;">
+                                            <?php echo $has_rzp_keys ? '✔ Live Keys Active (Protected in wp-config.php)' : '✖ Missing in wp-config.php'; ?>
+                                        </span>
                                     </div>
+                                    <p class="description" style="margin-bottom:8px;">
+                                        <?php echo esc_html__('Credentials are kept confidential and protected from public exposure.', 'merarashifal'); ?>
+                                    </p>
                                     <button type="button" id="mr-btn-test-razorpay" class="button button-secondary">
                                         <span class="dashicons dashicons-shield-alt" style="vertical-align: middle;"></span> Test Razorpay Connection
                                     </button>
@@ -626,7 +621,7 @@ class MR_Admin {
                         <li><strong>Payment Gateway:</strong> <?php 
                             $rzp_mode_label = (class_exists('MR_Razorpay') && MR_Razorpay::get_mode() === 'live') ? 'LIVE Mode' : 'TEST Mode';
                             if (!empty($active_rzp_key_id)) {
-                                echo '<span style="color:#10b981; font-weight:600;">Razorpay (' . esc_html($rzp_mode_label) . ')</span><br><code style="font-size:11px; background:#f1f5f9; padding:2px 6px; border-radius:3px; color:#475569;">' . esc_html(substr($active_rzp_key_id, 0, 14)) . '...</code>';
+                                echo '<span style="color:#10b981; font-weight:600;">Razorpay (' . esc_html($rzp_mode_label) . ')</span>';
                             } else {
                                 echo '<span style="color:#ef4444;">Not Configured</span>';
                             }
