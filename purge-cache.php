@@ -67,5 +67,13 @@ if (file_exists($wp_load)) {
         echo "Database Cleanup: {$deleted} legacy plain-text key records removed from database.\n";
     }
 
+    // 7. Verify Razorpay Gateway Status
+    if (class_exists('MR_Razorpay')) {
+        $rzp_test = MR_Razorpay::test_connection();
+        echo "Razorpay Active Key ID: " . MR_Razorpay::get_active_key_id() . "\n";
+        echo "Razorpay Secret SHA1: " . (defined('Razorpay_Live_Secret_Key') ? sha1(Razorpay_Live_Secret_Key) : 'none') . "\n";
+        echo "Razorpay Connection: " . ($rzp_test['success'] ? 'SUCCESS' : ('FAILED: ' . $rzp_test['message'])) . "\n";
+    }
+
     echo "ALL PURGE ROUTINES COMPLETED\n";
 }
