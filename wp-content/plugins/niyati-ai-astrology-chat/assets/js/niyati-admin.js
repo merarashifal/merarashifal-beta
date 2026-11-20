@@ -25,8 +25,8 @@ jQuery(document).ready(function ($) {
     $('#btn-test-gemini').on('click', function () {
         var btn = $(this);
         var badge = $('#gemini-test-result');
-        var apiKey = $('#gemini_api_key').val().trim();
-        var model = $('#gemini_model').val();
+        var apiKey = $('#gemini_api_key').length ? $('#gemini_api_key').val().trim() : '';
+        var model = $('#gemini_model').length ? $('#gemini_model').val() : '';
 
         badge.removeClass('success error').addClass('loading').text('Testing connection to Gemini...');
         btn.prop('disabled', true);
@@ -54,7 +54,7 @@ jQuery(document).ready(function ($) {
     $('#btn-test-vedic').on('click', function () {
         var btn = $(this);
         var badge = $('#vedic-test-result');
-        var apiKey = $('#vedic_api_key').val().trim();
+        var apiKey = $('#vedic_api_key').length ? $('#vedic_api_key').val().trim() : '';
 
         badge.removeClass('success error').addClass('loading').text('Testing VedicAstroAPI...');
         btn.prop('disabled', true);

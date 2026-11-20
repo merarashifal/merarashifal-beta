@@ -61,6 +61,12 @@ class MR_Palmistry_Builder {
      * Retrieve Gemini API Key
      */
     public static function get_api_key() {
+        if (defined('GOOGLE_API_KEY') && !empty(GOOGLE_API_KEY)) {
+            return trim(GOOGLE_API_KEY);
+        }
+        if (defined('MR_GEMINI_API_KEY') && !empty(MR_GEMINI_API_KEY)) {
+            return trim(MR_GEMINI_API_KEY);
+        }
         $ppb_key = get_option('ppb_gemini_api_key');
         if (!empty($ppb_key)) {
             return $ppb_key;

@@ -16,26 +16,33 @@ class MRCB_Writer {
      * Get Gemini API key
      */
     public static function get_api_key() {
-        // First check plugin-specific setting if set
+        // Priority 1: wp-config.php constants (Secure & Protected)
+        if (defined('GOOGLE_API_KEY') && !empty(GOOGLE_API_KEY)) {
+            return trim(GOOGLE_API_KEY);
+        }
+        if (defined('MR_GEMINI_API_KEY') && !empty(MR_GEMINI_API_KEY)) {
+            return trim(MR_GEMINI_API_KEY);
+        }
+
+        // Priority 2: Plugin-specific setting if set
         $mrcb_settings = get_option( 'mrcb_settings', [] );
         if ( ! empty( $mrcb_settings['gemini_api_key'] ) ) {
             return trim( $mrcb_settings['gemini_api_key'] );
         }
 
-        // Second, reuse Niyati chat settings if available
+        // Priority 3: Reuse Niyati chat settings if available
         $niyati_settings = get_option( 'niyati_chat_settings', [] );
         if ( ! empty( $niyati_settings['gemini_api_key'] ) ) {
             return trim( $niyati_settings['gemini_api_key'] );
         }
 
-        // Third, check mr_gemini_api_key
+        // Priority 4: Check mr_gemini_api_key option
         $fallback = get_option( 'mr_gemini_api_key', '' );
         if ( ! empty( $fallback ) ) {
             return trim( $fallback );
         }
 
-        // Hardcoded verified fallback key
-        return 'AIzaSyDzS22g365n4yrHAPRTuRfViNS3avj3QF0';
+        return '';
     }
 
     /**

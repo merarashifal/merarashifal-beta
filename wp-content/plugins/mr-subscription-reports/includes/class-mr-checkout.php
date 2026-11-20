@@ -480,7 +480,7 @@ class MR_Checkout {
         }
 
         $all_states = self::get_indian_states();
-        $key_id = class_exists('MR_Razorpay') ? MR_Razorpay::get_active_key_id() : 'rzp_test_TpIAA4q3WP1EYF';
+        $key_id = class_exists('MR_Razorpay') ? MR_Razorpay::get_active_key_id() : '';
         $gateway_mode = class_exists('MR_Razorpay') ? MR_Razorpay::get_mode() : 'test';
 
         // Retrieve active coupons for the "Offers Available" modal
@@ -2694,8 +2694,8 @@ class MR_Checkout {
         $internal_id = 'MR_ORD_' . strtoupper(bin2hex(random_bytes(5)));
 
         // Create Razorpay Gateway Order
-        $key_id       = class_exists('MR_Razorpay') ? MR_Razorpay::get_active_key_id() : 'rzp_test_TpIAA4q3WP1EYF';
-        $key_secret   = class_exists('MR_Razorpay') ? MR_Razorpay::get_active_key_secret() : '4YJwgnmeWvKdYEaKmpiv9pH1';
+        $key_id       = class_exists('MR_Razorpay') ? MR_Razorpay::get_active_key_id() : '';
+        $key_secret   = class_exists('MR_Razorpay') ? MR_Razorpay::get_active_key_secret() : '';
         $amount_paise = round($net_amount * 100);
         $gateway_order_id = '';
 

@@ -52,6 +52,9 @@ class MR_Baby_Gemini_Service
         if (defined('GOOGLE_API_KEY') && !empty(GOOGLE_API_KEY)) {
             return trim(GOOGLE_API_KEY);
         }
+        if (defined('MR_GEMINI_API_KEY') && !empty(MR_GEMINI_API_KEY)) {
+            return trim(MR_GEMINI_API_KEY);
+        }
 
         $db_key = get_option('mr_gemini_api_key', '');
         if (!empty($db_key)) {

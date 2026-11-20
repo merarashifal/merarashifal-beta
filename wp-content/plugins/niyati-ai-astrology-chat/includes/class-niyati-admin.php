@@ -718,15 +718,25 @@ class Niyati_Admin {
 
                         <table class="form-table">
                             <tr>
-                                <th scope="row"><label for="razorpay_key_id"><?php echo esc_html__('Razorpay Key ID', 'merarashifal'); ?></label></th>
+                                <th scope="row"><?php echo esc_html__('Razorpay Live Key ID', 'merarashifal'); ?></th>
                                 <td>
-                                    <input type="text" id="razorpay_key_id" name="razorpay_key_id" value="<?php echo esc_attr($settings['razorpay_key_id'] ?? ''); ?>" class="regular-text" placeholder="rzp_live_...">
+                                    <?php $active_rzp_id = Niyati_REST_API::get_razorpay_key_id(); ?>
+                                    <div style="display:flex; align-items:center; gap:10px;">
+                                        <code style="background:#f1f5f9; padding:4px 8px; border-radius:4px; font-weight:600;"><?php echo !empty($active_rzp_id) ? esc_html(substr($active_rzp_id, 0, 14) . '••••••') : 'Missing in wp-config.php'; ?></code>
+                                        <span style="color:#059669; font-weight:600; font-size:12px;">🔒 Managed in wp-config.php</span>
+                                    </div>
+                                    <p class="description"><?php echo esc_html__('Securely defined in wp-config.php (Razorpay_Live_API_Key).', 'merarashifal'); ?></p>
                                 </td>
                             </tr>
                             <tr>
-                                <th scope="row"><label for="razorpay_key_secret"><?php echo esc_html__('Razorpay Key Secret', 'merarashifal'); ?></label></th>
+                                <th scope="row"><?php echo esc_html__('Razorpay Live Secret', 'merarashifal'); ?></th>
                                 <td>
-                                    <input type="password" id="razorpay_key_secret" name="razorpay_key_secret" value="<?php echo esc_attr($settings['razorpay_key_secret'] ?? ''); ?>" class="regular-text">
+                                    <?php $has_rzp_secret = !empty(Niyati_REST_API::get_razorpay_key_secret()); ?>
+                                    <div style="display:flex; align-items:center; gap:10px;">
+                                        <code style="background:#f1f5f9; padding:4px 8px; border-radius:4px;"><?php echo $has_rzp_secret ? '●●●●●●●●●●●●●●●●' : 'Missing in wp-config.php'; ?></code>
+                                        <span style="color:#059669; font-weight:600; font-size:12px;">🔒 Protected</span>
+                                    </div>
+                                    <p class="description"><?php echo esc_html__('Kept confidential outside public access and database.', 'merarashifal'); ?></p>
                                 </td>
                             </tr>
                             <tr>
@@ -787,15 +797,25 @@ class Niyati_Admin {
                         <h2><?php echo esc_html__('1. Google Gemini AI Engine', 'merarashifal'); ?></h2>
                         <p class="description"><?php echo esc_html__('Niyati uses Google Gemini to read and interpret the Vedic birth chart with authentic empathy and wisdom.', 'merarashifal'); ?></p>
 
+                        <div style="background: #ecfdf5; border-left: 4px solid #10b981; padding: 12px 16px; margin: 15px 0 20px 0; border-radius: 4px;">
+                            <strong style="color: #065f46; font-size: 13px;">🔒 Security Lock Active:</strong><br>
+                            <span style="color: #047857; font-size: 12px;">
+                                API keys are loaded safely from <code>wp-config.php</code>. Direct editing from the browser is disabled.
+                            </span>
+                        </div>
+
                         <table class="form-table">
                             <tr>
-                                <th scope="row"><label for="gemini_api_key"><?php echo esc_html__('Gemini API Key', 'merarashifal'); ?></label></th>
+                                <th scope="row"><?php echo esc_html__('Gemini API Key', 'merarashifal'); ?></th>
                                 <td>
-                                    <input type="password" id="gemini_api_key" name="gemini_api_key" value="<?php echo esc_attr($settings['gemini_api_key'] ?? ''); ?>" class="regular-text" placeholder="AIzaSy...">
-                                    <button type="button" class="button" id="btn-toggle-gemini-key"><span class="dashicons dashicons-visibility"></span></button>
+                                    <?php $gemini_k = Niyati_Gemini_API::get_api_key(); ?>
+                                    <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+                                        <code style="background:#f1f5f9; padding:4px 8px; border-radius:4px; font-weight:600;"><?php echo !empty($gemini_k) ? esc_html(substr($gemini_k, 0, 8) . '••••••••' . substr($gemini_k, -4)) : 'Missing in wp-config.php'; ?></code>
+                                        <span style="color:#059669; font-weight:600; font-size:12px;">✔ Configured in wp-config.php</span>
+                                    </div>
                                     <button type="button" class="button button-secondary" id="btn-test-gemini"><?php echo esc_html__('Test Gemini API', 'merarashifal'); ?></button>
                                     <span id="gemini-test-result" class="niyati-test-badge"></span>
-                                    <p class="description"><?php echo esc_html__('Get your key from Google AI Studio (https://aistudio.google.com).', 'merarashifal'); ?></p>
+                                    <p class="description"><?php echo esc_html__('Managed via GOOGLE_API_KEY constant.', 'merarashifal'); ?></p>
                                 </td>
                             </tr>
                             <tr>
@@ -819,13 +839,16 @@ class Niyati_Admin {
 
                         <table class="form-table">
                             <tr>
-                                <th scope="row"><label for="vedic_api_key"><?php echo esc_html__('VedicAstroAPI Key', 'merarashifal'); ?></label></th>
+                                <th scope="row"><?php echo esc_html__('VedicAstroAPI Key', 'merarashifal'); ?></th>
                                 <td>
-                                    <input type="password" id="vedic_api_key" name="vedic_api_key" value="<?php echo esc_attr($settings['vedic_api_key'] ?? ''); ?>" class="regular-text" placeholder="e.g. 8d9d828d-...">
-                                    <button type="button" class="button" id="btn-toggle-vedic-key"><span class="dashicons dashicons-visibility"></span></button>
+                                    <?php $vedic_k = Niyati_Vedic_API::get_api_key(); ?>
+                                    <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+                                        <code style="background:#f1f5f9; padding:4px 8px; border-radius:4px; font-weight:600;"><?php echo !empty($vedic_k) ? esc_html(substr($vedic_k, 0, 8) . '••••••••' . substr($vedic_k, -4)) : 'Missing in wp-config.php'; ?></code>
+                                        <span style="color:#059669; font-weight:600; font-size:12px;">✔ Configured in wp-config.php</span>
+                                    </div>
                                     <button type="button" class="button button-secondary" id="btn-test-vedic"><?php echo esc_html__('Test VedicAstroAPI', 'merarashifal'); ?></button>
                                     <span id="vedic-test-result" class="niyati-test-badge"></span>
-                                    <p class="description"><?php echo esc_html__('Your API key from https://api.vedicastroapi.com/v3-json/', 'merarashifal'); ?></p>
+                                    <p class="description"><?php echo esc_html__('Managed via VEDICASTRO_API_KEY constant.', 'merarashifal'); ?></p>
                                 </td>
                             </tr>
                         </table>

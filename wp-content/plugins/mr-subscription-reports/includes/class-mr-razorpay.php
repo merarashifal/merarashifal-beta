@@ -9,36 +9,52 @@ if (!defined('ABSPATH')) {
 
 class MR_Razorpay {
 
-    const DEFAULT_TEST_KEY_ID     = 'rzp_test_TpIAA4q3WP1EYF';
-    const DEFAULT_TEST_KEY_SECRET = '4YJwgnmeWvKdYEaKmpiv9pH1';
+    const DEFAULT_TEST_KEY_ID     = '';
+    const DEFAULT_TEST_KEY_SECRET = '';
 
     /**
      * Get active gateway mode: 'test' or 'live'
      */
     public static function get_mode() {
-        return get_option('mr_razorpay_mode', 'test');
+        if (defined('MR_RAZORPAY_MODE') && !empty(MR_RAZORPAY_MODE)) {
+            return MR_RAZORPAY_MODE;
+        }
+        $saved = get_option('mr_razorpay_mode', '');
+        if (!empty($saved)) {
+            return $saved;
+        }
+        if (defined('Razorpay_Live_API_Key') && !empty(Razorpay_Live_API_Key)) {
+            return 'live';
+        }
+        return 'test';
     }
 
     /**
      * Get Test Key ID
      */
     public static function get_test_key_id() {
-        $val = get_option('mr_razorpay_test_key_id', self::DEFAULT_TEST_KEY_ID);
-        return !empty($val) ? trim($val) : self::DEFAULT_TEST_KEY_ID;
+        $val = get_option('mr_razorpay_test_key_id', '');
+        return !empty($val) ? trim($val) : '';
     }
 
     /**
      * Get Test Key Secret
      */
     public static function get_test_key_secret() {
-        $val = get_option('mr_razorpay_test_key_secret', self::DEFAULT_TEST_KEY_SECRET);
-        return !empty($val) ? trim($val) : self::DEFAULT_TEST_KEY_SECRET;
+        $val = get_option('mr_razorpay_test_key_secret', '');
+        return !empty($val) ? trim($val) : '';
     }
 
     /**
      * Get Live Key ID
      */
     public static function get_live_key_id() {
+        if (defined('Razorpay_Live_API_Key') && !empty(Razorpay_Live_API_Key)) {
+            return trim(Razorpay_Live_API_Key);
+        }
+        if (defined('MR_RAZORPAY_LIVE_KEY_ID') && !empty(MR_RAZORPAY_LIVE_KEY_ID)) {
+            return trim(MR_RAZORPAY_LIVE_KEY_ID);
+        }
         return trim(get_option('mr_razorpay_live_key_id', ''));
     }
 
@@ -46,6 +62,12 @@ class MR_Razorpay {
      * Get Live Key Secret
      */
     public static function get_live_key_secret() {
+        if (defined('Razorpay_Live_Secret_Key') && !empty(Razorpay_Live_Secret_Key)) {
+            return trim(Razorpay_Live_Secret_Key);
+        }
+        if (defined('MR_RAZORPAY_LIVE_KEY_SECRET') && !empty(MR_RAZORPAY_LIVE_KEY_SECRET)) {
+            return trim(MR_RAZORPAY_LIVE_KEY_SECRET);
+        }
         return trim(get_option('mr_razorpay_live_key_secret', ''));
     }
 

@@ -23,11 +23,17 @@ class MR_PDF_Engine {
      * Get configured Browserless.io API Token
      */
     public static function get_browserless_token() {
+        if (defined('Browserless_API_KEY') && !empty(Browserless_API_KEY)) {
+            return trim(Browserless_API_KEY);
+        }
+        if (defined('MR_BROWSERLESS_TOKEN') && !empty(MR_BROWSERLESS_TOKEN)) {
+            return trim(MR_BROWSERLESS_TOKEN);
+        }
         if (function_exists('get_option')) {
             $t = get_option('mr_browserless_token', '');
-            if (!empty($t)) return $t;
+            if (!empty($t)) return trim($t);
         }
-        return '2VSwOG5b8ldOoue0281fab0ae0278fbea9460509561a3ec84';
+        return '';
     }
 
     /**

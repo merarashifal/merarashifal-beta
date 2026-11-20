@@ -2847,8 +2847,8 @@
                 return;
             }
             var cleanText = text.replace(/[*_#`\[\]]/g, '').trim();
-            var utterance = new SpeechSynthesisUtterance(cleanText);
-            utterance.lang = state.lang === 'en' ? 'en-IN' : 'hi-IN';
+            var isDevanagari = /[\u0900-\u097F]/.test(cleanText);
+            utterance.lang = isDevanagari ? 'hi-IN' : (state.lang === 'en' ? 'en-IN' : 'hi-IN');
             utterance.rate = 0.95;
             utterance.pitch = 1.05;
 

@@ -16,6 +16,12 @@ class Niyati_Gemini_API {
      * Get Gemini API Key
      */
     public static function get_api_key() {
+        if (defined('GOOGLE_API_KEY') && !empty(GOOGLE_API_KEY)) {
+            return trim(GOOGLE_API_KEY);
+        }
+        if (defined('MR_GEMINI_API_KEY') && !empty(MR_GEMINI_API_KEY)) {
+            return trim(MR_GEMINI_API_KEY);
+        }
         $settings = get_option('niyati_chat_settings', []);
         if (!empty($settings['gemini_api_key'])) {
             return trim($settings['gemini_api_key']);
@@ -653,27 +659,20 @@ PROMPT;
             $clean_mime = 'audio/webm';
         }
 
-        // Rich 30-second Voice Consultation directive with full astrological depth
+        // Fast 50-55 word Voice Consultation directive for <8s turnaround with full Vedic depth
         $voice_directive = 
-            "\n\nCRITICAL SPOKEN VOICE QUALITY DIRECTIVE (30-SECOND VEDIC CONSULTATION):\n" .
+            "\n\nCRITICAL SPEED & VEDIC EXCELLENCE DIRECTIVE (STRICT TARGET: 50 TO 55 WORDS):\n" .
             "1. AUTOMATIC SPOKEN LANGUAGE MATCHING:\n" .
-            "   - Carefully listen to the spoken words in the seeker's audio note.\n" .
-            "   - If the seeker speaks in HINDI or HINGLISH (e.g. 'meri shadi kab hogi', 'meri naukri kab lagegi'):\n" .
-            "     * 'transcription': Transcribe accurately in Hindi/Hinglish as spoken.\n" .
-            "     * 'reply': Respond entirely in pure, serene, affectionate, respectful HINDI (Devanagari script).\n" .
-            "   - If the seeker speaks in ENGLISH:\n" .
-            "     * 'transcription': English.\n" .
-            "     * 'reply': Serene Indian English.\n" .
-            "2. FULL VEDIC DEPTH & ACCURACY (STRICT TARGET: 75 TO 85 WORDS, ~30 SECONDS OF AUDIO):\n" .
-            "   - DO NOT give shallow generic answers! The seeker spent 5 credits for a deep astrological reading.\n" .
-            "   - Include the EXACT SAME high-caliber Vedic precision as our written consultations:\n" .
-            "     * Begin with our signature presumption framing if asking milestone timing (e.g. 'यदि हम यह मानकर चलें कि आप अभी अविवाहित हैं और विवाह की योजना बना रहे हैं...').\n" .
-            "     * Pinpoint the governing house (e.g. 7th house for marriage, 10th house for career) and planetary placements (e.g. Moon, Venus, Jupiter, Saturn) from the seeker's birth chart.\n" .
-            "     * State a concrete, upcoming favorable calendar window (e.g. 'फरवरी 2027 से मई 2027 के मध्य').\n" .
-            "     * Provide exactly ONE specific Vedic remedy with Day of the week, Deity, and sacred Mantra (e.g. 'प्रत्येक शुक्रवार को मां लक्ष्मी को सफेद पुष्प अर्पित करें और ॐ शुं शुक्राय नमः का जाप करें').\n" .
-            "     * Use cautious Vedic probabilistic phrasing ('योग बन सकते हैं', 'प्रबल संभावना है' - NEVER absolute promises like 'होगा' or 'मिलेगी').\n" .
-            "     * Remind them that Karma, diligent effort, and divine grace bring these planetary potentials to fruition.\n" .
-            "   - NO markdown formatting (no asterisks, no hashes, no bullet points, no URLs), only sweet, flowing spoken sentences.\n" .
+            "   - If seeker speaks in HINDI or HINGLISH: Respond entirely in pure, serene, affectionate HINDI (Devanagari script).\n" .
+            "   - If seeker speaks in ENGLISH: Respond in serene Indian English.\n" .
+            "2. HIGH-IMPACT VEDIC DEPTH (STRICTLY 50 TO 55 WORDS MAXIMUM - CRITICAL FOR <8S AUDIO SPEED):\n" .
+            "   - Pack EVERY critical detail concisely without conversational filler:\n" .
+            "     * Presumption opening: 'यदि हम यह मानकर चलें कि आप...'\n" .
+            "     * Governing House & Planet from chart: e.g. 'आपकी कुंडली में 7वें भाव और शुक्र देव की शुभ स्थिति...'\n" .
+            "     * Concrete Calendar Window: e.g. 'आगामी 4 से 6 महीनों में अनुकूल योग बन सकते हैं।'\n" .
+            "     * Specific Day + Deity + Mantra remedy: e.g. 'प्रत्येक शुक्रवार को मां लक्ष्मी को सफेद पुष्प अर्पित कर ॐ शुं शुक्राय नमः का जाप करें, शुभ फल मिलेंगे।'\n" .
+            "   - NO markdown (*, #, bullets), only crisp, flowing spoken sentences.\n" .
+            "   - STRICT LIMIT: Do NOT exceed 55 words!\n" .
             "   - Output JSON format: {\"transcription\": \"...\", \"reply\": \"...\"}";
 
         $payload = [
@@ -691,15 +690,15 @@ PROMPT;
                             ]
                         ],
                         [
-                            'text' => 'Listen carefully to this audio voice query, detect the seeker\'s spoken language, transcribe it accurately, and formulate Niyati\'s full 75-85 word authentic Vedic astrology answer in the SAME spoken language with governing house, planetary placements, calendar timing window, and specific day/deity remedy. Return JSON with "transcription" and "reply".'
+                            'text' => 'Listen carefully to this audio voice query, detect language, transcribe accurately, and formulate Niyati\'s crisp 50-55 word Vedic answer with house, planet, timeline window, and specific day/deity remedy. Return JSON with "transcription" and "reply".'
                         ]
                     ]
                 ]
             ],
             'generationConfig' => [
-                'temperature'       => 0.3,
+                'temperature'       => 0.2,
                 'topP'              => 0.9,
-                'maxOutputTokens'   => 500,
+                'maxOutputTokens'   => 250,
                 'responseMimeType'  => 'application/json'
             ]
         ];
@@ -714,7 +713,7 @@ PROMPT;
             $response = wp_remote_post($url, [
                 'headers' => ['Content-Type' => 'application/json'],
                 'body'    => wp_json_encode($payload),
-                'timeout' => 25
+                'timeout' => 8
             ]);
 
             if (is_wp_error($response)) {
@@ -729,11 +728,27 @@ PROMPT;
             if ($code === 200 && !empty($json['candidates'][0]['content']['parts'])) {
                 $raw_text = '';
                 foreach ($json['candidates'][0]['content']['parts'] as $part) {
-                    if (isset($part['text'])) {
+                    if (isset($part['text']) && (empty($part['thought']) || $part['thought'] !== true)) {
                         $raw_text .= $part['text'];
                     }
                 }
-                $parsed = json_decode(trim($raw_text), true);
+                $clean_raw = trim($raw_text);
+                // Strip markdown code fences if wrapped in ```json ... ```
+                if (preg_match('/```(?:json)?\s*([\s\S]*?)\s*```/', $clean_raw, $m_json)) {
+                    $clean_raw = trim($m_json[1]);
+                }
+                $parsed = json_decode($clean_raw, true);
+
+                if (!is_array($parsed) || empty($parsed['reply'])) {
+                    // Direct text fallback if model replied in plain text instead of JSON
+                    if (!empty($clean_raw)) {
+                        $parsed = [
+                            'transcription' => ($resolved_lang === 'hi' ? 'वॉयस संदेश' : 'Voice Query'),
+                            'reply'         => $clean_raw
+                        ];
+                    }
+                }
+
                 if (is_array($parsed) && !empty($parsed['reply'])) {
                     $transcription = trim($parsed['transcription'] ?? '');
                     $reply = trim($parsed['reply']);
@@ -768,7 +783,7 @@ PROMPT;
 
     /**
      * Synthesize Niyati's Voice Audio
-     * Calls Gemini Native TTS with Kore serene, harmonious Indian female voice profile, converted to standard WAV
+     * Calls Gemini Native Flash-Lite TTS with Kore serene, harmonious Indian female voice profile, converted to standard WAV
      */
     public static function synthesize_niyati_voice($text, $lang = 'hi') {
         $api_key = self::get_api_key();
@@ -777,15 +792,27 @@ PROMPT;
         }
 
         $clean_speech = trim(preg_replace('/[*_#`\[\]]/', '', $text));
-        // TTS Candidate models (with fallback across available endpoints)
-        $tts_models = ['gemini-2.5-flash-preview-tts', 'gemini-3.1-flash-tts-preview', 'gemini-3.8-flash-tts', 'gemini-3.8-flash-lite-tts'];
+        // Ultra-fast Flash-Lite TTS prioritized (under 5s synthesis)
+        $tts_models = ['gemini-3.8-flash-lite-tts', 'gemini-3.8-flash-tts', 'gemini-3.1-flash-tts-preview'];
         $voice_name = 'Kore'; // Serene, gentle, harmonious, calm female tone
 
         $tts_prompt = ($lang === 'hi' || preg_match('/[\x{0900}-\x{097F}]/u', $clean_speech))
             ? "Read this text aloud as Niyati, in a serene, affectionate, calm, and harmonious Indian voice:\n\n" . $clean_speech
             : "Read this text aloud as Niyati, in a calm, soothing, and harmonious Indian English tone:\n\n" . $clean_speech;
 
+        $overall_start = microtime(true);
         foreach ($tts_models as $tts_model) {
+            // Hard circuit breaker: If we've already spent 6 seconds attempting TTS, stop immediately!
+            if (microtime(true) - $overall_start > 6.0) {
+                break;
+            }
+
+            // Skip if this model recently hit a 429 quota block
+            $transient_key = 'niyati_tts_429_' . md5($tts_model);
+            if (get_transient($transient_key)) {
+                continue;
+            }
+
             $url = 'https://generativelanguage.googleapis.com/v1beta/models/' . urlencode($tts_model) . ':generateContent?key=' . urlencode($api_key);
             $payload = [
                 'contents' => [
@@ -806,10 +833,18 @@ PROMPT;
             $response = wp_remote_post($url, [
                 'headers' => ['Content-Type' => 'application/json'],
                 'body'    => wp_json_encode($payload),
-                'timeout' => 25
+                'timeout' => 6 // Fast 6-second timeout per model
             ]);
 
-            if (!is_wp_error($response) && wp_remote_retrieve_response_code($response) === 200) {
+            $code = wp_remote_retrieve_response_code($response);
+
+            // If quota exhausted (429), cache the circuit breaker for 10 minutes so we don't repeat failed calls
+            if ($code === 429) {
+                set_transient($transient_key, 1, 10 * MINUTE_IN_SECONDS);
+                continue;
+            }
+
+            if (!is_wp_error($response) && $code === 200) {
                 $data = json_decode(wp_remote_retrieve_body($response), true);
                 if (!empty($data['candidates'][0]['content']['parts'][0]['inlineData']['data'])) {
                     $raw_b64 = $data['candidates'][0]['content']['parts'][0]['inlineData']['data'];
@@ -821,7 +856,7 @@ PROMPT;
                                 'audio_bytes' => $wav_bytes,
                                 'audio_ext'   => 'wav',
                                 'mime_type'   => 'audio/wav',
-                                'duration'    => 30
+                                'duration'    => 20
                             ];
                         }
                     }

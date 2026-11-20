@@ -168,6 +168,9 @@ class Niyati_REST_API {
      * Get active Razorpay Key ID (prioritizes Central MR_Razorpay gateway)
      */
     public static function get_razorpay_key_id() {
+        if (defined('Razorpay_Live_API_Key') && !empty(Razorpay_Live_API_Key)) {
+            return trim(Razorpay_Live_API_Key);
+        }
         if (class_exists('MR_Razorpay')) {
             $key = MR_Razorpay::get_active_key_id();
             if (!empty($key)) {
@@ -175,7 +178,7 @@ class Niyati_REST_API {
             }
         }
         $settings = self::get_settings();
-        $fallback = get_option('mr_razorpay_test_key_id', 'rzp_test_TpIAA4q3WP1EYF');
+        $fallback = get_option('mr_razorpay_test_key_id', '');
         return !empty($settings['razorpay_key_id']) ? trim($settings['razorpay_key_id']) : $fallback;
     }
 
@@ -183,6 +186,9 @@ class Niyati_REST_API {
      * Get active Razorpay Key Secret (prioritizes Central MR_Razorpay gateway)
      */
     public static function get_razorpay_key_secret() {
+        if (defined('Razorpay_Live_Secret_Key') && !empty(Razorpay_Live_Secret_Key)) {
+            return trim(Razorpay_Live_Secret_Key);
+        }
         if (class_exists('MR_Razorpay')) {
             $secret = MR_Razorpay::get_active_key_secret();
             if (!empty($secret)) {
@@ -190,7 +196,7 @@ class Niyati_REST_API {
             }
         }
         $settings = self::get_settings();
-        $fallback = get_option('mr_razorpay_test_key_secret', '4YJwgnmeWvKdYEaKmpiv9pH1');
+        $fallback = get_option('mr_razorpay_test_key_secret', '');
         return !empty($settings['razorpay_key_secret']) ? trim($settings['razorpay_key_secret']) : $fallback;
     }
 

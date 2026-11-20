@@ -361,16 +361,28 @@ class MR_Admin {
                         </h2>
 
                         <table class="form-table">
+                        <div style="background: #ecfdf5; border-left: 4px solid #10b981; padding: 14px 18px; margin: 15px 0 24px 0; border-radius: 4px;">
+                            <strong style="color: #065f46; font-size: 14px;">🔒 High-Security Configuration Active:</strong><br>
+                            <span style="color: #047857; font-size: 13px;">
+                                API keys and gateway secrets are loaded strictly from server-level environment configurations in <code>wp-config.php</code>. Key editing has been permanently disabled from this web dashboard to prevent leaks and credential exposure.
+                            </span>
+                        </div>
+
+                        <table class="form-table">
                             <!-- Gemini AI API Key -->
                             <tr>
                                 <th scope="row">
-                                    <label for="mr_gemini_api_key"><strong><?php echo esc_html__('Google Gemini API Key', 'merarashifal'); ?></strong></label>
+                                    <label><strong><?php echo esc_html__('Google Gemini API Key', 'merarashifal'); ?></strong></label>
                                 </th>
                                 <td>
-                                    <input type="password" name="mr_gemini_api_key" id="mr_gemini_api_key" value="<?php echo esc_attr($gemini_key); ?>" style="width: 100%; max-width: 480px; font-family: monospace;" />
-                                    <button type="button" class="button" onclick="var f=document.getElementById('mr_gemini_api_key'); f.type = f.type==='password'?'text':'password';">Show/Hide</button>
+                                    <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+                                        <span class="badge" style="background:#e0f2fe; color:#0369a1; padding:4px 8px; border-radius:4px; font-weight:600; font-size:12px;">
+                                            <?php echo !empty($gemini_key) ? '✔ Configured in wp-config.php' : '✖ Not Found in wp-config.php'; ?>
+                                        </span>
+                                        <code style="background:#f1f5f9; padding:4px 8px; border-radius:4px;"><?php echo !empty($gemini_key) ? esc_html(substr($gemini_key, 0, 8) . '••••••••' . substr($gemini_key, -4)) : 'None'; ?></code>
+                                    </div>
                                     <p class="description">
-                                        <?php echo esc_html__('Powers the conversational editorial tone, monthly themes, 60-second weather summaries, and weekly advice.', 'merarashifal'); ?>
+                                        <?php echo esc_html__('Powers conversational tone, monthly themes, 60-second weather summaries, and weekly advice.', 'merarashifal'); ?>
                                     </p>
                                     <button type="button" id="mr-btn-test-gemini" class="button button-secondary" style="margin-top: 8px;">
                                         <span class="dashicons dashicons-rest-api" style="vertical-align: middle;"></span> Test Gemini Connection
@@ -382,11 +394,15 @@ class MR_Admin {
                             <!-- VedicAstroAPI Key -->
                             <tr>
                                 <th scope="row">
-                                    <label for="mr_vedic_api_key"><strong><?php echo esc_html__('VedicAstroAPI Key', 'merarashifal'); ?></strong></label>
+                                    <label><strong><?php echo esc_html__('VedicAstroAPI Key', 'merarashifal'); ?></strong></label>
                                 </th>
                                 <td>
-                                    <input type="password" name="mr_vedic_api_key" id="mr_vedic_api_key" value="<?php echo esc_attr($vedic_key); ?>" style="width: 100%; max-width: 480px; font-family: monospace;" placeholder="Enter your api.vedicastroapi.com key" />
-                                    <button type="button" class="button" onclick="var f=document.getElementById('mr_vedic_api_key'); f.type = f.type==='password'?'text':'password';">Show/Hide</button>
+                                    <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+                                        <span class="badge" style="background:#e0f2fe; color:#0369a1; padding:4px 8px; border-radius:4px; font-weight:600; font-size:12px;">
+                                            <?php echo !empty($vedic_key) ? '✔ Configured in wp-config.php' : '✖ Not Found in wp-config.php'; ?>
+                                        </span>
+                                        <code style="background:#f1f5f9; padding:4px 8px; border-radius:4px;"><?php echo !empty($vedic_key) ? esc_html(substr($vedic_key, 0, 8) . '••••••••' . substr($vedic_key, -4)) : 'None'; ?></code>
+                                    </div>
                                     <p class="description">
                                         <?php echo esc_html__('From api.vedicastroapi.com. Calculates D1/D9 diamond charts, planetary coordinates, dashas, doshas, and panchang.', 'merarashifal'); ?>
                                     </p>
@@ -436,13 +452,17 @@ class MR_Admin {
                             <!-- Browserless.io API Token -->
                             <tr>
                                 <th scope="row">
-                                    <label for="mr_browserless_token"><strong><?php echo esc_html__('Browserless.io API Token', 'merarashifal'); ?></strong></label>
+                                    <label><strong><?php echo esc_html__('Browserless.io API Token', 'merarashifal'); ?></strong></label>
                                 </th>
                                 <td>
-                                    <input type="password" name="mr_browserless_token" id="mr_browserless_token" value="<?php echo esc_attr($browserless_token); ?>" style="width: 100%; max-width: 480px; font-family: monospace;" placeholder="Enter your browserless.io token" />
-                                    <button type="button" class="button" onclick="var f=document.getElementById('mr_browserless_token'); f.type = f.type==='password'?'text':'password';">Show/Hide</button>
+                                    <div style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
+                                        <span class="badge" style="background:#e0f2fe; color:#0369a1; padding:4px 8px; border-radius:4px; font-weight:600; font-size:12px;">
+                                            <?php echo !empty($browserless_token) ? '✔ Configured in wp-config.php' : '✖ Not Found in wp-config.php'; ?>
+                                        </span>
+                                        <code style="background:#f1f5f9; padding:4px 8px; border-radius:4px;"><?php echo !empty($browserless_token) ? esc_html(substr($browserless_token, 0, 8) . '••••••••' . substr($browserless_token, -4)) : 'None'; ?></code>
+                                    </div>
                                     <p class="description">
-                                        <?php echo esc_html__('From cloud.browserless.io. Provides 1,000 PDFs/month free with zero server dependencies.', 'merarashifal'); ?>
+                                        <?php echo esc_html__('From cloud.browserless.io. Provides cloud headless PDF compilation with zero server dependencies.', 'merarashifal'); ?>
                                     </p>
                                     <button type="button" id="mr-btn-test-browserless" class="button button-secondary" style="margin-top: 8px;">
                                         <span class="dashicons dashicons-cloud" style="vertical-align: middle;"></span> Test Browserless.io Connection
@@ -465,76 +485,35 @@ class MR_Admin {
                                 </th>
                                 <td>
                                     <select name="mr_razorpay_mode" id="mr_razorpay_mode" style="font-weight: 600; padding: 4px 10px;">
+                                        <option value="live" <?php selected($razorpay_mode, 'live'); ?>>🚀 <?php echo esc_html__('Live Mode (Production Customer Payments)', 'merarashifal'); ?></option>
                                         <option value="test" <?php selected($razorpay_mode, 'test'); ?>>🛠️ <?php echo esc_html__('Test Mode (Sandbox / Development)', 'merarashifal'); ?></option>
-                                        <option value="live" <?php selected($razorpay_mode, 'live'); ?>>🚀 <?php echo esc_html__('Live Mode (Real Customer Payments)', 'merarashifal'); ?></option>
                                     </select>
                                     <p class="description">
-                                        <?php echo esc_html__('Select Test Mode for test transactions or Live Mode for real customer payments.', 'merarashifal'); ?>
+                                        <?php echo esc_html__('Active gateway mode. Live keys are loaded securely from wp-config.php.', 'merarashifal'); ?>
                                     </p>
                                 </td>
                             </tr>
 
-                            <!-- Test Key ID -->
+                            <!-- Live Credentials Status -->
                             <tr>
                                 <th scope="row">
-                                    <label for="mr_razorpay_test_key_id"><?php echo esc_html__('Razorpay Test Key ID', 'merarashifal'); ?></label>
+                                    <label><strong><?php echo esc_html__('Razorpay Live Credentials', 'merarashifal'); ?></strong></label>
                                 </th>
                                 <td>
-                                    <input type="text" name="mr_razorpay_test_key_id" id="mr_razorpay_test_key_id" value="<?php echo esc_attr($razorpay_test_key_id); ?>" style="width: 100%; max-width: 480px; font-family: monospace;" placeholder="rzp_test_..." />
-                                    <p class="description"><?php echo esc_html__('Test Key ID from your Razorpay Dashboard (Settings > API Keys).', 'merarashifal'); ?></p>
-                                </td>
-                            </tr>
-
-                            <!-- Test Key Secret -->
-                            <tr>
-                                <th scope="row">
-                                    <label for="mr_razorpay_test_key_secret"><?php echo esc_html__('Razorpay Test Key Secret', 'merarashifal'); ?></label>
-                                </th>
-                                <td>
-                                    <input type="password" name="mr_razorpay_test_key_secret" id="mr_razorpay_test_key_secret" value="<?php echo esc_attr($razorpay_test_secret); ?>" style="width: 100%; max-width: 480px; font-family: monospace;" />
-                                    <button type="button" class="button" onclick="var f=document.getElementById('mr_razorpay_test_key_secret'); f.type = f.type==='password'?'text':'password';">Show/Hide</button>
-                                    <p class="description"><?php echo esc_html__('Secret paired with your Test Key ID.', 'merarashifal'); ?></p>
-                                </td>
-                            </tr>
-
-                            <!-- Live Key ID -->
-                            <tr style="border-top: 1px dashed #e2e8f0;">
-                                <th scope="row">
-                                    <label for="mr_razorpay_live_key_id"><strong><?php echo esc_html__('Razorpay Live Key ID', 'merarashifal'); ?></strong></label>
-                                </th>
-                                <td>
-                                    <input type="text" name="mr_razorpay_live_key_id" id="mr_razorpay_live_key_id" value="<?php echo esc_attr($razorpay_live_key_id); ?>" style="width: 100%; max-width: 480px; font-family: monospace;" placeholder="rzp_live_..." />
-                                    <p class="description"><?php echo esc_html__('Production Live Key ID (starts with rzp_live_).', 'merarashifal'); ?></p>
-                                </td>
-                            </tr>
-
-                            <!-- Live Key Secret -->
-                            <tr>
-                                <th scope="row">
-                                    <label for="mr_razorpay_live_key_secret"><strong><?php echo esc_html__('Razorpay Live Key Secret', 'merarashifal'); ?></strong></label>
-                                </th>
-                                <td>
-                                    <input type="password" name="mr_razorpay_live_key_secret" id="mr_razorpay_live_key_secret" value="<?php echo esc_attr($razorpay_live_secret); ?>" style="width: 100%; max-width: 480px; font-family: monospace;" placeholder="Enter live secret key" />
-                                    <button type="button" class="button" onclick="var f=document.getElementById('mr_razorpay_live_key_secret'); f.type = f.type==='password'?'text':'password';">Show/Hide</button>
-                                    <p class="description"><?php echo esc_html__('Secret paired with your Live Key ID. Keep confidential.', 'merarashifal'); ?></p>
-                                </td>
-                            </tr>
-
-                            <!-- Webhook Secret -->
-                            <tr>
-                                <th scope="row">
-                                    <label for="mr_razorpay_webhook_secret"><?php echo esc_html__('Razorpay Webhook Secret (Optional)', 'merarashifal'); ?></label>
-                                </th>
-                                <td>
-                                    <input type="password" name="mr_razorpay_webhook_secret" id="mr_razorpay_webhook_secret" value="<?php echo esc_attr($razorpay_webhook); ?>" style="width: 100%; max-width: 480px; font-family: monospace;" placeholder="Enter webhook secret" />
-                                    <button type="button" class="button" onclick="var f=document.getElementById('mr_razorpay_webhook_secret'); f.type = f.type==='password'?'text':'password';">Show/Hide</button>
-                                    <p class="description"><?php echo esc_html__('Used for webhook signature verification.', 'merarashifal'); ?></p>
-                                    <div style="margin-top: 10px;">
-                                        <button type="button" id="mr-btn-test-razorpay" class="button button-secondary">
-                                            <span class="dashicons dashicons-shield-alt" style="vertical-align: middle;"></span> Test Razorpay Connection
-                                        </button>
-                                        <span id="mr-razorpay-test-result" style="margin-left: 10px; font-weight: 600;"></span>
+                                    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:6px; padding:12px 16px; margin-bottom:10px; max-width:520px;">
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                                            <span><strong>Live Key ID:</strong></span>
+                                            <code style="background:#f1f5f9; padding:2px 6px; border-radius:3px;"><?php echo !empty($razorpay_live_key_id) ? esc_html(substr($razorpay_live_key_id, 0, 14) . '••••••') : '<span style="color:#ef4444;">Missing</span>'; ?></code>
+                                        </div>
+                                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                                            <span><strong>Live Secret:</strong></span>
+                                            <code style="background:#f1f5f9; padding:2px 6px; border-radius:3px;"><?php echo !empty($razorpay_live_secret) ? '●●●●●●●●●●●● (Protected in wp-config.php)' : '<span style="color:#ef4444;">Missing</span>'; ?></code>
+                                        </div>
                                     </div>
+                                    <button type="button" id="mr-btn-test-razorpay" class="button button-secondary">
+                                        <span class="dashicons dashicons-shield-alt" style="vertical-align: middle;"></span> Test Razorpay Connection
+                                    </button>
+                                    <span id="mr-razorpay-test-result" style="margin-left: 10px; font-weight: 600;"></span>
                                 </td>
                             </tr>
                         </table>
@@ -679,14 +658,13 @@ class MR_Admin {
                 e.preventDefault();
                 var $btn = $(this);
                 var $res = $('#mr-gemini-test-result');
-                var key = $('#mr_gemini_api_key').val();
 
                 $btn.prop('disabled', true).text('Testing...');
                 $res.html('<span style="color:#666;">Connecting to Google Gemini API...</span>');
 
                 $.post(ajaxurl, {
                     action: 'mr_test_gemini_api',
-                    api_key: key,
+                    api_key: '',
                     nonce: '<?php echo wp_create_nonce("mr_test_api_nonce"); ?>'
                 }, function(resp) {
                     $btn.prop('disabled', false).html('<span class="dashicons dashicons-rest-api" style="vertical-align: middle;"></span> Test Gemini Connection');
@@ -705,14 +683,13 @@ class MR_Admin {
                 e.preventDefault();
                 var $btn = $(this);
                 var $res = $('#mr-vedic-test-result');
-                var key = $('#mr_vedic_api_key').val();
 
                 $btn.prop('disabled', true).text('Testing...');
                 $res.html('<span style="color:#666;">Connecting to VedicAstroAPI...</span>');
 
                 $.post(ajaxurl, {
                     action: 'mr_test_vedic_api',
-                    api_key: key,
+                    api_key: '',
                     nonce: '<?php echo wp_create_nonce("mr_test_api_nonce"); ?>'
                 }, function(resp) {
                     $btn.prop('disabled', false).html('<span class="dashicons dashicons-networking" style="vertical-align: middle;"></span> Test VedicAstroAPI Connection');
@@ -731,14 +708,13 @@ class MR_Admin {
                 e.preventDefault();
                 var $btn = $(this);
                 var $res = $('#mr-browserless-test-result');
-                var token = $('#mr_browserless_token').val();
 
                 $btn.prop('disabled', true).text('Testing Cloud PDF API...');
                 $res.html('<span style="color:#666;">Connecting to Browserless.io...</span>');
 
                 $.post(ajaxurl, {
                     action: 'mr_test_browserless_api',
-                    token: token,
+                    token: '',
                     nonce: '<?php echo wp_create_nonce("mr_test_api_nonce"); ?>'
                 }, function(resp) {
                     $btn.prop('disabled', false).html('<span class="dashicons dashicons-cloud" style="vertical-align: middle;"></span> Test Browserless.io Connection');
@@ -757,17 +733,14 @@ class MR_Admin {
                 e.preventDefault();
                 var $btn = $(this);
                 var $res = $('#mr-razorpay-test-result');
-                var mode = $('#mr_razorpay_mode').val();
-                var key_id = (mode === 'live') ? $('#mr_razorpay_live_key_id').val() : $('#mr_razorpay_test_key_id').val();
-                var key_secret = (mode === 'live') ? $('#mr_razorpay_live_key_secret').val() : $('#mr_razorpay_test_key_secret').val();
 
                 $btn.prop('disabled', true).text('Testing Razorpay...');
-                $res.html('<span style="color:#666;">Connecting to Razorpay API (' + mode.toUpperCase() + ')...</span>');
+                $res.html('<span style="color:#666;">Connecting to Razorpay API...</span>');
 
                 $.post(ajaxurl, {
                     action: 'mr_test_razorpay_api',
-                    key_id: key_id,
-                    key_secret: key_secret,
+                    key_id: '',
+                    key_secret: '',
                     nonce: '<?php echo wp_create_nonce("mr_test_api_nonce"); ?>'
                 }, function(resp) {
                     $btn.prop('disabled', false).html('<span class="dashicons dashicons-shield-alt" style="vertical-align: middle;"></span> Test Razorpay Connection');
@@ -824,32 +797,38 @@ class MR_Admin {
 
         check_admin_referer('mr_save_api_settings_nonce', 'mr_api_nonce');
 
-        $gemini_key        = isset($_POST['mr_gemini_api_key']) ? sanitize_text_field($_POST['mr_gemini_api_key']) : '';
-        $vedic_key         = isset($_POST['mr_vedic_api_key']) ? sanitize_text_field($_POST['mr_vedic_api_key']) : '';
         $chart_style       = isset($_POST['mr_vedic_chart_style']) ? sanitize_text_field($_POST['mr_vedic_chart_style']) : 'north';
         $pdf_engine        = isset($_POST['mr_pdf_engine']) ? sanitize_text_field($_POST['mr_pdf_engine']) : 'auto';
-        $browserless_token = isset($_POST['mr_browserless_token']) ? sanitize_text_field($_POST['mr_browserless_token']) : '';
+        $razorpay_mode     = isset($_POST['mr_razorpay_mode']) ? sanitize_text_field($_POST['mr_razorpay_mode']) : 'live';
 
-        // Razorpay Gateway Settings
-        $razorpay_mode        = isset($_POST['mr_razorpay_mode']) ? sanitize_text_field($_POST['mr_razorpay_mode']) : 'test';
-        $razorpay_test_key_id = isset($_POST['mr_razorpay_test_key_id']) ? sanitize_text_field($_POST['mr_razorpay_test_key_id']) : '';
-        $razorpay_test_secret = isset($_POST['mr_razorpay_test_key_secret']) ? sanitize_text_field($_POST['mr_razorpay_test_key_secret']) : '';
-        $razorpay_live_key_id = isset($_POST['mr_razorpay_live_key_id']) ? sanitize_text_field($_POST['mr_razorpay_live_key_id']) : '';
-        $razorpay_live_secret = isset($_POST['mr_razorpay_live_key_secret']) ? sanitize_text_field($_POST['mr_razorpay_live_key_secret']) : '';
-        $razorpay_webhook     = isset($_POST['mr_razorpay_webhook_secret']) ? sanitize_text_field($_POST['mr_razorpay_webhook_secret']) : '';
-
-        update_option('mr_gemini_api_key', $gemini_key);
-        update_option('mr_vedic_api_key', $vedic_key);
         update_option('mr_vedic_chart_style', $chart_style);
         update_option('mr_pdf_engine', $pdf_engine);
-        update_option('mr_browserless_token', $browserless_token);
-
         update_option('mr_razorpay_mode', $razorpay_mode);
-        update_option('mr_razorpay_test_key_id', $razorpay_test_key_id);
-        update_option('mr_razorpay_test_key_secret', $razorpay_test_secret);
-        update_option('mr_razorpay_live_key_id', $razorpay_live_key_id);
-        update_option('mr_razorpay_live_key_secret', $razorpay_live_secret);
-        update_option('mr_razorpay_webhook_secret', $razorpay_webhook);
+
+        if (isset($_POST['mr_gemini_api_key'])) {
+            update_option('mr_gemini_api_key', sanitize_text_field($_POST['mr_gemini_api_key']));
+        }
+        if (isset($_POST['mr_vedic_api_key'])) {
+            update_option('mr_vedic_api_key', sanitize_text_field($_POST['mr_vedic_api_key']));
+        }
+        if (isset($_POST['mr_browserless_token'])) {
+            update_option('mr_browserless_token', sanitize_text_field($_POST['mr_browserless_token']));
+        }
+        if (isset($_POST['mr_razorpay_test_key_id'])) {
+            update_option('mr_razorpay_test_key_id', sanitize_text_field($_POST['mr_razorpay_test_key_id']));
+        }
+        if (isset($_POST['mr_razorpay_test_key_secret'])) {
+            update_option('mr_razorpay_test_key_secret', sanitize_text_field($_POST['mr_razorpay_test_key_secret']));
+        }
+        if (isset($_POST['mr_razorpay_live_key_id'])) {
+            update_option('mr_razorpay_live_key_id', sanitize_text_field($_POST['mr_razorpay_live_key_id']));
+        }
+        if (isset($_POST['mr_razorpay_live_key_secret'])) {
+            update_option('mr_razorpay_live_key_secret', sanitize_text_field($_POST['mr_razorpay_live_key_secret']));
+        }
+        if (isset($_POST['mr_razorpay_webhook_secret'])) {
+            update_option('mr_razorpay_webhook_secret', sanitize_text_field($_POST['mr_razorpay_webhook_secret']));
+        }
 
         // Outbound Email & Serverbyt SMTP Settings
         if (class_exists('MR_Mailer')) {

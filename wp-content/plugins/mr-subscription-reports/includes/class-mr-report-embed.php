@@ -1381,8 +1381,8 @@ class MR_Report_Embed {
         }
 
         // CASE 2: PAID REPORT -> CREATE RAZORPAY ORDER
-        $key_id     = class_exists('MR_Razorpay') ? MR_Razorpay::get_active_key_id() : 'rzp_test_TpIAA4q3WP1EYF';
-        $key_secret = class_exists('MR_Razorpay') ? MR_Razorpay::get_active_key_secret() : '4YJwgnmeWvKdYEaKmpiv9pH1';
+        $key_id     = class_exists('MR_Razorpay') ? MR_Razorpay::get_active_key_id() : '';
+        $key_secret = class_exists('MR_Razorpay') ? MR_Razorpay::get_active_key_secret() : '';
         $amount_paise = round($price_sale * 100);
 
         $rzp_order_id = '';

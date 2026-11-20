@@ -17,16 +17,19 @@ class MR_Vedic_API {
      * Get configured VedicAstroAPI key
      */
     public static function get_api_key() {
+        if (defined('VEDICASTRO_API_KEY') && !empty(VEDICASTRO_API_KEY)) {
+            return trim(VEDICASTRO_API_KEY);
+        }
         if (function_exists('get_option')) {
             $key = get_option('mr_vedic_api_key', '');
             if (empty($key)) {
                 $key = get_option('vedicastro_api_key', '');
             }
             if (!empty($key)) {
-                return $key;
+                return trim($key);
             }
         }
-        return '8d9d828d-3f9b-531a-a640-88c00469c300';
+        return '';
     }
 
     /**

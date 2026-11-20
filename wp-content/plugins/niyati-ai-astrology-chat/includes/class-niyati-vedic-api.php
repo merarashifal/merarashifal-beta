@@ -17,6 +17,9 @@ class Niyati_Vedic_API {
      * Get VedicAstroAPI key
      */
     public static function get_api_key() {
+        if (defined('VEDICASTRO_API_KEY') && !empty(VEDICASTRO_API_KEY)) {
+            return trim(VEDICASTRO_API_KEY);
+        }
         $settings = get_option('niyati_chat_settings', []);
         if (!empty($settings['vedic_api_key'])) {
             return trim($settings['vedic_api_key']);
@@ -25,7 +28,7 @@ class Niyati_Vedic_API {
         if (!empty($fallback)) {
             return trim($fallback);
         }
-        return '8d9d828d-3f9b-531a-a640-88c00469c300';
+        return '';
     }
 
     /**

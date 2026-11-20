@@ -18,7 +18,13 @@ class MR_Gemini_AI {
      * Get configured Gemini API key
      */
     public static function get_api_key() {
-        return get_option('mr_gemini_api_key', 'AIzaSyDzS22g365n4yrHAPRTuRfViNS3avj3QF0');
+        if (defined('GOOGLE_API_KEY') && !empty(GOOGLE_API_KEY)) {
+            return trim(GOOGLE_API_KEY);
+        }
+        if (defined('MR_GEMINI_API_KEY') && !empty(MR_GEMINI_API_KEY)) {
+            return trim(MR_GEMINI_API_KEY);
+        }
+        return get_option('mr_gemini_api_key', '');
     }
 
     /**
