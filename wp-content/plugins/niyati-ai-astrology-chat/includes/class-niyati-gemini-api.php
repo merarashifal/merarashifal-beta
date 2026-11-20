@@ -10,7 +10,7 @@ if (!defined('ABSPATH')) {
 
 class Niyati_Gemini_API {
 
-    const DEFAULT_MODEL = 'gemini-3.5-flash-lite';
+    const DEFAULT_MODEL = 'gemini-3.1-flash-lite';
 
     /**
      * Get Gemini API Key
@@ -26,11 +26,15 @@ class Niyati_Gemini_API {
     }
 
     /**
-     * Get Model
+     * Get Model (whitelisted to ultra-fast sub-5s models only)
      */
     public static function get_model() {
         $settings = get_option('niyati_chat_settings', []);
-        return !empty($settings['gemini_model']) ? trim($settings['gemini_model']) : self::DEFAULT_MODEL;
+        $mdl = !empty($settings['gemini_model']) ? trim($settings['gemini_model']) : self::DEFAULT_MODEL;
+        if (in_array($mdl, ['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', 'gemini-flash-lite-latest'], true)) {
+            return $mdl;
+        }
+        return self::DEFAULT_MODEL;
     }
 
     /**
@@ -400,7 +404,7 @@ PROMPT;
             'generationConfig'   => [
                 'temperature'     => 0.7,
                 'topP'            => 0.9,
-                'maxOutputTokens' => 800
+                'maxOutputTokens' => 350
             ],
             'safetySettings'     => [
                 ['category' => 'HARM_CATEGORY_HARASSMENT', 'threshold' => 'BLOCK_MEDIUM_AND_ABOVE'],
@@ -410,7 +414,7 @@ PROMPT;
             ]
         ];
 
-        $candidate_models = array_unique([$model, 'gemini-3.5-flash-lite', 'gemini-3.5-flash', 'gemini-3.8-flash', 'gemini-3.1-flash-lite']);
+        $candidate_models = array_unique([$model, 'gemini-3.1-flash-lite', 'gemini-3.5-flash-lite']);
         $last_error = '';
 
         foreach ($candidate_models as $cand_model) {
@@ -422,7 +426,7 @@ PROMPT;
                     'x-goog-api-key' => $api_key
                 ],
                 'body'    => wp_json_encode($payload),
-                'timeout' => 20
+                'timeout' => 8
             ]);
 
             if (is_wp_error($response)) {
@@ -555,16 +559,19 @@ PROMPT;
             ]
         ];
 
-        $candidate_models = array_unique([$model, 'gemini-3.5-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-3.8-flash']);
+        $candidate_models = array_unique([$model, 'gemini-3.1-flash-lite', 'gemini-3.5-flash-lite']);
         $last_error = '';
 
         foreach ($candidate_models as $cand_model) {
             $url = 'https://generativelanguage.googleapis.com/v1beta/models/' . urlencode($cand_model) . ':generateContent?key=' . urlencode($api_key);
 
             $response = wp_remote_post($url, [
-                'headers' => ['Content-Type' => 'application/json'],
+                'headers' => [
+                    'Content-Type'   => 'application/json',
+                    'x-goog-api-key' => $api_key
+                ],
                 'body'    => wp_json_encode($payload),
-                'timeout' => 30
+                'timeout' => 12
             ]);
 
             if (is_wp_error($response)) {
@@ -695,7 +702,7 @@ PROMPT;
         ];
 
         // Models that support multimodal audio input - fastest first!
-        $candidate_models = ['gemini-3.5-flash-lite', 'gemini-3.5-flash', 'gemini-3.8-flash', 'gemini-3.1-flash-lite'];
+        $candidate_models = ['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite'];
         $last_error = '';
 
         foreach ($candidate_models as $cand_model) {
