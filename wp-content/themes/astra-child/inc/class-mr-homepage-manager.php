@@ -249,21 +249,115 @@ class MR_Homepage_Manager {
 
         $name_en_clean = trim($name_en);
         $name_hi_clean = trim($name_hi);
+        $name_en_lower = strtolower($name_en_clean);
 
-        // 1. Search for a published post in wp_posts
+        // 1. Canonical Ekadashi article resolver (prevents incorrect link targets)
+        if (stripos($name_en_clean, 'ekadashi') !== false || stripos($name_hi_clean, 'एकादशी') !== false) {
+            // Specific check for Putrada Ekadashi
+            if (stripos($name_en_lower, 'putrada') !== false || stripos($name_hi_clean, 'पुत्रदा') !== false) {
+                if (stripos($name_en_lower, 'pausha') !== false || stripos($name_en_lower, 'paush') !== false || stripos($name_hi_clean, 'पौष') !== false) {
+                    $p_id = 652; // Pausha Shukla Putrada Ekadashi
+                } else {
+                    $p_id = 633; // Shravana Shukla Putrada Ekadashi
+                }
+                $p = get_post($p_id);
+                if ($p && $p->post_status === 'publish') {
+                    return [
+                        'url'   => get_permalink($p_id),
+                        'type'  => 'article',
+                        'title' => $p->post_title,
+                    ];
+                }
+            }
+
+            // Specific check for Papankusha Ekadashi
+            if (stripos($name_en_lower, 'papankusha') !== false || stripos($name_hi_clean, 'पापांकुशा') !== false) {
+                $p_id = 642; // Papankusha Ekadashi Vrat Katha
+                $p = get_post($p_id);
+                if ($p && $p->post_status === 'publish') {
+                    return [
+                        'url'   => get_permalink($p_id),
+                        'type'  => 'article',
+                        'title' => $p->post_title,
+                    ];
+                }
+            }
+
+            // Other canonical Ekadashis
+            $ek_id_map = [
+                'nirjala'    => 4251,
+                'padmini'    => 3653,
+                'parama'     => 3944,
+                'dev-prabodhini' => 645,
+                'prabodhini' => 645,
+                'devutthana' => 645,
+                'dev-uthani' => 2306,
+                'devshayani' => 609,
+                'aja'        => 2659,
+                'apara'      => 2644,
+                'kamada'     => 580,
+                'kamika'     => 2650,
+                'mohini'     => 585,
+                'mokshada'   => 649,
+                'papmochani' => 2637,
+                'papamochani' => 2637,
+                'saphala'    => 2675,
+                'utpanna'    => 2671,
+                'vamana'     => 639,
+                'varuthini'  => 2640,
+                'vijaya'     => 2928,
+                'yogini'     => 2647,
+                'indira'     => 2662,
+            ];
+
+            foreach ($ek_id_map as $key => $target_id) {
+                if (stripos($name_en_lower, $key) !== false) {
+                    $p = get_post($target_id);
+                    if ($p && $p->post_status === 'publish') {
+                        return [
+                            'url'   => get_permalink($target_id),
+                            'type'  => 'article',
+                            'title' => $p->post_title,
+                        ];
+                    }
+                }
+            }
+
+            // Check Rama Ekadashi (excluding Parama)
+            if (stripos($name_en_lower, 'rama') !== false && stripos($name_en_lower, 'parama') === false) {
+                $p = get_post(2668);
+                if ($p && $p->post_status === 'publish') {
+                    return [
+                        'url'   => get_permalink(2668),
+                        'type'  => 'article',
+                        'title' => $p->post_title,
+                    ];
+                }
+            }
+        }
+
+        // Clean names for broader regex search (stripping parenthetical notes like '(Pavitropana)', '(Gurpurab)')
+        $name_en_stripped = trim(preg_replace('/\s*\(.*?\)/', '', $name_en_clean));
+        $name_hi_stripped = trim(preg_replace('/\s*\(.*?\)/', '', $name_hi_clean));
+
+        // 2. Search for a published post in wp_posts
         $post = $wpdb->get_row($wpdb->prepare(
             "SELECT ID, post_title, post_name FROM {$wpdb->posts} 
              WHERE post_status = 'publish' AND post_type = 'post' 
              AND (
                  post_title LIKE %s 
                  OR post_title LIKE %s 
+                 OR post_title LIKE %s 
+                 OR post_name LIKE %s 
                  OR post_name LIKE %s 
                  OR post_name = %s
              ) 
              LIMIT 1",
             '%' . $wpdb->esc_like($name_en_clean) . '%',
-            (!empty($name_hi_clean) ? '%' . $wpdb->esc_like($name_hi_clean) . '%' : '%nomatch%'),
+            (!empty($name_en_stripped) ? '%' . $wpdb->esc_like($name_en_stripped) . '%' : '%nomatch%'),
+            (!empty($name_hi_stripped) ? '%' . $wpdb->esc_like($name_hi_stripped) . '%' : '%nomatch%'),
             '%' . $wpdb->esc_like(sanitize_title($name_en_clean)) . '%',
+            (!empty($name_en_stripped) ? '%' . $wpdb->esc_like(sanitize_title($name_en_stripped)) . '%' : '%nomatch%'),
             sanitize_title($name_en_clean)
         ), ARRAY_A);
 

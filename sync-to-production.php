@@ -134,6 +134,61 @@ $authorized = $is_admin || (isset($_GET['token']) && $_GET['token'] === 'mr_depl
             echo "<div class='log-success'><strong>[DB CLEANUP]:</strong> Cleaned {$deleted} legacy plaintext key options from database.</div>\n";
         }
 
+        // 4. Update Snippet 67 typos (Deity, Samvat) & smart links in DB
+        $snippets_table = $wpdb->prefix . 'snippets';
+        if ($wpdb->get_var("SHOW TABLES LIKE '$snippets_table'") === null) {
+            $snippets_table = 'af_snippets';
+        }
+        if ($wpdb->get_var("SHOW TABLES LIKE '$snippets_table'") !== null) {
+            $snip67 = $wpdb->get_row("SELECT id, name, code FROM {$snippets_table} WHERE id = 67", ARRAY_A);
+            if ($snip67) {
+                $code = $snip67['code'];
+                $mod = false;
+                if (strpos($code, 'Diety:') !== false) {
+                    $code = str_replace('Diety:', 'Deity:', $code);
+                    $mod = true;
+                }
+                if (strpos($code, 'Samvaat Details') !== false) {
+                    $code = str_replace('Samvaat Details', 'Samvat Details', $code);
+                    $mod = true;
+                }
+                if (strpos($code, "'https://merarashifal.com/ekadashi'") !== false && strpos($code, 'get_festival_smart_link') === false) {
+                    $code = str_replace(
+                        "\$ek_url = !empty(\$ek_row->url) ? esc_url(\$ek_row->url) : 'https://merarashifal.com/ekadashi';",
+                        "\$ek_url = !empty(\$ek_row->url) ? esc_url(\$ek_row->url) : (class_exists('MR_Homepage_Manager') ? esc_url(MR_Homepage_Manager::get_festival_smart_link(\$ek_row->ekadashi_name)['url']) : 'https://merarashifal.com/ekadashi');",
+                        $code
+                    );
+                    $mod = true;
+                }
+                if ($mod) {
+                    $wpdb->update($snippets_table, ['code' => $code], ['id' => 67]);
+                    echo "<div class='log-success'><strong>[SNIPPET 67]:</strong> Corrected typos ('Deity', 'Samvat') & enabled smart links.</div>\n";
+                }
+            }
+        }
+
+        // 5. Update af_ekadashi canonical URLs in DB
+        $ek_table = $wpdb->prefix . 'ekadashi';
+        if ($wpdb->get_var("SHOW TABLES LIKE '$ek_table'") === null) {
+            $ek_table = 'af_ekadashi';
+        }
+        if ($wpdb->get_var("SHOW TABLES LIKE '$ek_table'") !== null) {
+            $ek_rows = $wpdb->get_results("SELECT id, ekadashi_name, url FROM {$ek_table}", ARRAY_A);
+            $ek_up = 0;
+            foreach ($ek_rows as $er) {
+                if (class_exists('MR_Homepage_Manager')) {
+                    $resolved = MR_Homepage_Manager::get_festival_smart_link($er['ekadashi_name']);
+                    if (!empty($resolved['url']) && $resolved['type'] === 'article' && $er['url'] !== $resolved['url']) {
+                        $wpdb->update($ek_table, ['url' => $resolved['url']], ['id' => $er['id']]);
+                        $ek_up++;
+                    }
+                }
+            }
+            if ($ek_up > 0) {
+                echo "<div class='log-success'><strong>[EKADASHI DB]:</strong> Synced {$ek_up} canonical article URLs in {$ek_table}.</div>\n";
+            }
+        }
+
         $sync_targets = [
             'wp-content/plugins/mr-subscription-reports',
             'wp-content/plugins/mr-content-bot',
@@ -141,6 +196,7 @@ $authorized = $is_admin || (isset($_GET['token']) && $_GET['token'] === 'mr_depl
             'wp-content/themes/astra-child',
             'merarashifal-logo.png',
             'fix-pending-order.php',
+            'sync-homepage-db.php',
             'purge-cache.php',
             'check-integrity.php',
             'robots.txt',

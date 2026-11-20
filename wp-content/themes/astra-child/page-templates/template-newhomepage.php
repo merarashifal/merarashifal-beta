@@ -20,7 +20,7 @@ if (!$live_panchang) {
 $tithi_display     = !empty($live_panchang['tithi_name']) ? ($live_panchang['tithi_type'] . ' ' . $live_panchang['tithi_name']) : 'कार्तिक शुक्ल एकादशी';
 $nakshatra_display = !empty($live_panchang['nakshatra_name']) ? $live_panchang['nakshatra_name'] : 'उत्तराषाढ़ा';
 $nakshatra_lord    = !empty($live_panchang['nakshatra_lord']) ? $live_panchang['nakshatra_lord'] : 'सूर्य';
-$nakshatra_diety   = !empty($live_panchang['nakshatra_diety']) ? $live_panchang['nakshatra_diety'] : 'विश्वेदेवस';
+$nakshatra_deity   = !empty($live_panchang['nakshatra_deity']) ? $live_panchang['nakshatra_deity'] : (!empty($live_panchang['nakshatra_diety']) ? $live_panchang['nakshatra_diety'] : 'विश्वेदेवस');
 $yoga_display      = !empty($live_panchang['yoga_name']) ? $live_panchang['yoga_name'] : 'सिद्धि';
 $karana_display    = !empty($live_panchang['karana_name']) ? $live_panchang['karana_name'] : 'कौलव';
 $sun_zodiac        = !empty($live_panchang['sun_zodiac']) ? $live_panchang['sun_zodiac'] : 'तुला (Libra)';
@@ -737,30 +737,42 @@ foreach ($ordered_sections as $section_id => $sec_data) {
             break;
 
         /* ==========================================================
-         * 5. UPCOMING VRATS & FESTIVALS (Drik Engine)
-         * ========================================================== */
+        /* --------------------------------------------------
+         * 5. UPCOMING VRATS & FESTIVALS (Drik Engine - Dynamic af_festivals)
+         * -------------------------------------------------- */
         case 'festivals_calendar':
-            $items_limit = !empty($sec_data['items_count']) ? intval($sec_data['items_count']) : 4;
-            $cta_text    = 'View Full 2026-2027 Calendar';
-            $cta_url     = !empty($sec_data['cta_url']) ? $sec_data['cta_url'] : home_url('/festivals/');
+            $items_limit        = !empty($sec_data['items_count']) ? intval($sec_data['items_count']) : 4;
+            $month_end_date     = date('Y-m-t', strtotime($today_str));
+            $current_month_name = date('F Y', strtotime($today_str));
+            $cta_text           = 'View ' . $current_month_name . ' Calendar';
+            $cta_url            = !empty($sec_data['cta_url']) ? $sec_data['cta_url'] : home_url('/festivals/');
 
+            // Dynamic current-month dates query from af_festivals
             $upcoming_festivals = $wpdb->get_results($wpdb->prepare(
-                "SELECT * FROM af_mr_content_festivals 
-                 WHERE coverage_status = 'active' 
-                 AND tier <= 4 
-                 AND festival_date >= %s 
-                 ORDER BY festival_date ASC, tier ASC 
+                "SELECT id, festival_date, festival_eng_1, festival_hin_1, tithi_eng, tithi_hin, event_category 
+                 FROM af_festivals 
+                 WHERE festival_date >= %s 
+                   AND festival_date <= %s 
+                   AND festival_eng_1 IS NOT NULL 
+                   AND TRIM(festival_eng_1) != '' 
+                 ORDER BY festival_date ASC 
                  LIMIT %d",
                 $today_str,
+                $month_end_date,
                 $items_limit
             ), ARRAY_A);
 
-            if (empty($upcoming_festivals)) {
+            // If remaining days in current month have fewer than $items_limit, expand query across next 45 days
+            if (empty($upcoming_festivals) || count($upcoming_festivals) < $items_limit) {
                 $upcoming_festivals = $wpdb->get_results($wpdb->prepare(
-                    "SELECT * FROM af_mr_content_festivals 
-                     WHERE coverage_status = 'active' 
-                     ORDER BY festival_date DESC 
+                    "SELECT id, festival_date, festival_eng_1, festival_hin_1, tithi_eng, tithi_hin, event_category 
+                     FROM af_festivals 
+                     WHERE festival_date >= %s 
+                       AND festival_eng_1 IS NOT NULL 
+                       AND TRIM(festival_eng_1) != '' 
+                     ORDER BY festival_date ASC 
                      LIMIT %d",
+                    $today_str,
                     $items_limit
                 ), ARRAY_A);
             }
@@ -786,17 +798,34 @@ foreach ($ordered_sections as $section_id => $sec_data) {
 
               <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
                 <?php foreach ($upcoming_festivals as $fest): 
-                    $f_en = $fest['festival_name_en'];
-                    $f_hi = $fest['festival_name_hi'];
-                    $f_date = !empty($fest['festival_date']) ? strtotime($fest['festival_date']) : time();
-                    $f_tier = intval($fest['tier'] ?? 3);
+                    $f_en     = !empty($fest['festival_eng_1']) ? $fest['festival_eng_1'] : ($fest['festival_name_en'] ?? '');
+                    $f_hi     = !empty($fest['festival_hin_1']) ? $fest['festival_hin_1'] : ($fest['festival_name_hi'] ?? '');
+                    $f_date   = !empty($fest['festival_date']) ? strtotime($fest['festival_date']) : time();
+                    $f_cat    = strtolower($fest['event_category'] ?? '');
+                    $tithi_hi = !empty($fest['tithi_hin']) ? $fest['tithi_hin'] : '';
+                    $tithi_en = !empty($fest['tithi_eng']) ? $fest['tithi_eng'] : '';
 
-                    $resolved = MR_Homepage_Manager::get_festival_smart_link($f_en, $f_hi);
-                    $dest_url = $resolved['url'];
+                    $resolved   = MR_Homepage_Manager::get_festival_smart_link($f_en, $f_hi);
+                    $dest_url   = $resolved['url'];
                     $is_article = ($resolved['type'] === 'article');
 
-                    $tier_badge = ($f_tier === 1) ? 'Featured Grand Festival' : (($f_tier === 2) ? 'Upcoming Parva' : 'Sacred Vrat');
-                    $is_featured = ($f_tier === 1);
+                    // Determine tier badge based on category
+                    if ($f_cat === 'major') {
+                        $tier_badge  = 'Featured Grand Parva';
+                        $is_featured = true;
+                    } elseif ($f_cat === 'ekadashi') {
+                        $tier_badge  = 'Sacred Ekadashi Vrat';
+                        $is_featured = true;
+                    } elseif ($f_cat === 'pradosh') {
+                        $tier_badge  = 'Pradosh Vrat';
+                        $is_featured = false;
+                    } elseif ($f_cat === 'fasting') {
+                        $tier_badge  = 'Auspicious Vrat';
+                        $is_featured = false;
+                    } else {
+                        $tier_badge  = 'Upcoming Parva';
+                        $is_featured = false;
+                    }
                 ?>
                   <div class="golden-card p-5 flex flex-col justify-between relative <?php echo $is_featured ? 'border-2 border-primary-container ring-1 ring-primary-container/30' : ''; ?>">
                     <?php if ($is_featured): ?>
@@ -814,12 +843,15 @@ foreach ($ordered_sections as $section_id => $sec_data) {
                       </div>
 
                       <h3 class="font-serif text-lg font-bold text-primary pt-1 leading-snug">
-                        <?php echo esc_html($f_en); ?> <span class="text-sm font-semibold text-secondary">(<?php echo esc_html($f_hi); ?>)</span>
+                        <?php echo esc_html($f_en); ?> <?php if ($f_hi): ?><span class="text-sm font-semibold text-secondary">(<?php echo esc_html($f_hi); ?>)</span><?php endif; ?>
                       </h3>
 
                       <div class="text-xs font-bold text-on-surface flex items-center gap-1.5 pt-0.5">
                         <span class="material-symbols-outlined text-xs text-primary-container">calendar_month</span>
                         <span><?php echo date('d M Y', $f_date); ?></span>
+                        <?php if ($tithi_hi || $tithi_en): ?>
+                          <span class="text-secondary font-semibold text-[11px]">• <?php echo esc_html($tithi_hi ?: $tithi_en); ?></span>
+                        <?php endif; ?>
                       </div>
 
                       <p class="text-xs text-on-surface-variant leading-relaxed line-clamp-3">
