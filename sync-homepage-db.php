@@ -567,6 +567,79 @@ global $wpdb;
         echo "<div class='log-success'>✅ [PAGE 2538]: Updated Shubh Muhurat Dates hub with 2027 cards and single H1.</div>\n";
     }
 
+    // ---------------------------------------------------------
+    // 8. UPGRADE SNIPPETS FOR GOOGLE MAPS API KEY (13, 14, 30, 46, 69, 70, 73, 74, 84)
+    // ---------------------------------------------------------
+    $maps_updated = 0;
+    
+    // Snippet 13
+    $r13 = $wpdb->get_row("SELECT id, code FROM {$snippets_table} WHERE id = 13", ARRAY_A);
+    if ($r13 && strpos($r13['code'], '$mr_maps_key') === false) {
+        $c = $r13['code'];
+        $c = str_replace(
+            "if (!defined('GOOGLE_API_KEY') || !GOOGLE_API_KEY) return;",
+            "\$mr_maps_key = defined('GOOGLE_MAPS_API_KEY') && !empty(GOOGLE_MAPS_API_KEY) ? GOOGLE_MAPS_API_KEY : (defined('GOOGLE_API_KEY') ? GOOGLE_API_KEY : '');\n    if (empty(\$mr_maps_key)) return;",
+            $c
+        );
+        $c = str_replace(
+            "\$inline_js = str_replace('GOOGLE_API_KEY_TOKEN', json_encode(GOOGLE_API_KEY), \$inline_js);",
+            "\$inline_js = str_replace('GOOGLE_API_KEY_TOKEN', json_encode(\$mr_maps_key), \$inline_js);",
+            $c
+        );
+        $wpdb->update($snippets_table, ['code' => $c], ['id' => 13]);
+        $maps_updated++;
+    }
+
+    // Snippet 14
+    $r14 = $wpdb->get_row("SELECT id, code FROM {$snippets_table} WHERE id = 14", ARRAY_A);
+    if ($r14 && strpos($r14['code'], 'rawurlencode(GOOGLE_API_KEY)') !== false) {
+        $c = str_replace(
+            'rawurlencode(GOOGLE_API_KEY)',
+            "rawurlencode(defined('GOOGLE_MAPS_API_KEY') && !empty(GOOGLE_MAPS_API_KEY) ? GOOGLE_MAPS_API_KEY : (defined('GOOGLE_API_KEY') ? GOOGLE_API_KEY : ''))",
+            $r14['code']
+        );
+        $wpdb->update($snippets_table, ['code' => $c], ['id' => 14]);
+        $maps_updated++;
+    }
+
+    // Snippet 30
+    $r30 = $wpdb->get_row("SELECT id, code FROM {$snippets_table} WHERE id = 30", ARRAY_A);
+    if ($r30 && strpos($r30['code'], 'GOOGLE_MAPS_API_KEY') === false) {
+        $c = str_replace(
+            "\$google_key = defined('GOOGLE_API_KEY') ? GOOGLE_API_KEY : 'YOUR_GOOGLE_KEY';",
+            "\$google_key = defined('GOOGLE_MAPS_API_KEY') && !empty(GOOGLE_MAPS_API_KEY) ? GOOGLE_MAPS_API_KEY : (defined('GOOGLE_API_KEY') ? GOOGLE_API_KEY : 'YOUR_GOOGLE_KEY');",
+            $r30['code']
+        );
+        $wpdb->update($snippets_table, ['code' => $c], ['id' => 30]);
+        $maps_updated++;
+    }
+
+    // Snippet 46
+    $r46 = $wpdb->get_row("SELECT id, code FROM {$snippets_table} WHERE id = 46", ARRAY_A);
+    if ($r46 && strpos($r46['code'], 'GOOGLE_MAPS_API_KEY') === false) {
+        $old46 = "if (!defined('GOOGLE_API_KEY')) wp_die('// Missing GOOGLE_API_KEY');\n    \$url = \"https://maps.googleapis.com/maps/api/js?key=\" . GOOGLE_API_KEY . \"&libraries=places\";";
+        $new46 = "\$google_key = defined('GOOGLE_MAPS_API_KEY') && !empty(GOOGLE_MAPS_API_KEY) ? GOOGLE_MAPS_API_KEY : (defined('GOOGLE_API_KEY') ? GOOGLE_API_KEY : '');\n    if (empty(\$google_key)) wp_die('// Missing GOOGLE_MAPS_API_KEY');\n    \$url = \"https://maps.googleapis.com/maps/api/js?key=\" . \$google_key . \"&libraries=places\";";
+        $c = str_replace($old46, $new46, $r46['code']);
+        $wpdb->update($snippets_table, ['code' => $c], ['id' => 46]);
+        $maps_updated++;
+    }
+
+    // Snippets 69, 70, 73, 74, 84
+    $engine_ids = [69, 70, 73, 74, 84];
+    foreach ($engine_ids as $eid) {
+        $row = $wpdb->get_row("SELECT id, code FROM {$snippets_table} WHERE id = {$eid}", ARRAY_A);
+        if ($row && strpos($row['code'], 'GOOGLE_MAPS_API_KEY') === false) {
+            $c = str_replace(
+                "\$google_key = defined('GOOGLE_API_KEY') ? GOOGLE_API_KEY : '';",
+                "\$google_key = defined('GOOGLE_MAPS_API_KEY') && !empty(GOOGLE_MAPS_API_KEY) ? GOOGLE_MAPS_API_KEY : (defined('GOOGLE_API_KEY') ? GOOGLE_API_KEY : '');",
+                $row['code']
+            );
+            $wpdb->update($snippets_table, ['code' => $c], ['id' => $eid]);
+            $maps_updated++;
+        }
+    }
+    echo "<div class='log-success'>✅ [GOOGLE MAPS SNIPPETS]: Verified/Synced {$maps_updated} snippets (13, 14, 30, 46, 69, 70, 73, 74, 84) to use GOOGLE_MAPS_API_KEY.</div>\n";
+
     // Flush OPcache
     if (function_exists('opcache_reset')) {
         @opcache_reset();
