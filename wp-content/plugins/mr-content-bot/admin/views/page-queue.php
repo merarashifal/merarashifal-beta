@@ -11,15 +11,19 @@ global $wpdb;
 $t_queue = MRCB_DB_Setup::table_queue();
 $t_fest  = MRCB_DB_Setup::table_festivals();
 
+// Automatically purge expired unapproved drafts whose festival/event date has passed
+MRCB_Scheduler::cleanup_expired_posts();
+
+$today = current_time( 'Y-m-d' );
+
 // Filter - default to pending_review so unapproved drafts stay in this workspace until approved
 $status_filter = isset( $_GET['status'] ) ? sanitize_text_field( $_GET['status'] ) : 'pending_review';
-$where = '1=1';
+$where = "1=1 AND (q.scheduled_date >= '{$today}' OR q.admin_status = 'published')";
 if ( $status_filter !== 'all' && ! empty( $status_filter ) ) {
     $where .= $wpdb->prepare( " AND q.admin_status = %s", $status_filter );
 }
 
-// Fetch queue items - pending_review drafts always stay visible until reviewed/approved
-$today = current_time( 'Y-m-d' );
+// Fetch queue items - current & future posts, plus published items
 $date_where = '';
 if ( $status_filter === 'published' ) {
     $date_where = " AND q.scheduled_date >= DATE_SUB('{$today}', INTERVAL 30 DAY)";
@@ -30,15 +34,16 @@ $items = $wpdb->get_results(
      FROM {$t_queue} q
      LEFT JOIN {$t_fest} f ON q.festival_id = f.id
      WHERE {$where} {$date_where}
-     ORDER BY q.scheduled_date ASC
+     ORDER BY q.scheduled_date ASC, q.publish_time ASC
      LIMIT 100",
     ARRAY_A
 );
 
-// Metrics
+// Metrics (only active/future posts + published posts)
 $counts = $wpdb->get_results(
     "SELECT admin_status, COUNT(*) as cnt 
      FROM {$t_queue} 
+     WHERE (scheduled_date >= '{$today}' OR admin_status = 'published')
      GROUP BY admin_status",
     ARRAY_A
 );
@@ -53,18 +58,18 @@ foreach ( $counts as $c ) {
     <div class="mrcb-header">
         <div class="mrcb-header-title">
             <h1>✍️ MeraRashifal Content Bot — Content Queue</h1>
-            <p class="mrcb-subtitle">Unapproved drafts stay in this staging area until reviewed &bull; Approved posts are scheduled directly in <strong>WordPress Posts &gt; Scheduled</strong></p>
+            <p class="mrcb-subtitle">Daily schedule guaranteed (7:00 AM primary + 9:00 AM secondary) &bull; Expired past drafts auto-removed &bull; Approved posts schedule in <strong>WordPress Posts &gt; Scheduled</strong></p>
         </div>
         <div class="mrcb-header-actions">
+            <button id="mrcb-btn-ensure-schedule" class="button button-primary" style="margin-right: 8px;">
+                ⚡ Ensure 14-Day Schedule
+            </button>
             <button id="mrcb-btn-sync-wp" class="button" style="margin-right: 8px;">
                 🔄 Sync to WP Posts
             </button>
-            <a href="<?php echo admin_url( 'edit.php?post_status=future' ); ?>" class="button button-secondary" target="_blank" style="margin-right: 8px;">
+            <a href="<?php echo admin_url( 'edit.php?post_status=future' ); ?>" class="button button-secondary" target="_blank">
                 📋 View WP Scheduled Posts (<?php echo $metrics['approved']; ?>)
             </a>
-            <button id="mrcb-trigger-advance-cron" class="button button-primary">
-                ⚡ Generate for Day+10 Now
-            </button>
         </div>
     </div>
 
@@ -152,6 +157,10 @@ foreach ( $counts as $c ) {
                     <tr data-id="<?php echo esc_attr( $it['id'] ); ?>">
                         <td>
                             <strong><?php echo esc_html( wp_date( 'd M Y', strtotime( $it['scheduled_date'] ) ) ); ?></strong>
+                            <br>
+                            <span class="mrcb-time-badge" style="display:inline-block; margin:3px 0; padding:2px 6px; font-size:11px; background:#e0f2fe; color:#0369a1; border-radius:4px; font-weight:600;">
+                                ⏰ <?php echo esc_html( wp_date( 'h:i A', strtotime( $it['publish_time'] ?: '07:00:00' ) ) ); ?>
+                            </span>
                             <br><?php echo $timing_label; ?>
                         </td>
                         <td>

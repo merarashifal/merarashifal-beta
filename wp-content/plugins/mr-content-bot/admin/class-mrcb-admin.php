@@ -27,6 +27,7 @@ class MRCB_Admin {
         add_action( 'wp_ajax_mrcb_save_filler', [ __CLASS__, 'ajax_save_filler' ] );
         add_action( 'wp_ajax_mrcb_delete_filler', [ __CLASS__, 'ajax_delete_filler' ] );
         add_action( 'wp_ajax_mrcb_sync_to_wp', [ __CLASS__, 'ajax_sync_to_wp' ] );
+        add_action( 'wp_ajax_mrcb_ensure_daily_schedule', [ __CLASS__, 'ajax_ensure_daily_schedule' ] );
     }
 
     /**
@@ -470,6 +471,20 @@ class MRCB_Admin {
             'message' => $count > 0 
                 ? "Successfully synchronized {$count} approved post(s) into WordPress Posts > Scheduled!" 
                 : "All approved posts are already scheduled in WordPress!"
+        ] );
+    }
+
+    public static function ajax_ensure_daily_schedule() {
+        check_ajax_referer( 'mrcb_admin_nonce', 'nonce' );
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => 'Unauthorized' ] );
+        }
+
+        $cleaned = MRCB_Scheduler::cleanup_expired_posts();
+        $res = MRCB_Scheduler::ensure_daily_schedule_coverage( 14, false );
+
+        wp_send_json_success( [
+            'message' => "Schedule coverage verified for next 14 days! (Stale expired drafts cleaned: {$cleaned})"
         ] );
     }
 }

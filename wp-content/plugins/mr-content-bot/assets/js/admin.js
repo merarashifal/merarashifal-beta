@@ -368,6 +368,29 @@
             });
         });
 
+        // 14. Ensure 14-Day Daily Schedule Coverage
+        $('#mrcb-btn-ensure-schedule').on('click', function(e) {
+            e.preventDefault();
+            var $btn = $(this);
+            var originalText = $btn.text();
+            $btn.prop('disabled', true).text('⏳ Verifying 14-Day Schedule...');
+            $.post(mrcbConfig.ajax_url, {
+                action: 'mrcb_ensure_daily_schedule',
+                nonce: mrcbConfig.nonce
+            }, function(res) {
+                if (res.success) {
+                    alert('✅ ' + res.data.message);
+                    window.location.reload();
+                } else {
+                    alert('❌ ' + (res.data.message || 'Schedule verification failed.'));
+                    $btn.prop('disabled', false).text(originalText);
+                }
+            }).fail(function() {
+                alert('❌ Server error while verifying schedule.');
+                $btn.prop('disabled', false).text(originalText);
+            });
+        });
+
     });
 
 })(jQuery);

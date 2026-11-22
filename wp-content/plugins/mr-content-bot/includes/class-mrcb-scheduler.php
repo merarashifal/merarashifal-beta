@@ -44,13 +44,246 @@ class MRCB_Scheduler {
     }
 
     /**
-     * Main nightly routine: look 10 days ahead and prepare draft
+     * Main nightly routine: cleans expired posts and guarantees complete 14-day schedule coverage
      */
     public static function run_nightly_generation() {
-        $advance_days = defined( 'MRCB_ADVANCE_DAYS' ) ? MRCB_ADVANCE_DAYS : 10;
-        $target_date = wp_date( 'Y-m-d', strtotime( "+{$advance_days} days" ) );
+        $advance_days = defined( 'MRCB_ADVANCE_DAYS' ) ? (int) MRCB_ADVANCE_DAYS : 14;
+        self::cleanup_expired_posts();
+        return self::ensure_daily_schedule_coverage( $advance_days, true );
+    }
 
-        return self::ensure_content_for_date( $target_date );
+    /**
+     * Clean up unapproved drafts whose scheduled date has expired.
+     * Stale past festival drafts have no relevance and are removed from the queue.
+     */
+    public static function cleanup_expired_posts() {
+        global $wpdb;
+        $t_queue = MRCB_DB_Setup::table_queue();
+        $today   = current_time( 'Y-m-d' );
+
+        $deleted = $wpdb->query(
+            $wpdb->prepare(
+                "DELETE FROM {$t_queue} 
+                 WHERE scheduled_date < %s 
+                   AND (admin_status IN ('pending_review', 'rejected') OR (admin_status = 'approved' AND (wp_post_id IS NULL OR wp_post_id = 0)))",
+                $today
+            )
+        );
+
+        return (int) $deleted;
+    }
+
+    /**
+     * Find next available time slot for a date (07:00:00 or 09:00:00)
+     * Enforces maximum 2 posts per day with a 2-hour gap.
+     */
+    public static function get_next_available_slot( $preferred_date, $min_date = null, $max_date = null ) {
+        global $wpdb;
+        $t_queue = MRCB_DB_Setup::table_queue();
+
+        $today = current_time( 'Y-m-d' );
+        if ( ! $min_date || $min_date < $today ) {
+            $min_date = $today;
+        }
+
+        $target_date = $preferred_date;
+        if ( $target_date < $min_date ) {
+            $target_date = $min_date;
+        }
+        if ( $max_date && $target_date > $max_date ) {
+            $target_date = $max_date;
+        }
+
+        $date_cursor = $target_date;
+        $attempts = 0;
+
+        while ( $attempts < 20 ) {
+            $existing = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT id, publish_time FROM {$t_queue} 
+                     WHERE scheduled_date = %s AND admin_status != 'skipped' 
+                     ORDER BY publish_time ASC",
+                    $date_cursor
+                ),
+                ARRAY_A
+            );
+
+            $cnt = count( $existing );
+            if ( $cnt === 0 ) {
+                return [ 'date' => $date_cursor, 'time' => '07:00:00', 'slot' => 1 ];
+            } elseif ( $cnt === 1 ) {
+                return [ 'date' => $date_cursor, 'time' => '09:00:00', 'slot' => 2 ];
+            }
+
+            // Both slots (07:00 and 09:00) occupied on this date; try adjacent dates
+            $date_cursor = wp_date( 'Y-m-d', strtotime( '+1 day', strtotime( $date_cursor ) ) );
+            if ( $max_date && $date_cursor > $max_date ) {
+                $date_cursor = wp_date( 'Y-m-d', strtotime( '-1 day', strtotime( $target_date ) ) );
+                if ( $date_cursor < $min_date ) {
+                    break;
+                }
+            }
+            $attempts++;
+        }
+
+        return [ 'date' => $preferred_date, 'time' => '09:00:00', 'slot' => 2 ];
+    }
+
+    /**
+     * Ensure daily schedule coverage across a multi-day horizon (default 14 days)
+     * Rules:
+     * 1. Every calendar day has AT LEAST 1 post (Slot 1: 07:00:00).
+     * 2. If 2 festivals occur on that day, Slot 2 is scheduled at 09:00:00 (2-hour gap).
+     * 3. Days with no festivals are populated with evergreen topics from Filler Bank.
+     */
+    public static function ensure_daily_schedule_coverage( $days_ahead = 14, $auto_generate = false ) {
+        global $wpdb;
+        $t_fest  = MRCB_DB_Setup::table_festivals();
+        $t_queue = MRCB_DB_Setup::table_queue();
+
+        self::cleanup_expired_posts();
+
+        $today = current_time( 'Y-m-d' );
+        $today_ts = strtotime( $today );
+        $end_date = wp_date( 'Y-m-d', strtotime( "+{$days_ahead} days", $today_ts ) );
+
+        // 1. Fetch all active festivals within coverage horizon
+        $festivals = $wpdb->get_results(
+            $wpdb->prepare(
+                "SELECT * FROM {$t_fest} 
+                 WHERE coverage_status = 'active'
+                   AND tier < 5
+                   AND festival_date >= %s 
+                   AND festival_date <= %s
+                 ORDER BY festival_date ASC, tier ASC",
+                $today,
+                $end_date
+            ),
+            ARRAY_A
+        );
+
+        $festivals_by_date = [];
+        foreach ( $festivals as $f ) {
+            $festivals_by_date[ $f['festival_date'] ][] = $f;
+        }
+
+        // 2. Schedule festival posts for the festivals occurring on these dates
+        foreach ( $festivals_by_date as $f_date => $f_list ) {
+            foreach ( $f_list as $f ) {
+                // Check if this festival already has a post scheduled on this date
+                $has_post = $wpdb->get_var(
+                    $wpdb->prepare(
+                        "SELECT id FROM {$t_queue} 
+                         WHERE festival_id = %d AND scheduled_date = %s AND admin_status != 'skipped'",
+                        $f['id'],
+                        $f_date
+                    )
+                );
+                if ( $has_post ) {
+                    continue;
+                }
+
+                $slot = self::get_next_available_slot( $f_date, $today, $f_date );
+                // Only place on the festival day if slots are available (slot 1 = 07:00, slot 2 = 09:00)
+                if ( $slot['date'] !== $f_date ) {
+                    continue; // Day already reached maximum 2 posts
+                }
+
+                $year = wp_date( 'Y', strtotime( $f_date ) );
+                $fest_name_hi = $f['festival_name_hi'] ?: $f['festival_name_en'];
+                $clean_kw = class_exists( 'MRCB_Writer' )
+                    ? MRCB_Writer::sanitize_focus_keyword( "{$fest_name_hi} {$year}", $fest_name_hi )
+                    : "{$fest_name_hi} {$year}";
+
+                $title_hi = ( $slot['slot'] === 1 )
+                    ? "{$fest_name_hi} {$year}: आज का शुभ मुहूर्त, संपूर्ण पूजन विधि और आरती"
+                    : "{$fest_name_hi} {$year}: पौराणिक व्रत कथा, महत्व और विशेष उपाय";
+
+                $wpdb->insert(
+                    $t_queue,
+                    [
+                        'festival_id'       => (int) $f['id'],
+                        'post_type'         => 'festival',
+                        'topic_title_hi'    => $title_hi,
+                        'topic_angle'       => ( $slot['slot'] === 1 ) ? 'muhurat' : 'katha',
+                        'focus_keyword'     => $clean_kw,
+                        'word_count_target' => 1000,
+                        'scheduled_date'    => $f_date,
+                        'publish_time'      => $slot['time'],
+                        'admin_status'      => 'pending_review',
+                    ]
+                );
+                $new_id = $wpdb->insert_id;
+
+                if ( $auto_generate && class_exists( 'MRCB_Writer' ) ) {
+                    MRCB_Writer::generate_for_queue_item( $new_id );
+                }
+            }
+        }
+
+        // 3. Ensure EVERY single day from today to end_date has at least 1 post scheduled
+        for ( $i = 0; $i <= $days_ahead; $i++ ) {
+            $cur_date = wp_date( 'Y-m-d', strtotime( "+{$i} days", $today_ts ) );
+
+            $existing_count = (int) $wpdb->get_var(
+                $wpdb->prepare(
+                    "SELECT COUNT(*) FROM {$t_queue} 
+                     WHERE scheduled_date = %s AND admin_status != 'skipped'",
+                    $cur_date
+                )
+            );
+
+            if ( $existing_count === 0 ) {
+                // Empty date: schedule an evergreen topic from the filler bank at 07:00:00
+                $filler = self::pick_filler_topic( $cur_date );
+                $clean_kw = class_exists( 'MRCB_Writer' )
+                    ? MRCB_Writer::sanitize_focus_keyword( $filler['focus_keyword'] ?: '', '', $filler['topic_title_hi'] )
+                    : $filler['focus_keyword'];
+
+                $wpdb->insert(
+                    $t_queue,
+                    [
+                        'festival_id'       => null,
+                        'post_type'         => 'filler',
+                        'topic_title_hi'    => $filler['topic_title_hi'],
+                        'topic_angle'       => $filler['topic_angle'] ?: 'guide',
+                        'focus_keyword'     => $clean_kw,
+                        'word_count_target' => 950,
+                        'scheduled_date'    => $cur_date,
+                        'publish_time'      => '07:00:00', // Slot 1: 7:00 AM
+                        'admin_status'      => 'pending_review',
+                    ]
+                );
+                $new_id = $wpdb->insert_id;
+
+                if ( $auto_generate && class_exists( 'MRCB_Writer' ) ) {
+                    MRCB_Writer::generate_for_queue_item( $new_id );
+                }
+            }
+
+            // Enforce timing slots on all posts for this date:
+            // First post is always 07:00:00; second post (if present) is always 09:00:00 (2h gap)
+            $posts_on_date = $wpdb->get_results(
+                $wpdb->prepare(
+                    "SELECT id, publish_time FROM {$t_queue} 
+                     WHERE scheduled_date = %s AND admin_status != 'skipped' 
+                     ORDER BY publish_time ASC, id ASC",
+                    $cur_date
+                ),
+                ARRAY_A
+            );
+
+            if ( ! empty( $posts_on_date ) ) {
+                if ( $posts_on_date[0]['publish_time'] !== '07:00:00' ) {
+                    $wpdb->update( $t_queue, [ 'publish_time' => '07:00:00' ], [ 'id' => $posts_on_date[0]['id'] ] );
+                }
+                if ( isset( $posts_on_date[1] ) && $posts_on_date[1]['publish_time'] !== '09:00:00' ) {
+                    $wpdb->update( $t_queue, [ 'publish_time' => '09:00:00' ], [ 'id' => $posts_on_date[1]['id'] ] );
+                }
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -68,6 +301,7 @@ class MRCB_Scheduler {
 
         // Plan content: festival or filler
         $planned = self::plan_topic_for_date( $target_date );
+        $slot    = self::get_next_available_slot( $target_date );
 
         $queue_id = 0;
         if ( $existing && $force_regenerate ) {
@@ -96,7 +330,7 @@ class MRCB_Scheduler {
                     'focus_keyword'     => $planned['focus_keyword'],
                     'word_count_target' => 950,
                     'scheduled_date'    => $target_date,
-                    'publish_time'      => '07:00:00',
+                    'publish_time'      => $slot['time'],
                     'admin_status'      => 'pending_review',
                 ],
                 [ '%d', '%s', '%s', '%s', '%s', '%d', '%s', '%s', '%s' ]
@@ -268,6 +502,7 @@ class MRCB_Scheduler {
                 }
                 $qid = $existing['id'];
             } else {
+                $slot = self::get_next_available_slot( $p['scheduled_date'], $today, $fest_date );
                 $wpdb->insert(
                     $t_queue,
                     [
@@ -279,8 +514,8 @@ class MRCB_Scheduler {
                         'focus_keyword'     => $p['focus_keyword'],
                         'word_count_target' => $p['word_count'],
                         'series_position'   => $pos,
-                        'scheduled_date'    => $p['scheduled_date'],
-                        'publish_time'      => '07:00:00',
+                        'scheduled_date'    => $slot['date'],
+                        'publish_time'      => $slot['time'],
                         'admin_status'      => 'pending_review',
                     ]
                 );
@@ -337,23 +572,23 @@ class MRCB_Scheduler {
                         'word_count'     => 1300,
                     ],
                     [
-                        'lead_days'      => 5,
+                        'lead_days'      => 4,
                         'angle'          => 'tier1_kundali_dosha',
                         'title_hi'       => "{$fest_name_hi} की रात्रि किन जातकों को अवश्य करनी चाहिए पूजा? कुंडली के शनि, राहु और कालसर्प दोष से मुक्ति के उपाय",
                         'focus_keyword'  => "{$fest_name_hi} ग्रह शांति",
                         'word_count'     => 1200,
                     ],
                     [
-                        'lead_days'      => 3,
+                        'lead_days'      => 2,
                         'angle'          => 'tier1_deity_temples',
                         'title_hi'       => "{$fest_name_hi} पर करें इन सिद्ध मंदिरों के दर्शन: इष्टदेव का अलौकिक स्वरूप और दिव्य बीज मंत्र",
                         'focus_keyword'  => "{$fest_name_hi} मंदिर",
                         'word_count'     => 1200,
                     ],
                     [
-                        'lead_days'      => 1,
+                        'lead_days'      => 0, // Day of festival
                         'angle'          => 'tier1_vidhi_katha_aarti',
-                        'title_hi'       => "{$fest_name_hi} संपूर्ण पूजन विधि, आवश्यक सामग्री लिस्ट, पौराणिक व्रत कथा और पावन आरती",
+                        'title_hi'       => "{$fest_name_hi} {$year}: आज का पावन पर्व, संपूर्ण पूजन विधि, आवश्यक सामग्री लिस्ट, व्रत कथा और आरती",
                         'focus_keyword'  => "{$fest_name_hi} पूजन विधि",
                         'word_count'     => 1500,
                     ],
@@ -362,30 +597,30 @@ class MRCB_Scheduler {
                 // 4-Post Sequence (e.g. Maha Shivratri, Janmashtami)
                 $blueprint = [
                     [
-                        'lead_days'      => 8,
+                        'lead_days'      => 7,
                         'angle'          => 'tier1_muhurat_date',
                         'title_hi'       => "{$fest_name_hi} {$year} कब है? जानें सही तारीख, चार प्रहर की पूजा का शुभ मुहूर्त और पारण समय",
                         'focus_keyword'  => "{$fest_name_hi} {$year}",
                         'word_count'     => 1200,
                     ],
                     [
-                        'lead_days'      => 5,
+                        'lead_days'      => 4,
                         'angle'          => 'tier1_kundali_dosha',
                         'title_hi'       => "{$fest_name_hi} पर राशि अनुसार करें ये अचूक उपाय: कालसर्प, साढ़ेसाती और पितृ दोष से मिलेगी मुक्ति",
                         'focus_keyword'  => "{$fest_name_hi} उपाय",
                         'word_count'     => 1300,
                     ],
                     [
-                        'lead_days'      => 3,
+                        'lead_days'      => 2,
                         'angle'          => 'tier1_deity_temples',
                         'title_hi'       => "{$fest_name_hi} पर भारत के इन सिद्ध धामों और प्रमुख मंदिरों का आध्यात्मिक महत्व और स्तुति",
                         'focus_keyword'  => "{$fest_name_hi} मंदिर",
                         'word_count'     => 1200,
                     ],
                     [
-                        'lead_days'      => 1,
+                        'lead_days'      => 0, // Day of festival
                         'angle'          => 'tier1_vidhi_katha_aarti',
-                        'title_hi'       => "{$fest_name_hi} पावन व्रत कथा, अभिषेक व पूजन विधि, सामग्री और आरती",
+                        'title_hi'       => "{$fest_name_hi} {$year}: आज का पावन पर्व, व्रत कथा, अभिषेक व पूजन विधि, सामग्री और आरती",
                         'focus_keyword'  => "{$fest_name_hi} पूजन विधि",
                         'word_count'     => 1400,
                     ],
@@ -394,23 +629,23 @@ class MRCB_Scheduler {
                 // 3-Post Sequence (e.g. Karwa Chauth, Chhath Puja, Ram Navami, Makar Sankranti)
                 $blueprint = [
                     [
-                        'lead_days'      => 7,
+                        'lead_days'      => 5,
                         'angle'          => 'tier1_muhurat_date',
                         'title_hi'       => "{$fest_name_hi} {$year} कब है? जानें सही तिथि, पूजा का शुभ मुहूर्त, अर्घ्य समय और पूजन सामग्री",
                         'focus_keyword'  => "{$fest_name_hi} {$year}",
                         'word_count'     => 1200,
                     ],
                     [
-                        'lead_days'      => 4,
+                        'lead_days'      => 2,
                         'angle'          => 'tier1_kundali_dosha',
                         'title_hi'       => "{$fest_name_hi} पर राशि अनुसार करें ये विशेष उपाय: वैवाहिक सुख, सौभाग्य और ग्रह शांति के अचूक उपाय",
                         'focus_keyword'  => "{$fest_name_hi} उपाय",
                         'word_count'     => 1300,
                     ],
                     [
-                        'lead_days'      => 1,
+                        'lead_days'      => 0, // Day of festival
                         'angle'          => 'tier1_vidhi_katha_aarti',
-                        'title_hi'       => "{$fest_name_hi} संपूर्ण पौराणिक व्रत कथा, पूजन विधि और आरती: जानें व्रत के नियम",
+                        'title_hi'       => "{$fest_name_hi} {$year}: आज का पावन पर्व, संपूर्ण पौराणिक व्रत कथा, पूजन विधि और आरती",
                         'focus_keyword'  => "{$fest_name_hi} पूजन विधि",
                         'word_count'     => 1400,
                     ],
@@ -420,16 +655,16 @@ class MRCB_Scheduler {
             // Tier 2: Secondary Festivals (Major Campaigns: 2 Posts Formula)
             $blueprint = [
                 [
-                    'lead_days'      => 5,
+                    'lead_days'      => 3,
                     'angle'          => 'tier2_practical_astrology',
-                    'title_hi'       => "{$fest_name_hi} {$year}: शुभ मुहूर्त, पूजन विधि और कुंडली के ग्रह दोष शांति के अचूक उपाय",
+                    'title_hi'       => "{$fest_name_hi} {$year}: शुभ मुहूर्त, पूजन सामग्री, आवश्यक विधि और कुंडली दोष शांति के उपाय",
                     'focus_keyword'  => "{$fest_name_hi} {$year}",
                     'word_count'     => 1300,
                 ],
                 [
-                    'lead_days'      => 2,
+                    'lead_days'      => 0, // Day of festival
                     'angle'          => 'tier2_spiritual_katha',
-                    'title_hi'       => "{$fest_name_hi} पावन व्रत कथा: पौराणिक इतिहास, इष्टदेव का स्वरूप और भारत के शीर्ष सिद्ध मंदिर",
+                    'title_hi'       => "{$fest_name_hi} पावन व्रत कथा: पौराणिक इतिहास, इष्टदेव का स्वरूप और आज के विशेष उपाय",
                     'focus_keyword'  => "{$fest_name_hi} व्रत कथा",
                     'word_count'     => 1300,
                 ],
@@ -438,9 +673,9 @@ class MRCB_Scheduler {
             // Tier 4: Regional Observances (1 Post Cultural + Jyotish Composite)
             $blueprint = [
                 [
-                    'lead_days'      => 2,
+                    'lead_days'      => 0, // Day of festival
                     'angle'          => 'tier4_regional_composite',
-                    'title_hi'       => "{$fest_name_hi} {$year}: क्षेत्रीय परंपराएं, शुभ मुहूर्त, लोककथा और नव संवत्सर का ज्योतिषीय प्रभाव",
+                    'title_hi'       => "{$fest_name_hi} {$year}: क्षेत्रीय परंपराएं, आज का शुभ मुहूर्त, लोककथा और नव संवत्सर का ज्योतिषीय प्रभाव",
                     'focus_keyword'  => "{$fest_name_hi} {$year}",
                     'word_count'     => 1300,
                 ],
@@ -449,9 +684,9 @@ class MRCB_Scheduler {
             // Tier 3 (and fallback): Regular Vrats & Observances (1 Post All-in-One Master Architecture)
             $blueprint = [
                 [
-                    'lead_days'      => 2,
+                    'lead_days'      => 0, // Day of festival
                     'angle'          => 'tier3_master_all_in_one',
-                    'title_hi'       => "{$fest_name_hi} {$year}: तिथि, शुभ मुहूर्त, पूजा विधि, संपूर्ण व्रत कथा और राशि अनुसार उपाय",
+                    'title_hi'       => "{$fest_name_hi} {$year}: आज की तिथि, शुभ मुहूर्त, पूजा विधि, संपूर्ण व्रत कथा और राशि अनुसार उपाय",
                     'focus_keyword'  => "{$fest_name_hi} {$year}",
                     'word_count'     => 1500,
                 ],
@@ -468,6 +703,10 @@ class MRCB_Scheduler {
                 $target_ts = $today_ts;
             }
             $b['scheduled_date'] = wp_date( 'Y-m-d', $target_ts );
+
+            if ( class_exists( 'MRCB_Writer' ) ) {
+                $b['focus_keyword'] = MRCB_Writer::sanitize_focus_keyword( $b['focus_keyword'], $fest_name_hi, $b['title_hi'] );
+            }
         }
 
         return $blueprint;
