@@ -12,7 +12,7 @@ if (!defined('ABSPATH')) {
 class MR_Gemini_AI {
 
     const DEFAULT_MODEL = 'gemini-3.1-flash-lite';
-    const FALLBACK_MODEL = 'gemini-flash-latest';
+    const FALLBACK_MODEL = 'gemini-3.5-flash-lite';
 
     /**
      * Get configured Gemini API key
@@ -219,7 +219,13 @@ class MR_Gemini_AI {
      * Send prompt to Gemini with JSON schema output
      */
     private static function call_gemini_json($prompt, $api_key) {
-        $models = ['gemini-3-flash-preview', 'gemini-flash-lite-latest', 'gemini-3.5-flash', 'gemini-flash-latest'];
+        $models = [
+            self::DEFAULT_MODEL,
+            self::FALLBACK_MODEL,
+            'gemini-flash-lite-latest',
+            'gemini-3.5-flash',
+            'gemini-3-flash-preview'
+        ];
 
         foreach ($models as $model) {
             $url = 'https://generativelanguage.googleapis.com/v1beta/models/' . $model . ':generateContent?key=' . urlencode($api_key);

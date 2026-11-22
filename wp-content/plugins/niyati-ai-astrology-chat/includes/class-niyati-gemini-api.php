@@ -63,7 +63,7 @@ class Niyati_Gemini_API {
     public static function get_model() {
         $settings = get_option('niyati_chat_settings', []);
         $mdl = !empty($settings['gemini_model']) ? trim($settings['gemini_model']) : self::DEFAULT_MODEL;
-        if (in_array($mdl, ['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', 'gemini-flash-lite-latest', 'gemini-flash-latest', 'gemini-3.8-flash'], true)) {
+        if (in_array($mdl, ['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', 'gemini-flash-lite-latest', 'gemini-3.5-flash'], true)) {
             return $mdl;
         }
         return self::DEFAULT_MODEL;

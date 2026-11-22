@@ -20,7 +20,7 @@ class MR_Palmistry_Builder {
     const REPORT_SLUG = 'palmistry_report';
     const INTERNAL_CODE = 'MR_PLMR';
     const GEMINI_MODEL = 'gemini-3.5-flash';
-    const FALLBACK_MODEL = 'gemini-3.8-flash';
+    const FALLBACK_MODEL = 'gemini-3.5-flash-lite';
 
     public static function init() {
         // Register shortcodes
@@ -166,7 +166,7 @@ class MR_Palmistry_Builder {
             . "  \"rejection_reason\": \"Specific explanation here if rejected, or empty string if valid\"\n"
             . "}";
 
-        $models = [self::GEMINI_MODEL, self::FALLBACK_MODEL];
+        $models = [self::GEMINI_MODEL, self::FALLBACK_MODEL, 'gemini-3.1-flash-lite', 'gemini-flash-lite-latest'];
         foreach ($models as $model) {
             $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key=" . urlencode($api_key);
             $payload = [
@@ -1236,7 +1236,7 @@ class MR_Palmistry_Builder {
                 . "  ]"
                 . "}";
 
-        $models = [self::GEMINI_MODEL, self::FALLBACK_MODEL];
+        $models = [self::GEMINI_MODEL, self::FALLBACK_MODEL, 'gemini-3.1-flash-lite', 'gemini-flash-lite-latest'];
 
         foreach ($models as $model) {
             $url = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key=" . urlencode($api_key);

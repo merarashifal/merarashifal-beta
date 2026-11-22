@@ -45,37 +45,65 @@
                 }
 
                 // Smooth scroll to card if below hero
-                if ($(window).scrollTop() > 300) {
-                    $('html, body').animate({
-                        scrollTop: $('.mr-account-hero-card').offset().top - 20
-                    }, 300);
-                }
+                try {
+                    var $hero = $('.mr-account-hero-card');
+                    if ($(window).scrollTop() > 300 && $hero.length && $hero.offset()) {
+                        $('html, body').animate({
+                            scrollTop: $hero.offset().top - 20
+                        }, 300);
+                    }
+                } catch(scrollErr) {}
             }
         }
 
-        // Click handler for main tabs
-        $('.mr-tab-btn').on('click', function(e) {
-            e.preventDefault();
-            var tab = $(this).data('tab');
+        // Tap / Click handling for main tabs (with iOS WebKit touch support & anti-double-fire guard)
+        var lastTabTriggerTime = 0;
+        function handleTabActivation($btn, e) {
+            if (e && e.preventDefault) e.preventDefault();
+            var now = Date.now();
+            if (now - lastTabTriggerTime < 300) return;
+            lastTabTriggerTime = now;
+
+            var tab = $btn.attr('data-tab') || $btn.data('tab');
+            if (!tab) return;
             switchTab(tab);
-            if (history.pushState) {
-                history.pushState(null, null, '#' + tab);
-            } else {
-                location.hash = '#' + tab;
+
+            try {
+                if (window.history && window.history.pushState) {
+                    window.history.pushState(null, null, '#' + tab);
+                } else {
+                    window.location.hash = '#' + tab;
+                }
+            } catch(navErr) {
+                try { window.location.hash = '#' + tab; } catch(hErr) {}
             }
+        }
+
+        $(document).on('click', '.mr-tab-btn', function(e) {
+            handleTabActivation($(this), e);
         });
 
-        // Header Action Buttons
-        $('#mr-tab-btn-contact-trigger').on('click', function(e) {
-            e.preventDefault();
+        $(document).on('touchend', '.mr-tab-btn', function(e) {
+            handleTabActivation($(this), e);
+        });
+
+        // Header Action Buttons (Contact Us & Settings)
+        $(document).on('click touchend', '#mr-tab-btn-contact-trigger', function(e) {
+            if (e && e.preventDefault) e.preventDefault();
+            var now = Date.now();
+            if (now - lastTabTriggerTime < 300) return;
+            lastTabTriggerTime = now;
             switchTab('contact');
-            location.hash = '#contact';
+            try { window.location.hash = '#contact'; } catch(err) {}
         });
 
-        $('#mr-tab-btn-settings-trigger').on('click', function(e) {
-            e.preventDefault();
+        $(document).on('click touchend', '#mr-tab-btn-settings-trigger', function(e) {
+            if (e && e.preventDefault) e.preventDefault();
+            var now = Date.now();
+            if (now - lastTabTriggerTime < 300) return;
+            lastTabTriggerTime = now;
             switchTab('settings');
-            location.hash = '#settings';
+            try { window.location.hash = '#settings'; } catch(err) {}
         });
 
         // Tab listener on page load (via query param ?tab= or hash #)

@@ -314,6 +314,16 @@ html, html body {
     text-decoration: none !important;
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     box-sizing: border-box;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+    position: relative;
+    z-index: 2;
+}
+
+.mr-btn-action-pill > * {
+    pointer-events: none;
 }
 
 .mr-btn-contact {
@@ -364,6 +374,9 @@ html, html body {
     padding-bottom: 4px;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
+    position: relative;
+    z-index: 10;
+    touch-action: pan-x;
 }
 
 .mr-account-nav-tabs::-webkit-scrollbar {
@@ -384,6 +397,16 @@ html, html body {
     cursor: pointer;
     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     white-space: nowrap;
+    position: relative;
+    z-index: 1;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.mr-tab-btn > * {
+    pointer-events: none;
 }
 
 .mr-tab-btn:hover {
@@ -408,6 +431,7 @@ html, html body {
     font-size: 11px;
     margin-left: 2px;
     font-weight: 800;
+    pointer-events: none;
 }
 
 .mr-tab-btn:not(.active) .mr-tab-count {
@@ -2470,6 +2494,15 @@ input.mr-city-input {
     font-weight: 700;
     cursor: pointer;
     transition: all 0.15s ease;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.mr-page-btn > *,
+.mr-page-num > * {
+    pointer-events: none;
 }
 
 .mr-page-btn:hover:not(:disabled),
@@ -3082,6 +3115,9 @@ input.mr-city-input {
     gap: 8px;
     align-items: center;
     flex-wrap: wrap;
+    position: relative;
+    z-index: 5;
+    touch-action: pan-x;
 }
 
 .mr-passbook-filter-btn {
@@ -3097,6 +3133,14 @@ input.mr-city-input {
     align-items: center !important;
     gap: 6px !important;
     transition: all 0.2s ease !important;
+    touch-action: manipulation !important;
+    -webkit-tap-highlight-color: transparent !important;
+    user-select: none !important;
+    -webkit-user-select: none !important;
+}
+
+.mr-passbook-filter-btn > * {
+    pointer-events: none !important;
 }
 
 .mr-passbook-filter-btn:hover {
@@ -3118,6 +3162,7 @@ input.mr-city-input {
     border-radius: 20px;
     font-size: 11px;
     font-weight: 700;
+    pointer-events: none !important;
 }
 
 .mr-passbook-filter-btn.active .mr-filter-count {

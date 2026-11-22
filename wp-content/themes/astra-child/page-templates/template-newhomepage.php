@@ -464,7 +464,9 @@ foreach ($ordered_sections as $section_id => $sec_data) {
                       <div class="flex-1 relative">
                         <input type="date" id="mr-zodiac-dob" 
                                value="1995-05-15"
-                               class="w-full h-11 px-3.5 bg-amber-50/40 border border-amber-200 rounded-lg text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:bg-white transition-all font-semibold" />
+                               min="1920-01-01"
+                               max="<?php echo date('Y-m-d'); ?>"
+                               class="w-full h-11 px-3.5 bg-amber-50/40 border border-amber-200 rounded-lg text-base sm:text-sm text-on-surface focus:outline-none focus:ring-2 focus:ring-primary-container focus:bg-white transition-all font-semibold" />
                       </div>
 
                       <input type="hidden" id="mr_zodiac_nonce_field" value="<?php echo esc_attr(wp_create_nonce('hp_zodiac_nonce')); ?>" />
@@ -612,13 +614,13 @@ foreach ($ordered_sections as $section_id => $sec_data) {
                       <div class="grid grid-cols-2 gap-2">
                         <div>
                           <label class="block text-[11px] font-semibold text-on-surface-variant mb-1">Date of Birth</label>
-                          <input type="date" name="dob" value="1998-08-15" required
-                                 class="w-full h-9 px-2 bg-amber-50/40 border border-amber-200/80 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-1 focus:ring-primary-container font-semibold" />
+                          <input type="date" name="dob" value="1998-08-15" min="1920-01-01" max="<?php echo date('Y-m-d'); ?>" required
+                                 class="w-full h-11 sm:h-9 px-2 bg-amber-50/40 border border-amber-200/80 rounded-lg text-base sm:text-xs text-on-surface focus:outline-none focus:ring-1 focus:ring-primary-container font-semibold" />
                         </div>
                         <div>
                           <label class="block text-[11px] font-semibold text-on-surface-variant mb-1">Time of Birth</label>
                           <input type="time" name="tob" value="10:30" required
-                                 class="w-full h-9 px-2 bg-amber-50/40 border border-amber-200/80 rounded-lg text-xs text-on-surface focus:outline-none focus:ring-1 focus:ring-primary-container font-semibold" />
+                                 class="w-full h-11 sm:h-9 px-2 bg-amber-50/40 border border-amber-200/80 rounded-lg text-base sm:text-xs text-on-surface focus:outline-none focus:ring-1 focus:ring-primary-container font-semibold" />
                         </div>
                       </div>
                       <div>

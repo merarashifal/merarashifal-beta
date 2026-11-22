@@ -250,4 +250,228 @@ body.logged-in .ast-header-break-point a[href*="my-account"] .elementor-button-t
     visibility: visible !important;
 }
 
+/* ==========================================================================
+   SAFARI & WEBKIT CROSS-BROWSER COMPATIBILITY & NAVIGATION FIXES
+   ========================================================================== */
+
+/* 1. Universal CSS Fallback for Elementor Nav Dropdown Menus */
+/* Guarantees sub-menus open on hover & keyboard focus even if SmartMenus JS lags */
+@media (min-width: 1025px) {
+    .elementor-nav-menu--main li.menu-item-has-children {
+        position: relative;
+    }
+    .elementor-nav-menu--main li.menu-item-has-children:hover > ul.sub-menu,
+    .elementor-nav-menu--main li.menu-item-has-children:focus-within > ul.sub-menu,
+    .elementor-nav-menu--main li.menu-item-has-children.mrf-touch-open > ul.sub-menu,
+    .elementor-nav-menu--main li.menu-item-has-children > ul.sub-menu li.menu-item-has-children:hover > ul.sub-menu,
+    .elementor-nav-menu--main li.menu-item-has-children > ul.sub-menu li.menu-item-has-children:focus-within > ul.sub-menu {
+        display: block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        pointer-events: auto !important;
+        transform: none !important;
+    }
+}
+
+/* 2. Prevent Header Container Stacking Context & Overflow Clipping in WebKit/Safari */
+.elementor-location-header,
+.elementor-location-header .elementor-section,
+.elementor-location-header .elementor-container,
+.elementor-location-header .elementor-column,
+.elementor-location-header .elementor-widget-wrap,
+.elementor-location-header .elementor-widget-nav-menu {
+    overflow: visible !important;
+}
+
+/* Ensure sub-menus sit above all other elements */
+.elementor-nav-menu--main ul.sub-menu,
+.elementor-nav-menu--dropdown {
+    z-index: 9999999 !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* 3. iOS Safari Click Dispatching & Cursor Pointer */
+.elementor-nav-menu--main .menu-item a,
+.elementor-nav-menu--dropdown .menu-item a,
+.elementor-menu-toggle,
+.sub-arrow,
+.elementor-sub-item {
+    cursor: pointer !important;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.05);
+}
+
+/* 4. Fix iOS Safari Auto-Zoom Bug on Form Focus */
+/* Prevents Safari from auto-zooming when focusing inputs with font-size < 16px */
+@media screen and (max-width: 768px) {
+    input[type="text"],
+    input[type="number"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="search"],
+    input[type="date"],
+    input[type="time"],
+    select,
+    textarea {
+        font-size: 16px !important;
+    }
+}
+
+/* 5. Smooth Momentum Scrolling for Safari iOS (Panchang, Muhurat & Zodiac Tables) */
+.mru-wrap,
+.mru-table-responsive,
+.panchang-table-wrap,
+.table-responsive,
+.elementor-widget-table {
+    -webkit-overflow-scrolling: touch !important;
+}
+
+/* 6. Safe Area Insets for Modern iPhone Screen Notches & Bottom Home Bar */
+.wp-bottom-menu,
+#niyati-chat-toggle,
+.floating-action-button {
+    padding-bottom: max(8px, env(safe-area-inset-bottom, 8px)) !important;
+}
+
+/* 7. Safari Backdrop-Filter Support */
+.has-backdrop-blur,
+.glass-effect,
+.mru-controls {
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+}
+
+/* ==========================================================================
+   UNIVERSAL DATE & TIME PICKER NORMALIZATION (IOS SAFARI & TOUCH SCREENS)
+   ========================================================================== */
+
+/* 1. Global Date, Time & DateTime Input Normalization */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    box-sizing: border-box;
+    font-size: 16px !important; /* Strictly prevents iOS Safari auto-zoom on focus */
+    min-height: 44px; /* Apple HIG standard tap target */
+    line-height: normal;
+    background-color: #fff;
+    cursor: pointer;
+    border-radius: 8px;
+    padding: 8px 12px;
+}
+
+/* 2. WebKit internal text alignment and padding fix for iOS */
+input[type="date"]::-webkit-date-and-time-value,
+input[type="time"]::-webkit-date-and-time-value,
+input[type="datetime-local"]::-webkit-date-and-time-value {
+    text-align: left;
+    min-height: 1.4em;
+    line-height: inherit;
+    padding: 0;
+}
+
+/* 3. Calendar & Clock Picker Icons in WebKit/Safari */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+    padding: 4px;
+    margin-right: -4px;
+    opacity: 0.75;
+    filter: invert(0.25);
+    transition: opacity 0.2s ease;
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover,
+input[type="time"]::-webkit-calendar-picker-indicator:hover,
+input[type="datetime-local"]::-webkit-calendar-picker-indicator:hover {
+    opacity: 1;
+}
+
+/* 4. Astrological & Calculator Form Inputs Specific Touch Fixes */
+.ku-input,
+.md-input,
+.mr-form-input,
+.bf-field input,
+.ns-field input {
+    font-size: 16px !important; /* Overrides 14px/15px to prevent auto-zoom */
+    min-height: 44px !important;
+}
+
+.ku-input[type="date"],
+.ku-input[type="time"],
+.md-input[type="date"],
+.md-input[type="time"],
+.mr-form-input[type="date"],
+.mr-form-input[type="time"],
+.bf-field input[type="time"],
+.ns-field input[type="time"],
+#chogx-date,
+#pcDate,
+#mrDate {
+    -webkit-appearance: none !important;
+    appearance: none !important;
+    font-size: 16px !important;
+    min-height: 44px !important;
+    cursor: pointer !important;
+}
+
+/* Panchang & Horoscope Inline Date Picker Buttons */
+#pcDate.mr-btn,
+.mr-calendar input[type="date"] {
+    font-size: 15px !important;
+    min-height: 42px !important;
+    padding: 8px 12px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    cursor: pointer !important;
+    -webkit-appearance: none !important;
+}
+@media (max-width: 768px) {
+    #pcDate.mr-btn,
+    .mr-calendar input[type="date"] {
+        font-size: 16px !important;
+        min-height: 44px !important;
+        width: 100% !important;
+    }
+}
+
+/* 5. Flatpickr Modal Fixes on iOS Safari & Mobile */
+.flatpickr-calendar {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+    border-radius: 14px !important;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.18) !important;
+    border: 1px solid rgba(0, 0, 0, 0.08) !important;
+    overflow: hidden;
+    z-index: 9999999 !important;
+}
+@media (max-width: 480px) {
+    .flatpickr-calendar {
+        width: 320px !important;
+        max-width: 92vw !important;
+        left: 50% !important;
+        transform: translateX(-50%) !important;
+    }
+    .flatpickr-day {
+        height: 38px !important;
+        line-height: 38px !important;
+        font-size: 15px !important;
+    }
+}
+.flatpickr-monthDropdown-months {
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    cursor: pointer !important;
+    background: #fff !important;
+    color: #333 !important;
+}
+.numInputWrapper input.cur-year {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+}
+
+
+
 

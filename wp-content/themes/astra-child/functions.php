@@ -93,8 +93,8 @@ add_action('wp_default_scripts', function($scripts) {
 add_filter('script_loader_tag', function($tag, $handle, $src) {
     if (is_admin()) return $tag;
 
-    // Never defer jQuery core or inline configs
-    if ($handle === 'jquery' || $handle === 'jquery-core') {
+    // Never defer jQuery core, inline configs, or navigation menu controller (smartmenus)
+    if ($handle === 'jquery' || $handle === 'jquery-core' || strpos($handle, 'smartmenus') !== false || strpos($src, 'smartmenus') !== false) {
         return $tag;
     }
 
@@ -104,7 +104,6 @@ add_filter('script_loader_tag', function($tag, $handle, $src) {
         'elementor-pro-elements-handlers',
         'elementor-pro-webpack-pro-runtime',
         'elementor-webpack-runtime',
-        'smartmenus',
         'wp-bottom-menu',
         'astra-theme-js',
         'mr-reports',
@@ -559,3 +558,102 @@ add_action('wpseo_opengraph', function() {
     $og_img = mr_get_contextual_og_image();
     echo '<meta property="og:image:secure_url" content="' . esc_url($og_img) . '" />' . "\n";
 }, 30);
+
+/**
+ * Safari & Mobile WebKit Navigation Helper:
+ * Ensures dropdown menus open properly on touch/iPad/iPhone without prematurely triggering link navigation.
+ */
+add_action('wp_footer', function() {
+    if (is_admin()) return;
+    ?>
+    <script id="mrf-safari-nav-helper">
+    (function() {
+        var isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0) || (window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+        if (!isTouchDevice) return;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            var parentItems = document.querySelectorAll('.elementor-nav-menu--main li.menu-item-has-children > a');
+            
+            parentItems.forEach(function(anchor) {
+                var parentLi = anchor.parentElement;
+                
+                anchor.addEventListener('click', function(e) {
+                    // Check if sub-menu is already visible/open
+                    var isExpanded = parentLi.classList.contains('mrf-touch-open') || 
+                                     anchor.getAttribute('aria-expanded') === 'true' ||
+                                     parentLi.classList.contains('highlighted');
+
+                    if (!isExpanded) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        // Close sibling open menus
+                        var siblings = parentLi.parentElement.querySelectorAll('li.mrf-touch-open');
+                        siblings.forEach(function(sib) {
+                            if (sib !== parentLi) {
+                                sib.classList.remove('mrf-touch-open');
+                                var sibSub = sib.querySelector('ul.sub-menu');
+                                if (sibSub) sibSub.style.display = '';
+                            }
+                        });
+
+                        parentLi.classList.add('mrf-touch-open');
+                        anchor.setAttribute('aria-expanded', 'true');
+                        
+                        var subMenu = parentLi.querySelector('ul.sub-menu');
+                        if (subMenu) {
+                            subMenu.style.display = 'block';
+                            subMenu.style.visibility = 'visible';
+                            subMenu.style.opacity = '1';
+                        }
+                    }
+                });
+            });
+
+            // Tap anywhere outside to close dropdowns
+            document.addEventListener('click', function(e) {
+                if (!e.target.closest('.menu-item-has-children')) {
+                    document.querySelectorAll('li.mrf-touch-open').forEach(function(li) {
+                        li.classList.remove('mrf-touch-open');
+                        var sub = li.querySelector('ul.sub-menu');
+                        if (sub && !li.classList.contains('highlighted')) {
+                            sub.style.display = '';
+                            sub.style.visibility = '';
+                            sub.style.opacity = '';
+                        }
+                        var a = li.querySelector('a');
+                        if (a) a.setAttribute('aria-expanded', 'false');
+                    });
+                }
+            });
+
+            // Universal Date & Time Picker Tap Trigger for Safari & WebKit
+            // Allows tapping ANY part of the date/time input to open the native picker immediately
+            document.addEventListener('click', function(e) {
+                var target = e.target;
+                if (target && target.matches && target.matches('input[type="date"], input[type="time"], input[type="datetime-local"]')) {
+                    if (typeof target.showPicker === 'function') {
+                        try {
+                            target.showPicker();
+                        } catch (err) {}
+                    }
+                }
+            });
+
+            // Set sensible birthdate limits if missing on DOB fields
+            var dobInputs = document.querySelectorAll('input[type="date"][name*="dob"], input[type="date"][id*="dob"]');
+            var todayStr = new Date().toISOString().split('T')[0];
+            dobInputs.forEach(function(inp) {
+                if (!inp.getAttribute('max')) {
+                    inp.setAttribute('max', todayStr);
+                }
+                if (!inp.getAttribute('min')) {
+                    inp.setAttribute('min', '1920-01-01');
+                }
+            });
+        });
+    })();
+    </script>
+    <?php
+}, 998);
+

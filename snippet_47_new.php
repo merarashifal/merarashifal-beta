@@ -709,12 +709,21 @@ $active_year = substr($selected_ym, 0, 4);
 
     <!-- Month Navigation Buttons & Picker -->
     <div class="mru-ctrl-group">
-        <input type="month"
-               id="mruMonth"
-               class="mru-month-input"
-               value="<?php echo esc_attr($selected_ym); ?>"
-               min="<?php echo esc_attr($months[0]); ?>"
-               max="<?php echo esc_attr(end($months)); ?>">
+        <!-- Safari & Universal Month Selector Dropdown -->
+        <select id="mruMonth" class="mru-select" style="min-width: 140px; font-weight: 600;">
+            <?php foreach ($months as $m): 
+                $m_time = strtotime($m . '-01');
+                $eng_name = date('F Y', $m_time);
+                $eng_m = date('F', $m_time);
+                $y_str = date('Y', $m_time);
+                $hi_name = (isset($hi_months[$eng_m]) ? $hi_months[$eng_m] : $eng_m) . ' ' . $y_str;
+                $label = ($lang === 'hi') ? $hi_name : $eng_name;
+            ?>
+                <option value="<?php echo esc_attr($m); ?>" <?php selected($selected_ym, $m); ?>>
+                    <?php echo esc_html($label); ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
 
         <a class="mru-btn" href="<?php echo $build_url(['ym' => $prev_ym]); ?>" <?php if ($idx === 0) echo "disabled"; ?>>
             &larr; <?php echo ($lang === 'hi') ? 'पिछला' : 'Prev'; ?>
