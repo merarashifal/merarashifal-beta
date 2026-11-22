@@ -117,7 +117,7 @@ class MR_Baby_Template_Renderer
 
         if (empty($name_slug)) {
             $uri = $_SERVER['REQUEST_URI'] ?? '';
-            if (preg_match('#/baby-names/([a-z])/(boy|girl)/([^/?#]+)#i', $uri, $matches)) {
+            if (preg_match('#/baby-names/([a-z])/(boy|girl)/([^/?\#]+)#i', $uri, $matches)) {
                 $name_slug = $matches[3];
                 $page      = 'name_detail';
             }

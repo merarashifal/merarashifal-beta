@@ -346,6 +346,12 @@ class MR_Catalog_Manager {
      * Retrieve all cards sorted by display order
      */
     public static function get_all_cards() {
+        static $in_cards = false;
+        if ($in_cards) {
+            return get_option(self::OPTION_KEY, []) ?: self::get_default_cards();
+        }
+        $in_cards = true;
+
         $saved = get_option(self::OPTION_KEY, null);
         $defaults = self::get_default_cards();
 
@@ -361,12 +367,12 @@ class MR_Catalog_Manager {
             }
         }
 
-        // Ensure testimonials exist on every card
+        // Ensure testimonials exist on every card without triggering infinite recursion
         if (class_exists('MR_Report_Landing_Data')) {
+            $all_landing = method_exists('MR_Report_Landing_Data', 'get_all') ? MR_Report_Landing_Data::get_all() : [];
             foreach ($saved as $k => &$c) {
                 if (!isset($c['testimonials']) || !is_array($c['testimonials'])) {
-                    $def = MR_Report_Landing_Data::get($k);
-                    $c['testimonials'] = $def['testimonials'] ?? [];
+                    $c['testimonials'] = $all_landing[$k]['testimonials'] ?? [];
                 }
             }
             unset($c);
@@ -436,6 +442,7 @@ class MR_Catalog_Manager {
             return $oa - $ob;
         });
 
+        $in_cards = false;
         return $saved;
     }
 

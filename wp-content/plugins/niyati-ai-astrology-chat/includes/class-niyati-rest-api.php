@@ -459,9 +459,33 @@ class Niyati_REST_API {
     }
 
     /**
+     * Defense-in-depth: Block automated bots, scrapers, and aggressive flooders
+     */
+    private static function verify_request_safety() {
+        if (class_exists('Niyati_Gemini_API') && Niyati_Gemini_API::is_crawler_or_bot()) {
+            return new WP_Error('bot_forbidden', 'Automated access not permitted.', ['status' => 403]);
+        }
+
+        $client_ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+        $rate_key = 'niyati_rate_' . md5($client_ip);
+        $attempts = (int) get_transient($rate_key);
+        if ($attempts >= 20) {
+            return new WP_Error('rate_limit', 'Too many requests. Please wait a moment.', ['status' => 429]);
+        }
+        set_transient($rate_key, $attempts + 1, 60);
+
+        return true;
+    }
+
+    /**
      * Handle Chat Message: Checks Free Quota first, then Paid Wallet Credits
      */
     public static function handle_chat($request) {
+        $safety = self::verify_request_safety();
+        if (is_wp_error($safety)) {
+            return $safety;
+        }
+
         $params = $request->get_json_params();
         if (empty($params)) {
             $params = $request->get_params();
@@ -729,6 +753,11 @@ class Niyati_REST_API {
      * Handle Streaming Chat Message via Server-Sent Events (SSE)
      */
     public static function handle_chat_stream($request) {
+        $safety = self::verify_request_safety();
+        if (is_wp_error($safety)) {
+            return $safety;
+        }
+
         $params = $request->get_json_params() ?: $request->get_params();
 
         $message     = sanitize_text_field($params['message'] ?? '');
@@ -1030,6 +1059,11 @@ class Niyati_REST_API {
      * Handle Elaborated Deep-Dive Astrological Reading Request (Approx 200-250 words)
      */
     public static function handle_elaborate($request) {
+        $safety = self::verify_request_safety();
+        if (is_wp_error($safety)) {
+            return $safety;
+        }
+
         $params = $request->get_json_params() ?: $request->get_params();
 
         $user_id = get_current_user_id();
@@ -1150,6 +1184,11 @@ class Niyati_REST_API {
     public static function handle_voice_chat($request) {
         if (!defined('NIYATI_VOICE_ENABLED') || NIYATI_VOICE_ENABLED !== true) {
             return new WP_Error('voice_disabled', 'Voice consultation is currently disabled.', ['status' => 403]);
+        }
+
+        $safety = self::verify_request_safety();
+        if (is_wp_error($safety)) {
+            return $safety;
         }
 
         $params = $request->get_json_params() ?: $request->get_params();

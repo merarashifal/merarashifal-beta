@@ -68,14 +68,22 @@ if (file_exists($wp_load)) {
         echo "Database Cleanup: {$deleted} legacy plain-text key records removed from database.\n";
     }
 
-    // 7. Ensure Niyati floating chat widget is enabled in database
+    // 7. Ensure Niyati floating chat widget is enabled and model is gemini-3.1-flash-lite in database
     $niyati_settings = get_option('niyati_chat_settings', []);
+    $updated_settings = false;
     if (empty($niyati_settings['floating_enabled']) || $niyati_settings['floating_enabled'] !== '1') {
         $niyati_settings['floating_enabled'] = '1';
+        $updated_settings = true;
+    }
+    if (empty($niyati_settings['gemini_model']) || !in_array($niyati_settings['gemini_model'], ['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite'], true)) {
+        $niyati_settings['gemini_model'] = 'gemini-3.1-flash-lite';
+        $updated_settings = true;
+    }
+    if ($updated_settings) {
         update_option('niyati_chat_settings', $niyati_settings);
-        echo "Niyati Settings: floating_enabled updated to '1'\n";
+        echo "Niyati Settings: updated model to gemini-3.1-flash-lite and floating_enabled to 1\n";
     } else {
-        echo "Niyati Settings: floating_enabled is already '1'\n";
+        echo "Niyati Settings: already optimal (gemini-3.1-flash-lite, floating=1)\n";
     }
 
     // 8. Verify Razorpay Gateway Status

@@ -823,10 +823,9 @@ class Niyati_Admin {
                                 <td>
                                     <?php $selected_model = $settings['gemini_model'] ?? 'gemini-3.1-flash-lite'; ?>
                                     <select id="gemini_model" name="gemini_model">
-                                        <option value="gemini-3.1-flash-lite" <?php selected($selected_model, 'gemini-3.1-flash-lite'); ?>>Gemini 3.1 Flash-Lite (Recommended - Blazing Fast & Economical)</option>
-                                        <option value="gemini-3.5-flash-lite" <?php selected($selected_model, 'gemini-3.5-flash-lite'); ?>>Gemini 3.5 Flash-Lite (Fast & Intelligent)</option>
-                                        <option value="gemini-3.5-flash" <?php selected($selected_model, 'gemini-3.5-flash'); ?>>Gemini 3.5 Flash</option>
-                                        <option value="gemini-flash-lite-latest" <?php selected($selected_model, 'gemini-flash-lite-latest'); ?>>Gemini Flash-Lite Latest</option>
+                                        <option value="gemini-3.1-flash-lite" <?php selected($selected_model, 'gemini-3.1-flash-lite'); ?>>Gemini 3.1 Flash Lite (Recommended - Ultra Fast & Sub-2s)</option>
+                                        <option value="gemini-3.5-flash-lite" <?php selected($selected_model, 'gemini-3.5-flash-lite'); ?>>Gemini 3.5 Flash Lite</option>
+                                        <option value="gemini-flash-lite-latest" <?php selected($selected_model, 'gemini-flash-lite-latest'); ?>>Gemini Flash Lite Latest</option>
                                     </select>
                                 </td>
                             </tr>

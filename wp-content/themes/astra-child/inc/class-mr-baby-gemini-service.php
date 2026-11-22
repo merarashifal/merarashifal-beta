@@ -22,10 +22,10 @@ class MR_Baby_Gemini_Service
      * Official high-speed Gemini models in priority order for ultra-low latency (<2 seconds)
      */
     private $candidate_models = [
-        'gemini-2.5-flash',
-        'gemini-2.0-flash',
-        'gemini-1.5-flash',
-        'gemini-1.5-flash-8b'
+        'gemini-3.1-flash-lite',
+        'gemini-3.5-flash-lite',
+        'gemini-flash-lite-latest',
+        'gemini-flash-latest'
     ];
 
     public static function instance()
@@ -67,6 +67,39 @@ class MR_Baby_Gemini_Service
         }
 
         return '';
+    }
+
+    /**
+     * Identifies automated search crawlers, bots, and scrapers
+     * to protect Gemini API quotas and server performance.
+     */
+    public static function is_crawler_or_bot()
+    {
+        if (defined('WP_CLI') && WP_CLI) {
+            return false;
+        }
+
+        if (empty($_SERVER['HTTP_USER_AGENT'])) {
+            return true;
+        }
+
+        $ua = strtolower($_SERVER['HTTP_USER_AGENT']);
+        $bot_signatures = [
+            'bot', 'crawl', 'spider', 'slurp', 'mediapartners-google',
+            'googlebot', 'bingbot', 'yandex', 'baidu', 'duckduckgo',
+            'semrush', 'ahrefs', 'mj12bot', 'dotbot', 'petalbot',
+            'bytespider', 'screaming frog', 'facebookexternalhit',
+            'headless', 'python-requests', 'curl', 'wget', 'postman',
+            'uptimerobot', 'feedfetcher'
+        ];
+
+        foreach ($bot_signatures as $sig) {
+            if (strpos($ua, $sig) !== false) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -164,6 +197,12 @@ class MR_Baby_Gemini_Service
         $astro_engine = MR_Baby_Astro_Engine::instance();
         $astro_core   = $astro_engine->compute_astro_profile($clean_name, $gender, $religion);
 
+        // Guard against search engine crawlers, bots, or global pause draining Gemini quotas
+        if (self::is_crawler_or_bot() || (defined('DISABLE_GEMINI_AUTO_GENERATION') && DISABLE_GEMINI_AUTO_GENERATION)) {
+            $fallback_ai = $this->get_fallback_ai_data($clean_name, $gender, $religion, $astro_core);
+            return $this->build_master_payload($clean_name, $gender, $religion, $astro_core, $fallback_ai);
+        }
+
         // 4. Step 2 (AI Enrichment): Call Gemini API in JSON Mode
         $ai_enrichment = $this->call_gemini_enrichment($clean_name, $gender, $religion, $astro_core);
 
@@ -210,6 +249,10 @@ class MR_Baby_Gemini_Service
      */
     private function call_gemini_enrichment($name, $gender, $religion, array $astro_core)
     {
+        if (self::is_crawler_or_bot() || (defined('DISABLE_GEMINI_AUTO_GENERATION') && DISABLE_GEMINI_AUTO_GENERATION)) {
+            return $this->get_fallback_ai_data($name, $gender, $religion, $astro_core);
+        }
+
         $api_key = $this->get_api_key();
         if (empty($api_key)) {
             return $this->get_fallback_ai_data($name, $gender, $religion, $astro_core);

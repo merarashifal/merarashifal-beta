@@ -13,6 +13,38 @@ class Niyati_Gemini_API {
     const DEFAULT_MODEL = 'gemini-3.1-flash-lite';
 
     /**
+     * Detect automated search bots, crawlers, and scrapers
+     * to protect Gemini API quota and server resources.
+     */
+    public static function is_crawler_or_bot() {
+        if (defined('WP_CLI') && WP_CLI) {
+            return false;
+        }
+
+        if (empty($_SERVER['HTTP_USER_AGENT'])) {
+            return true;
+        }
+
+        $ua = strtolower($_SERVER['HTTP_USER_AGENT']);
+        $bot_signatures = [
+            'bot', 'crawl', 'spider', 'slurp', 'mediapartners-google',
+            'googlebot', 'bingbot', 'yandex', 'baidu', 'duckduckgo',
+            'semrush', 'ahrefs', 'mj12bot', 'dotbot', 'petalbot',
+            'bytespider', 'screaming frog', 'facebookexternalhit',
+            'headless', 'python-requests', 'curl', 'wget', 'postman',
+            'uptimerobot', 'feedfetcher'
+        ];
+
+        foreach ($bot_signatures as $sig) {
+            if (strpos($ua, $sig) !== false) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Get Gemini API Key
      */
     public static function get_api_key() {
@@ -26,12 +58,12 @@ class Niyati_Gemini_API {
     }
 
     /**
-     * Get Model (whitelisted to ultra-fast sub-5s models only)
+     * Get Model (whitelisted to official high-speed models only)
      */
     public static function get_model() {
         $settings = get_option('niyati_chat_settings', []);
         $mdl = !empty($settings['gemini_model']) ? trim($settings['gemini_model']) : self::DEFAULT_MODEL;
-        if (in_array($mdl, ['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', 'gemini-flash-lite-latest'], true)) {
+        if (in_array($mdl, ['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', 'gemini-flash-lite-latest', 'gemini-flash-latest', 'gemini-3.8-flash'], true)) {
             return $mdl;
         }
         return self::DEFAULT_MODEL;
@@ -555,6 +587,14 @@ PROMPT;
      * @return array [success => bool, reply => string, error => string]
      */
     public static function generate_chat_response($user_message, $kundli_profile, $history = [], $user_lang = 'en') {
+        if (self::is_crawler_or_bot()) {
+            return [
+                'success' => false,
+                'reply'   => 'Automated access blocked.',
+                'error'   => 'bot_detected'
+            ];
+        }
+
         $api_key = self::get_api_key();
         $model = self::get_model();
 
@@ -613,7 +653,7 @@ PROMPT;
             ]
         ];
 
-        $candidate_models = array_unique(['gemini-3.1-flash-lite', $model, 'gemini-3.5-flash-lite']);
+        $candidate_models = array_unique(['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', $model, 'gemini-flash-lite-latest']);
         $last_error = '';
 
         foreach ($candidate_models as $cand_model) {
@@ -688,6 +728,14 @@ PROMPT;
      * @return array [success => bool, reply => string, error => string]
      */
     public static function stream_chat_response($user_message, $kundli_profile, $history = [], $user_lang = 'en', $token_callback = null) {
+        if (self::is_crawler_or_bot()) {
+            return [
+                'success' => false,
+                'reply'   => 'Automated access blocked.',
+                'error'   => 'bot_detected'
+            ];
+        }
+
         $api_key = self::get_api_key();
         $model = self::get_model();
 
@@ -751,7 +799,7 @@ PROMPT;
             ]
         ];
 
-        $candidate_models = array_unique(['gemini-3.1-flash-lite', $model, 'gemini-3.5-flash-lite']);
+        $candidate_models = array_unique(['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', $model, 'gemini-flash-lite-latest']);
         $last_error = '';
 
         foreach ($candidate_models as $cand_model) {
@@ -841,6 +889,14 @@ PROMPT;
      * @return array [success => bool, reply => string, error => string]
      */
     public static function generate_elaborated_response($question, $previous_reply, $kundli_profile, $user_lang = 'en') {
+        if (self::is_crawler_or_bot()) {
+            return [
+                'success' => false,
+                'reply'   => 'Automated access blocked.',
+                'error'   => 'bot_detected'
+            ];
+        }
+
         $api_key = self::get_api_key();
         $model = self::get_model();
 
@@ -912,7 +968,7 @@ PROMPT;
             ]
         ];
 
-        $candidate_models = array_unique([$model, 'gemini-3.1-flash-lite', 'gemini-3.5-flash-lite']);
+        $candidate_models = array_unique(['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', $model, 'gemini-flash-lite-latest']);
         $last_error = '';
 
         foreach ($candidate_models as $cand_model) {
@@ -976,6 +1032,14 @@ PROMPT;
      * @return array ['success' => bool, 'transcription' => string, 'reply' => string, 'audio_bytes' => string|null, 'mime_type' => string]
      */
     public static function process_voice_query($audio_base64, $mime_type = 'audio/webm', $kundli_profile = [], $user_lang = 'hi') {
+        if (self::is_crawler_or_bot()) {
+            return [
+                'success' => false,
+                'error'   => 'Automated access blocked.',
+                'reply'   => 'Automated access not allowed.'
+            ];
+        }
+
         $api_key = self::get_api_key();
         if (empty($api_key)) {
             return [
@@ -1055,7 +1119,7 @@ PROMPT;
         ];
 
         // Models that support multimodal audio input - fastest first!
-        $candidate_models = ['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite'];
+        $candidate_models = ['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', 'gemini-flash-lite-latest'];
         $last_error = '';
 
         foreach ($candidate_models as $cand_model) {
@@ -1140,14 +1204,17 @@ PROMPT;
      * Calls Gemini Native Flash-Lite TTS with Kore serene, harmonious Indian female voice profile, converted to standard WAV
      */
     public static function synthesize_niyati_voice($text, $lang = 'hi') {
+        if (self::is_crawler_or_bot()) {
+            return null;
+        }
+
         $api_key = self::get_api_key();
         if (empty($api_key) || empty($text)) {
             return null;
         }
 
         $clean_speech = trim(preg_replace('/[*_#`\[\]]/', '', $text));
-        // Ultra-fast Flash-Lite TTS prioritized (under 5s synthesis)
-        $tts_models = ['gemini-3.8-flash-lite-tts', 'gemini-3.8-flash-tts', 'gemini-3.1-flash-tts-preview'];
+        $tts_models = ['gemini-3.1-flash-tts-preview', 'gemini-2.5-flash-preview-tts', 'gemini-3.8-flash-tts'];
         $voice_name = 'Kore'; // Serene, gentle, harmonious, calm female tone
 
         $tts_prompt = ($lang === 'hi' || preg_match('/[\x{0900}-\x{097F}]/u', $clean_speech))

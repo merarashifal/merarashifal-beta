@@ -44,6 +44,12 @@ class MR_Report_Landing_Data {
      * Synchronize live pricing, discounts, and testimonials from Catalog Manager
      */
     public static function apply_live_catalog_sync($data, $key = '') {
+        static $in_sync = false;
+        if ($in_sync) {
+            return $data;
+        }
+        $in_sync = true;
+
         $slug = $data['report_slug'] ?? $key;
 
         if (class_exists('MR_Catalog_Manager')) {
@@ -82,6 +88,7 @@ class MR_Report_Landing_Data {
             }
         }
 
+        $in_sync = false;
         return $data;
     }
 
