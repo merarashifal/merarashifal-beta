@@ -574,26 +574,33 @@ global $wpdb;
     
     // Snippet 13
     $r13 = $wpdb->get_row("SELECT id, code FROM {$snippets_table} WHERE id = 13", ARRAY_A);
-    if ($r13 && strpos($r13['code'], '$mr_maps_key') === false) {
+    if ($r13) {
         $c = $r13['code'];
-        $c = str_replace(
-            "if (!defined('GOOGLE_API_KEY') || !GOOGLE_API_KEY) return;",
-            "\$mr_maps_key = defined('GOOGLE_MAPS_API_KEY') && !empty(GOOGLE_MAPS_API_KEY) ? GOOGLE_MAPS_API_KEY : (defined('GOOGLE_API_KEY') ? GOOGLE_API_KEY : '');\n    if (empty(\$mr_maps_key)) return;",
-            $c
-        );
-        $c = str_replace(
-            "\$inline_js = str_replace('GOOGLE_API_KEY_TOKEN', json_encode(GOOGLE_API_KEY), \$inline_js);",
-            "\$inline_js = str_replace('GOOGLE_API_KEY_TOKEN', json_encode(\$mr_maps_key), \$inline_js);",
-            $c
-        );
+        $mod13 = false;
+        if (strpos($c, '$mr_maps_key') === false) {
+            $c = str_replace(
+                "if (!defined('GOOGLE_API_KEY') || !GOOGLE_API_KEY) return;",
+                "\$mr_maps_key = defined('GOOGLE_MAPS_API_KEY') && !empty(GOOGLE_MAPS_API_KEY) ? GOOGLE_MAPS_API_KEY : (defined('GOOGLE_API_KEY') ? GOOGLE_API_KEY : '');\n    if (empty(\$mr_maps_key)) return;",
+                $c
+            );
+            $c = str_replace(
+                "\$inline_js = str_replace('GOOGLE_API_KEY_TOKEN', json_encode(GOOGLE_API_KEY), \$inline_js);",
+                "\$inline_js = str_replace('GOOGLE_API_KEY_TOKEN', json_encode(\$mr_maps_key), \$inline_js);",
+                $c
+            );
+            $mod13 = true;
+        }
         // Optimize: Prevent Google Maps JS loading on pages without city inputs
         $old_lazy = "['scroll', 'keydown', 'pointerdown', 'touchstart'].forEach(function(ev){\n    window.addEventListener(ev, function(){ ensureGoogleMaps(); }, {once:true, passive:true});\n  });\n  setTimeout(function(){ ensureGoogleMaps(); }, 4000);";
         $new_lazy = "// Only load Google Maps if city inputs actually exist on the page\n  setTimeout(function(){ if (findInputs().length > 0) ensureGoogleMaps(); }, 3000);";
         if (strpos($c, $old_lazy) !== false) {
             $c = str_replace($old_lazy, $new_lazy, $c);
+            $mod13 = true;
         }
-        $wpdb->update($snippets_table, ['code' => $c], ['id' => 13]);
-        $maps_updated++;
+        if ($mod13) {
+            $wpdb->update($snippets_table, ['code' => $c], ['id' => 13]);
+            $maps_updated++;
+        }
     }
 
     // Snippet 14
