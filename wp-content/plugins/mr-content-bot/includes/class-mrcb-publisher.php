@@ -148,7 +148,9 @@ class MRCB_Publisher {
             return [ 'success' => false, 'error' => 'No content found in draft, and automatic generation failed.' ];
         }
 
-        $html_content = MRCB_Writer::markdown_to_html( $markdown_content );
+        $markdown_content = class_exists( 'MRCB_Writer' ) ? MRCB_Writer::clean_localhost_urls( $markdown_content ) : $markdown_content;
+        $html_content     = MRCB_Writer::markdown_to_html( $markdown_content );
+        $html_content     = class_exists( 'MRCB_Writer' ) ? MRCB_Writer::clean_localhost_urls( $html_content ) : $html_content;
 
         // Post Title
         $post_title = ! empty( $item['admin_meta_title'] ) ? $item['admin_meta_title'] : ( $item['ai_meta_title'] ?: $item['topic_title_hi'] );

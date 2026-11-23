@@ -70,6 +70,10 @@ class MRCB_Scheduler {
             )
         );
 
+        if ( class_exists( 'MRCB_DB_Setup' ) ) {
+            MRCB_DB_Setup::sanitize_stored_links_and_queue();
+        }
+
         return (int) $deleted;
     }
 

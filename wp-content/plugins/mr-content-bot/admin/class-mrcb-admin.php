@@ -12,6 +12,7 @@ class MRCB_Admin {
     public static function init() {
         add_action( 'admin_menu', [ __CLASS__, 'register_menus' ] );
         add_action( 'admin_enqueue_scripts', [ __CLASS__, 'enqueue_assets' ] );
+        add_action( 'admin_init', [ 'MRCB_DB_Setup', 'sanitize_stored_links_and_queue' ] );
 
         // AJAX Actions
         add_action( 'wp_ajax_mrcb_approve_draft', [ __CLASS__, 'ajax_approve_draft' ] );
@@ -170,7 +171,7 @@ class MRCB_Admin {
         ];
 
         if ( ! empty( $draft_content ) ) {
-            $data['admin_draft'] = $draft_content;
+            $data['admin_draft'] = class_exists( 'MRCB_Writer' ) ? MRCB_Writer::clean_localhost_urls( $draft_content ) : $draft_content;
         }
         if ( ! empty( $meta_title ) ) {
             $data['admin_meta_title'] = $meta_title;

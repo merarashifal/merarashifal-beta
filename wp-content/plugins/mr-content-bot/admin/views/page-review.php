@@ -20,7 +20,8 @@ if ( ! $item ) {
 }
 
 $draft_markdown = ! empty( $item['admin_draft'] ) ? $item['admin_draft'] : ( $item['ai_draft_tagged'] ?: $item['ai_draft'] );
-$draft_html     = MRCB_Writer::markdown_to_html( $draft_markdown );
+$draft_markdown = class_exists( 'MRCB_Writer' ) ? MRCB_Writer::clean_localhost_urls( $draft_markdown ) : $draft_markdown;
+$draft_html     = class_exists( 'MRCB_Writer' ) ? MRCB_Writer::markdown_to_html( $draft_markdown ) : nl2br( $draft_markdown );
 $meta_title     = ! empty( $item['admin_meta_title'] ) ? $item['admin_meta_title'] : ( $item['ai_meta_title'] ?: $item['topic_title_hi'] );
 $meta_desc      = ! empty( $item['admin_meta_desc'] ) ? $item['admin_meta_desc'] : $item['ai_meta_desc'];
 $slug           = $item['wp_slug'] ?: sanitize_title( $item['focus_keyword'] );

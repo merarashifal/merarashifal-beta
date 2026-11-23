@@ -560,18 +560,40 @@ PROMPT;
         return $data;
     }
 
+    const CANONICAL_SITE_URL = 'https://merarashifal.com';
+
     /**
-     * Normalize URL to match current site's home domain (avoids localhost vs live domain issues)
+     * Get live site base URL (strictly https://merarashifal.com for all article links)
+     */
+    public static function get_site_base_url() {
+        return self::CANONICAL_SITE_URL;
+    }
+
+    /**
+     * Deep scrubber to replace any localhost or local test URL with https://merarashifal.com
+     */
+    public static function clean_localhost_urls( $content ) {
+        if ( empty( $content ) || ! is_string( $content ) ) {
+            return $content;
+        }
+        $pattern = '#https?://(?:localhost|127\.0\.0\.1)(?::\d+)?(?:/merarashifal)?#i';
+        return preg_replace( $pattern, self::CANONICAL_SITE_URL, $content );
+    }
+
+    /**
+     * Normalize URL to match canonical live domain https://merarashifal.com
+     * Strips localhost, local directories, and guarantees live production links
      */
     public static function normalize_internal_url( $raw_url ) {
         if ( empty( $raw_url ) ) {
-            return home_url();
+            return self::CANONICAL_SITE_URL . '/';
         }
         $parsed = function_exists( 'wp_parse_url' ) ? wp_parse_url( $raw_url ) : parse_url( $raw_url );
         $path = ! empty( $parsed['path'] ) ? $parsed['path'] : '/';
-        // Strip out local folder prefix if moved to live domain
+        // Strip out local folder prefix e.g. /merarashifal
         $clean_path = preg_replace( '#^/merarashifal#i', '', $path );
-        return home_url( $clean_path );
+        $clean_path = '/' . ltrim( $clean_path, '/' );
+        return self::CANONICAL_SITE_URL . $clean_path;
     }
 
     /**
@@ -584,15 +606,16 @@ PROMPT;
 
         $links = ! empty( $wpdb ) ? $wpdb->get_results( "SELECT * FROM {$t_links} WHERE is_active = 1", ARRAY_A ) : [];
 
-        // Fallback default core links if database link map table is empty
+        // Fallback default core links pointing directly to live site
         if ( empty( $links ) ) {
+            $site_base = self::get_site_base_url();
             $links = [
-                [ 'url' => home_url( '/panchang/' ), 'title_hi' => 'दैनिक हिंदू पंचांग', 'keywords_hi' => 'पंचांग, दैनिक पंचांग, शुभ मुहूर्त, आज का पंचांग, तिथि, नक्षत्र, चौघड़िया', 'link_type' => 'tool' ],
-                [ 'url' => home_url( '/kundali-details/' ), 'title_hi' => 'जन्म कुंडली एवं जन्म पत्रिका', 'keywords_hi' => 'कुंडली, जन्मपत्री, जन्म कुंडली, ग्रह शांति', 'link_type' => 'tool' ],
-                [ 'url' => home_url( '/dosh/mangal-dosh/' ), 'title_hi' => 'मांगलिक दोष जांच एवं उपाय', 'keywords_hi' => 'मांगलिक दोष, मंगल दोष, मांगलिक', 'link_type' => 'tool' ],
-                [ 'url' => home_url( '/dosh/kaal-sarp-dosh/' ), 'title_hi' => 'कालसर्प दोष निवारण', 'keywords_hi' => 'कालसर्प दोष, काल सर्प', 'link_type' => 'tool' ],
-                [ 'url' => home_url( '/horoscope/' ), 'title_hi' => 'दैनिक राशिफल', 'keywords_hi' => 'राशिफल, दैनिक राशिफल, राशि अनुसार, 12 राशियों', 'link_type' => 'tool' ],
-                [ 'url' => home_url( '/festivals/' ), 'title_hi' => 'हिंदू व्रत एवं त्योहार कैलेंडर', 'keywords_hi' => 'त्योहार कैलेंडर, व्रत त्योहार, हिंदू व्रत, पावन पर्व', 'link_type' => 'tool' ],
+                [ 'url' => $site_base . '/panchang/', 'title_hi' => 'दैनिक हिंदू पंचांग', 'keywords_hi' => 'पंचांग, दैनिक पंचांग, शुभ मुहूर्त, आज का पंचांग, तिथि, नक्षत्र, चौघड़िया', 'link_type' => 'tool' ],
+                [ 'url' => $site_base . '/kundali-details/', 'title_hi' => 'जन्म कुंडली एवं जन्म पत्रिका', 'keywords_hi' => 'कुंडली, जन्मपत्री, जन्म कुंडली, ग्रह शांति', 'link_type' => 'tool' ],
+                [ 'url' => $site_base . '/dosh/mangal-dosh/', 'title_hi' => 'मांगलिक दोष जांच एवं उपाय', 'keywords_hi' => 'मांगलिक दोष, मंगल दोष, मांगलिक', 'link_type' => 'tool' ],
+                [ 'url' => $site_base . '/dosh/kaal-sarp-dosh/', 'title_hi' => 'कालसर्प दोष निवारण', 'keywords_hi' => 'कालसर्प दोष, काल सर्प', 'link_type' => 'tool' ],
+                [ 'url' => $site_base . '/horoscope/', 'title_hi' => 'दैनिक राशिफल', 'keywords_hi' => 'राशिफल, दैनिक राशिफल, राशि अनुसार, 12 राशियों', 'link_type' => 'tool' ],
+                [ 'url' => $site_base . '/festivals/', 'title_hi' => 'हिंदू व्रत एवं त्योहार कैलेंडर', 'keywords_hi' => 'त्योहार कैलेंडर, व्रत त्योहार, हिंदू व्रत, पावन पर्व', 'link_type' => 'tool' ],
             ];
         }
 
@@ -631,8 +654,9 @@ PROMPT;
 
         // Guaranteed In-Text Internal Links: If no keyword was matched, add an in-text editorial reference
         if ( $injected_count === 0 ) {
-            $panchang_url = home_url( '/panchang/' );
-            $kundali_url  = home_url( '/kundali-details/' );
+            $site_base    = self::get_site_base_url();
+            $panchang_url = $site_base . '/panchang/';
+            $kundali_url  = $site_base . '/kundali-details/';
             $editorial_callout = "\n\n> 💡 **संपादकीय सुझाव:** इस तिथि के शुभ मुहूर्त, चौघड़िया और पंचांग गणना की सटीक जानकारी के लिए हमारा [<a href=\"" . esc_url( $panchang_url ) . "\"><strong>दैनिक हिंदू पंचांग</strong></a>] देखें। यदि आप ग्रह दोष शांति के उपाय जानना चाहते हैं, तो अपनी [<a href=\"" . esc_url( $kundali_url ) . "\"><strong>जन्म कुंडली</strong></a>] का विश्लेषण अवश्य करें।\n\n";
 
             // Insert callout right after the first H2 heading
@@ -642,6 +666,8 @@ PROMPT;
                 $content .= $editorial_callout;
             }
         }
+
+        return self::clean_localhost_urls( $content );
 
         // Add styled "यह भी देखें" (Also Check) box at the bottom with normalized URLs
         $tools = array_filter( $links, function( $l ) { return ( $l['link_type'] ?? '' ) === 'tool'; } );
@@ -804,7 +830,7 @@ PROMPT;
             }
         }
 
-        return $body_html . $faq_html;
+        return self::clean_localhost_urls( $body_html . $faq_html );
     }
 
     /**
@@ -846,18 +872,18 @@ PROMPT;
         if ( ! $pass1_res['success'] ) {
             return [ 'success' => false, 'error' => 'Pass 1 failed: ' . $pass1_res['error'] ];
         }
-        $pass1_text = $pass1_res['text'];
+        $pass1_text = self::clean_localhost_urls( $pass1_res['text'] );
 
         // PASS 2: Humanizer
         $pass2_res = self::generate_pass2_humanizer( $pass1_text, $focus_kw );
-        $pass2_text = $pass2_res['success'] ? $pass2_res['text'] : $pass1_text;
+        $pass2_text = $pass2_res['success'] ? self::clean_localhost_urls( $pass2_res['text'] ) : $pass1_text;
 
         // PASS 3: Entity Tagging
         $pass3_res = self::generate_pass3_entity_tagger( $pass2_text );
-        $pass3_text = $pass3_res['success'] ? $pass3_res['text'] : $pass2_text;
+        $pass3_text = $pass3_res['success'] ? self::clean_localhost_urls( $pass3_res['text'] ) : $pass2_text;
 
         // Inject Internal Links
-        $final_content = self::inject_internal_links( $pass3_text );
+        $final_content = self::clean_localhost_urls( self::inject_internal_links( $pass3_text ) );
 
         // Generate SEO Meta
         $seo_meta = self::generate_seo_metadata( $item['topic_title_hi'], $festival_name_hi, $final_content, $focus_kw );

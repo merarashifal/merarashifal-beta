@@ -509,7 +509,7 @@ class MRCB_DB_Setup {
             return;
         }
 
-        $site_base = untrailingslashit( home_url() );
+        $site_base = 'https://merarashifal.com';
 
         $initial_links = [
             [ 'url' => $site_base . '/kundali-details/', 'title_hi' => 'जन्म कुंडली एवं जन्म पत्रिका', 'title_en' => 'Kundali Details', 'type' => 'tool', 'kw_hi' => 'कुंडली, जन्मपत्री, जन्म कुंडली, होरोस्कोप', 'kw_en' => 'kundali, birth chart' ],
@@ -538,6 +538,53 @@ class MRCB_DB_Setup {
                 ],
                 [ '%s', '%s', '%s', '%s', '%s', '%s', '%d', '%s' ]
             );
+        }
+    }
+
+    /**
+     * One-time & recurring database scrubber to purge any localhost URLs in mr_link_map and mr_content_queue.
+     * Ensures all links point exclusively to canonical live site https://merarashifal.com
+     */
+    public static function sanitize_stored_links_and_queue() {
+        global $wpdb;
+        $t_link_map = self::table_link_map();
+        $t_queue    = self::table_queue();
+
+        $bad_patterns = [
+            'http://localhost/merarashifal',
+            'https://localhost/merarashifal',
+            'http://localhost',
+            'https://localhost',
+            'http://127.0.0.1/merarashifal',
+            'http://127.0.0.1'
+        ];
+
+        // 1. Scrub mr_link_map
+        if ( $wpdb->get_var( "SHOW TABLES LIKE '{$t_link_map}'" ) === $t_link_map ) {
+            foreach ( $bad_patterns as $bad ) {
+                $wpdb->query(
+                    $wpdb->prepare(
+                        "UPDATE {$t_link_map} SET url = REPLACE(url, %s, 'https://merarashifal.com') WHERE url LIKE %s",
+                        $bad,
+                        '%' . $wpdb->esc_like( $bad ) . '%'
+                    )
+                );
+            }
+        }
+
+        // 2. Scrub existing drafts in mr_content_queue
+        if ( $wpdb->get_var( "SHOW TABLES LIKE '{$t_queue}'" ) === $t_queue ) {
+            $fields = [ 'ai_draft', 'ai_draft_humanized', 'ai_draft_tagged', 'admin_draft', 'draft_markdown', 'draft_html' ];
+            foreach ( $bad_patterns as $bad ) {
+                $set_parts   = [];
+                $where_parts = [];
+                foreach ( $fields as $f ) {
+                    $set_parts[]   = "{$f} = REPLACE({$f}, '{$bad}', 'https://merarashifal.com')";
+                    $where_parts[] = "{$f} LIKE '%{$bad}%'";
+                }
+                $sql = "UPDATE {$t_queue} SET " . implode( ', ', $set_parts ) . " WHERE " . implode( ' OR ', $where_parts );
+                $wpdb->query( $sql );
+            }
         }
     }
 }
