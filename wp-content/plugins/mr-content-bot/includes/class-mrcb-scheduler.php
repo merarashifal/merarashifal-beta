@@ -47,6 +47,9 @@ class MRCB_Scheduler {
      * Main nightly routine: cleans expired posts and guarantees complete 14-day schedule coverage
      */
     public static function run_nightly_generation() {
+        if ( defined( 'DISABLE_GEMINI_AUTO_GENERATION' ) && DISABLE_GEMINI_AUTO_GENERATION ) {
+            return false;
+        }
         $advance_days = defined( 'MRCB_ADVANCE_DAYS' ) ? (int) MRCB_ADVANCE_DAYS : 14;
         self::cleanup_expired_posts();
         return self::ensure_daily_schedule_coverage( $advance_days, true );
