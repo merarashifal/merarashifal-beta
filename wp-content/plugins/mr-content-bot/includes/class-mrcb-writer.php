@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class MRCB_Writer {
 
-    const DEFAULT_MODEL = 'gemini-2.5-flash';
+    const DEFAULT_MODEL = 'gemini-3.1-flash-lite';
 
     /**
      * Get Gemini API key
@@ -70,7 +70,7 @@ class MRCB_Writer {
         }
 
         $active_model = self::get_model();
-        $candidate_models = array_unique( [ $active_model, 'gemini-2.5-flash', 'gemini-flash-latest', 'gemini-3.5-flash', 'gemini-3.5-flash-lite' ] );
+        $candidate_models = array_unique( [ $active_model, 'gemini-3.1-flash-lite', 'gemini-flash-lite-latest', 'gemini-3.5-flash-lite' ] );
 
         $payload = [
             'contents' => [
@@ -106,7 +106,7 @@ class MRCB_Writer {
             $response = wp_remote_post( $url, [
                 'headers' => [ 'Content-Type' => 'application/json' ],
                 'body'    => wp_json_encode( $payload ),
-                'timeout' => 45,
+                'timeout' => 60,
             ] );
 
             if ( is_wp_error( $response ) ) {
@@ -669,9 +669,11 @@ PROMPT;
      */
     public static function inject_internal_links( $content ) {
         global $wpdb;
-        $t_links = MRCB_DB_Setup::table_link_map();
-
-        $links = ! empty( $wpdb ) ? $wpdb->get_results( "SELECT * FROM {$t_links} WHERE is_active = 1", ARRAY_A ) : [];
+        $links = [];
+        if ( ! empty( $wpdb ) && class_exists( 'MRCB_DB_Setup' ) ) {
+            $t_links = MRCB_DB_Setup::table_link_map();
+            $links   = $wpdb->get_results( "SELECT * FROM {$t_links} WHERE is_active = 1", ARRAY_A ) ?: [];
+        }
 
         // Fallback default core links pointing directly to live site
         if ( empty( $links ) ) {

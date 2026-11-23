@@ -76,23 +76,30 @@ echo str_repeat("-", 85) . "\n";
 echo $all_synced ? "RESULT: 100% IN SYNC - ALL FILES MATCH ON BETA AND LIVE!\n" : "RESULT: SOME FILES DIFFER OR PENDING DEPLOY.\n";
 
 if (file_exists($live_dir . '/wp-load.php')) {
-    require_once $live_dir . '/wp-load.php';
-    global $wpdb;
-    $active = get_option('active_plugins', []);
-    echo "\n=== LIVE DATABASE ACTIVE PLUGINS ===\n";
-    foreach ($active as $p) {
-        if (strpos($p, 'niyati') !== false) {
-            echo " -> [ACTIVE] " . $p . "\n";
-        }
-    }
-    $settings = get_option('niyati_chat_settings', []);
-    echo "Live floating_enabled setting: " . var_export($settings['floating_enabled'] ?? 'NOT SET', true) . "\n";
+    try {
+        @require_once $live_dir . '/wp-load.php';
+        global $wpdb;
+        if (!empty($wpdb)) {
+            $active = get_option('active_plugins', []);
+            echo "\n=== LIVE DATABASE ACTIVE PLUGINS ===\n";
+            foreach ($active as $p) {
+                if (strpos($p, 'niyati') !== false) {
+                    echo " -> [ACTIVE] " . $p . "\n";
+                }
+            }
+            $settings = get_option('niyati_chat_settings', []);
+            echo "Live floating_enabled setting: " . var_export($settings['floating_enabled'] ?? 'NOT SET', true) . "\n";
 
-    if (isset($_GET['fix_floating']) && $_GET['fix_floating'] === '1') {
-        $settings['floating_enabled'] = '1';
-        update_option('niyati_chat_settings', $settings);
-        echo "FIX APPLIED: floating_enabled updated to '1' in live database!\n";
-        $refreshed = get_option('niyati_chat_settings', []);
-        echo "Verified new setting: " . var_export($refreshed['floating_enabled'] ?? 'NOT SET', true) . "\n";
+            if (isset($_GET['fix_floating']) && $_GET['fix_floating'] === '1') {
+                $settings['floating_enabled'] = '1';
+                update_option('niyati_chat_settings', $settings);
+                echo "FIX APPLIED: floating_enabled updated to '1' in live database!\n";
+                $refreshed = get_option('niyati_chat_settings', []);
+                echo "Verified new setting: " . var_export($refreshed['floating_enabled'] ?? 'NOT SET', true) . "\n";
+            }
+        }
+    } catch (\Throwable $e) {
+        echo "\n[WARNING] Live WP load warning: " . $e->getMessage() . "\n";
     }
 }
+

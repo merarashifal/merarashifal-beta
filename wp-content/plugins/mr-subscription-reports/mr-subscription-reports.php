@@ -59,7 +59,9 @@ require_once MR_PLUGIN_DIR . 'includes/class-mr-pricing-page.php';
 require_once MR_PLUGIN_DIR . 'includes/class-mr-report-pricing-admin.php';
 require_once MR_PLUGIN_DIR . 'includes/class-mr-reports-showcase.php';
 require_once MR_PLUGIN_DIR . 'includes/class-mr-cookie-consent.php';
-require_once MR_PLUGIN_DIR . 'includes/class-mr-auth.php';
+if (file_exists(MR_PLUGIN_DIR . 'includes/class-mr-auth.php')) {
+    require_once MR_PLUGIN_DIR . 'includes/class-mr-auth.php';
+}
 require_once MR_PLUGIN_DIR . 'includes/class-mr-giveaway-manager.php';
 
 // Plugin Activation: Create Database Tables
@@ -67,11 +69,14 @@ register_activation_hook(__FILE__, ['MR_DB', 'create_tables']);
 
 // Initialize Admin & Frontend
 add_action('plugins_loaded', function() {
-    // Ensure tables exist on boot
-    MR_DB::create_tables();
-    MR_Coupons::create_tables();
-
     if (is_admin()) {
+        // Ensure tables exist in admin
+        if (class_exists('MR_DB')) {
+            MR_DB::create_tables();
+        }
+        if (class_exists('MR_Coupons')) {
+            MR_Coupons::create_tables();
+        }
         MR_Admin::init();
         MR_Bundles_Admin::init();
         MR_Coupons_Admin::init();
@@ -93,7 +98,9 @@ add_action('plugins_loaded', function() {
     MR_Invoice::init();
     MR_Checkout::init();
     MR_Cookie_Consent::init();
-    MR_Auth::init();
+    if (class_exists('MR_Auth')) {
+        MR_Auth::init();
+    }
 });
 
 

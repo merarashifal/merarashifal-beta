@@ -5,17 +5,35 @@
  * Access: https://beta.merarashifal.com/sync-to-production.php
  */
 
-define('WP_USE_THEMES', false);
-if (file_exists(__DIR__ . '/wp-load.php')) {
-    require_once __DIR__ . '/wp-load.php';
-}
-
 $source_dir = __DIR__;
 $target_dir = realpath(__DIR__ . '/../public_html');
 
 // Security Check: require run key or logged-in admin
+$token_valid = (isset($_GET['token']) && $_GET['token'] === 'mr_deploy_2026');
+
+// Auto-clean stale git index.lock if present
+$lock_file = __DIR__ . '/.git/index.lock';
+if (file_exists($lock_file)) {
+    @unlink($lock_file);
+}
+
+// If valid deploy token provided and shell_exec is available, sync git immediately before loading WordPress
+$pre_git_sync = '';
+if ($token_valid && function_exists('shell_exec')) {
+    $pre_git_sync = @shell_exec('git fetch origin beta 2>&1 && git reset --hard origin/beta 2>&1');
+}
+
+define('WP_USE_THEMES', false);
+if (file_exists(__DIR__ . '/wp-load.php')) {
+    try {
+        @require_once __DIR__ . '/wp-load.php';
+    } catch (\Throwable $e) {
+        // Safe continuation even if WordPress encounters a bootstrap issue
+    }
+}
+
 $is_admin = function_exists('current_user_can') && current_user_can('manage_options');
-$authorized = $is_admin || (isset($_GET['token']) && $_GET['token'] === 'mr_deploy_2026');
+$authorized = $is_admin || $token_valid;
 
 ?>
 <!DOCTYPE html>

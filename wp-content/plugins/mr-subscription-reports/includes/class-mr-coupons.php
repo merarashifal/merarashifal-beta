@@ -25,7 +25,7 @@ class MR_Coupons {
      * Create required database tables with idempotent checks
      */
     public static function create_tables() {
-        if (self::$tables_checked && get_option('mr_coupons_db_v1') === 'yes') {
+        if (self::$tables_checked || get_option('mr_coupons_db_v1') === 'yes') {
             return;
         }
         self::$tables_checked = true;
