@@ -586,6 +586,12 @@ global $wpdb;
             "\$inline_js = str_replace('GOOGLE_API_KEY_TOKEN', json_encode(\$mr_maps_key), \$inline_js);",
             $c
         );
+        // Optimize: Prevent Google Maps JS loading on pages without city inputs
+        $old_lazy = "['scroll', 'keydown', 'pointerdown', 'touchstart'].forEach(function(ev){\n    window.addEventListener(ev, function(){ ensureGoogleMaps(); }, {once:true, passive:true});\n  });\n  setTimeout(function(){ ensureGoogleMaps(); }, 4000);";
+        $new_lazy = "// Only load Google Maps if city inputs actually exist on the page\n  setTimeout(function(){ if (findInputs().length > 0) ensureGoogleMaps(); }, 3000);";
+        if (strpos($c, $old_lazy) !== false) {
+            $c = str_replace($old_lazy, $new_lazy, $c);
+        }
         $wpdb->update($snippets_table, ['code' => $c], ['id' => 13]);
         $maps_updated++;
     }

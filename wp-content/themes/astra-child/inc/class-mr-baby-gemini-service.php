@@ -197,8 +197,10 @@ class MR_Baby_Gemini_Service
         $astro_engine = MR_Baby_Astro_Engine::instance();
         $astro_core   = $astro_engine->compute_astro_profile($clean_name, $gender, $religion);
 
-        // Guard against search engine crawlers, bots, or global pause draining Gemini quotas
-        if (self::is_crawler_or_bot() || (defined('DISABLE_GEMINI_AUTO_GENERATION') && DISABLE_GEMINI_AUTO_GENERATION)) {
+        // Guard against search engine crawlers, bots, public traffic, or global pause draining Gemini quotas
+        $disable_auto = defined('DISABLE_GEMINI_AUTO_GENERATION') ? DISABLE_GEMINI_AUTO_GENERATION : true;
+        $is_admin_user = function_exists('current_user_can') && current_user_can('manage_options');
+        if ($disable_auto || self::is_crawler_or_bot() || !$is_admin_user) {
             $fallback_ai = $this->get_fallback_ai_data($clean_name, $gender, $religion, $astro_core);
             return $this->build_master_payload($clean_name, $gender, $religion, $astro_core, $fallback_ai);
         }
