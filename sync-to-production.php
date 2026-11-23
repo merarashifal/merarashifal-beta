@@ -277,6 +277,7 @@ $authorized = $is_admin || (isset($_GET['token']) && $_GET['token'] === 'mr_depl
             'update_page_2538.php',
             'purge-cache.php',
             'check-integrity.php',
+            'audit-google-hits.php',
             'robots.txt',
         ];
 
