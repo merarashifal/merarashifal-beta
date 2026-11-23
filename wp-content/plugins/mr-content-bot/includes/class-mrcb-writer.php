@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class MRCB_Writer {
 
-    const DEFAULT_MODEL = 'gemini-3.1-flash-lite';
+    const DEFAULT_MODEL = 'gemini-3-flash-preview';
 
     /**
      * Get Gemini API key
@@ -70,7 +70,7 @@ class MRCB_Writer {
         }
 
         $active_model = self::get_model();
-        $candidate_models = array_unique( [ $active_model, 'gemini-3.1-flash-lite', 'gemini-flash-lite-latest', 'gemini-3.5-flash-lite' ] );
+        $candidate_models = array_unique( [ $active_model, 'gemini-3-flash-preview', 'gemini-3.5-flash-lite', 'gemini-flash-lite-latest' ] );
 
         $payload = [
             'contents' => [
@@ -100,42 +100,52 @@ class MRCB_Writer {
 
         $last_error = '';
 
-        foreach ( $candidate_models as $cand_model ) {
-            $url = 'https://generativelanguage.googleapis.com/v1beta/models/' . urlencode( $cand_model ) . ':generateContent?key=' . urlencode( $api_key );
+        for ( $attempt = 1; $attempt <= 2; $attempt++ ) {
+            foreach ( $candidate_models as $cand_model ) {
+                $url = 'https://generativelanguage.googleapis.com/v1beta/models/' . urlencode( $cand_model ) . ':generateContent?key=' . urlencode( $api_key );
 
-            $response = wp_remote_post( $url, [
-                'headers' => [ 'Content-Type' => 'application/json' ],
-                'body'    => wp_json_encode( $payload ),
-                'timeout' => 60,
-            ] );
+                $response = wp_remote_post( $url, [
+                    'headers' => [ 'Content-Type' => 'application/json' ],
+                    'body'    => wp_json_encode( $payload ),
+                    'timeout' => 60,
+                ] );
 
-            if ( is_wp_error( $response ) ) {
-                $last_error = $response->get_error_message();
-                continue;
-            }
+                if ( is_wp_error( $response ) ) {
+                    $last_error = $response->get_error_message();
+                    continue;
+                }
 
-            $code = wp_remote_retrieve_response_code( $response );
-            $body = wp_remote_retrieve_body( $response );
-            $json = json_decode( $body, true );
+                $code = wp_remote_retrieve_response_code( $response );
+                $body = wp_remote_retrieve_body( $response );
+                $json = json_decode( $body, true );
 
-            if ( $code === 200 && ! empty( $json['candidates'][0]['content']['parts'] ) ) {
-                $text = '';
-                foreach ( $json['candidates'][0]['content']['parts'] as $part ) {
-                    if ( isset( $part['text'] ) && ( empty( $part['thought'] ) || $part['thought'] !== true ) ) {
-                        $text .= $part['text'];
+                if ( $code === 200 && ! empty( $json['candidates'][0]['content']['parts'] ) ) {
+                    $text = '';
+                    foreach ( $json['candidates'][0]['content']['parts'] as $part ) {
+                        if ( isset( $part['text'] ) && ( empty( $part['thought'] ) || $part['thought'] !== true ) ) {
+                            $text .= $part['text'];
+                        }
+                    }
+                    $text = trim( $text );
+                    if ( ! empty( $text ) ) {
+                        return [
+                            'success' => true,
+                            'text'    => $text,
+                            'model'   => $cand_model
+                        ];
                     }
                 }
-                $text = trim( $text );
-                if ( ! empty( $text ) ) {
-                    return [
-                        'success' => true,
-                        'text'    => $text,
-                        'model'   => $cand_model
-                    ];
+
+                $last_error = $json['error']['message'] ?? ( 'HTTP ' . $code . ': ' . substr( $body, 0, 200 ) );
+
+                if ( $code === 503 || $code === 429 ) {
+                    usleep( 1500000 );
                 }
             }
 
-            $last_error = $json['error']['message'] ?? ( 'HTTP ' . $code . ': ' . substr( $body, 0, 200 ) );
+            if ( $attempt === 1 ) {
+                sleep( 2 );
+            }
         }
 
         return [ 'success' => false, 'error' => $last_error ];
@@ -228,37 +238,42 @@ class MRCB_Writer {
      */
     public static function get_editorial_persona() {
         return <<<PROMPT
-You are an experienced, senior Hindi features columnist writing for living people (जैसे दैनिक भास्कर के रसरंग, नवभारत टाइम्स या बीबीसी हिंदी के वरिष्ठ लेखक).
-You write for real human readers, NOT bots.
-Your writing must read 100% authentically human and defeat ALL AI detection tools (ZeroGPT, CopyLeaks, GPTZero) with a human score of 95%+.
+You are a veteran Hindi cultural columnist and investigative features writer (like a senior editor at Navbharat Times, Dainik Bhaskar, or BBC Hindi).
+You write for real human readers who want engaging, grounded, and practical astrology insights.
+Your text MUST defeat AI detectors (ZeroGPT, CopyLeaks) by achieving 95%+ Human Score (<= 10% AI detection).
 
-STRICT HUMAN WRITING RULES:
-1. वाक्यों की लंबाई (SHORT & PUNCHY SENTENCES):
-   - हर वाक्य छोटा, सीधा और चुस्त होना चाहिए (औसतन 8 से 13 शब्द)।
-   - 18 शब्दों से बड़ा एक भी वाक्य न लिखें। बात पूरी होते ही तुरंत पूर्णविराम (।) लगाएं।
-   - बहुत छोटे वाक्य (3 से 6 शब्द) स्वाभाविक रूप से बीच-बीच में शामिल करें (उदा: "शनि का डर बेकार है।" "यह कोई सजा नहीं है।" "नियम बहुत सीधे हैं।" "बात सिर्फ इतनी है।")।
+CORE HUMAN JOURNALISTIC RULES:
+1. प्राकृतिक व्याकरण एवं उच्च संयोजक अनुपात (HIGH FUNCTION-WORD RATIO > 40%):
+   - AI रोबोट्स सिर्फ भारी संज्ञाओं (Nouns) की भरमार करते हैं, जबकि असली इंसान स्वाभाविक संयोजक और व्याकरणिक शब्दों का खुलकर प्रयोग करते हैं।
+   - वाक्य में संबंधबोधक और संयोजक अवश्य लगाएं: 'अगर... तो', 'जब... तब', 'क्योंकि', 'इसलिए', 'साथ ही', 'की वजह से', 'के लिए', 'परंतु', 'हालांकि', 'भी', 'ही', 'तो'।
+   - कभी भी कटे-फटे या आधे-अधूरे नारे जैसे वाक्य न लिखें (उदा: "बात बहुत साफ है", "नियम सीधे हैं", "यह सजा नहीं है" जैसे कृत्रिम AI तकियाकलाम भूलकर भी न लिखें)।
 
-2. प्रतिबंधित AI शब्द एवं तकियाकलाम (BANNED AI CRUTCHES - NEVER USE):
-   - 'इस दौरान' (STRICTLY BANNED!)
-   - 'इसके अलावा' (STRICTLY BANNED!)
-   - 'विशेष रूप से' (STRICTLY BANNED!)
-   - 'व्यवहारिक रूप से देखें तो' (STRICTLY BANNED!)
-   - 'ज्योतिषीय मान्यताओं के अनुसार' (STRICTLY BANNED! Write "शास्त्रों में" or "परंपरा में")
-   - 'नीचे दिए गए पांच उपाय' / 'मदद करेंगे' (STRICTLY BANNED!)
-   - 'सकारात्मक दिशा में' / 'नकारात्मक प्रभाव' / 'सकारात्मक ऊर्जा' (STRICTLY BANNED!)
-   - 'पावन पर्व है' / 'अत्यंत महत्वपूर्ण माना गया है' / 'चमत्कारी लाभ' / 'संजीवनी का काम करता है' (STRICTLY BANNED!)
+2. स्वाभाविक वाक्य प्रवाह और विविधता (NATURAL SENTENCE BURSTINESS):
+   - इंसानी लेखन में वाक्य की लंबाई एक जैसी नहीं होती।
+   - कुछ वाक्य मध्यम लंबाई (14 से 20 शब्द) के हों जो बात को गहराई दें।
+   - कुछ वाक्य छोटे और विचारोत्तेजक (7 से 11 शब्द) हों, जैसे बीच में कोई सहज सवाल पूछना ("लेकिन क्या हर किसी के लिए यह समय सचमुच बुरा होता है?").
+   - 25 शब्दों से बड़ा कोई भारी वाक्य न बनाएं।
 
-3. आम बोलचाल की सहज शब्दावली (NATURAL HUMAN VOCABULARY):
-   - भारी संस्कृतनिष्ठ शब्दों के स्थान पर आसान और स्वाभाविक हिंदी लिखें:
-     - 'आत्म-मूल्यांकन' की जगह 'खुद को परखने का वक्त'
-     - 'समयावधि' की जगह 'समय' या 'दौर'
-     - 'समयबद्धता' की जगह 'समय की पाबंदी'
-     - 'उत्तरदायित्वों' की जगह 'जिम्मेदारियां'
-     - 'प्रातःकालीन' की जगह 'सुबह-सवेरे'
-     - 'कष्टकारी' की जगह 'कठिन' या 'मुश्किल'
+3. प्रतिबंधित AI तकियाकलाम एवं उपदेशात्मक शैली (BANNED AI CLICHÉS & MORALIZING TROPES):
+   - भूलकर भी ये कृत्रिम AI जुमले न लिखें:
+     - 'यह सजा नहीं है' / 'यह सीख का समय है'
+     - 'बात बहुत साफ है' / 'नियम सीधे हैं' / 'डरने की कोई बात नहीं है'
+     - 'इस दौरान' / 'इसके अलावा' / 'विशेष रूप से' / 'व्यवहारिक रूप से देखें तो'
+     - 'ज्योतिषीय मान्यताओं के अनुसार' (इसके स्थान पर "ज्योतिष के जानकारों का कहना है" या "परंपरा में" लिखें)
+     - 'सकारात्मक दिशा' / 'नकारात्मक प्रभाव' / 'सकारात्मक ऊर्जा' / 'चमत्कारी लाभ' / 'संजीवनी का काम करता है'
+     - 'नीचे दिए गए उपाय' / 'आइए जानते हैं'
 
-4. बनावटी बुलेट पॉइंट्स या कोलन (:) वाले फॉर्मूले न बनाएं।
-   - सीधे 1, 2, 3 नंबर देकर 2-2 वाक्यों में बात लिखें।
+4. रोजमर्रा की सहज हिंदी शब्दावली (SIMPLE CONTEMPORARY VOCABULARY):
+   - भारी संस्कृतनिष्ठ पांडित्य के बजाय सहज और बोलचाल की भाषा लिखें:
+     - 'समयावधि' -> 'समय' या 'दौर'
+     - 'आत्म-मूल्यांकन' -> 'अपने काम की समीक्षा'
+     - 'कष्टकारी' -> 'कठिन' या 'मुश्किल'
+     - 'समयबद्धता' -> 'समय की पाबंदी'
+     - 'उत्तरदायित्वों' -> 'जिम्मेदारियां'
+     - 'प्रातःकालीन' -> 'सुबह के समय'
+     - 'प्रज्वलित करें' -> 'जलाएं'
+     - 'प्रतिकूलता' -> 'बुरा असर'
+     - 'समीप' -> 'पास'
 PROMPT;
     }
 
@@ -358,6 +373,11 @@ GUIDE;
    - पैराग्राफ्स की लंबाई प्राकृतिक रखें; मशीनी एकरूपता न हो।
 4. स्वाभाविक समापन: कोई रोबोटिक 'निष्कर्ष' न लिखें। एक सकारात्मक, व्यावहारिक विचार या मंगलकामना के साथ समाप्त करें।
 5. FAQ (अक्सर पूछे जाने वाले सवाल): ठीक 3 व्यावहारिक प्रश्न और उनके 2-3 वाक्यों के स्पष्ट उत्तर।
+6. व्यावहारिक संदर्भ (Natural Astrological References):
+   - प्रसंग अनुसार आलेख में 2-3 प्रमुख ज्योतिषीय शब्दों का स्वाभाविक वाक्य में प्रयोग करें:
+     - पर्व/पूजा/मुहूर्त के लिए: 'दैनिक पंचांग', 'शुभ मुहूर्त', 'चौघड़िया'
+     - ग्रह/दोष/उपाय के लिए: 'जन्म कुंडली', 'दैनिक राशिफल', 'ग्रह शांति'
+   - वाक्य पूरी तरह स्वाभाविक होने चाहिए (जैसे: "शुभ समय जानने के लिए दैनिक पंचांग और मुहूर्त देखना फलदायी होता है।" या "ग्रहों की स्थिति समझने के लिए अपनी जन्म कुंडली का विश्लेषण जरूरी होता है।")।
 {$kw_instruction}
 
 प्रारूप: Markdown में लिखें (#, ##, ### का प्रयोग करें)।
@@ -379,32 +399,38 @@ PROMPT;
 तुम एक अत्यंत सख्त, वरिष्ठ हिंदी संपादक हो। तुम्हारा कार्य नीचे दिए गए आलेख को पूरी तरह से मशीनी AI भाषा से मुक्त करके 100% मानवीय (Zero AI Detectable) शैली में बदलना है।
 
 संपादकीय निर्देश (CRITICAL RULES):
-1. वाक्यों को छोटा करो (Shorten Sentences):
-   - 15 शब्दों से अधिक लंबे हर वाक्य को तुरंत पूर्णविराम (।) लगाकर दो छोटे वाक्यों में तोड़ें।
-   - पूरे लेख में औसत वाक्य लंबाई 8 से 12 शब्दों की होनी चाहिए।
-   - बहुत छोटे वाक्य (3-5 शब्द) बीच-बीच में स्वाभाविक रूप से जोड़ें (उदा: "बात बहुत साफ है।" "यह सजा नहीं है।" "नियम सीधे हैं।")।
+1. प्राकृतिक व्याकरण एवं उच्च संयोजक अनुपात (HIGH FUNCTION-WORD RATIO):
+   - वाक्यों में स्वाभाविक संबंधबोधक और संयोजक अवश्य लगाएं: 'अगर... तो', 'जब... तब', 'क्योंकि', 'इसलिए', 'साथ ही', 'की वजह से', 'के लिए', 'परंतु', 'हालांकि', 'भी', 'ही', 'तो'।
+   - कृत्रिम AI तकियाकलाम जैसे "बात बहुत साफ है", "नियम सीधे हैं", "यह सजा नहीं है", "डरने की कोई बात नहीं है" को पूरी तरह हटा दें।
 
-2. प्रतिबंधित AI शब्दों को जड़ से मिटाएं (Purge AI Signal Words):
+2. वाक्य संतुलन (Sentence Balance):
+   - 25 शब्दों से अधिक लंबे किसी भी वाक्य को पूर्णविराम (।) लगाकर दो छोटे वाक्यों में तोड़ें।
+   - पूरे लेख में वाक्य लंबाई 10 से 18 शब्दों की स्वाभाविक विविधता में होनी चाहिए।
+
+3. प्रतिबंधित AI शब्दों को जड़ से मिटाएं (Purge AI Signal Words):
    - 'इस दौरान'
    - 'इसके अलावा'
    - 'विशेष रूप से'
    - 'व्यवहारिक रूप से देखें तो'
-   - 'ज्योतिषीय मान्यताओं के अनुसार' (इसके स्थान पर 'शास्त्रों में' या 'परंपरा में' लिखें)
+   - 'ज्योतिषीय मान्यताओं के अनुसार' (इसके स्थान पर 'ज्योतिष के जानकारों के अनुसार' या 'शास्त्रों में' लिखें)
    - 'नीचे दिए गए' / 'मदद करेंगे' / 'महत्वपूर्ण भूमिका'
-   - 'सकारात्मक दिशा में' / 'नकारात्मक प्रभाव'
+   - 'सकारात्मक दिशा' / 'नकारात्मक प्रभाव' / 'सकारात्मक ऊर्जा'
    इन सभी शब्दों को तुरंत हटाकर वाक्य को सरल और सीधा बनाएं।
 
-3. भारी संस्कृतनिष्ठ शब्दों को आसान बनाएं (Simplify Vocabulary):
-   - 'आत्म-मूल्यांकन' -> 'खुद को परखना'
+4. भारी संस्कृतनिष्ठ शब्दों को आसान बनाएं (Simplify Vocabulary):
+   - 'आत्म-मूल्यांकन' -> 'अपने काम की समीक्षा'
    - 'समयावधि' -> 'समय' या 'दौर'
    - 'समयबद्धता' -> 'समय की पाबंदी'
    - 'उत्तरदायित्वों' -> 'जिम्मेदारियां'
-   - 'प्रातःकालीन' -> 'सुबह-सवेरे'
+   - 'प्रातःकालीन' -> 'सुबह के समय'
    - 'कष्टकारी' -> 'कठिन'
+   - 'प्रज्वलित करें' -> 'जलाएं'
+   - 'समीप' -> 'पास'
+   - 'प्रतिकूलता' -> 'बुरा असर'
 
-4. कोई भी कोलन वाले फॉर्मूले (जैसे 'प्रातःकालीन जल अर्पण:') न रखें। साधारण 1, 2, 3 नंबर देकर 2-2 वाक्यों में बात लिखें।
+5. कोई भी कोलन वाले फॉर्मूले (जैसे 'प्रातःकालीन जल अर्पण:') न रखें। साधारण 1, 2, 3 नंबर देकर 2-2 वाक्यों में बात लिखें।
 
-5. मुख्य कीवर्ड '{$focus_keyword}' को पहले पैराग्राफ और सबहेडिंग्स में सुरक्षित रखें।
+{$kw_guard}
 
 केवल और केवल शुद्ध परिष्कृत (Humanized) Markdown आलेख ही लौटाएं; कोई अपनी भूमिका, 'यहाँ है आपका लेख' जैसी टिप्पणी न लिखें।
 
@@ -601,6 +627,15 @@ PROMPT;
             '/\bऊर्जा के संचार का प्रतीक है[।,]?\s*/u'      => '',
             '/\bचमत्कारी लाभ(?: मिलते हैं| होता है)?/u'     => 'अच्छे परिणाम मिलते हैं',
             '/\bसंजीवनी का काम करता है/u'                  => 'मददगार साबित होता है',
+            '/\b(यह|यह कोई)\s*सजा\s*नहीं\s*है[।,]\s*/u'       => '',
+            '/\b(यह)\s*सीख\s*का\s*समय\s*है[।,]\s*/u'          => '',
+            '/\bबात\s*बहुत\s*साफ\s*है[।,]\s*/u'               => '',
+            '/\bनियम\s*सीधे\s*हैं[।,]\s*/u'                   => '',
+            '/\bडरने\s*की\s*कोई\s*बात\s*नहीं\s*है[।,]\s*/u'   => '',
+            '/\bडरें\s*नहीं,?\s*समझें\b/u'                    => 'समझें',
+            '/\bप्रज्वलित\s*करें\b/u'                         => 'जलाएं',
+            '/\bसमीप\b/u'                                     => 'पास',
+            '/\bप्रतिकूलता\b/u'                               => 'बुरा असर',
         ];
 
         foreach ( $cliche_replacements as $pattern => $replacement ) {
@@ -667,7 +702,7 @@ PROMPT;
      * Inject internal links from mr_link_map into final markdown / HTML content
      * Fully compliant with Yoast SEO internal links detection
      */
-    public static function inject_internal_links( $content ) {
+    public static function inject_internal_links( $content, $topic_title = '', $topic_angle = '' ) {
         global $wpdb;
         $links = [];
         if ( ! empty( $wpdb ) && class_exists( 'MRCB_DB_Setup' ) ) {
@@ -675,96 +710,157 @@ PROMPT;
             $links   = $wpdb->get_results( "SELECT * FROM {$t_links} WHERE is_active = 1", ARRAY_A ) ?: [];
         }
 
-        // Fallback default core links pointing directly to live site
+        $site_base = self::get_site_base_url();
+
+        // Core fallback links pointing directly to live site
         if ( empty( $links ) ) {
-            $site_base = self::get_site_base_url();
             $links = [
-                [ 'url' => $site_base . '/panchang/', 'title_hi' => 'दैनिक हिंदू पंचांग', 'keywords_hi' => 'पंचांग, दैनिक पंचांग, शुभ मुहूर्त, आज का पंचांग, तिथि, नक्षत्र, चौघड़िया', 'link_type' => 'tool' ],
-                [ 'url' => $site_base . '/kundali-details/', 'title_hi' => 'जन्म कुंडली एवं जन्म पत्रिका', 'keywords_hi' => 'कुंडली, जन्मपत्री, जन्म कुंडली, ग्रह शांति', 'link_type' => 'tool' ],
-                [ 'url' => $site_base . '/dosh/mangal-dosh/', 'title_hi' => 'मांगलिक दोष जांच एवं उपाय', 'keywords_hi' => 'मांगलिक दोष, मंगल दोष, मांगलिक', 'link_type' => 'tool' ],
-                [ 'url' => $site_base . '/dosh/kaal-sarp-dosh/', 'title_hi' => 'कालसर्प दोष निवारण', 'keywords_hi' => 'कालसर्प दोष, काल सर्प', 'link_type' => 'tool' ],
-                [ 'url' => $site_base . '/horoscope/', 'title_hi' => 'दैनिक राशिफल', 'keywords_hi' => 'राशिफल, दैनिक राशिफल, राशि अनुसार, 12 राशियों', 'link_type' => 'tool' ],
-                [ 'url' => $site_base . '/festivals/', 'title_hi' => 'हिंदू व्रत एवं त्योहार कैलेंडर', 'keywords_hi' => 'त्योहार कैलेंडर, व्रत त्योहार, हिंदू व्रत, पावन पर्व', 'link_type' => 'tool' ],
+                [ 'url' => $site_base . '/panchang/', 'title_hi' => 'दैनिक हिंदू पंचांग', 'keywords_hi' => 'दैनिक पंचांग, आज का पंचांग, हिंदू पंचांग, पंचांग', 'link_type' => 'tool' ],
+                [ 'url' => $site_base . '/kundali-details/', 'title_hi' => 'जन्म कुंडली एवं जन्म पत्रिका', 'keywords_hi' => 'जन्म कुंडली, जन्मपत्रिका, जन्म पत्रिका, कुंडली', 'link_type' => 'tool' ],
+                [ 'url' => $site_base . '/panchang/abhijit-muhurat/', 'title_hi' => 'आज का अभिजित मुहूर्त', 'keywords_hi' => 'अभिजित मुहूर्त, अभिजीत मुहूर्त, शुभ मुहूर्त', 'link_type' => 'tool' ],
+                [ 'url' => $site_base . '/daily-choghadiya-muhurat/', 'title_hi' => 'दैनिक चौघड़िया मुहूर्त', 'keywords_hi' => 'चौघड़िया मुहूर्त, दैनिक चौघड़िया, चौघड़िया', 'link_type' => 'tool' ],
+                [ 'url' => $site_base . '/horoscope/', 'title_hi' => 'आज का राशिफल', 'keywords_hi' => 'दैनिक राशिफल, आज का राशिफल, राशिफल', 'link_type' => 'tool' ],
+                [ 'url' => $site_base . '/matchmaking-compatibility-check/', 'title_hi' => 'कुंडली मिलान (गुण मिलान)', 'keywords_hi' => 'कुंडली मिलान, गुण मिलान, विवाह मिलान', 'link_type' => 'tool' ],
+                [ 'url' => $site_base . '/dosh/mangal-dosh/', 'title_hi' => 'मांगलिक दोष जांच एवं उपाय', 'keywords_hi' => 'मांगलिक दोष, मंगल दोष', 'link_type' => 'tool' ],
+                [ 'url' => $site_base . '/dosh/kaal-sarp-dosh/', 'title_hi' => 'कालसर्प दोष निवारण', 'keywords_hi' => 'कालसर्प दोष', 'link_type' => 'tool' ],
+                [ 'url' => $site_base . '/festivals/', 'title_hi' => 'हिंदू व्रत एवं त्योहार कैलेंडर', 'keywords_hi' => 'त्योहार कैलेंडर, व्रत त्योहार, हिंदू व्रत', 'link_type' => 'tool' ],
             ];
         }
+
+        // 1. CONTEXTUAL INTELLIGENCE: Determine article theme
+        $context_str = mb_strtolower( $topic_title . ' ' . $topic_angle . ' ' . mb_substr( $content, 0, 600 ) );
+        $is_astro    = preg_match( '/(शनि|राहु|केतु|दोष|कुंडली|ग्रह|साढ़े साती|ढैय्या|उपाय)/u', $context_str );
+        $is_marriage = preg_match( '/(विवाह|शादी|मिलान|वर-वधू)/u', $context_str );
+
+        // Sort links so contextually relevant tools are evaluated first
+        usort( $links, function( $a, $b ) use ( $is_astro, $is_marriage ) {
+            $a_score = 0;
+            $b_score = 0;
+            if ( $is_astro ) {
+                if ( strpos( $a['url'], 'kundali' ) !== false || strpos( $a['url'], 'dosh' ) !== false ) $a_score += 10;
+                if ( strpos( $b['url'], 'kundali' ) !== false || strpos( $b['url'], 'dosh' ) !== false ) $b_score += 10;
+            } elseif ( $is_marriage ) {
+                if ( strpos( $a['url'], 'matchmaking' ) !== false ) $a_score += 10;
+                if ( strpos( $b['url'], 'matchmaking' ) !== false ) $b_score += 10;
+            } else {
+                if ( strpos( $a['url'], 'panchang' ) !== false || strpos( $a['url'], 'choghadiya' ) !== false ) $a_score += 10;
+                if ( strpos( $b['url'], 'panchang' ) !== false || strpos( $b['url'], 'choghadiya' ) !== false ) $b_score += 10;
+            }
+            return $b_score <=> $a_score;
+        } );
 
         $linked_urls = [];
         $max_injected_links = 3;
         $injected_count = 0;
 
-        foreach ( $links as $link ) {
-            if ( $injected_count >= $max_injected_links ) {
-                break;
-            }
+        // Split into lines so links are ONLY injected into normal body paragraphs
+        $lines = explode( "\n", $content );
+        $processed_lines = [];
 
-            $clean_url = self::normalize_internal_url( $link['url'] );
-            if ( in_array( $clean_url, $linked_urls, true ) ) {
+        foreach ( $lines as $line ) {
+            $trimmed = trim( $line );
+            // Skip headings, blockquotes, HTML divs, list items
+            if ( empty( $trimmed ) || preg_match( '/^(?:#+|>|<div|<\/div|<p|<\/p|\d+\.|\*|\-)/u', $trimmed ) ) {
+                $processed_lines[] = $line;
                 continue;
             }
 
-            $keywords = array_filter( array_map( 'trim', explode( ',', $link['keywords_hi'] ) ) );
-            foreach ( $keywords as $kw ) {
-                if ( mb_strlen( $kw ) < 3 ) {
-                    continue;
+            if ( $injected_count < $max_injected_links ) {
+                foreach ( $links as $link ) {
+                    if ( $injected_count >= $max_injected_links ) break;
+                    $clean_url = self::normalize_internal_url( $link['url'] );
+                    if ( in_array( $clean_url, $linked_urls, true ) ) continue;
+
+                    $keywords = array_filter( array_map( 'trim', explode( ',', $link['keywords_hi'] ?? '' ) ) );
+                    foreach ( $keywords as $kw ) {
+                        if ( mb_strlen( $kw ) < 3 ) continue;
+
+                        $pattern = '/(?<!\[)(?<!href=")(?<!href=\')(?<![\p{L}\p{N}])(' . preg_quote( $kw, '/' ) . ')(?![\p{L}\p{N}])(?![^<]*>)(?![^\[]*\])/u';
+
+                        if ( preg_match( $pattern, $line ) ) {
+                            $replacement = '<a href="' . esc_url( $clean_url ) . '" title="' . esc_attr( $link['title_hi'] ?? '' ) . '">$1</a>';
+                            $line = preg_replace( $pattern, $replacement, $line, 1 );
+                            $linked_urls[] = $clean_url;
+                            $injected_count++;
+                            break;
+                        }
+                    }
                 }
+            }
+            $processed_lines[] = $line;
+        }
 
-                // Unicode-safe word boundary matching for Devanagari Hindi characters
-                $pattern = '/(?<!\[)(?<!href=")(?<!href=\')(?<![\p{L}\p{N}])(' . preg_quote( $kw, '/' ) . ')(?![\p{L}\p{N}])(?![^<]*>)(?![^\[]*\])/u';
+        $content = implode( "\n", $processed_lines );
 
-                if ( preg_match( $pattern, $content ) ) {
-                    $replacement = '<a href="' . esc_url( $clean_url ) . '" title="' . esc_attr( $link['title_hi'] ) . '">$1</a>';
-                    $content = preg_replace( $pattern, $replacement, $content, 1 );
-                    $linked_urls[] = $clean_url;
-                    $injected_count++;
-                    break;
+        // Fallback: If fewer than 2 links were matched naturally, inject a natural sentence after the first H2
+        if ( $injected_count < 2 ) {
+            $panchang_url = $site_base . '/panchang/';
+            $kundali_url  = $site_base . '/kundali-details/';
+            $natural_ref = '';
+
+            if ( $is_astro && ! in_array( $kundali_url, $linked_urls, true ) ) {
+                $natural_ref = "\n\nशास्त्रों के अनुसार अपनी <a href=\"" . esc_url( $kundali_url ) . "\">जन्म कुंडली</a> में ग्रहों और साढ़े साती की स्थिति देखकर उपाय करना अधिक फलदायी होता है।\n\n";
+                $linked_urls[] = $kundali_url;
+            } elseif ( ! in_array( $panchang_url, $linked_urls, true ) ) {
+                $natural_ref = "\n\nशास्त्रों के अनुसार शुभ कार्य और पूजन से पहले <a href=\"" . esc_url( $panchang_url ) . "\">दैनिक पंचांग</a> और शुभ मुहूर्त की गणना देखना श्रेयस्कर माना जाता है।\n\n";
+                $linked_urls[] = $panchang_url;
+            }
+
+            if ( ! empty( $natural_ref ) ) {
+                if ( preg_match( '/(##\s+[^\n]+\n+)/u', $content ) ) {
+                    $content = preg_replace( '/(##\s+[^\n]+\n+)/u', '$1' . $natural_ref, $content, 1 );
+                } elseif ( preg_match( '/(^#[^\n]+\n+[^\n]+\n+)/um', $content ) ) {
+                    $content = preg_replace( '/(^#[^\n]+\n+[^\n]+\n+)/um', '$1' . $natural_ref, $content, 1 );
+                } else {
+                    $content .= $natural_ref;
                 }
             }
         }
 
-        // Guaranteed In-Text Internal Links: If no keyword was matched, add natural in-line references without robotic blockquotes
-        if ( $injected_count === 0 ) {
-            $site_base    = self::get_site_base_url();
-            $panchang_url = $site_base . '/panchang/';
-            $kundali_url  = $site_base . '/kundali-details/';
+        // 2. MID-ARTICLE CROSS-PROMOTION TAB (High-CTR Contextual Card)
+        $promo_card = '';
+        if ( $is_astro ) {
+            $promo_card = "\n\n<div class=\"mrcb-crosspromo-box\">\n<span class=\"mrcb-promo-badge\">विशेष ज्योतिषीय सेवा।</span>\n<p class=\"mrcb-promo-content\">👉 <strong>अपनी कुंडली का विश्लेषण करें:</strong> क्या आपकी जन्म पत्रिका में भी ग्रह दोष का प्रभाव है? <a href=\"" . esc_url( $site_base . '/kundali-details/' ) . "\">मुफ्त जन्म कुंडली देखें और सटीक उपाय जानें।</a></p>\n</div>\n\n";
+        } elseif ( $is_marriage ) {
+            $promo_card = "\n\n<div class=\"mrcb-crosspromo-box\">\n<span class=\"mrcb-promo-badge\">विवाह एवं कुंडली मिलान।</span>\n<p class=\"mrcb-promo-content\">👉 <strong>गुण मिलान रिपोर्ट:</strong> वर-वधू के 36 गुणों और मांगलिक दोष की विस्तृत जांच के लिए <a href=\"" . esc_url( $site_base . '/matchmaking-compatibility-check/' ) . "\">मुफ्त कुंडली मिलान करें और रिपोर्ट पाएं।</a></p>\n</div>\n\n";
+        } else {
+            $promo_card = "\n\n<div class=\"mrcb-crosspromo-box\">\n<span class=\"mrcb-promo-badge\">शुभ मुहूर्त एवं पंचांग।</span>\n<p class=\"mrcb-promo-content\">👉 <strong>आज का शुभ समय:</strong> पूजा, अनुष्ठान और शुभ कार्यों के लिए आज का राहुकाल, अभिजीत मुहूर्त और चौघड़िया जानने के लिए <a href=\"" . esc_url( $site_base . '/panchang/' ) . "\">दैनिक हिंदू पंचांग देखें।</a></p>\n</div>\n\n";
+        }
 
-            $wrapped = false;
-            if ( preg_match( '/\b(पंचांग)\b/u', $content ) ) {
-                $content = preg_replace( '/\b(पंचांग)\b/u', '<a href="' . esc_url( $panchang_url ) . '">$1</a>', $content, 1 );
-                $wrapped = true;
+        // Insert after the second H2 section
+        $h2_count = 0;
+        $content = preg_replace_callback( '/(^##\s+[^\n]+)/m', function( $matches ) use ( &$h2_count, $promo_card ) {
+            $h2_count++;
+            if ( $h2_count === 2 ) {
+                return $promo_card . $matches[0];
             }
-            if ( preg_match( '/\b(कुंडली)\b/u', $content ) ) {
-                $content = preg_replace( '/\b(कुंडली)\b/u', '<a href="' . esc_url( $kundali_url ) . '">$1</a>', $content, 1 );
-                $wrapped = true;
-            }
+            return $matches[0];
+        }, $content );
 
-            if ( ! $wrapped ) {
-                $natural_line = "\n\nग्रह स्थिति समझने के लिए <a href=\"" . esc_url( $kundali_url ) . "\">जन्म कुंडली</a> और तिथि मुहूर्त के लिए <a href=\"" . esc_url( $panchang_url ) . "\">दैनिक पंचांग</a> की जानकारी आवश्यक मानी जाती है।\n\n";
-                if ( preg_match( '/(##\s+[^\n]+\n[^\n]+\n)/u', $content ) ) {
-                    $content = preg_replace( '/(##\s+[^\n]+\n[^\n]+\n)/u', '$1' . $natural_line, $content, 1 );
-                } else {
-                    $content .= $natural_line;
-                }
-            }
+        if ( $h2_count < 2 ) {
+            $content .= $promo_card;
+        }
+
+        // 3. BOTTOM CROSS-PROMOTION SERVICES TABS (Responsive Navigation Grid)
+        $services_tabs = "\n\n<div class=\"mrcb-services-tabs\">\n<h4>🔮 मेरा राशिफल विशेष ज्योतिषीय सेवाएं।</h4>\n<div class=\"mrcb-tabs-grid\">\n" .
+            "<a href=\"" . esc_url( $site_base . '/panchang/' ) . "\" class=\"mrcb-tab-item\">📅 दैनिक पंचांग: आज का शुभ मुहूर्त व चौघड़िया देखें।</a>\n" .
+            "<a href=\"" . esc_url( $site_base . '/kundali-details/' ) . "\" class=\"mrcb-tab-item\">✨ मुफ्त जन्म कुंडली: अपनी पत्रिका और ग्रह स्थिति जानें।</a>\n" .
+            "<a href=\"" . esc_url( $site_base . '/daily-choghadiya-muhurat/' ) . "\" class=\"mrcb-tab-item\">⏰ चौघड़िया मुहूर्त: पूजा व यात्रा के शुभ समय की जांच करें।</a>\n" .
+            "<a href=\"" . esc_url( $site_base . '/horoscope/' ) . "\" class=\"mrcb-tab-item\">♈ आज का राशिफल: अपनी राशि का दैनिक भविष्यफल पढ़ें।</a>\n" .
+            "<a href=\"" . esc_url( $site_base . '/matchmaking-compatibility-check/' ) . "\" class=\"mrcb-tab-item\">💖 कुंडली मिलान: विवाह के लिए 36 गुणों का मिलान करें।</a>\n" .
+            "<a href=\"" . esc_url( $site_base . '/festivals/' ) . "\" class=\"mrcb-tab-item\">🪔 व्रत व त्योहार: संपूर्ण हिंदू पंचांग कैलेंडर देखें।</a>\n" .
+            "</div>\n</div>\n\n";
+
+        // Insert before FAQ heading if present, otherwise append at the end
+        $faq_pos = preg_match( '/(^##\s+.*?(?:अक्सर पूछे जाने वाले सवाल|FAQ|प्रश्नोत्तरी).*?$)/mui', $content, $m, PREG_OFFSET_CAPTURE );
+        if ( $faq_pos && isset( $m[0][1] ) ) {
+            $offset = $m[0][1];
+            $content = substr( $content, 0, $offset ) . $services_tabs . substr( $content, $offset );
+        } else {
+            $content .= $services_tabs;
         }
 
         return self::clean_localhost_urls( $content );
-
-        // Add styled "यह भी देखें" (Also Check) box at the bottom with normalized URLs
-        $tools = array_filter( $links, function( $l ) { return ( $l['link_type'] ?? '' ) === 'tool'; } );
-        if ( ! empty( $tools ) ) {
-            shuffle( $tools );
-            $selected_tools = array_slice( $tools, 0, 3 );
-            $tool_box = "\n\n<div class=\"mrcb-tools-box\"><h4>🔮 मेरा राशिफल विशेष सेवाएँ:</h4><p>";
-            $tool_links = [];
-            foreach ( $selected_tools as $t ) {
-                $clean_tool_url = self::normalize_internal_url( $t['url'] );
-                $tool_links[] = "👉 <a href=\"" . esc_url( $clean_tool_url ) . "\"><strong>" . esc_html( $t['title_hi'] ) . "</strong></a>";
-            }
-            $tool_box .= implode( " &nbsp;•&nbsp; ", $tool_links ) . "</p></div>\n\n";
-            $content .= $tool_box;
-        }
-
-        return $content;
     }
 
     /**
@@ -964,7 +1060,7 @@ PROMPT;
 
         // Scrub AI cliches & Inject Internal Links
         $clean_pass3   = self::scrub_ai_cliches( $pass3_text );
-        $final_content = self::clean_localhost_urls( self::inject_internal_links( $clean_pass3 ) );
+        $final_content = self::clean_localhost_urls( self::inject_internal_links( $clean_pass3, $item['topic_title_hi'] ?? '', $item['topic_angle'] ?? '' ) );
 
         // Generate SEO Meta
         $seo_meta = self::generate_seo_metadata( $item['topic_title_hi'], $festival_name_hi, $final_content, $focus_kw );
