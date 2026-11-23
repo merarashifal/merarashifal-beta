@@ -1,5 +1,16 @@
 <?php
+ini_set('display_errors', '1');
+error_reporting(E_ALL);
 header('Content-Type: text/plain');
+
+echo "PHP Version: " . phpversion() . "\n";
+$err_file = __DIR__ . '/error_log';
+if (file_exists($err_file)) {
+    echo "=== RECENT ERROR LOG (LAST 20 LINES) ===\n";
+    $lines = file($err_file);
+    echo implode("", array_slice($lines, -20));
+    echo "========================================\n\n";
+}
 
 $beta_dir = __DIR__;
 $live_dir = realpath(__DIR__ . '/../public_html');
