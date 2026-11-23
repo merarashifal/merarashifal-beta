@@ -43,6 +43,15 @@ class MR_Admin {
 
         add_submenu_page(
             'mr-subscriptions',
+            __('Free Token Top-Up & Giveaways', 'merarashifal'),
+            __('🎁 Free Token Top-Up', 'merarashifal'),
+            'manage_options',
+            'mr-giveaways',
+            ['MR_Giveaway_Manager', 'render_admin_page']
+        );
+
+        add_submenu_page(
+            'mr-subscriptions',
             __('Transaction Passbook & Revenue Ledger', 'merarashifal'),
             __('Transaction Passbook', 'merarashifal'),
             'manage_options',
@@ -96,6 +105,17 @@ class MR_Admin {
         ?>
         <div class="wrap">
             <h1><?php echo esc_html__('MeraRashifal Subscriptions & Token Manager', 'merarashifal'); ?></h1>
+
+            <!-- Quick Link to Giveaway Engine -->
+            <div style="background:linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color:#ffffff; padding:14px 20px; border-radius:8px; margin-top:15px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; box-shadow:0 2px 6px rgba(2,132,199,0.2);">
+                <div>
+                    <strong style="font-size:14px; display:flex; align-items:center; gap:6px;">🎁 Looking for Free Token Top-Ups or Phone/Email Search?</strong>
+                    <p style="margin:3px 0 0 0; font-size:12.5px; color:#e0f2fe;">Instantly reward users with free Report Tokens and Niyati AI Chat Tokens with complete financial passbook accounting.</p>
+                </div>
+                <a href="<?php echo esc_url(admin_url('admin.php?page=mr-giveaways' . ($selected_user_id ? '&user_id=' . $selected_user_id : ''))); ?>" class="button button-primary" style="background:#ffffff; color:#0284c7; border:none; font-weight:700; height:34px; line-height:34px;">
+                    Open Free Token Top-Up &rarr;
+                </a>
+            </div>
 
             <?php if (isset($_GET['message']) && $_GET['message'] === 'pack_assigned'): ?>
                 <div class="notice notice-success is-dismissible">
@@ -1299,12 +1319,14 @@ class MR_Admin {
                         <option value="subscription" <?php selected($channel, 'subscription'); ?>>👑 Subscriptions</option>
                         <option value="chat_credit" <?php selected($channel, 'chat_credit'); ?>>💬 AI Chat</option>
                         <option value="ecommerce" <?php selected($channel, 'ecommerce'); ?>>🛍️ Store Products</option>
+                        <option value="admin_giveaway" <?php selected($channel, 'admin_giveaway'); ?>>🎁 Admin Giveaway</option>
                     </select>
 
                     <!-- Status Filter -->
                     <select name="status" style="height:36px;">
                         <option value="all" <?php selected($status, 'all'); ?>>All Statuses</option>
                         <option value="success" <?php selected($status, 'success'); ?>>✔ Paid / Success</option>
+                        <option value="completed" <?php selected($status, 'completed'); ?>>✔ Completed</option>
                         <option value="pending" <?php selected($status, 'pending'); ?>>⏳ Pending</option>
                         <option value="abandoned" <?php selected($status, 'abandoned'); ?>>🛒 Abandoned Cart</option>
                         <option value="failed" <?php selected($status, 'failed'); ?>>✖ Failed</option>
@@ -1325,6 +1347,7 @@ class MR_Admin {
                         <option value="renewal" <?php selected($txn_type, 'renewal'); ?>>Renewal</option>
                         <option value="refund" <?php selected($txn_type, 'refund'); ?>>Refund</option>
                         <option value="top_up" <?php selected($txn_type, 'top_up'); ?>>Top Up</option>
+                        <option value="giveaway" <?php selected($txn_type, 'giveaway'); ?>>🎁 Giveaway (Free)</option>
                     </select>
 
                     <button type="submit" class="button button-primary" style="height:36px; padding:0 18px;">Filter Ledger</button>
@@ -1388,10 +1411,17 @@ class MR_Admin {
                                 </td>
 
                                 <td>
+                                    <?php 
+                                    $is_giveaway_row = ($r['channel'] === 'admin_giveaway' || $r['txn_type'] === 'giveaway');
+                                    ?>
                                     <span style="display:inline-block; font-size:10px; font-weight:700; text-transform:uppercase; padding:2px 6px; border-radius:3px; <?php 
-                                        echo ($r['channel'] === 'subscription') ? 'background:#FEF3C7; color:#B45309;' : (($r['channel'] === 'chat_credit') ? 'background:#F3E8FF; color:#7E22CE;' : (($r['channel'] === 'ecommerce') ? 'background:#ECFDF5; color:#047857;' : 'background:#E0F2FE; color:#0369A1;'));
+                                        if ($is_giveaway_row) {
+                                            echo 'background:#FEF3C7; color:#92400E; border:1px solid #FCD34D;';
+                                        } else {
+                                            echo ($r['channel'] === 'subscription') ? 'background:#FEF3C7; color:#B45309;' : (($r['channel'] === 'chat_credit') ? 'background:#F3E8FF; color:#7E22CE;' : (($r['channel'] === 'ecommerce') ? 'background:#ECFDF5; color:#047857;' : 'background:#E0F2FE; color:#0369A1;'));
+                                        }
                                     ?>">
-                                        <?php echo esc_html(strtoupper($r['channel'])); ?>
+                                        <?php echo $is_giveaway_row ? '🎁 GIVEAWAY' : esc_html(strtoupper($r['channel'])); ?>
                                     </span>
                                     <div style="font-weight:600; color:#0F172A; margin-top:4px; font-size:13px;"><?php echo esc_html($r['item_name']); ?></div>
                                     <?php if (!empty($r['item_key'])): ?>
@@ -1399,7 +1429,16 @@ class MR_Admin {
                                     <?php endif; ?>
                                     <?php 
                                     $row_meta = !empty($r['metadata']) ? json_decode($r['metadata'], true) : [];
-                                    if (!empty($row_meta['coupon_code'])): ?>
+                                    if ($is_giveaway_row && !empty($row_meta['admin_name'])): ?>
+                                        <div style="margin-top:4px; font-size:11px; color:#B45309; background:#FFFBEB; padding:3px 6px; border-radius:4px; border:1px solid #FDE68A;">
+                                            <span class="dashicons dashicons-admin-users" style="font-size:13px; vertical-align:middle; width:13px; height:13px;"></span>
+                                            Granted by: <strong><?php echo esc_html($row_meta['admin_name']); ?></strong>
+                                            <?php if (!empty($row_meta['reason'])): ?>
+                                                <span style="color:#64748B;">— <?php echo esc_html($row_meta['reason']); ?></span>
+                                            <?php endif; ?>
+                                        </div>
+                                    <?php endif; ?>
+                                    <?php if (!empty($row_meta['coupon_code'])): ?>
                                         <div style="margin-top:4px;">
                                             <span style="display:inline-block; font-size:10.5px; font-weight:700; background:#FFF1F2; color:#BE123C; border:1px solid #FECDD3; padding:1px 6px; border-radius:4px;">
                                                 <span class="dashicons dashicons-tag" style="font-size:12px; vertical-align:middle; width:12px; height:12px;"></span> Coupon: <?php echo esc_html($row_meta['coupon_code']); ?>
@@ -1419,9 +1458,9 @@ class MR_Admin {
                                 </td>
 
                                 <td>
-                                    <span style="font-weight:600; text-transform:capitalize; color:#475569;"><?php echo esc_html($r['txn_type']); ?></span>
+                                    <span style="font-weight:600; text-transform:capitalize; color:<?php echo $is_giveaway_row ? '#D97706' : '#475569'; ?>;"><?php echo $is_giveaway_row ? '🎁 Giveaway' : esc_html($r['txn_type']); ?></span>
                                     <div style="margin-top:4px;">
-                                        <?php if ($is_test): ?>
+                                        <?php if ($is_test && !$is_giveaway_row): ?>
                                             <span style="background:#FEF3C7; color:#B45309; border:1px solid #FDE68A; padding:2px 6px; border-radius:3px; font-size:10px; font-weight:800;">TEST</span>
                                         <?php else: ?>
                                             <span style="background:#ECFDF5; color:#047857; padding:2px 6px; border-radius:3px; font-size:10px; font-weight:800;">LIVE</span>
@@ -1450,6 +1489,8 @@ class MR_Admin {
                                     ?>
                                         <div style="font-size:11px; color:#94A3B8; text-decoration:line-through;">₹<?php echo number_format($r['net_amount'], 2); ?></div>
                                         <strong style="font-size:13px; color:#7C3AED;">- ₹<?php echo number_format($ref_amt, 2); ?></strong>
+                                    <?php elseif ($is_giveaway_row): ?>
+                                        <span style="font-weight:800; font-size:12px; color:#059669; background:#ECFDF5; padding:2px 6px; border-radius:4px; border:1px solid #A7F3D0;">FREE (₹0.00)</span>
                                     <?php else: ?>
                                         <strong style="font-size:14px; color:#0F172A;">₹<?php echo number_format($r['net_amount'], 2); ?></strong>
                                         <?php if ($r['discount_amount'] > 0): ?>
@@ -1459,7 +1500,9 @@ class MR_Admin {
                                 </td>
 
                                 <td>
-                                    <?php if ($r['status'] === 'success'): ?>
+                                    <?php if ($is_giveaway_row): ?>
+                                        <span style="background:#ECFDF5; color:#059669; border:1px solid #A7F3D0; padding:3px 9px; border-radius:12px; font-size:11px; font-weight:700;">🎁 Credited</span>
+                                    <?php elseif ($r['status'] === 'success' || $r['status'] === 'completed'): ?>
                                         <span style="background:#ECFDF5; color:#059669; border:1px solid #A7F3D0; padding:3px 9px; border-radius:12px; font-size:11px; font-weight:700;">✔ Paid</span>
                                     <?php elseif ($r['status'] === 'failed'): ?>
                                         <span style="background:#FEF2F2; color:#DC2626; border:1px solid #FECACA; padding:3px 9px; border-radius:12px; font-size:11px; font-weight:700;">✖ Failed</span>

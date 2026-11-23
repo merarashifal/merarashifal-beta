@@ -59,6 +59,8 @@ require_once MR_PLUGIN_DIR . 'includes/class-mr-pricing-page.php';
 require_once MR_PLUGIN_DIR . 'includes/class-mr-report-pricing-admin.php';
 require_once MR_PLUGIN_DIR . 'includes/class-mr-reports-showcase.php';
 require_once MR_PLUGIN_DIR . 'includes/class-mr-cookie-consent.php';
+require_once MR_PLUGIN_DIR . 'includes/class-mr-auth.php';
+require_once MR_PLUGIN_DIR . 'includes/class-mr-giveaway-manager.php';
 
 // Plugin Activation: Create Database Tables
 register_activation_hook(__FILE__, ['MR_DB', 'create_tables']);
@@ -75,6 +77,7 @@ add_action('plugins_loaded', function() {
         MR_Coupons_Admin::init();
     }
     MR_Frontend::init();
+    MR_Giveaway_Manager::init();
     MR_Passbook_UI::init();
     MR_Razorpay::init();
     MR_Report_Pricing_Admin::init();
@@ -90,6 +93,7 @@ add_action('plugins_loaded', function() {
     MR_Invoice::init();
     MR_Checkout::init();
     MR_Cookie_Consent::init();
+    MR_Auth::init();
 });
 
 

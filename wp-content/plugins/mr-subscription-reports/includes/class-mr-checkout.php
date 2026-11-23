@@ -267,7 +267,8 @@ class MR_Checkout {
                     'discount_amount' => $discount,
                     'new_total'       => max(1.0, round($gross_amount - $discount, 2)),
                     'title'           => $res['title'],
-                    'message'         => $res['message']
+                    'message'         => $res['message'],
+                    'is_secret'       => !empty($res['is_secret']) ? 1 : 0
                 ];
             } else {
                 return $res;
@@ -323,10 +324,22 @@ class MR_Checkout {
     }
 
     /**
-     * AJAX Action: Validate & Apply Coupon Code
+     * AJAX Action: Validate & Apply Coupon Code with Anti-Brute-Force Rate Limiting
      */
     public static function ajax_apply_coupon() {
         check_ajax_referer('mr_reports_nonce', 'nonce');
+
+        // Rate Limiter: Prevent automated bot brute-forcing of coupon codes
+        $client_ip = sanitize_text_field($_SERVER['REMOTE_ADDR'] ?? '127.0.0.1');
+        $rate_key  = 'mr_coupon_rate_' . md5($client_ip);
+        $attempts  = (int)get_transient($rate_key);
+
+        if ($attempts >= 5) {
+            wp_send_json_error([
+                'valid'   => false,
+                'message' => __('Too many incorrect coupon attempts. Please wait 15 minutes before trying again.', 'merarashifal')
+            ]);
+        }
 
         $code        = sanitize_text_field($_POST['coupon_code'] ?? '');
         $item_type   = sanitize_key($_POST['item_type'] ?? 'report_bundle');
@@ -344,9 +357,14 @@ class MR_Checkout {
 
         $res = self::validate_coupon($code, $item_type, $gross_price, $context);
 
-        if ($res['valid']) {
+        if (!empty($res['valid'])) {
+            // Reset failed attempt counter on valid coupon
+            delete_transient($rate_key);
             wp_send_json_success($res);
         } else {
+            // Increment failed attempt counter and lock for 15 minutes
+            $attempts++;
+            set_transient($rate_key, $attempts, 15 * MINUTE_IN_SECONDS);
             wp_send_json_error($res);
         }
     }
@@ -489,6 +507,9 @@ class MR_Checkout {
             $db_coupons = MR_Coupons::get_all_coupons(['status' => 'active']);
             if (!empty($db_coupons)) {
                 foreach ($db_coupons as $dbc) {
+                    if (!empty($dbc['is_secret'])) {
+                        continue; // Strictly omit secret testing promo codes from public modal list
+                    }
                     $modal_coupons[$dbc['code']] = [
                         'code'        => $dbc['code'],
                         'title'       => $dbc['title'],
@@ -1712,7 +1733,10 @@ class MR_Checkout {
                         $('#mr-row-bucket-discount').slideUp(120);
 
                         // Calculate coupon discount on Gross Amount
-                        if (appliedCoupon.type === 'percent') {
+                        if (appliedCoupon.is_secret || (appliedCoupon.type === 'percent' && parseFloat(appliedCoupon.value) >= 100)) {
+                            // Secret test promo or 100% discount: Cart drops to exactly ₹1.00 for gateway compliance
+                            couponDiscount = Math.max(0, grossAmount - 1.00);
+                        } else if (appliedCoupon.type === 'percent') {
                             couponDiscount = Math.round(((grossAmount * appliedCoupon.value) / 100.0) * 100) / 100;
                             if (appliedCoupon.cap && appliedCoupon.cap > 0) {
                                 couponDiscount = Math.min(couponDiscount, appliedCoupon.cap);
@@ -1720,7 +1744,7 @@ class MR_Checkout {
                         } else {
                             couponDiscount = Math.min(grossAmount, appliedCoupon.value);
                         }
-                        couponDiscount = Math.min(couponDiscount, grossAmount);
+                        couponDiscount = Math.min(couponDiscount, Math.max(0, grossAmount - 1.00));
 
                         activePromoDiscount = couponDiscount;
                         $('#mr-disp-coupon-code').text(appliedCoupon.code);
@@ -1957,7 +1981,8 @@ class MR_Checkout {
                                     id: d.coupon_id || 0,
                                     type: d.type || 'percent',
                                     value: parseFloat(d.value) || 0,
-                                    cap: parseFloat(d.max_discount_cap) || 0
+                                    cap: parseFloat(d.max_discount_cap) || 0,
+                                    is_secret: parseInt(d.is_secret) || 0
                                 };
 
                                 recalcCheckoutTotals();
@@ -2600,17 +2625,31 @@ class MR_Checkout {
             wp_send_json_error(['message' => 'Please agree to the Terms & Conditions, Privacy Policy, and Refund Policy, and confirm you are 18+ to proceed.']);
         }
 
-        $user_id = get_current_user_id() ?: 1;
-        if ($user_id > 1) {
-            update_user_meta($user_id, 'billing_phone', $billing_phone);
-            update_user_meta($user_id, 'billing_state', $billing_state);
-            update_user_meta($user_id, 'billing_country', $billing_country);
-            update_user_meta($user_id, 'mr_dpdp_checkout_consent_at', current_time('mysql'));
-            update_user_meta($user_id, 'mr_dpdp_age_affirmed_18', '1');
-            if ($is_intl) {
-                update_user_meta($user_id, 'billing_address_1', $billing_address);
-                update_user_meta($user_id, 'billing_city', $billing_city);
-                update_user_meta($user_id, 'billing_postcode', $billing_pincode);
+        $extra_meta = [
+            'billing_phone'               => $billing_phone,
+            'billing_state'               => $billing_state,
+            'billing_country'             => $billing_country,
+            'mr_dpdp_checkout_consent_at' => current_time('mysql'),
+            'mr_dpdp_age_affirmed_18'     => '1',
+        ];
+        if ($is_intl) {
+            $extra_meta['billing_address_1'] = $billing_address;
+            $extra_meta['billing_city']      = $billing_city;
+            $extra_meta['billing_postcode']  = $billing_pincode;
+        }
+
+        if (is_user_logged_in()) {
+            $user_id = get_current_user_id();
+            foreach ($extra_meta as $mk => $mv) {
+                update_user_meta($user_id, $mk, $mv);
+            }
+        } else {
+            // Guest-First Silent Auto-Registration: Seamlessly provision subscriber and session
+            if (class_exists('MR_Auth')) {
+                $auth = MR_Auth::get_or_create_user($billing_email, $billing_phone, $billing_name, $extra_meta);
+                $user_id = (!is_wp_error($auth) && !empty($auth['user_id'])) ? $auth['user_id'] : (get_current_user_id() ?: 1);
+            } else {
+                $user_id = get_current_user_id() ?: 1;
             }
         }
 
@@ -2885,7 +2924,33 @@ class MR_Checkout {
         $txn = $wpdb->get_row($wpdb->prepare("SELECT * FROM $table WHERE id = %d LIMIT 1", $txn['id']), ARRAY_A);
         $meta = !empty($txn['metadata']) ? (is_array($txn['metadata']) ? $txn['metadata'] : json_decode($txn['metadata'], true)) : [];
 
-        $user_id   = intval($txn['user_id'] ?: (get_current_user_id() ?: 1));
+        $user_id = intval($txn['user_id'] ?? 0);
+        if ($user_id <= 1 && !empty($txn['customer_email']) && class_exists('MR_Auth')) {
+            $auth = MR_Auth::get_or_create_user(
+                $txn['customer_email'],
+                $txn['customer_phone'] ?? '',
+                $txn['customer_name'] ?? ''
+            );
+            if (!is_wp_error($auth) && !empty($auth['user_id'])) {
+                $user_id = $auth['user_id'];
+                $wpdb->update($table, ['user_id' => $user_id], ['id' => $txn['id']]);
+            }
+        }
+        if ($user_id <= 0) {
+            $user_id = get_current_user_id() ?: 1;
+        }
+
+        // Silent login session establishment
+        if ($user_id > 1) {
+            wp_clear_auth_cookie();
+            wp_set_current_user($user_id);
+            wp_set_auth_cookie($user_id, true);
+        }
+
+        $magic_login_url = ($user_id > 1 && class_exists('MR_Auth')) 
+            ? MR_Auth::generate_magic_login_url($user_id, home_url('/my-account/')) 
+            : home_url('/my-account/');
+
         $chat_cred = intval($meta['chat_credits'] ?? 0);
         $is_chat_recharge = ($txn['channel'] === 'chat_recharge' || ($meta['item_type'] ?? '') === 'chat_credits');
 
@@ -2952,6 +3017,8 @@ class MR_Checkout {
                 'internal_id'      => $internal_id,
                 'is_chat_recharge' => true,
                 'credits_added'    => $credits_added,
+                'user_id'          => $user_id,
+                'magic_login_url'  => $magic_login_url,
                 'reports'          => []
             ]);
         }
@@ -3012,13 +3079,15 @@ class MR_Checkout {
         }
 
         wp_send_json_success([
-            'message'        => 'Order completed successfully! Invoice generated and tokens credited.',
-            'invoice_number' => $inv_num,
-            'invoice_url'    => $inv_url,
-            'amount'         => $txn['net_amount'],
-            'internal_id'    => $internal_id,
-            'reports'        => $reports_data,
-            'bundle_tier'    => $meta['bundle_tier'] ?? 'single'
+            'message'         => 'Order completed successfully! Invoice generated and tokens credited.',
+            'invoice_number'  => $inv_num,
+            'invoice_url'     => $inv_url,
+            'amount'          => $txn['net_amount'],
+            'internal_id'     => $internal_id,
+            'user_id'         => $user_id,
+            'magic_login_url' => $magic_login_url,
+            'reports'         => $reports_data,
+            'bundle_tier'     => $meta['bundle_tier'] ?? 'single'
         ]);
     }
 }

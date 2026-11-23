@@ -299,9 +299,10 @@ class MR_Passbook_UI {
                             </thead>
                             <tbody>
                                 <?php foreach ($txns as $t): 
+                                    $is_giveaway   = ($t['channel'] === 'admin_giveaway' || $t['txn_type'] === 'giveaway');
                                     $channel_class = 'mr-badge-' . sanitize_html_class($t['channel']);
-                                    $channel_label = ($t['channel'] === 'subscription') ? 'Subscription' : (($t['channel'] === 'chat_credit') ? 'AI Chat' : (($t['channel'] === 'ecommerce') ? 'Store Product' : 'Astro Report'));
-                                    $status_class  = 'mr-status-' . sanitize_html_class($t['status']);
+                                    $channel_label = $is_giveaway ? '🎁 Free Giveaway' : (($t['channel'] === 'subscription') ? 'Subscription' : (($t['channel'] === 'chat_credit') ? 'AI Chat' : (($t['channel'] === 'ecommerce') ? 'Store Product' : 'Astro Report')));
+                                    $status_class  = ($t['status'] === 'completed' || $t['status'] === 'success') ? 'mr-status-success' : ('mr-status-' . sanitize_html_class($t['status']));
                                     $is_test       = ($t['gateway_mode'] === 'test');
                                     $is_refunded   = ($t['status'] === 'refunded' || $t['status'] === 'partial_refund');
                                     $meta          = !empty($t['metadata']) ? json_decode($t['metadata'], true) : [];
@@ -328,14 +329,14 @@ class MR_Passbook_UI {
                                         <?php endif; ?>
                                     </td>
                                     <td>
-                                        <span class="mr-badge-channel <?php echo esc_attr($channel_class); ?>"><?php echo esc_html($channel_label); ?></span>
-                                        <?php if ($is_test): ?>
+                                        <span class="mr-badge-channel <?php echo esc_attr($channel_class); ?>" <?php if ($is_giveaway) echo 'style="background:#FEF3C7; color:#92400E; border:1px solid #FCD34D;"'; ?>><?php echo esc_html($channel_label); ?></span>
+                                        <?php if ($is_test && !$is_giveaway): ?>
                                             <span class="mr-mode-badge mr-mode-test">TEST</span>
                                         <?php endif; ?>
                                         <div style="font-weight:700; color:#0f172a; margin-top:4px;"><?php echo esc_html($t['item_name']); ?></div>
                                     </td>
                                     <td>
-                                        <span style="font-weight:600; text-transform:capitalize; color:#475569;"><?php echo esc_html($t['txn_type']); ?></span>
+                                        <span style="font-weight:600; text-transform:capitalize; color:<?php echo $is_giveaway ? '#D97706' : '#475569'; ?>;"><?php echo $is_giveaway ? '🎁 Giveaway' : esc_html($t['txn_type']); ?></span>
                                     </td>
                                     <td>
                                         <?php if ($is_refunded): ?>
@@ -344,13 +345,17 @@ class MR_Passbook_UI {
                                                 + ₹<?php echo number_format($refund_amt, 2); ?>
                                                 <span style="font-size:11px; font-weight:600; display:block; color:#6b21a8;">Refunded</span>
                                             </div>
+                                        <?php elseif ($is_giveaway): ?>
+                                            <span style="font-weight:800; font-size:14px; color:#059669; background:#ECFDF5; padding:3px 8px; border-radius:6px; border:1px solid #A7F3D0;">FREE (₹0)</span>
                                         <?php else: ?>
                                             <span style="font-weight:800; font-size:15px; color:#0f172a;">₹<?php echo number_format($t['net_amount'], 2); ?></span>
                                         <?php endif; ?>
                                     </td>
                                     <td>
                                         <span class="mr-badge-status <?php echo esc_attr($status_class); ?>">
-                                            <?php if ($t['status'] === 'success'): ?>
+                                            <?php if ($is_giveaway): ?>
+                                                🎁 Credited
+                                            <?php elseif ($t['status'] === 'success' || $t['status'] === 'completed'): ?>
                                                 ✔ Paid
                                             <?php elseif ($t['status'] === 'failed'): ?>
                                                 ✖ Failed
@@ -368,6 +373,15 @@ class MR_Passbook_UI {
                                             <span style="display:inline-block; font-size:11px; color:#7c3aed; background:#f5f3ff; border:1px solid #ddd6fe; padding:4px 8px; border-radius:6px; font-weight:600;">
                                                 <i class="fa-solid fa-building-columns"></i> Sent to Bank
                                             </span>
+                                        <?php elseif ($is_giveaway): ?>
+                                            <div style="display:flex; flex-direction:column; gap:5px; align-items:flex-start;">
+                                                <a href="<?php echo esc_url(home_url('/reports')); ?>" class="mr-btn-action" style="white-space:nowrap; background:#059669; padding:4px 9px; font-size:11px; border-radius:6px; text-decoration:none;">
+                                                    <i class="fa-solid fa-wand-magic-sparkles"></i> Use Tokens &rarr;
+                                                </a>
+                                                <button type="button" onclick="if(window.document.getElementById('niyati-launcher')){window.document.getElementById('niyati-launcher').click();}" class="mr-btn-action" style="background:#7E22CE; border:none; cursor:pointer; white-space:nowrap; padding:4px 9px; font-size:11px; border-radius:6px;">
+                                                    💬 Ask Niyati
+                                                </button>
+                                            </div>
                                         <?php elseif ($t['status'] === 'success'): ?>
                                             <div style="display:flex; flex-direction:column; gap:5px; align-items:flex-start;">
                                                 <?php if ($t['channel'] === 'report'): ?>

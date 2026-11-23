@@ -54,12 +54,14 @@ class MR_Coupons {
             starts_at DATETIME DEFAULT NULL,
             expires_at DATETIME DEFAULT NULL,
             status ENUM('active', 'paused', 'expired') NOT NULL DEFAULT 'active',
+            is_secret TINYINT(1) NOT NULL DEFAULT 0,
             created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
             updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             PRIMARY KEY (id),
             UNIQUE KEY code_unique (code),
             KEY status_dates (status, starts_at, expires_at),
-            KEY product_scope (product_scope)
+            KEY product_scope (product_scope),
+            KEY is_secret (is_secret)
         ) {$charset_collate};";
 
         // 2. Redemptions audit & per-user tracking table
@@ -91,10 +93,28 @@ class MR_Coupons {
         dbDelta($sql_coupons);
         dbDelta($sql_redemptions);
 
+        // Ensure is_secret column exists on existing installations
+        self::ensure_secret_column();
+
         // Seed initial sample coupons if table is empty
         self::seed_default_coupons();
 
+        // Ensure active secret test coupon exists
+        self::get_or_create_secret_test_coupon();
+
         update_option('mr_coupons_db_v1', 'yes');
+    }
+
+    /**
+     * Ensure is_secret column exists on the coupons table
+     */
+    public static function ensure_secret_column() {
+        global $wpdb;
+        $table_coupons = $wpdb->prefix . self::TABLE_COUPONS;
+        $existing_cols = $wpdb->get_col("DESC {$table_coupons}", 0);
+        if (!empty($existing_cols) && !in_array('is_secret', $existing_cols, true)) {
+            $wpdb->query("ALTER TABLE {$table_coupons} ADD COLUMN is_secret tinyint(1) NOT NULL DEFAULT 0 AFTER status, ADD KEY is_secret (is_secret)");
+        }
     }
 
     /**
@@ -343,10 +363,12 @@ class MR_Coupons {
             }
         }
 
-        // 6. Minimum Pre-Tax Order Value Check
+        $is_secret = !empty($coupon['is_secret']);
+
+        // 6. Minimum Pre-Tax Order Value Check (Bypassed for secret test promo)
         $subtotal = floatval($context['subtotal_pretax'] ?? 0);
         $min_val  = floatval($coupon['min_order_value']);
-        if ($min_val > 0 && $subtotal < $min_val) {
+        if (!$is_secret && $min_val > 0 && $subtotal < $min_val) {
             return [
                 'valid'   => false,
                 'message' => sprintf(
@@ -362,25 +384,35 @@ class MR_Coupons {
         $max_cap        = floatval($coupon['max_discount_cap']);
         $discount_amt   = 0.00;
 
-        if ($discount_type === 'flat') {
-            $discount_amt = min($discount_value, $subtotal);
-        } elseif ($discount_type === 'percent') {
-            $raw_discount = ($subtotal * $discount_value) / 100.0;
-            if ($max_cap > 0) {
-                $raw_discount = min($raw_discount, $max_cap);
+        if ($is_secret || ($discount_type === 'percent' && $discount_value >= 100.0)) {
+            // Secret testing promo: adjust discount so payable total is exactly ₹1.00
+            $discount_amt = max(0.00, $subtotal - 1.00);
+            $new_subtotal = max(1.00, round($subtotal - $discount_amt, 2));
+            $msg = sprintf(
+                __('Secret Test Promo "%s" applied! Order total adjusted to ₹1.00 for live payment gateway verification.', 'merarashifal'),
+                $coupon['code']
+            );
+        } else {
+            if ($discount_type === 'flat') {
+                $discount_amt = min($discount_value, $subtotal);
+            } elseif ($discount_type === 'percent') {
+                $raw_discount = ($subtotal * $discount_value) / 100.0;
+                if ($max_cap > 0) {
+                    $raw_discount = min($raw_discount, $max_cap);
+                }
+                $discount_amt = min($raw_discount, $subtotal);
             }
-            $discount_amt = min($raw_discount, $subtotal);
+
+            $discount_amt = round($discount_amt, 2);
+            $new_subtotal = max(0.00, round($subtotal - $discount_amt, 2));
+
+            $savings_str = '₹' . number_format($discount_amt, 2);
+            $msg = sprintf(
+                __('Coupon "%s" applied! You saved %s on your order.', 'merarashifal'),
+                $coupon['code'],
+                $savings_str
+            );
         }
-
-        $discount_amt = round($discount_amt, 2);
-        $new_subtotal = max(0.00, round($subtotal - $discount_amt, 2));
-
-        $savings_str = '₹' . number_format($discount_amt, 2);
-        $msg = sprintf(
-            __('Coupon "%s" applied! You saved %s on your order.', 'merarashifal'),
-            $coupon['code'],
-            $savings_str
-        );
 
         return [
             'valid'           => true,
@@ -392,6 +424,7 @@ class MR_Coupons {
             'discount_value'  => $discount_value,
             'discount_amount' => $discount_amt,
             'new_subtotal'    => $new_subtotal,
+            'is_secret'       => $is_secret ? 1 : 0,
             'coupon'          => $coupon,
         ];
     }
@@ -512,6 +545,13 @@ class MR_Coupons {
             $where[] = "status = %s";
             $params[] = sanitize_key($args['status']);
         }
+        if (isset($args['is_secret'])) {
+            $where[] = "is_secret = %d";
+            $params[] = !empty($args['is_secret']) ? 1 : 0;
+        } elseif (empty($args['include_secret'])) {
+            // By default, exclude secret testing coupons from general and public listings
+            $where[] = "is_secret = 0";
+        }
         if (!empty($args['search'])) {
             $like = '%' . $wpdb->esc_like(trim($args['search'])) . '%';
             $where[] = "(code LIKE %s OR title LIKE %s)";
@@ -612,5 +652,85 @@ class MR_Coupons {
             "SELECT * FROM {$table} ORDER BY redeemed_at DESC LIMIT %d",
             $limit
         ), ARRAY_A);
+    }
+
+    /**
+     * Generate a cryptographically secure 6-character alphanumeric code
+     * Excludes ambiguous characters (0, O, 1, I) to ensure ease of typing
+     *
+     * @param int $length
+     * @return string High-entropy uppercase alphanumeric code
+     */
+    public static function generate_secret_code($length = 6) {
+        $chars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+        $max = strlen($chars) - 1;
+        $code = '';
+        for ($i = 0; $i < $length; $i++) {
+            $code .= $chars[random_int(0, $max)];
+        }
+        return $code;
+    }
+
+    /**
+     * Get or create the secret ₹1 live testing promo coupon
+     *
+     * @return array Secret coupon record
+     */
+    public static function get_or_create_secret_test_coupon() {
+        global $wpdb;
+        $table = $wpdb->prefix . self::TABLE_COUPONS;
+        self::ensure_secret_column();
+
+        $existing = $wpdb->get_row("SELECT * FROM {$table} WHERE is_secret = 1 LIMIT 1", ARRAY_A);
+        if ($existing) {
+            return $existing;
+        }
+
+        // Generate high-entropy 6-character alphanumeric code (e.g. X9K7M2)
+        $code = self::generate_secret_code(6);
+
+        $wpdb->insert($table, [
+            'code'                 => $code,
+            'title'                => 'Secret Live Gateway Test Promo (₹1 Total)',
+            'description'          => 'Secret 100% test promo code for verifying live Razorpay transactions and webhooks. Clamps cart total to exactly ₹1.00.',
+            'discount_type'        => 'percent',
+            'discount_value'       => 100.00,
+            'max_discount_cap'     => 0.00,
+            'min_order_value'      => 0.00,
+            'product_scope'        => 'all',
+            'total_usage_limit'    => 0, // Unlimited for administrative live testing
+            'total_redeemed_count' => 0,
+            'per_user_limit'       => 999,
+            'status'               => 'active',
+            'is_secret'            => 1,
+            'created_at'           => current_time('mysql'),
+        ]);
+
+        return self::get_coupon_by_id($wpdb->insert_id);
+    }
+
+    /**
+     * Regenerate or customize the secret test promo code
+     *
+     * @param string $new_code Optional specific code, or random if empty
+     * @return array Updated secret coupon record
+     */
+    public static function regenerate_secret_test_code($new_code = '') {
+        global $wpdb;
+        $table = $wpdb->prefix . self::TABLE_COUPONS;
+        $current = self::get_or_create_secret_test_coupon();
+
+        $new_code = strtoupper(trim(sanitize_text_field($new_code)));
+        if (empty($new_code)) {
+            $new_code = self::generate_secret_code(6);
+        }
+
+        $wpdb->update($table, [
+            'code'       => $new_code,
+            'status'     => 'active',
+            'updated_at' => current_time('mysql'),
+        ], ['id' => $current['id']]);
+
+        return self::get_coupon_by_id($current['id']);
     }
 }

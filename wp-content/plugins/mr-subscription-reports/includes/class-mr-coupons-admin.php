@@ -19,6 +19,7 @@ class MR_Coupons_Admin {
         add_action('admin_post_mr_save_bucket_rule', [__CLASS__, 'handle_save_bucket_rule']);
         add_action('admin_post_mr_delete_bucket_rule', [__CLASS__, 'handle_delete_bucket_rule']);
         add_action('admin_post_mr_toggle_bucket_rule', [__CLASS__, 'handle_toggle_bucket_rule']);
+        add_action('admin_post_mr_regenerate_secret_coupon', [__CLASS__, 'handle_regenerate_secret_coupon']);
     }
 
     /**
@@ -47,7 +48,7 @@ class MR_Coupons_Admin {
         $edit_id    = isset($_GET['edit']) ? intval($_GET['edit']) : 0;
         $coupon_to_edit = $edit_id > 0 ? MR_Coupons::get_coupon_by_id($edit_id) : null;
 
-        $coupons = MR_Coupons::get_all_coupons();
+        $coupons = MR_Coupons::get_all_coupons(['include_secret' => true]);
         $redemptions = MR_Coupons::get_recent_redemptions(100);
         $product_types = MR_Coupons::get_supported_product_types();
 
@@ -73,6 +74,7 @@ class MR_Coupons_Admin {
                         if ($_GET['msg'] === 'saved') _e('Coupon saved successfully!', 'merarashifal');
                         elseif ($_GET['msg'] === 'deleted') _e('Coupon deleted successfully.', 'merarashifal');
                         elseif ($_GET['msg'] === 'status_toggled') _e('Coupon status updated.', 'merarashifal');
+                        elseif ($_GET['msg'] === 'secret_regenerated') _e('New secret ₹1 live test promo code generated successfully! The previous code has been invalidated.', 'merarashifal');
                         ?>
                     </p>
                 </div>
@@ -99,9 +101,52 @@ class MR_Coupons_Admin {
                 </a>
             </nav>
 
-            <?php if ($active_tab === 'coupons'): ?>
+            <?php if ($active_tab === 'coupons'): 
+                $secret_coupon = MR_Coupons::get_or_create_secret_test_coupon();
+            ?>
                 <!-- ================= TAB 1: COUPONS LIST ================= -->
                 <div class="tab-content" style="background:#fff; border:1px solid #ccd0d4; border-radius:8px; padding:20px;">
+
+                    <!-- Secret ₹1 Testing Promo Card -->
+                    <div style="background:linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%); border:1.5px solid #FCD34D; border-radius:10px; padding:20px 24px; margin-bottom:24px; box-shadow:0 2px 8px rgba(245, 158, 11, 0.1);">
+                        <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
+                            <div>
+                                <div style="display:flex; align-items:center; gap:8px;">
+                                    <span style="font-size:22px;">🧪</span>
+                                    <h3 style="margin:0; font-size:16px; font-weight:800; color:#92400E;">Secret Live Gateway Test Promo Code (Clamps Cart to ₹1.00)</h3>
+                                    <span style="background:#059669; color:#fff; font-size:10.5px; font-weight:800; padding:2px 8px; border-radius:12px;">LIVE READY</span>
+                                </div>
+                                <p style="margin:6px 0 0 0; color:#78350F; font-size:12.5px; max-width:760px; line-height:1.5;">
+                                    This secret alphanumeric code is <strong>completely hidden from the general public</strong> and protected by an automated brute-force rate limiter. When entered on the checkout page, <strong>any cart amount (₹499, ₹999, etc.) automatically drops to exactly ₹1.00</strong>. Use this code to test real live Razorpay transactions, bank OTPs, webhooks, and invoices with real ₹1 charges.
+                                </p>
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="font-size:11px; text-transform:uppercase; color:#92400E; font-weight:700;">Live Test Redemptions</div>
+                                <div style="font-size:20px; font-weight:800; color:#78350F;"><?php echo intval($secret_coupon['total_redeemed_count'] ?? 0); ?> orders</div>
+                            </div>
+                        </div>
+
+                        <!-- Code Display Bar -->
+                        <div style="margin-top:16px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                            <div style="background:#ffffff; border:2px dashed #F59E0B; border-radius:8px; padding:8px 16px; display:flex; align-items:center; gap:12px;">
+                                <span style="font-size:11px; color:#64748B; font-weight:700; text-transform:uppercase;">Secret Code:</span>
+                                <code id="mr-secret-coupon-display" style="font-size:20px; font-weight:900; color:#7A1F3D; letter-spacing:2px; font-family:monospace;"><?php echo esc_html($secret_coupon['code']); ?></code>
+                            </div>
+
+                            <button type="button" id="mr-btn-copy-secret-coupon" class="button button-secondary" style="height:40px; font-weight:700;" onclick="navigator.clipboard.writeText('<?php echo esc_js($secret_coupon['code']); ?>'); this.innerText='✔ Copied!'; setTimeout(()=>{this.innerText='📋 Copy Code';}, 2000);">
+                                📋 Copy Code
+                            </button>
+
+                            <form method="post" action="<?php echo esc_url(admin_url('admin-post.php')); ?>" style="display:inline-block;" onsubmit="return confirm('Generate a new random 6-character secret test code? The old code will immediately stop working.');">
+                                <?php wp_nonce_field('mr_secret_coupon_nonce'); ?>
+                                <input type="hidden" name="action" value="mr_regenerate_secret_coupon">
+                                <button type="submit" class="button button-secondary" style="height:40px; font-weight:700;">
+                                    🎲 Generate New Secret Code
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
                         <h2 style="margin:0; font-size:18px; color:#1e293b;"><?php _e('Master Coupon Registry', 'merarashifal'); ?></h2>
                         <a href="?page=mr-coupons&tab=edit" class="button button-primary" style="background:#7A1F3D; border-color:#7A1F3D;">
@@ -131,6 +176,7 @@ class MR_Coupons_Admin {
                                 </tr>
                             <?php else: ?>
                                 <?php foreach ($coupons as $c): 
+                                    $is_sec = !empty($c['is_secret']);
                                     $limit = intval($c['total_usage_limit']);
                                     $used  = intval($c['total_redeemed_count']);
                                     $pct   = $limit > 0 ? min(100, round(($used / $limit) * 100)) : 0;
@@ -139,9 +185,12 @@ class MR_Coupons_Admin {
                                 ?>
                                     <tr>
                                         <td>
-                                            <strong style="font-family:monospace; font-size:14px; color:#7A1F3D; background:#FFF3E1; padding:3px 8px; border-radius:4px; border:1px solid #FED7AA;">
+                                            <strong style="font-family:monospace; font-size:14px; color:<?php echo $is_sec ? '#92400E' : '#7A1F3D'; ?>; background:<?php echo $is_sec ? '#FEF3C7' : '#FFF3E1'; ?>; padding:3px 8px; border-radius:4px; border:1px solid <?php echo $is_sec ? '#FCD34D' : '#FED7AA'; ?>;">
                                                 <?php echo esc_html($c['code']); ?>
                                             </strong>
+                                            <?php if ($is_sec): ?>
+                                                <div style="margin-top:3px;"><span style="background:#059669; color:#fff; font-size:9.5px; font-weight:800; padding:1px 5px; border-radius:3px;">🧪 SECRET TEST</span></div>
+                                            <?php endif; ?>
                                         </td>
                                         <td>
                                             <strong><?php echo esc_html($c['title']); ?></strong>
@@ -150,7 +199,10 @@ class MR_Coupons_Admin {
                                             <?php endif; ?>
                                         </td>
                                         <td>
-                                            <?php if ($c['discount_type'] === 'flat'): ?>
+                                            <?php if ($is_sec): ?>
+                                                <span style="color:#059669; font-weight:800;">₹1.00 Fixed Total</span>
+                                                <div style="font-size:10.5px; color:#78350F;">Live Gateway Test</div>
+                                            <?php elseif ($c['discount_type'] === 'flat'): ?>
                                                 <span style="color:#059669; font-weight:700;">₹<?php echo number_format($c['discount_value'], 2); ?> OFF</span>
                                             <?php else: ?>
                                                 <span style="color:#059669; font-weight:700;"><?php echo floatval($c['discount_value']); ?>% OFF</span>
@@ -158,7 +210,7 @@ class MR_Coupons_Admin {
                                                     <div style="font-size:11px; color:#64748b;">(Cap: ₹<?php echo number_format($c['max_discount_cap'], 2); ?>)</div>
                                                 <?php endif; ?>
                                             <?php endif; ?>
-                                            <?php if ($c['min_order_value'] > 0): ?>
+                                            <?php if (!$is_sec && $c['min_order_value'] > 0): ?>
                                                 <div style="font-size:10.5px; color:#94a3b8;">Min: ₹<?php echo number_format($c['min_order_value']); ?></div>
                                             <?php endif; ?>
                                         </td>
@@ -756,6 +808,21 @@ class MR_Coupons_Admin {
         }
 
         wp_redirect(admin_url('admin.php?page=mr-coupons&tab=coupons&msg=status_toggled'));
+        exit;
+    }
+
+    /**
+     * Handle regenerate secret testing coupon
+     */
+    public static function handle_regenerate_secret_coupon() {
+        if (!current_user_can('manage_options')) {
+            wp_die(__('Permission denied', 'merarashifal'));
+        }
+        check_admin_referer('mr_secret_coupon_nonce');
+
+        MR_Coupons::regenerate_secret_test_code();
+
+        wp_redirect(admin_url('admin.php?page=mr-coupons&tab=coupons&msg=secret_regenerated'));
         exit;
     }
 
