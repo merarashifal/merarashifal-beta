@@ -562,6 +562,7 @@ class MR_Baby_Astro_Engine
                 'soul_urge_number'    => $soul_urge,
                 'personality_number'  => $personality_num,
                 'life_path_resonance' => $life_path_res,
+                'life_path_resonance_hi' => $this->get_life_path_resonance_hi($chaldean_calc['reduced'], $pythagorean_calc['reduced']),
                 'meanings'            => self::get_numerology_meanings()
             ],
             'auspicious_attributes'=> [
@@ -777,6 +778,29 @@ class MR_Baby_Astro_Engine
         $py_text = $meanings[$pythagorean] ?? $meanings[6];
 
         return "With Lucky Number {$chaldean} ({$ch_text}) and Expression Number {$pythagorean} ({$py_text}), this name brings balanced blessings and success in life.";
+    }
+
+    /**
+     * Deterministic Life Path Resonance narrative in authentic Vedic Hindi
+     */
+    public function get_life_path_resonance_hi($chaldean, $pythagorean)
+    {
+        $meanings_hi = [
+            1 => 'सूर्य द्वारा संचालित, जो नेतृत्व, आत्मविश्वास और अदम्य साहस प्रदान करता है',
+            2 => 'चंद्रमा द्वारा संचालित, जो सौम्यता, दयालु स्वभाव और मधुर मित्रता का वरदान देता है',
+            3 => 'बृहस्पति द्वारा संचालित, जो सृजनात्मकता, प्रसन्नता और प्रखर बुद्धिमत्ता लाता है',
+            4 => 'राहु द्वारा संचालित, जो कठिन परिश्रम, अनुशासन और व्यावहारिक सोच की शक्ति देता है',
+            5 => 'बुध द्वारा संचालित, जो तीक्ष्ण सोच, त्वरित सीखने की क्षमता और उत्कृष्ट संवाद कौशल प्रदान करता है',
+            6 => 'शुक्र द्वारा संचालित, जो प्रेम, सौंदर्य, परोपकारी भावना और पारिवारिक सुख लाता है',
+            7 => 'केतु द्वारा संचालित, जो गहन चिंतन, विवेक और आध्यात्मिक आशीर्वाद प्रदान करता है',
+            8 => 'शनि द्वारा संचालित, जो अटूट धैर्य, कार्यक्षेत्र में सफलता और महान उपलब्धियां दिलाता है',
+            9 => 'मंगल द्वारा संचालित, जो वीरता, उच्च ऊर्जा और विशाल उदार हृदय प्रदान करता है'
+        ];
+
+        $ch_text = $meanings_hi[$chaldean] ?? $meanings_hi[1];
+        $py_text = $meanings_hi[$pythagorean] ?? $meanings_hi[6];
+
+        return "शुभ अंक {$chaldean} ({$ch_text}) और अभिव्यक्ति अंक {$pythagorean} ({$py_text}) के शुभ प्रभाव से यह नाम जीवन में संतुलित आशीर्वाद, उन्नति और सफलता का मार्ग प्रशस्त करता है।";
     }
 
     /**

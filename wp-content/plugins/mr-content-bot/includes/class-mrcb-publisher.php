@@ -267,6 +267,18 @@ class MRCB_Publisher {
             update_post_meta( $post_id, '_yoast_wpseo_metadesc', sanitize_text_field( $meta_desc ) );
         }
 
+        // Trigger Yoast Indexable Builder if available so Yoast registers meta immediately
+        if ( function_exists( 'YoastSEO' ) && isset( YoastSEO()->classes ) ) {
+            try {
+                $indexable_builder = YoastSEO()->classes->get( \Yoast\WP\SEO\Builders\Indexable_Builder::class );
+                if ( $indexable_builder && method_exists( $indexable_builder, 'build_for_id_and_type' ) ) {
+                    $indexable_builder->build_for_id_and_type( $post_id, 'post' );
+                }
+            } catch ( \Throwable $e ) {
+                // Silently ignore if Yoast is loading lazily
+            }
+        }
+
         // Update Queue record
         $now = current_time( 'mysql' );
         $final_slug = get_post_field( 'post_name', $post_id ) ?: $post_slug;

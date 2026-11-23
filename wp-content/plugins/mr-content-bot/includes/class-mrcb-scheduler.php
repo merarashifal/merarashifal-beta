@@ -287,6 +287,22 @@ class MRCB_Scheduler {
                 if ( isset( $posts_on_date[1] ) && $posts_on_date[1]['publish_time'] !== '09:00:00' ) {
                     $wpdb->update( $t_queue, [ 'publish_time' => '09:00:00' ], [ 'id' => $posts_on_date[1]['id'] ] );
                 }
+
+                // Strict Cap: Maximum 2 posts per day (7:00 AM Slot 1 + 9:00 AM Slot 2)
+                // Any excess unapproved post beyond Slot 2 is automatically cleaned or skipped
+                if ( count( $posts_on_date ) > 2 ) {
+                    for ( $p_idx = 2; $p_idx < count( $posts_on_date ); $p_idx++ ) {
+                        $excess_id = (int) $posts_on_date[$p_idx]['id'];
+                        $excess_post = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$t_queue} WHERE id = %d", $excess_id ), ARRAY_A );
+                        if ( $excess_post && in_array( $excess_post['admin_status'], [ 'pending_review', 'rejected' ], true ) ) {
+                            if ( $excess_post['post_type'] === 'filler' ) {
+                                $wpdb->delete( $t_queue, [ 'id' => $excess_id ] );
+                            } else {
+                                $wpdb->update( $t_queue, [ 'admin_status' => 'skipped' ], [ 'id' => $excess_id ] );
+                            }
+                        }
+                    }
+                }
             }
         }
 

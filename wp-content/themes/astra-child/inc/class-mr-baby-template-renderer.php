@@ -622,7 +622,9 @@ class MR_Baby_Template_Renderer
         $expression_no  = (int)($num['expression_number'] ?? 1);
 
         $life_path_en   = esc_html($num['life_path_resonance'] ?? '');
-        $life_path_hi   = esc_html(self::translate_to_hindi($num['life_path_resonance'] ?? ''));
+        $life_path_hi   = !empty($num['life_path_resonance_hi']) 
+            ? esc_html($num['life_path_resonance_hi']) 
+            : esc_html(MR_Baby_Astro_Engine::instance()->get_life_path_resonance_hi($chaldean_no, $pythagoras_no));
         ?>
         <section class="mr-baby-section mr-section-numerology">
             <h2 class="mr-section-title">
@@ -1168,7 +1170,7 @@ class MR_Baby_Template_Renderer
                 <span class="lang-hi"><?php echo $script ?: $name; ?> नाम से संबंधित अक्सर पूछे जाने वाले प्रश्न</span>
             </h2>
 
-            <div class="mr-faq-accordion">
+            <div class="mr-baby-faq-accordion">
                 <?php foreach ($faqs as $i => $item):
                     $q_en = esc_html($item['question'] ?? '');
                     $a_en = esc_html($item['answer'] ?? '');
@@ -1186,15 +1188,15 @@ class MR_Baby_Template_Renderer
                         ]
                     ];
                 ?>
-                <details class="mr-faq-item" <?php echo $i === 0 ? 'open' : ''; ?>>
-                    <summary class="mr-faq-question">
+                <details class="mr-baby-faq-item" <?php echo $i === 0 ? 'open' : ''; ?>>
+                    <summary class="mr-baby-faq-question">
                         <span>
                             <span class="lang-en"><?php echo $q_en; ?></span>
                             <span class="lang-hi"><?php echo $q_hi; ?></span>
                         </span>
-                        <span class="faq-toggle-icon">+</span>
+                        <span class="mr-baby-faq-toggle">+</span>
                     </summary>
-                    <div class="mr-faq-answer">
+                    <div class="mr-baby-faq-answer">
                         <div class="lang-en"><p><?php echo $a_en; ?></p></div>
                         <div class="lang-hi"><p><?php echo $a_hi; ?></p></div>
                     </div>
@@ -1948,26 +1950,28 @@ class MR_Baby_Template_Renderer
             }
 
             /* 11. Frequently Asked Questions (FAQ) Accordion */
-            .mr-faq-accordion {
+            .mr-baby-faq-accordion {
                 display: flex;
                 flex-direction: column;
-                gap: 8px;
+                gap: 10px;
+                margin-top: 14px;
             }
-            .mr-faq-item {
+            .mr-baby-faq-item {
                 border: 1px solid var(--border-gold);
-                border-radius: 8px;
+                border-radius: 10px;
                 overflow: hidden;
-                background: var(--bg-light-gold);
+                background: #FFFFFF;
+                box-shadow: 0 2px 6px rgba(0,0,0,0.03);
                 transition: var(--transition);
             }
-            .mr-faq-item:hover {
+            .mr-baby-faq-item:hover {
                 border-color: var(--accent-gold);
             }
-            .mr-faq-question {
-                padding: 11px 16px;
+            .mr-baby-faq-question {
+                padding: 13px 18px;
                 font-family: 'Outfit', sans-serif;
                 font-weight: 700;
-                font-size: 0.96rem;
+                font-size: 1rem;
                 color: var(--text-dark);
                 cursor: pointer;
                 display: flex;
@@ -1978,32 +1982,41 @@ class MR_Baby_Template_Renderer
                 background: var(--bg-light-gold);
                 transition: var(--transition);
             }
-            .mr-faq-question::-webkit-details-marker { display: none; }
-            .mr-faq-item[open] .mr-faq-question {
+            .mr-baby-faq-question::-webkit-details-marker { display: none; }
+            .mr-baby-faq-question::marker { display: none; }
+            .mr-baby-faq-item[open] > .mr-baby-faq-question {
                 color: var(--heading-purple);
                 background: #FFFBEB;
                 border-bottom: 1px solid var(--border-gold-light);
             }
-            .faq-toggle-icon {
-                font-size: 1.25rem;
+            .mr-baby-faq-toggle {
+                font-size: 1.4rem;
                 line-height: 1;
                 color: var(--primary-orange);
                 font-weight: 800;
-                transition: transform 0.2s ease;
+                margin-left: 12px;
+                flex-shrink: 0;
+                transition: transform 0.25s ease;
             }
-            .mr-faq-item[open] .faq-toggle-icon {
+            .mr-baby-faq-item[open] > .mr-baby-faq-question .mr-baby-faq-toggle {
                 transform: rotate(45deg);
                 color: var(--heading-purple);
             }
-            .mr-faq-answer {
-                padding: 11px 16px 14px 16px;
-                color: #475569;
+            .mr-baby-faq-answer {
+                padding: 16px 20px;
+                color: #334155;
                 font-family: 'Noto Sans', sans-serif;
-                font-size: 0.92rem;
-                line-height: 1.55;
+                font-size: 0.95rem;
+                line-height: 1.7;
                 background: #FFFFFF;
             }
-            .mr-faq-answer p { margin: 0; }
+            .mr-baby-faq-answer p { margin: 0; }
+            .mr-baby-faq-item:not([open]) .mr-baby-faq-answer {
+                display: none !important;
+            }
+            .mr-baby-faq-item[open] .mr-baby-faq-answer {
+                display: block !important;
+            }
 
             /* Top Language Toggle Bar (Prominent at top of content) */
             .mr-baby-top-lang-bar {
@@ -2184,6 +2197,32 @@ class MR_Baby_Template_Renderer
                     applyLang(lang);
                 }
 
+                // Dedicated Baby FAQ accordion handler
+                var faqQ = e.target.closest('.mr-baby-faq-question');
+                if (faqQ) {
+                    var details = faqQ.closest('.mr-baby-faq-item');
+                    if (details) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        var willOpen = !details.hasAttribute('open');
+
+                        // Close all sibling items in this accordion
+                        var container = details.closest('.mr-baby-faq-accordion');
+                        if (container) {
+                            container.querySelectorAll('.mr-baby-faq-item').forEach(function(it) {
+                                it.removeAttribute('open');
+                            });
+                        }
+
+                        if (willOpen) {
+                            details.setAttribute('open', '');
+                        } else {
+                            details.removeAttribute('open');
+                        }
+                    }
+                    return;
+                }
+
                 // Show visual loader when user clicks on any baby name link
                 var link = e.target.closest('a[href*="/baby-names/"]');
                 if (link && !link.target && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
@@ -2230,9 +2269,16 @@ class MR_Baby_Template_Renderer
             'Hindu / Sanskrit' => 'हिंदू / संस्कृत',
             'Hindu / Traditional' => 'हिंदू / पारंपरिक',
             'Sanskrit / Traditional' => 'संस्कृत / पारंपरिक',
+            'Hindu / Traditional Vedic Heritage' => 'हिंदू / पारंपरिक वैदिक धरोहर',
+            'Muslim / Traditional Heritage' => 'मुस्लिम / पारंपरिक धरोहर',
+            'Sikh / Traditional Heritage' => 'सिख / पारंपरिक धरोहर',
+            'Christian / Traditional Heritage' => 'ईसाई / पारंपरिक धरोहर',
+            'Traditional Vedic Heritage' => 'पारंपरिक वैदिक धरोहर',
             'Traditional' => 'पारंपरिक',
             'Popular & Meaningful' => 'लोकप्रिय एवं अर्थपूर्ण',
             'Trending Classic' => 'लोकप्रिय एवं पारंपरिक',
+
+            // Colors
             'White' => 'सफेद',
             'Light Blue' => 'हल्का नीला',
             'Silver' => 'चांदी',
@@ -2241,16 +2287,80 @@ class MR_Baby_Template_Renderer
             'Red' => 'लाल',
             'Green' => 'हरा',
             'Gold' => 'सुनहरा',
+            'Golden' => 'सुनहरा',
+            'Bright Red' => 'चमकीला लाल',
+            'Coral' => 'मूंगा लाल (कोरल)',
+            'Scarlet' => 'गहरा सिंदूरी (स्कार्लेट)',
+            'Pastel Pink' => 'हल्का गुलाबी',
+            'Lotus Pink' => 'कमल गुलाबी',
+            'Cream' => 'क्रीम (हल्का मक्खनी)',
+            'Emerald Green' => 'पन्ना हरा',
+            'Light Green' => 'हल्का हरा',
+            'Bright Yellow' => 'चमकीला पीला',
+            'Pearl White' => 'मोती जैसा सफेद',
+            'Moonlit Cream' => 'चंद्रमुखी क्रीम',
+            'Radiant Orange' => 'तेजस्वी नारंगी',
+            'Royal Crimson' => 'शाही गहरा लाल',
+            'Saffron' => 'केसरिया',
+            'Dark Green' => 'गहरा हरा',
+            'Olive' => 'जैतून हरा (ऑलिव)',
+            'Jade' => 'हरिताश्म (जेड ग्रीन)',
+            'Diamond White' => 'हीरे जैसा चमकदार सफेद',
+            'Light Sky Blue' => 'हल्का आसमानी नीला',
+            'Pastel Rose' => 'हल्का गुलाबी (पेस्टल रोज)',
+            'Deep Crimson' => 'गहरा लाल',
+            'Maroon' => 'मैरून (गहरा कत्थई)',
+            'Rust Red' => 'गेरुआ लाल',
+            'Black' => 'काला',
+            'Golden Honey' => 'शहद जैसा सुनहरा',
+            'Royal Purple' => 'शाही बैंगनी',
+            'Navy Blue' => 'नेवी ब्लू (गहरा नीला)',
+            'Royal Indigo' => 'शाही गहरा जामुनी',
+            'Steel Grey' => 'स्टील ग्रे (धूसर)',
+            'Charcoal' => 'चारकोल ग्रे',
+            'Electric Blue' => 'इलेक्ट्रिक ब्लू',
+            'Cyan' => 'स्यान (नील हरित)',
+            'Ultramarine' => 'गहरा चमकीला नीला',
+            'Violet' => 'बैंगनी',
+            'Sea Green' => 'समुद्री हरा',
+            'Aquamarine' => 'एक्वामरीन (हल्का समुद्री नीला)',
+            'Pale Yellow' => 'हल्का पीला',
+            'Lavender' => 'लैवेंडर (हल्का जामुनी)',
+
+            // Metals
+            'Copper and Gold' => 'तांबा और सोना',
             'Silver and Platinum' => 'चांदी और प्लेटिनम',
+            'Bronze and Gold' => 'कांसा और सोना',
+            'Gold and Copper' => 'सोना और तांबा',
+            'Bronze and Silver' => 'कांसा और चांदी',
+            'Silver and White Gold' => 'चांदी और सफेद सोना',
+            'Copper and Iron' => 'तांबा और लोहा',
+            'Gold and Brass' => 'सोना और पीतल',
+            'Iron and Lead' => 'लोहा और सीसा',
+            'Iron and Platinum' => 'लोहा और प्लेटिनम',
+            'Gold and Bronze' => 'सोना और कांसा',
+
+            // Gemstones
             'Diamond / White Sapphire (Heera)' => 'हीरा / सफेद पुखराज',
+            'Diamond (Heera) / White Sapphire' => 'हीरा / सफेद पुखराज',
+            'Diamond / White Sapphire (Heera / Safed Pukhraj)' => 'हीरा / सफेद पुखराज',
+            'Red Coral (Moonga)' => 'लाल मूंगा (Moonga)',
             'Ruby (Manikya)' => 'माणिक्य (Ruby)',
+            'Natural Ruby (Manikya)' => 'प्राकृतिक माणिक्य (Ruby)',
             'Pearl (Moti)' => 'मोती (Pearl)',
+            'Natural Pearl (Moti) / Moonstone' => 'प्राकृतिक मोती (Moti) / चंद्रकांत मणि',
             'Emerald (Panna)' => 'पन्ना (Emerald)',
+            'Emerald (Panna) / Peridot' => 'पन्ना (Emerald) / पेरिडॉट',
             'Yellow Sapphire (Pukhraj)' => 'पुखराज (Yellow Sapphire)',
+            'Yellow Sapphire (Pukhraj) / Natural Pearl' => 'पीला पुखराज / सच्चा मोती',
             'Blue Sapphire (Neelam)' => 'नीलम (Blue Sapphire)',
+            'Blue Sapphire (Neelam) / Amethyst' => 'नीलम (Neelam) / कटैला (Amethyst)',
+            'Blue Sapphire (Neelam) / Hessonite (Gomed)' => 'नीलम (Neelam) / गोमेद (Gomed)',
             'Hessonite (Gomed)' => 'गोमेद (Gomed)',
             'Cat\'s Eye (Lehsuniya)' => 'लहसुनिया (Cat\'s Eye)',
             'Coral (Moonga)' => 'मूंगा (Coral)',
+
+            // Days & Directions
             'Friday, Wednesday' => 'शुक्रवार, बुधवार',
             'West' => 'पश्चिम',
             'North' => 'उत्तर',

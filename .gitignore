@@ -22,3 +22,5 @@ wp-content/uploads/
 # Local festive themes in testing (do not push to beta/production)
 wp-content/themes/astra-child/inc/christmas-theme/
 wp-content/mu-plugins/
+piper-models/
+voice-samples/

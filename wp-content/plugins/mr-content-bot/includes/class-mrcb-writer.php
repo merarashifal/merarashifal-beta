@@ -10,7 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class MRCB_Writer {
 
-    const DEFAULT_MODEL = 'gemini-3.5-flash-lite';
+    const DEFAULT_MODEL = 'gemini-2.5-flash';
 
     /**
      * Get Gemini API key
@@ -70,7 +70,7 @@ class MRCB_Writer {
         }
 
         $active_model = self::get_model();
-        $candidate_models = array_unique( [ $active_model, 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-3.7-flash', 'gemini-3.5-flash' ] );
+        $candidate_models = array_unique( [ $active_model, 'gemini-2.5-flash', 'gemini-flash-latest', 'gemini-3.5-flash', 'gemini-3.5-flash-lite' ] );
 
         $payload = [
             'contents' => [
@@ -228,26 +228,37 @@ class MRCB_Writer {
      */
     public static function get_editorial_persona() {
         return <<<PROMPT
-You are a senior Hindi features editor and cultural columnist writing for MeraRashifal.com (जैसे दैनिक भास्कर के रसरंग, नवभारत टाइम्स या बीबीसी हिंदी के वरिष्ठ लेखक).
-Your writing must read 100% authentically human, intellectually grounded, and achieve ZERO (<15%) AI detection score on all major AI detectors (ZeroGPT, CopyLeaks, GPTZero).
+You are an experienced, senior Hindi features columnist writing for living people (जैसे दैनिक भास्कर के रसरंग, नवभारत टाइम्स या बीबीसी हिंदी के वरिष्ठ लेखक).
+You write for real human readers, NOT bots.
+Your writing must read 100% authentically human and defeat ALL AI detection tools (ZeroGPT, CopyLeaks, GPTZero) with a human score of 95%+.
 
-STRICT BAN ON LLM CLICHÉS & RHETORICAL FORMULAS (ZERO TOLERANCE):
-1. कभी भी ऐसे बनावटी सूत्र न लिखें:
-   - "आमतौर पर लोग... सच्चाई यह है कि..."
-   - "गौर करने वाली बात यह है कि..."
-   - "सीधी बात यह है कि..."
-   - "क्या सिर्फ औपचारिकता निभाना ही काफी है? बिल्कुल नहीं।"
-   - "दिखावे से ज्यादा जरूरी है संयम।"
-   - "तार्किक रूप से देखें तो..."
-   - "डिजिटल युग में... मोबाइल स्क्रीन पर उलझे रहने वाले लोग..."
-2. खुद से सवाल पूछकर तुरंत खुद ही जवाब देने वाली बनावटी शैली (Rhetorical self-answering) पर पूर्ण प्रतिबंध है।
-3. धार्मिक क्लीशे पूर्णतः प्रतिबंधित हैं: "पावन पर्व है", "अत्यंत महत्वपूर्ण माना गया है", "अंधकार से प्रकाश की ओर", "परिवर्तन प्रकृति का नियम है", "ऊर्जा के संचार का प्रतीक है", "जैसा कि हम सभी जानते हैं", "आइए जानते हैं", "चमत्कारी लाभ", "संजीवनी का काम करता है", "सुख-समृद्धि और खुशहाली आती है", "पापों का नाश होता है", "अखंड सौभाग्य", "मनोकामनाएं पूर्ण होती हैं", "निष्कर्ष के रूप में", "आज के इस आधुनिक युग में"।
+STRICT HUMAN WRITING RULES:
+1. वाक्यों की लंबाई (SHORT & PUNCHY SENTENCES):
+   - हर वाक्य छोटा, सीधा और चुस्त होना चाहिए (औसतन 8 से 13 शब्द)।
+   - 18 शब्दों से बड़ा एक भी वाक्य न लिखें। बात पूरी होते ही तुरंत पूर्णविराम (।) लगाएं।
+   - बहुत छोटे वाक्य (3 से 6 शब्द) स्वाभाविक रूप से बीच-बीच में शामिल करें (उदा: "शनि का डर बेकार है।" "यह कोई सजा नहीं है।" "नियम बहुत सीधे हैं।" "बात सिर्फ इतनी है।")।
 
-HOW TO WRITE AS A REAL HUMAN JOURNALIST:
-1. विषय पर सीधे, प्रामाणिक और सहज ढंग से बात शुरू करें। कोई बनावटी मौसम, अगरबत्ती की खुशबू या उपदेशात्मक भूमिका न बांधें।
-2. वाक्यों की लंबाई में स्वाभाविक विविधता रखें। अधिकांश वाक्य 10 से 16 शब्दों के हों। बात पूरी होते ही पूर्णविराम (।) लगाएं।
-3. पैराग्राफ्स छोटे और पठनीय रखें (1 से 3 वाक्य प्रति पैराग्राफ)।
-4. जानकारी को व्यावहारिक, सुस्पष्ट और उपयोगी बनाएं।
+2. प्रतिबंधित AI शब्द एवं तकियाकलाम (BANNED AI CRUTCHES - NEVER USE):
+   - 'इस दौरान' (STRICTLY BANNED!)
+   - 'इसके अलावा' (STRICTLY BANNED!)
+   - 'विशेष रूप से' (STRICTLY BANNED!)
+   - 'व्यवहारिक रूप से देखें तो' (STRICTLY BANNED!)
+   - 'ज्योतिषीय मान्यताओं के अनुसार' (STRICTLY BANNED! Write "शास्त्रों में" or "परंपरा में")
+   - 'नीचे दिए गए पांच उपाय' / 'मदद करेंगे' (STRICTLY BANNED!)
+   - 'सकारात्मक दिशा में' / 'नकारात्मक प्रभाव' / 'सकारात्मक ऊर्जा' (STRICTLY BANNED!)
+   - 'पावन पर्व है' / 'अत्यंत महत्वपूर्ण माना गया है' / 'चमत्कारी लाभ' / 'संजीवनी का काम करता है' (STRICTLY BANNED!)
+
+3. आम बोलचाल की सहज शब्दावली (NATURAL HUMAN VOCABULARY):
+   - भारी संस्कृतनिष्ठ शब्दों के स्थान पर आसान और स्वाभाविक हिंदी लिखें:
+     - 'आत्म-मूल्यांकन' की जगह 'खुद को परखने का वक्त'
+     - 'समयावधि' की जगह 'समय' या 'दौर'
+     - 'समयबद्धता' की जगह 'समय की पाबंदी'
+     - 'उत्तरदायित्वों' की जगह 'जिम्मेदारियां'
+     - 'प्रातःकालीन' की जगह 'सुबह-सवेरे'
+     - 'कष्टकारी' की जगह 'कठिन' या 'मुश्किल'
+
+4. बनावटी बुलेट पॉइंट्स या कोलन (:) वाले फॉर्मूले न बनाएं।
+   - सीधे 1, 2, 3 नंबर देकर 2-2 वाक्यों में बात लिखें।
 PROMPT;
     }
 
@@ -272,8 +283,8 @@ PROMPT;
    - पहले पैराग्राफ में कीवर्ड: पहले पैराग्राफ के पहले 1-2 वाक्यों में "{$focus_keyword}"{$en_part} को बिल्कुल स्वाभाविक और अर्थपूर्ण वाक्य में शामिल करें।
    - सबहेडिंग्स में कीवर्ड: किसी एक या दो H2 सबहेडिंग्स में "{$focus_keyword}" को स्वाभाविक रूप से शामिल करें। हर हेडिंग में कीवर्ड ठूंसने की सख्त मनाही है।
    - कीवर्ड घनत्व (Keyphrase Density): पूरे लेख में यह कीवर्ड 3 से 5 बार अलग-अलग संदर्भों में स्वाभाविक रूप से आना चाहिए।
-   - वाक्यों की लंबाई: 80% से अधिक वाक्य 10 से 16 शब्दों के हों।
-   - संयोजक शब्द: 'इसलिए', 'हालांकि', 'इसके अलावा', 'साथ ही', 'दरअसल', 'विशेष रूप से', 'परिणामस्वरूप' का सहज प्रयोग करें।
+   - वाक्यों की लंबाई: हर वाक्य 8 से 13 शब्दों का हो। 16 शब्दों से बड़ा कोई वाक्य न लिखें।
+   - AI तकियाकलामों ('इस दौरान', 'इसके अलावा', 'विशेष रूप से', 'व्यवहारिक रूप से देखें तो') का प्रयोग बिल्कुल न करें।
 KWGUIDE;
         }
 
@@ -365,23 +376,35 @@ PROMPT;
         }
 
         $prompt = <<<PROMPT
-तुम एक अत्यंत अनुभवी, वरिष्ठ हिंदी डिजिटल मैगज़ीन संपादक (Senior Digital Features Editor) हो। तुम्हारा कार्य नीचे दिए गए ड्राफ्ट को पूरी तरह से प्राकृतिक, मानवीय, AI-मुक्त (Zero AI Detectable) और Yoast Readability मानकों के अनुरूप परिष्कृत करना है।
+तुम एक अत्यंत सख्त, वरिष्ठ हिंदी संपादक हो। तुम्हारा कार्य नीचे दिए गए आलेख को पूरी तरह से मशीनी AI भाषा से मुक्त करके 100% मानवीय (Zero AI Detectable) शैली में बदलना है।
 
-संपादकीय जांच सूची (Anti-AI & Readability Polish Checklist):
-1. 25 प्रतिबंधित AI मुहावरों को जड़ से हटाएं (CRITICAL):
-   - यदि कहीं भी "का पावन पर्व है", "अत्यंत महत्वपूर्ण माना गया है", "अंधकार से प्रकाश की ओर", "परिवर्तन प्रकृति का नियम है", "अनुशासित जीवनशैली ही वास्तविक उद्देश्य है", "ऊर्जा के संचार का प्रतीक है", "जैसा कि हम सभी जानते हैं", "आइए जानते हैं", "चमत्कारी लाभ", "संजीवनी का काम करता है", "सुख-समृद्धि और खुशहाली आती है", "पापों का नाश होता है", "अखंड सौभाग्य", "मनोकामनाएं पूर्ण होती हैं", "सारे संकट दूर", "निष्कर्ष के रूप में", "आज के इस आधुनिक युग में", "ठिठुरती रातें" जैसी भाषा दिखे—तो उसे तुरंत हटाकर सहज, प्रौढ़ और विचारशील पत्रकारिता शैली में बदलें।
-2. वाक्यों की लंबाई एवं बर्स्टीनेस (Burstiness & Human Rhythm):
-   - 80% से अधिक वाक्य छोटे और मध्यम (10 से 16 शब्द) होने चाहिए।
-   - 20 शब्दों से अधिक लंबे वाक्यों को दो छोटे वाक्यों में तोड़ें। बात पूरी होते ही तुरंत पूर्णविराम (।) लगाएं।
-   - छोटे, सीधे और धारदार वाक्यों (3-6 शब्द) का प्रयोग करें (उदा: "संयम जरूरी है।", "दिखावे से बचें।", "नियम स्पष्ट हैं।")।
-   - पैराग्राफ की लंबाई में स्वाभाविक विविधता रखें (1-3 वाक्य प्रति पैराग्राफ)।
-3. स्वाभाविक संयोजक शब्द (Transition Words for Readability):
-   - वाक्यों और विचारों के बीच स्वाभाविक प्रवाह के लिए हिंदी के संयोजक शब्दों (जैसे: इसलिए, हालांकि, इसके अलावा, साथ ही, दरअसल, विशेष रूप से, परिणामस्वरूप, इसके साथ ही) का सहज प्रयोग करें।
-4. समकालीन स्वाभाविक हिंदी:
-   - भाषा ऐसी लगे जैसे कोई वरिष्ठ पत्रकार या अनुभवी विद्वान पाठक से आमने-सामने बैठकर व्यावहारिक रूप से बात कर रहा हो।
-5. तथ्यों और कीवर्ड की सुरक्षा:
-   {$kw_guard}
-   - सभी तारीखें, समय (सटीक घंटे-मिनट), मुहूर्त, मंत्र और उपयोगी जानकारियां पूरी तरह सुरक्षित रहें।
+संपादकीय निर्देश (CRITICAL RULES):
+1. वाक्यों को छोटा करो (Shorten Sentences):
+   - 15 शब्दों से अधिक लंबे हर वाक्य को तुरंत पूर्णविराम (।) लगाकर दो छोटे वाक्यों में तोड़ें।
+   - पूरे लेख में औसत वाक्य लंबाई 8 से 12 शब्दों की होनी चाहिए।
+   - बहुत छोटे वाक्य (3-5 शब्द) बीच-बीच में स्वाभाविक रूप से जोड़ें (उदा: "बात बहुत साफ है।" "यह सजा नहीं है।" "नियम सीधे हैं।")।
+
+2. प्रतिबंधित AI शब्दों को जड़ से मिटाएं (Purge AI Signal Words):
+   - 'इस दौरान'
+   - 'इसके अलावा'
+   - 'विशेष रूप से'
+   - 'व्यवहारिक रूप से देखें तो'
+   - 'ज्योतिषीय मान्यताओं के अनुसार' (इसके स्थान पर 'शास्त्रों में' या 'परंपरा में' लिखें)
+   - 'नीचे दिए गए' / 'मदद करेंगे' / 'महत्वपूर्ण भूमिका'
+   - 'सकारात्मक दिशा में' / 'नकारात्मक प्रभाव'
+   इन सभी शब्दों को तुरंत हटाकर वाक्य को सरल और सीधा बनाएं।
+
+3. भारी संस्कृतनिष्ठ शब्दों को आसान बनाएं (Simplify Vocabulary):
+   - 'आत्म-मूल्यांकन' -> 'खुद को परखना'
+   - 'समयावधि' -> 'समय' या 'दौर'
+   - 'समयबद्धता' -> 'समय की पाबंदी'
+   - 'उत्तरदायित्वों' -> 'जिम्मेदारियां'
+   - 'प्रातःकालीन' -> 'सुबह-सवेरे'
+   - 'कष्टकारी' -> 'कठिन'
+
+4. कोई भी कोलन वाले फॉर्मूले (जैसे 'प्रातःकालीन जल अर्पण:') न रखें। साधारण 1, 2, 3 नंबर देकर 2-2 वाक्यों में बात लिखें।
+
+5. मुख्य कीवर्ड '{$focus_keyword}' को पहले पैराग्राफ और सबहेडिंग्स में सुरक्षित रखें।
 
 केवल और केवल शुद्ध परिष्कृत (Humanized) Markdown आलेख ही लौटाएं; कोई अपनी भूमिका, 'यहाँ है आपका लेख' जैसी टिप्पणी न लिखें।
 
@@ -418,6 +441,7 @@ PROMPT;
      * Generate SEO metadata (Focus Keyword, Meta Title, Meta Description, English Slug, English Tags)
      */
     public static function generate_seo_metadata( $topic_title_hi, $festival_name_hi, $final_content, $preset_focus_kw = '' ) {
+        $year        = function_exists( 'wp_date' ) ? wp_date( 'Y' ) : date( 'Y' );
         $raw_default = ! empty( $preset_focus_kw ) ? $preset_focus_kw : ( $festival_name_hi ? $festival_name_hi . ' ' . $year : $topic_title_hi );
         $default_kw  = self::sanitize_focus_keyword( $raw_default, $festival_name_hi, $topic_title_hi );
 
@@ -543,6 +567,76 @@ PROMPT;
     }
 
     /**
+     * Deterministic scrubber to eliminate AI idioms & clichés from generated text
+     */
+    public static function scrub_ai_cliches( $content ) {
+        if ( empty( $content ) || ! is_string( $content ) ) {
+            return $content;
+        }
+
+        $cliche_replacements = [
+            '/\bइस दौरान,?\s*/u'                          => '',
+            '/\bइसके अलावा,?\s*/u'                         => '',
+            '/\bविशेष रूप से,?\s*/u'                        => '',
+            '/\bव्यवहारिक रूप से(?: देखें तो)?,?\s*/u'      => '',
+            '/\bज्योतिषीय मान्यताओं के अनुसार,?\s*/u'      => 'शास्त्रों में ',
+            '/\bनीचे दिए गए[^\n:]+:\s*/u'                  => '',
+            '/\bमहत्वपूर्ण भूमिका निभाता है/u'             => 'असर डालता है',
+            '/\bसकारात्मक दिशा में मुड़ जाता है/u'          => 'सकारात्मक हो जाता है',
+            '/\bनकारात्मक प्रभाव\b/u'                      => 'बुरा असर',
+            '/\bसकारात्मक ऊर्जा\b/u'                       => 'सकारात्मक माहौल',
+            '/\bकष्टकारी\b/u'                              => 'कठिन',
+            '/\bप्रातःकालीन\b/u'                           => 'सुबह के समय',
+            '/\bसमयावधि\b/u'                               => 'समय',
+            '/\bसमयबद्धता\b/u'                             => 'समय की पाबंदी',
+            '/\bउत्तरदायित्वों\b/u'                        => 'जिम्मेदारियों',
+            '/\bआत्म-मूल्यांकन\b/u'                        => 'खुद को परखने',
+            '/\bआइए जानते हैं(?: कि)?/u'                   => '',
+            '/\bजैसा कि हम सभी जानते हैं,?\s*/u'          => '',
+            '/\bनिष्कर्ष के रूप में,?\s*/u'                => '',
+            '/\bआज के इस आधुनिक युग में,?\s*/u'           => 'आज के समय में',
+            '/\bडिजिटल युग में,?\s*/u'                    => 'आजकल',
+            '/\bपरिवर्तन प्रकृति का नियम है[।,]?\s*/u'      => '',
+            '/\bअंधकार से प्रकाश की ओर[।,]?\s*/u'          => '',
+            '/\bऊर्जा के संचार का प्रतीक है[।,]?\s*/u'      => '',
+            '/\bचमत्कारी लाभ(?: मिलते हैं| होता है)?/u'     => 'अच्छे परिणाम मिलते हैं',
+            '/\bसंजीवनी का काम करता है/u'                  => 'मददगार साबित होता है',
+        ];
+
+        foreach ( $cliche_replacements as $pattern => $replacement ) {
+            $content = preg_replace( $pattern, $replacement, $content );
+        }
+
+        // Automated sentence splitter: split sentences with > 20 words at conjunctions
+        $lines = explode( "\n", $content );
+        $processed_lines = [];
+        foreach ( $lines as $line ) {
+            if ( preg_match( '/^#+/', $line ) || empty( trim( $line ) ) ) {
+                $processed_lines[] = $line;
+                continue;
+            }
+
+            $sentences = preg_split( '/(।)/u', $line, -1, PREG_SPLIT_DELIM_CAPTURE );
+            $rebuilt_line = '';
+            for ( $i = 0; $i < count( $sentences ); $i += 2 ) {
+                $s = $sentences[$i] ?? '';
+                $danda = $sentences[$i+1] ?? '';
+                $words = preg_split( '/\s+/u', trim( $s ) );
+                if ( count( $words ) > 20 ) {
+                    $split_pattern = '/(,\s*(?:और|लेकिन|परंतु|जिससे|ताकि|क्योंकि)\s+)/u';
+                    if ( preg_match( $split_pattern, $s ) ) {
+                        $s = preg_replace( $split_pattern, '। ', $s, 1 );
+                    }
+                }
+                $rebuilt_line .= $s . $danda;
+            }
+            $processed_lines[] = $rebuilt_line;
+        }
+
+        return implode( "\n", $processed_lines );
+    }
+
+    /**
      * Deep scrubber to replace any localhost or local test URL with https://merarashifal.com
      */
     public static function clean_localhost_urls( $content ) {
@@ -625,18 +719,29 @@ PROMPT;
             }
         }
 
-        // Guaranteed In-Text Internal Links: If no keyword was matched, add an in-text editorial reference
+        // Guaranteed In-Text Internal Links: If no keyword was matched, add natural in-line references without robotic blockquotes
         if ( $injected_count === 0 ) {
             $site_base    = self::get_site_base_url();
             $panchang_url = $site_base . '/panchang/';
             $kundali_url  = $site_base . '/kundali-details/';
-            $editorial_callout = "\n\n> 💡 **संपादकीय सुझाव:** इस तिथि के शुभ मुहूर्त, चौघड़िया और पंचांग गणना की सटीक जानकारी के लिए हमारा [<a href=\"" . esc_url( $panchang_url ) . "\"><strong>दैनिक हिंदू पंचांग</strong></a>] देखें। यदि आप ग्रह दोष शांति के उपाय जानना चाहते हैं, तो अपनी [<a href=\"" . esc_url( $kundali_url ) . "\"><strong>जन्म कुंडली</strong></a>] का विश्लेषण अवश्य करें।\n\n";
 
-            // Insert callout right after the first H2 heading
-            if ( preg_match( '/(##\s+[^\n]+\n)/u', $content ) ) {
-                $content = preg_replace( '/(##\s+[^\n]+\n)/u', '$1' . $editorial_callout, $content, 1 );
-            } else {
-                $content .= $editorial_callout;
+            $wrapped = false;
+            if ( preg_match( '/\b(पंचांग)\b/u', $content ) ) {
+                $content = preg_replace( '/\b(पंचांग)\b/u', '<a href="' . esc_url( $panchang_url ) . '">$1</a>', $content, 1 );
+                $wrapped = true;
+            }
+            if ( preg_match( '/\b(कुंडली)\b/u', $content ) ) {
+                $content = preg_replace( '/\b(कुंडली)\b/u', '<a href="' . esc_url( $kundali_url ) . '">$1</a>', $content, 1 );
+                $wrapped = true;
+            }
+
+            if ( ! $wrapped ) {
+                $natural_line = "\n\nग्रह स्थिति समझने के लिए <a href=\"" . esc_url( $kundali_url ) . "\">जन्म कुंडली</a> और तिथि मुहूर्त के लिए <a href=\"" . esc_url( $panchang_url ) . "\">दैनिक पंचांग</a> की जानकारी आवश्यक मानी जाती है।\n\n";
+                if ( preg_match( '/(##\s+[^\n]+\n[^\n]+\n)/u', $content ) ) {
+                    $content = preg_replace( '/(##\s+[^\n]+\n[^\n]+\n)/u', '$1' . $natural_line, $content, 1 );
+                } else {
+                    $content .= $natural_line;
+                }
             }
         }
 
@@ -855,8 +960,9 @@ PROMPT;
         $pass3_res = self::generate_pass3_entity_tagger( $pass2_text );
         $pass3_text = $pass3_res['success'] ? self::clean_localhost_urls( $pass3_res['text'] ) : $pass2_text;
 
-        // Inject Internal Links
-        $final_content = self::clean_localhost_urls( self::inject_internal_links( $pass3_text ) );
+        // Scrub AI cliches & Inject Internal Links
+        $clean_pass3   = self::scrub_ai_cliches( $pass3_text );
+        $final_content = self::clean_localhost_urls( self::inject_internal_links( $clean_pass3 ) );
 
         // Generate SEO Meta
         $seo_meta = self::generate_seo_metadata( $item['topic_title_hi'], $festival_name_hi, $final_content, $focus_kw );

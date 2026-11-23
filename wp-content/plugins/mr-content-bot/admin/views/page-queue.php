@@ -198,8 +198,14 @@ foreach ( $counts as $c ) {
                                 <?php if ( ! empty( $it['wp_post_id'] ) ) : ?>
                                     <br><a href="<?php echo get_permalink( $it['wp_post_id'] ); ?>" target="_blank" style="font-size:11px;">View Live &nearr;</a>
                                 <?php endif; ?>
-                            <?php elseif ( $it['admin_status'] === 'pending_review' ) : ?>
-                                <span class="mrcb-badge status-pending_review">Needs Review</span>
+                            <?php elseif ( $it['admin_status'] === 'pending_review' ) : 
+                                $has_draft = ! empty( $it['admin_draft'] ) || ! empty( $it['ai_draft_tagged'] ) || ! empty( $it['ai_draft'] );
+                            ?>
+                                <?php if ( ! $has_draft ) : ?>
+                                    <span class="mrcb-badge" style="background:#fef3c7; color:#92400e; border:1px solid #fde68a;">Planned (Draft Pending)</span>
+                                <?php else : ?>
+                                    <span class="mrcb-badge status-pending_review">Needs Review</span>
+                                <?php endif; ?>
                             <?php else : ?>
                                 <span class="mrcb-badge <?php echo $status_class; ?>">
                                     <?php echo esc_html( ucwords( str_replace( '_', ' ', $it['admin_status'] ) ) ); ?>
@@ -207,16 +213,27 @@ foreach ( $counts as $c ) {
                             <?php endif; ?>
                         </td>
                         <td class="mrcb-actions-cell">
-                            <?php if ( $it['admin_status'] === 'pending_review' ) : ?>
-                                <a href="<?php echo admin_url( 'admin.php?page=mrcb-queue&action=review&id=' . $it['id'] ); ?>" class="button button-primary button-small">
-                                    👁️ Review & Approve
-                                </a>
-                                <button class="button button-small btn-quick-approve" data-id="<?php echo esc_attr( $it['id'] ); ?>" title="Approve and Schedule in WordPress Posts">
-                                    ✅ Schedule
-                                </button>
-                                <button class="button button-small btn-regenerate" data-id="<?php echo esc_attr( $it['id'] ); ?>" title="Regenerate with Gemini">
-                                    🔄
-                                </button>
+                            <?php if ( $it['admin_status'] === 'pending_review' ) : 
+                                $has_draft = ! empty( $it['admin_draft'] ) || ! empty( $it['ai_draft_tagged'] ) || ! empty( $it['ai_draft'] );
+                            ?>
+                                <?php if ( $has_draft ) : ?>
+                                    <a href="<?php echo admin_url( 'admin.php?page=mrcb-queue&action=review&id=' . $it['id'] ); ?>" class="button button-primary button-small">
+                                        👁️ Review & Approve
+                                    </a>
+                                    <button class="button button-small btn-quick-approve" data-id="<?php echo esc_attr( $it['id'] ); ?>" title="Approve and Schedule in WordPress Posts">
+                                        ✅ Schedule
+                                    </button>
+                                    <button class="button button-small btn-regenerate" data-id="<?php echo esc_attr( $it['id'] ); ?>" title="Regenerate with Gemini">
+                                        🔄
+                                    </button>
+                                <?php else : ?>
+                                    <button class="button button-primary button-small btn-regenerate" data-id="<?php echo esc_attr( $it['id'] ); ?>" title="Generate complete 3-pass draft with Gemini AI">
+                                        ✍️ Draft with AI
+                                    </button>
+                                    <a href="<?php echo admin_url( 'admin.php?page=mrcb-queue&action=review&id=' . $it['id'] ); ?>" class="button button-small">
+                                        ✏️ Edit
+                                    </a>
+                                <?php endif; ?>
                             <?php elseif ( $it['admin_status'] === 'approved' ) : ?>
                                 <?php if ( ! empty( $it['wp_post_id'] ) ) : ?>
                                     <a href="<?php echo admin_url( 'post.php?post=' . $it['wp_post_id'] . '&action=edit' ); ?>" class="button button-small button-primary" target="_blank">

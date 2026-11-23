@@ -66,9 +66,21 @@ $tags       = ! empty( $item['ai_tags'] ) ? $item['ai_tags'] : '';
 
                 <!-- Tab 1: WordPress Visual Rich Text Editor -->
                 <div id="mrcb-tab-editor" class="mrcb-tab-content active">
-                    <div style="margin-bottom: 12px; color: #475569; font-size: 13px;">
-                        💡 <strong>Visual Editor:</strong> You can edit paragraphs, headings, bullet points, and hyperlinks directly below.
-                    </div>
+                    <?php if ( empty( trim( strip_tags( $draft_html ) ) ) ) : ?>
+                        <div style="margin-bottom: 15px; padding: 14px 18px; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 4px; font-size: 14px; color: #92400e; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong>⚠️ This planned topic does not have a draft yet.</strong><br>
+                                Click the button to generate the complete 3-pass article with Gemini AI.
+                            </div>
+                            <button type="button" class="button button-primary btn-regenerate" data-id="<?php echo esc_attr( $item['id'] ); ?>" style="font-weight: 600;">
+                                ✍️ Generate Draft Now
+                            </button>
+                        </div>
+                    <?php else : ?>
+                        <div style="margin-bottom: 12px; color: #475569; font-size: 13px;">
+                            💡 <strong>Visual Editor:</strong> You can edit paragraphs, headings, bullet points, and hyperlinks directly below.
+                        </div>
+                    <?php endif; ?>
                     <?php
                     wp_editor(
                         $draft_html,
@@ -152,8 +164,8 @@ $tags       = ! empty( $item['ai_tags'] ) ? $item['ai_tags'] : '';
                         🚀 Publish Live Immediately
                     </button>
 
-                    <button id="btn-review-regenerate" class="button" style="width: 100%; margin-bottom: 8px;" data-id="<?php echo esc_attr( $item['id'] ); ?>">
-                        🔄 Regenerate with Gemini AI
+                    <button id="btn-review-regenerate" class="button <?php echo empty( trim( strip_tags( $draft_html ) ) ) ? 'button-primary' : ''; ?>" style="width: 100%; margin-bottom: 8px;" data-id="<?php echo esc_attr( $item['id'] ); ?>">
+                        <?php echo empty( trim( strip_tags( $draft_html ) ) ) ? '✍️ Generate Draft with Gemini AI' : '🔄 Regenerate with Gemini AI'; ?>
                     </button>
 
                     <button id="btn-review-reject" class="button button-link-delete" style="width: 100%; margin-top: 4px;" data-id="<?php echo esc_attr( $item['id'] ); ?>">
