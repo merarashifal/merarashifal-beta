@@ -15,6 +15,7 @@ class MRCB_Admin {
         add_action( 'admin_init', [ 'MRCB_DB_Setup', 'sanitize_stored_links_and_queue' ] );
 
         // AJAX Actions
+        add_action( 'wp_ajax_mrcb_save_draft', [ __CLASS__, 'ajax_save_draft' ] );
         add_action( 'wp_ajax_mrcb_approve_draft', [ __CLASS__, 'ajax_approve_draft' ] );
         add_action( 'wp_ajax_mrcb_reject_draft', [ __CLASS__, 'ajax_reject_draft' ] );
         add_action( 'wp_ajax_mrcb_skip_draft', [ __CLASS__, 'ajax_skip_draft' ] );
@@ -145,6 +146,72 @@ class MRCB_Admin {
 
     // ── AJAX Handlers ─────────────────────────────────────────────────────────
 
+    public static function ajax_save_draft() {
+        check_ajax_referer( 'mrcb_admin_nonce', 'nonce' );
+        if ( ! current_user_can( 'manage_options' ) ) {
+            wp_send_json_error( [ 'message' => 'Unauthorized' ] );
+        }
+
+        global $wpdb;
+        $t_queue = MRCB_DB_Setup::table_queue();
+        $id = (int) ( $_POST['id'] ?? 0 );
+
+        if ( ! $id ) {
+            wp_send_json_error( [ 'message' => 'Invalid ID' ] );
+        }
+
+        $title          = isset( $_POST['title'] ) ? sanitize_text_field( wp_unslash( $_POST['title'] ) ) : '';
+        $draft_content  = isset( $_POST['content'] ) ? wp_unslash( $_POST['content'] ) : '';
+        $scheduled_date = isset( $_POST['scheduled_date'] ) ? sanitize_text_field( wp_unslash( $_POST['scheduled_date'] ) ) : '';
+        $publish_time   = isset( $_POST['publish_time'] ) ? sanitize_text_field( wp_unslash( $_POST['publish_time'] ) ) : '';
+        $focus_kw       = isset( $_POST['focus_keyword'] ) ? sanitize_text_field( wp_unslash( $_POST['focus_keyword'] ) ) : '';
+        $meta_title     = isset( $_POST['meta_title'] ) ? sanitize_text_field( wp_unslash( $_POST['meta_title'] ) ) : '';
+        $meta_desc      = isset( $_POST['meta_desc'] ) ? sanitize_text_field( wp_unslash( $_POST['meta_desc'] ) ) : '';
+        $slug           = isset( $_POST['slug'] ) ? sanitize_title( $_POST['slug'] ) : '';
+        $tags           = isset( $_POST['tags'] ) ? sanitize_text_field( wp_unslash( $_POST['tags'] ) ) : '';
+
+        $data = [];
+        if ( ! empty( $title ) ) {
+            $data['topic_title_hi'] = $title;
+        }
+        if ( ! empty( $draft_content ) ) {
+            $data['admin_draft'] = class_exists( 'MRCB_Writer' ) ? MRCB_Writer::clean_localhost_urls( $draft_content ) : $draft_content;
+        }
+        if ( ! empty( $scheduled_date ) ) {
+            $data['scheduled_date'] = $scheduled_date;
+        }
+        if ( ! empty( $publish_time ) ) {
+            $data['publish_time'] = $publish_time;
+        }
+        if ( ! empty( $focus_kw ) ) {
+            $data['focus_keyword'] = class_exists( 'MRCB_Writer' ) ? MRCB_Writer::sanitize_focus_keyword( $focus_kw ) : $focus_kw;
+        }
+        if ( ! empty( $meta_title ) ) {
+            $data['admin_meta_title'] = $meta_title;
+        }
+        if ( ! empty( $meta_desc ) ) {
+            $data['admin_meta_desc'] = $meta_desc;
+        }
+        if ( ! empty( $slug ) ) {
+            $data['wp_slug'] = $slug;
+        }
+        if ( ! empty( $tags ) ) {
+            $data['ai_tags'] = $tags;
+        }
+
+        if ( ! empty( $data ) ) {
+            $wpdb->update( $t_queue, $data, [ 'id' => $id ] );
+        }
+
+        // If post was already scheduled in WordPress, update the WP post as well
+        $wp_post_id = (int) $wpdb->get_var( $wpdb->prepare( "SELECT wp_post_id FROM {$t_queue} WHERE id = %d", $id ) );
+        if ( $wp_post_id && get_post( $wp_post_id ) ) {
+            MRCB_Publisher::schedule_queue_item( $id );
+        }
+
+        wp_send_json_success( [ 'message' => 'Draft changes saved successfully!' ] );
+    }
+
     public static function ajax_approve_draft() {
         check_ajax_referer( 'mrcb_admin_nonce', 'nonce' );
         if ( ! current_user_can( 'manage_options' ) ) {
@@ -159,10 +226,15 @@ class MRCB_Admin {
             wp_send_json_error( [ 'message' => 'Invalid ID' ] );
         }
 
-        $draft_content = isset( $_POST['content'] ) ? wp_unslash( $_POST['content'] ) : '';
-        $meta_title    = isset( $_POST['meta_title'] ) ? sanitize_text_field( wp_unslash( $_POST['meta_title'] ) ) : '';
-        $meta_desc     = isset( $_POST['meta_desc'] ) ? sanitize_text_field( wp_unslash( $_POST['meta_desc'] ) ) : '';
-        $slug          = isset( $_POST['slug'] ) ? sanitize_title( $_POST['slug'] ) : '';
+        $title          = isset( $_POST['title'] ) ? sanitize_text_field( wp_unslash( $_POST['title'] ) ) : '';
+        $draft_content  = isset( $_POST['content'] ) ? wp_unslash( $_POST['content'] ) : '';
+        $scheduled_date = isset( $_POST['scheduled_date'] ) ? sanitize_text_field( wp_unslash( $_POST['scheduled_date'] ) ) : '';
+        $publish_time   = isset( $_POST['publish_time'] ) ? sanitize_text_field( wp_unslash( $_POST['publish_time'] ) ) : '';
+        $focus_kw       = isset( $_POST['focus_keyword'] ) ? sanitize_text_field( wp_unslash( $_POST['focus_keyword'] ) ) : '';
+        $meta_title     = isset( $_POST['meta_title'] ) ? sanitize_text_field( wp_unslash( $_POST['meta_title'] ) ) : '';
+        $meta_desc      = isset( $_POST['meta_desc'] ) ? sanitize_text_field( wp_unslash( $_POST['meta_desc'] ) ) : '';
+        $slug           = isset( $_POST['slug'] ) ? sanitize_title( $_POST['slug'] ) : '';
+        $tags           = isset( $_POST['tags'] ) ? sanitize_text_field( wp_unslash( $_POST['tags'] ) ) : '';
 
         $data = [
             'admin_status' => 'approved',
@@ -170,8 +242,20 @@ class MRCB_Admin {
             'approved_at'  => current_time( 'mysql' ),
         ];
 
+        if ( ! empty( $title ) ) {
+            $data['topic_title_hi'] = $title;
+        }
         if ( ! empty( $draft_content ) ) {
             $data['admin_draft'] = class_exists( 'MRCB_Writer' ) ? MRCB_Writer::clean_localhost_urls( $draft_content ) : $draft_content;
+        }
+        if ( ! empty( $scheduled_date ) ) {
+            $data['scheduled_date'] = $scheduled_date;
+        }
+        if ( ! empty( $publish_time ) ) {
+            $data['publish_time'] = $publish_time;
+        }
+        if ( ! empty( $focus_kw ) ) {
+            $data['focus_keyword'] = class_exists( 'MRCB_Writer' ) ? MRCB_Writer::sanitize_focus_keyword( $focus_kw ) : $focus_kw;
         }
         if ( ! empty( $meta_title ) ) {
             $data['admin_meta_title'] = $meta_title;
@@ -179,6 +263,13 @@ class MRCB_Admin {
         if ( ! empty( $meta_desc ) ) {
             $data['admin_meta_desc'] = $meta_desc;
         }
+        if ( ! empty( $slug ) ) {
+            $data['wp_slug'] = $slug;
+        }
+        if ( ! empty( $tags ) ) {
+            $data['ai_tags'] = $tags;
+        }
+
         $wpdb->update( $t_queue, $data, [ 'id' => $id ] );
 
         // Immediately schedule post in WordPress Posts

@@ -163,6 +163,10 @@ class MRCB_Writer {
      * Sanitize and format focus keyword strictly as clean Devanagari Hindi target (2-3 words)
      * Strips Latin tag words (muhurat, vidhi, katha, upay, date, etc.) and repetitive tag combos
      */
+    /**
+     * Sanitize and format focus keyword strictly as clean Devanagari Hindi target (2-4 words)
+     * Strips Latin tag words and never truncates mid-word
+     */
     public static function sanitize_focus_keyword( $keyword, $festival_name_hi = '', $topic_title_hi = '', $topic_angle = '' ) {
         $clean = trim( (string) $keyword );
 
@@ -179,7 +183,7 @@ class MRCB_Writer {
         $clean = trim( preg_replace( '/(मुहूर्त|विधि|कथा|उपाय|नियम|सामग्री|आरती)\s+(मुहूर्त|विधि|कथा|उपाय|नियम|सामग्री|आरती)/u', '', $clean ) );
 
         // Clean up multiple spaces
-        $clean = trim( preg_replace( '/\s+/', ' ', $clean ) );
+        $clean = trim( preg_replace( '/\s+/u', ' ', $clean ) );
 
         $year = wp_date( 'Y' );
 
@@ -194,14 +198,26 @@ class MRCB_Writer {
                     $clean = $festival_name_hi . ' ' . $year;
                 }
             } elseif ( ! empty( $topic_title_hi ) ) {
-                $clean = mb_substr( $topic_title_hi, 0, 25 );
+                // Extract clean meaningful keyphrase without ever cutting words mid-character!
+                $parts = preg_split( '/[:\-?|।]/u', $topic_title_hi );
+                $phrase = trim( $parts[0] );
+                // Strip numbers and generic counting words like "5 चीजें", "4 नियम"
+                $phrase = preg_replace( '/\b\d+\s*(?:चीजें|नियम|उपाय|गलतियां|बातें|रास्ते)\b/u', '', $phrase );
+                $words = array_values( array_filter( preg_split( '/\s+/u', $phrase ) ) );
+                if ( count( $words ) > 4 ) {
+                    $words = array_slice( $words, 0, 4 );
+                }
+                $clean = implode( ' ', $words );
             }
         }
+
+        // Strip trailing grammatical stop words so keyword ends on a complete noun (e.g. "तुलसी के पौधे के पास", not "पौधे के")
+        $clean = preg_replace( '/\s+(?:ये|के|की|का|में|पर|न|भी|को|से|है|हैं)$/u', '', $clean );
 
         // Guarantee clean Devanagari and trim punctuation (unicode-safe)
         $clean = preg_replace( '/^[\s\-:,।|]+|[\s\-:,।|]+$/u', '', $clean );
         if ( empty( $clean ) ) {
-            $clean = ! empty( $festival_name_hi ) ? ( $festival_name_hi . ' ' . $year ) : 'त्योहार ' . $year;
+            $clean = ! empty( $festival_name_hi ) ? ( $festival_name_hi . ' ' . $year ) : 'दैनिक पंचांग ' . $year;
         }
 
         return $clean;
@@ -212,54 +228,26 @@ class MRCB_Writer {
      */
     public static function get_editorial_persona() {
         return <<<PROMPT
-You are a senior Hindi features editor and cultural columnist writing for MeraRashifal.com (जैसे दैनिक भास्कर के रसरंग, नवभारत टाइम्स के विशेष संपादकीय या बीबीसी हिंदी के वरिष्ठ लेखक).
+You are a senior Hindi features editor and cultural columnist writing for MeraRashifal.com (जैसे दैनिक भास्कर के रसरंग, नवभारत टाइम्स या बीबीसी हिंदी के वरिष्ठ लेखक).
 Your writing must read 100% authentically human, intellectually grounded, and achieve ZERO (<15%) AI detection score on all major AI detectors (ZeroGPT, CopyLeaks, GPTZero).
 
-STRICT BAN ON 25 LLM HINDI CLICHÉS (ZERO TOLERANCE - DO NOT USE ANY OF THESE):
-1. "...का पावन पर्व है" / "...का पावन अवसर है"
-2. "अत्यंत महत्वपूर्ण माना गया है" / "विशेष महत्व रखता है" / "विशेष महत्व है"
-3. "यह हमें अंधकार से प्रकाश की ओर बढ़ने की प्रेरणा देता है"
-4. "यह हमें सिखाता है कि परिवर्तन प्रकृति का नियम है"
-5. "अनुशासित जीवनशैली ही इस पर्व का वास्तविक उद्देश्य है"
-6. "परिणामस्वरूप, यह संक्रांति आत्मा के शोधन का..."
-7. "धार्मिक ग्रंथों में सूर्य की गति को काल का चक्र माना गया है"
-8. "ऊर्जा के संचार का प्रतीक है" / "सकारात्मक ऊर्जा का संचार होता है"
-9. "जैसा कि हम सभी जानते हैं"
-10. "आइए जानते हैं" / "आइए विस्तार से समझें" / "इस लेख में हम बताएंगे"
-11. "चमत्कारी लाभ" / "अचूक चमत्कार" / "दिव्य अनुभूति"
-12. "संजीवनी का काम करता है"
-13. "शुभ फल की प्राप्ति होती है" / "पुण्य फल की प्राप्ति"
-14. "जीवन में सुख-समृद्धि और खुशहाली आती है"
-15. "पापों का नाश होता है" / "समस्त पाप धुल जाते हैं"
-16. "अखंड सौभाग्य की प्राप्ति होती है"
-17. "मनोकामनाएं पूर्ण होती हैं" / "हर मनोकामना पूरी होगी"
-18. "समस्त कष्टों का निवारण होता है" / "सारे संकट पल भर में दूर"
-19. "निष्कर्ष के रूप में" / "संक्षेप में कहें तो" / "अतः यह कहा जा सकता है"
-20. "आज के इस आधुनिक युग में" / "आज की भागदौड़ भरी जिंदगी में"
-21. "ठिठुरती रातें" / "श्वेत चांदनी" / "कपूर और अगरबत्ती की सुगंध"
-22. "ब्रह्मांड की दुर्लभ ऊर्जाएं" / "अलौकिक संयोग"
-23. "अद्वितीय स्थान रखता है"
-24. "श्रद्धा और भक्ति के साथ"
-25. "आध्यात्मिक यात्रा का आरंभ"
+STRICT BAN ON LLM CLICHÉS & RHETORICAL FORMULAS (ZERO TOLERANCE):
+1. कभी भी ऐसे बनावटी सूत्र न लिखें:
+   - "आमतौर पर लोग... सच्चाई यह है कि..."
+   - "गौर करने वाली बात यह है कि..."
+   - "सीधी बात यह है कि..."
+   - "क्या सिर्फ औपचारिकता निभाना ही काफी है? बिल्कुल नहीं।"
+   - "दिखावे से ज्यादा जरूरी है संयम।"
+   - "तार्किक रूप से देखें तो..."
+   - "डिजिटल युग में... मोबाइल स्क्रीन पर उलझे रहने वाले लोग..."
+2. खुद से सवाल पूछकर तुरंत खुद ही जवाब देने वाली बनावटी शैली (Rhetorical self-answering) पर पूर्ण प्रतिबंध है।
+3. धार्मिक क्लीशे पूर्णतः प्रतिबंधित हैं: "पावन पर्व है", "अत्यंत महत्वपूर्ण माना गया है", "अंधकार से प्रकाश की ओर", "परिवर्तन प्रकृति का नियम है", "ऊर्जा के संचार का प्रतीक है", "जैसा कि हम सभी जानते हैं", "आइए जानते हैं", "चमत्कारी लाभ", "संजीवनी का काम करता है", "सुख-समृद्धि और खुशहाली आती है", "पापों का नाश होता है", "अखंड सौभाग्य", "मनोकामनाएं पूर्ण होती हैं", "निष्कर्ष के रूप में", "आज के इस आधुनिक युग में"।
 
-HOW TO WRITE AS A REAL HUMAN JOURNALIST & SENIOR COLUMNIST:
-1. CONVERSATIONAL, GROUNDED & ANALYTICAL VOICE:
-   - Use natural Hindi phrasing: "सीधी बात यह है", "अक्सर लोग यहीं चूक करते हैं", "गौर करने वाली बात यह है", "आमतौर पर", "सच्चाई यह है", "तार्किक रूप से देखें तो", "दिखावे से ज्यादा जरूरी है संयम"।
-   - Avoid mechanical, textbook, or priest-like preaching. Speak directly to the thoughtful reader.
-2. HIGH BURSTINESS & RHYTHM VARIATION:
-   - AI writes monotonous sentences of predictable length. Break this completely!
-   - Mix ultra-short 2-5 word micro-sentences for emphasis: "संयम जरूरी है।" "वजह बहुत साफ है।" "दिखावे से बचें।" "तैयारी पहले से रखें।" "जल्दबाजी बिल्कुल न करें।" "नियम स्पष्ट हैं।"
-   - Ask thought-provoking rhetorical questions: "क्या सिर्फ औपचारिकता निभाना ही काफी है?" "आखिर इस परंपरा के पीछे की असली सोच क्या है?"
-   - Alternate between crisp observations (1 sentence) and reflective explanations (2-3 sentences). Never write uniform paragraphs.
-3. MODERN READER PERSPECTIVE (DIGITAL LIFESTYLE & WELLNESS CONNECTION):
-   - Connect ancient rituals to modern reality: How fasting or screen-free puja calms digital anxiety; why seasonal shifts (like Sankranti in November) require dietary changes like sesame (तिल) and jaggery (गुड़) for body warmth and immunity; why charity is an ego detox.
-4. EXACT PANCHANG TIMINGS (MANDATORY REAL HOURS & MINUTES):
-   - Never write vague lines like "दोपहर के समय से होगी" or "सुबह का समय शुभ है".
-   - Mandate specific hours and minutes based on traditional astronomical calculations:
-     e.g., "संक्रांति का क्षण: दोपहर 01:28 बजे", "महापुण्य काल: दोपहर 01:28 से 03:15 बजे तक", "पुण्य काल: दोपहर 01:28 से शाम 05:45 बजे तक", "सर्वश्रेष्ठ पूजन समय: सुबह 07:15 से 09:30 बजे तक"।
-5. NATURAL HEADINGS (STRICTLY NO KEYWORD STUFFING):
-   - Headings must look like newspaper or magazine editorial headlines, NOT SEO spam!
-   - Never stuff keywords into every heading.
+HOW TO WRITE AS A REAL HUMAN JOURNALIST:
+1. विषय पर सीधे, प्रामाणिक और सहज ढंग से बात शुरू करें। कोई बनावटी मौसम, अगरबत्ती की खुशबू या उपदेशात्मक भूमिका न बांधें।
+2. वाक्यों की लंबाई में स्वाभाविक विविधता रखें। अधिकांश वाक्य 10 से 16 शब्दों के हों। बात पूरी होते ही पूर्णविराम (।) लगाएं।
+3. पैराग्राफ्स छोटे और पठनीय रखें (1 से 3 वाक्य प्रति पैराग्राफ)।
+4. जानकारी को व्यावहारिक, सुस्पष्ट और उपयोगी बनाएं।
 PROMPT;
     }
 
@@ -270,8 +258,10 @@ PROMPT;
         $system = self::get_editorial_persona();
         $year   = wp_date( 'Y' );
 
-        // Sanitize focus keyword to eliminate any appended tag mashups
+        // Sanitize focus keyword to eliminate any appended tag mashups or word chopping
         $focus_keyword = self::sanitize_focus_keyword( $focus_keyword, $festival_name_hi, $topic_title_hi, $topic_angle );
+
+        $is_evergreen = empty( $festival_name_hi ) || in_array( $topic_angle, [ 'guide', 'vastu', 'puja_basics', 'astrology', 'sacred_items', 'lifestyle' ], true );
 
         $kw_instruction = '';
         if ( ! empty( $focus_keyword ) ) {
@@ -279,10 +269,10 @@ PROMPT;
             $kw_instruction = <<<KWGUIDE
 6. YOAST SEO एवं कीवर्ड नियम (Strict Yoast SEO Rules):
    - मुख्य फोकस कीवर्ड (Focus Keyphrase): "{$focus_keyword}"
-   - पहले पैराग्राफ में कीवर्ड: पहले पैराग्राफ के पहले 1-2 वाक्यों में "{$focus_keyword}"{$en_part} को बिना किसी बनावटीपन के स्वाभाविक रूप से लाएं (जैसे: "वर्ष {$year} में {$focus_keyword} को लेकर श्रद्धालुओं में विशेष उत्सुकता है...", या "पंचांग के अनुसार {$focus_keyword} का समय इस बार बेहद खास माना जा रहा है...").
-   - सबहेडिंग्स में कीवर्ड: किसी एक या दो H2 सबहेडिंग्स में "{$focus_keyword}" को स्वाभाविक रूप से शामिल करें (जैसे: "## {$focus_keyword}: पंचांग समय और शुभ मुहूर्त", "## {$focus_keyword} पर पूजन की सही विधि")। हर हेडिंग में कीवर्ड ठूंसने (Keyword Stuffing) की सख्त मनाही है।
-   - कीवर्ड घनत्व (Keyphrase Density): पूरे लेख में यह कीवर्ड 3 से 5 बार अलग-अलग अनुच्छेदों में स्वाभाविक रूप से आना चाहिए।
-   - वाक्यों की लंबाई: 80% से अधिक वाक्य 10 से 16 शब्दों के हों। बात पूरी होते ही पूर्णविराम (।) लगाएं।
+   - पहले पैराग्राफ में कीवर्ड: पहले पैराग्राफ के पहले 1-2 वाक्यों में "{$focus_keyword}"{$en_part} को बिल्कुल स्वाभाविक और अर्थपूर्ण वाक्य में शामिल करें।
+   - सबहेडिंग्स में कीवर्ड: किसी एक या दो H2 सबहेडिंग्स में "{$focus_keyword}" को स्वाभाविक रूप से शामिल करें। हर हेडिंग में कीवर्ड ठूंसने की सख्त मनाही है।
+   - कीवर्ड घनत्व (Keyphrase Density): पूरे लेख में यह कीवर्ड 3 से 5 बार अलग-अलग संदर्भों में स्वाभाविक रूप से आना चाहिए।
+   - वाक्यों की लंबाई: 80% से अधिक वाक्य 10 से 16 शब्दों के हों।
    - संयोजक शब्द: 'इसलिए', 'हालांकि', 'इसके अलावा', 'साथ ही', 'दरअसल', 'विशेष रूप से', 'परिणामस्वरूप' का सहज प्रयोग करें।
 KWGUIDE;
         }
@@ -290,11 +280,20 @@ KWGUIDE;
         // Specific Angle & Pillar Guidance
         $angle_instructions = '';
 
-        if ( strpos( $topic_angle, 'muhurat' ) !== false ) {
+        if ( $is_evergreen ) {
+            $angle_instructions = <<<EVERGREENGUIDE
+[सदाबहार विषय - VASTU / DAILY PUJA / JYOTISH LIFESTYLE GUIDELINES]:
+- यह एक सदाबहार (Evergreen / Vastu / Daily Guidance) आलेख है।
+- **अत्यंत महत्वपूर्ण:** इसमें किसी काल्पनिक संक्रांति, ग्रहण या मनगढ़ंत एकमुश्त मुहूर्त (जैसे 'दोपहर 01:28 बजे' या 'महापुण्य काल') का उल्लेख भूलकर भी न करें!
+- इसके स्थान पर दैनिक जीवन में अपनाए जाने वाले व्यावहारिक नियम, सही समय (जैसे प्रातःकाल सूर्योदय के समय, स्नान के बाद, या संध्या वेला), सही दिशा (जैसे उत्तर, पूर्व, ईशान कोण) और वास्तु सावधानियां बिंदुवार समझाएं।
+- हर बिंदु में स्पष्ट कारण और शास्त्रीय/व्यावहारिक समाधान दें।
+- भाषा गरिमापूर्ण, व्यावहारिक और घरेलू जीवन के अनुकूल हो।
+EVERGREENGUIDE;
+        } elseif ( strpos( $topic_angle, 'muhurat' ) !== false ) {
             $angle_instructions = <<<GUIDE
 [मुख्य फोकस: शुभ मुहूर्त, तिथि गणना एवं व्यावहारिक तैयारी]
-- पहले पैराग्राफ में सीधे तारीख और पंचांग संदर्भ से शुरुआत करें। कोई नाटकीय मौसम या चांदनी का वर्णन न करें।
-- सही तिथि का आरंभ और समापन समय, सटीक घंटे और मिनट के साथ दें। पंचांग भेद (तिथि को लेकर संशय) हो तो उसे शांत और स्पष्ट भाषा में सुलझाएं।
+- **अनिवार्य तारीख नियम:** पूजा, मुहूर्त या पारण का समय बताते समय हमेशा स्पष्ट **कैलेंडर तारीख और वार** (जैसे: 'गुरुवार, 26 नवंबर 2026') का स्पष्ट उल्लेख करें ताकि पाठक को ठीक से पता हो कि यह समय किस दिन लागू होगा।
+- सही तिथि का आरंभ और समापन समय, सटीक घंटे और मिनट के साथ दें। पंचांग भेद हो तो उसे शांत और स्पष्ट भाषा में सुलझाएं।
 - घर में पूजन की व्यावहारिक तैयारी और आवश्यक सामग्री की सरल सूची दें।
 - दिनचर्या और व्रत पालन के व्यावहारिक नियम बताएं।
 GUIDE;
@@ -302,8 +301,7 @@ GUIDE;
             $angle_instructions = <<<GUIDE
 [मुख्य फोकस: ज्योतिषीय समझ, जीवनशैली और राशि उपाय]
 - अंधविश्वास या चमत्कारी दावों से पूरी तरह बचें।
-- इस तिथि के खगोलीय व मानसिक प्रभाव को समझाएं (मन की शांति, एकाग्रता, आत्म-संयम)।
-- कुंडली के संदर्भ में शनि, राहु या चंद्रमा की शांति को सकारात्मक कर्मों और दान-पुण्य से जोड़कर समझाएं।
+- कुंडली के संदर्भ में नवग्रह शांति को सकारात्मक कर्मों और दान-पुण्य से जोड़कर समझाएं।
 - 12 राशियों के लिए सरल, सात्विक व व्यावहारिक उपाय (दान, संयम, विशेष रंग, सात्विक आहार)।
 GUIDE;
         } elseif ( strpos( $topic_angle, 'temples' ) !== false || strpos( $topic_angle, 'deity' ) !== false ) {
@@ -322,36 +320,12 @@ GUIDE;
 - व्रत पारण का सही समय और सात्विक भोजन के नियम।
 - पारंपरिक आरती व प्रार्थना।
 GUIDE;
-        } elseif ( strpos( $topic_angle, 'practical_astrology' ) !== false ) {
-            $angle_instructions = <<<GUIDE
-[मुख्य फोकस: व्यावहारिक पूजन गाइड + संतुलित ज्योतिषीय उपाय]
-- तिथि, शुभ चौघड़िया मुहूर्त और पूजा का श्रेष्ठ समय (सटीक घंटे और मिनट)।
-- संक्षिप्त व प्रमाणिक पूजन विधि और आवश्यक सामग्री।
-- कुंडली के ग्रह दोष निवारण और राशि अनुसार 3 से 4 प्रमुख प्रभावशाली उपाय।
-GUIDE;
-        } elseif ( strpos( $topic_angle, 'spiritual_katha' ) !== false ) {
-            $angle_instructions = <<<GUIDE
-[मुख्य फोकस: पौराणिक कथा + इष्टदेव व सिद्ध तीर्थ]
-- पावन व्रत कथा का संपूर्ण आध्यात्मिक व नैतिक रहस्य।
-- इष्टदेव के कल्याणकारी स्वरूप का ध्यान और प्रभावशाली स्तोत्र।
-- प्रसिद्ध तीर्थ स्थल व दर्शन की महिमा।
-GUIDE;
-        } elseif ( strpos( $topic_angle, 'master_all_in_one' ) !== false ) {
-            $angle_instructions = <<<GUIDE
-[मुख्य फोकस: ऑल-इन-वन संपूर्ण महा-गाइड]
-संरचना स्पष्ट H2 शीर्षकों में होनी चाहिए:
-1. तिथि और शुभ मुहूर्त (सटीक समय)
-2. संपूर्ण पौराणिक व्रत कथा और इसका संदेश
-3. पूजन सामग्री और स्टेप-बाय-स्टेप पूजन विधि
-4. ज्योतिषीय महत्व: ग्रह शांति और राशि अनुसार उपाय
-5. पारण के नियम और सावधानियां
-GUIDE;
         } else {
             $angle_instructions = <<<GUIDE
 [मुख्य फोकस: पर्व का समग्र सांस्कृतिक, पंचांगीय व व्यावहारिक विश्लेषण]
+- जब भी मुहूर्त या समय बताएं, तो अनिवार्य रूप से कैलेंडर तारीख और वार का स्पष्ट उल्लेख करें।
 - तिथि, शुभ समय और पूजा का सही क्रम।
-- सामाजिक व पारिवारिक महत्व।
-- जीवनशैली में सकारात्मक बदलाव और सावधानियां।
+- सामाजिक व पारिवारिक महत्व और जीवनशैली में सकारात्मक बदलाव।
 GUIDE;
         }
 
@@ -444,9 +418,8 @@ PROMPT;
      * Generate SEO metadata (Focus Keyword, Meta Title, Meta Description, English Slug, English Tags)
      */
     public static function generate_seo_metadata( $topic_title_hi, $festival_name_hi, $final_content, $preset_focus_kw = '' ) {
-        $year = wp_date( 'Y' );
-        $raw_default = ! empty( $preset_focus_kw ) ? $preset_focus_kw : ( $festival_name_hi ? $festival_name_hi . ' ' . $year : mb_substr( $topic_title_hi, 0, 25 ) );
-        $default_kw = self::sanitize_focus_keyword( $raw_default, $festival_name_hi, $topic_title_hi );
+        $raw_default = ! empty( $preset_focus_kw ) ? $preset_focus_kw : ( $festival_name_hi ? $festival_name_hi . ' ' . $year : $topic_title_hi );
+        $default_kw  = self::sanitize_focus_keyword( $raw_default, $festival_name_hi, $topic_title_hi );
 
         $prompt = <<<PROMPT
 निम्नलिखित हिंदी ब्लॉग पोस्ट के लिए Yoast SEO अनुकूल मेटाडाटा तैयार करें:

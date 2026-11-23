@@ -439,46 +439,46 @@ class MRCB_DB_Setup {
 
         $starter_topics = [
             // Category: Puja Basics & Rituals
-            [ 'title_hi' => 'घर के मंदिर में दीपक जलाने के सही नियम: घी का दीपक या तेल का दीपक?', 'cat' => 'puja_basics', 'kw' => 'ghar ke mandir me deepak jalane ke niyam', 'prio' => 1 ],
-            [ 'title_hi' => 'तुलसी के पौधे के पास भूलकर भी न रखें ये 5 चीजें, आती है आर्थिक परेशानी', 'cat' => 'puja_basics', 'kw' => 'tulsi ke paas kya nahi rakhna chahiye', 'prio' => 1 ],
-            [ 'title_hi' => 'शंख बजाने के चमत्कारी लाभ और घर में शंख रखने के जरूरी वैदिक नियम', 'cat' => 'puja_basics', 'kw' => 'shankh bajane ke fayde niyam', 'prio' => 2 ],
-            [ 'title_hi' => 'हनुमान चालीसा का पाठ करते समय न करें ये गलतियां, जानें सही विधि और समय', 'cat' => 'puja_basics', 'kw' => 'hanuman chalisa path karne ke niyam', 'prio' => 1 ],
-            [ 'title_hi' => 'शिवलिंग पर जल चढ़ाने का सही तरीका और दिशा: भूलकर भी न करें ये गलतियां', 'cat' => 'puja_basics', 'kw' => 'shivling par jal chadhane ka sahi tarika', 'prio' => 1 ],
+            [ 'title_hi' => 'घर के मंदिर में दीपक जलाने के सही नियम: घी का दीपक या तेल का दीपक?', 'cat' => 'puja_basics', 'kw' => 'दीपक जलाने के नियम', 'prio' => 1 ],
+            [ 'title_hi' => 'तुलसी के पौधे के पास भूलकर भी न रखें ये 5 चीजें, आती है आर्थिक परेशानी', 'cat' => 'puja_basics', 'kw' => 'तुलसी के पौधे के नियम', 'prio' => 1 ],
+            [ 'title_hi' => 'शंख बजाने के चमत्कारी लाभ और घर में शंख रखने के जरूरी वैदिक नियम', 'cat' => 'puja_basics', 'kw' => 'शंख रखने के नियम', 'prio' => 2 ],
+            [ 'title_hi' => 'हनुमान चालीसा का पाठ करते समय न करें ये गलतियां, जानें सही विधि और समय', 'cat' => 'puja_basics', 'kw' => 'हनुमान चालीसा पाठ नियम', 'prio' => 1 ],
+            [ 'title_hi' => 'शिवलिंग पर जल चढ़ाने का सही तरीका और दिशा: भूलकर भी न करें ये गलतियां', 'cat' => 'puja_basics', 'kw' => 'शिवलिंग पर जल चढ़ाने के नियम', 'prio' => 1 ],
 
             // Category: Vastu Shastra
-            [ 'title_hi' => 'घर का मुख्य द्वार किस दिशा में होना चाहिए? वास्तु शास्त्र के अचूक नियम', 'cat' => 'vastu', 'kw' => 'ghar ka mukhya dwar vastu tips', 'prio' => 2 ],
-            [ 'title_hi' => 'तिजोरी और पैसे रखने की सही दिशा: वास्तु के अनुसार धन वृद्धि के उपाय', 'cat' => 'vastu', 'kw' => 'tijori rakhne ki sahi disha vastu', 'prio' => 2 ],
-            [ 'title_hi' => 'घर में किस दिशा में सोने से बढ़ती है सुख-शांति? दिशाओं का वैज्ञानिक व वास्तु महत्व', 'cat' => 'vastu', 'kw' => 'sone ki sahi disha vastu', 'prio' => 3 ],
-            [ 'title_hi' => 'घर के ईशान कोण (उत्तर-पूर्व) में क्या रखना चाहिए और क्या नहीं?', 'cat' => 'vastu', 'kw' => 'ishan kon vastu tips', 'prio' => 3 ],
-            [ 'title_hi' => 'आईना (Mirror) लगाने के वास्तु नियम: गलत दिशा में लगा शीशा बन सकता है वास्तु दोष', 'cat' => 'vastu', 'kw' => 'aaina lagane ke vastu niyam', 'prio' => 3 ],
+            [ 'title_hi' => 'घर का मुख्य द्वार किस दिशा में होना चाहिए? वास्तु शास्त्र के अचूक नियम', 'cat' => 'vastu', 'kw' => 'घर का मुख्य द्वार वास्तु', 'prio' => 2 ],
+            [ 'title_hi' => 'तिजोरी और पैसे रखने की सही दिशा: वास्तु के अनुसार धन वृद्धि के उपाय', 'cat' => 'vastu', 'kw' => 'तिजोरी रखने की दिशा वास्तु', 'prio' => 2 ],
+            [ 'title_hi' => 'घर में किस दिशा में सोने से बढ़ती है सुख-शांति? दिशाओं का वैज्ञानिक व वास्तु महत्व', 'cat' => 'vastu', 'kw' => 'सोने की सही दिशा वास्तु', 'prio' => 3 ],
+            [ 'title_hi' => 'घर के ईशान कोण (उत्तर-पूर्व) में क्या रखना चाहिए और क्या नहीं?', 'cat' => 'vastu', 'kw' => 'ईशान कोण वास्तु नियम', 'prio' => 3 ],
+            [ 'title_hi' => 'आईना (Mirror) लगाने के वास्तु नियम: गलत दिशा में लगा शीशा बन सकता है वास्तु दोष', 'cat' => 'vastu', 'kw' => 'आईना लगाने के वास्तु नियम', 'prio' => 3 ],
 
             // Category: Astrology & Remedies
-            [ 'title_hi' => 'शनि की साढ़े साती क्या है? इसके लक्षण और 5 सबसे सरल सात्विक उपाय', 'cat' => 'astrology', 'kw' => 'shani sade sati ke upay', 'prio' => 1 ],
-            [ 'title_hi' => 'कुंडली में मांगलिक दोष: क्या यह हमेशा डरावना होता है? जानें इसके वास्तविक प्रभाव', 'cat' => 'astrology', 'kw' => 'kundli me manglik dosh ke prabhav upay', 'prio' => 1 ],
-            [ 'title_hi' => 'सूर्य देव को अर्घ्य देने का सही समय, पात्र और मंत्र: मिलता है मान-सम्मान व तेज', 'cat' => 'astrology', 'kw' => 'surya dev ko arghya dene ke niyam', 'prio' => 2 ],
-            [ 'title_hi' => 'कालसर्प दोष के वास्तविक लक्षण और जीवन में इसके प्रभावों को शांत करने के उपाय', 'cat' => 'astrology', 'kw' => 'kaal sarp dosh lakshan upay', 'prio' => 2 ],
-            [ 'title_hi' => 'बृहस्पति (गुरु) ग्रह को मजबूत करने के आसान घरेलू उपाय: बढ़ती है विद्या और सौभाग्य', 'cat' => 'astrology', 'kw' => 'guru grah ko majboot karne ke upay', 'prio' => 2 ],
-            [ 'title_hi' => 'चंद्रमा कमजोर होने के लक्षण: मानसिक तनाव, अनिद्रा और इसका ज्योतिषीय समाधान', 'cat' => 'astrology', 'kw' => 'chandrama kamjor hone ke lakshan upay', 'prio' => 2 ],
+            [ 'title_hi' => 'शनि की साढ़े साती क्या है? इसके लक्षण और 5 सबसे सरल सात्विक उपाय', 'cat' => 'astrology', 'kw' => 'शनि की साढ़े साती उपाय', 'prio' => 1 ],
+            [ 'title_hi' => 'कुंडली में मांगलिक दोष: क्या यह हमेशा डरावना होता है? जानें इसके वास्तविक प्रभाव', 'cat' => 'astrology', 'kw' => 'मांगलिक दोष प्रभाव और उपाय', 'prio' => 1 ],
+            [ 'title_hi' => 'सूर्य देव को अर्घ्य देने का सही समय, पात्र और मंत्र: मिलता है मान-सम्मान व तेज', 'cat' => 'astrology', 'kw' => 'सूर्य देव को अर्घ्य के नियम', 'prio' => 2 ],
+            [ 'title_hi' => 'कालसर्प दोष के वास्तविक लक्षण और जीवन में इसके प्रभावों को शांत करने के उपाय', 'cat' => 'astrology', 'kw' => 'कालसर्प दोष लक्षण और उपाय', 'prio' => 2 ],
+            [ 'title_hi' => 'बृहस्पति (गुरु) ग्रह को मजबूत करने के आसान घरेलू उपाय: बढ़ती है विद्या और सौभाग्य', 'cat' => 'astrology', 'kw' => 'गुरु ग्रह मजबूत करने के उपाय', 'prio' => 2 ],
+            [ 'title_hi' => 'चंद्रमा कमजोर होने के लक्षण: मानसिक तनाव, अनिद्रा और इसका ज्योतिषीय समाधान', 'cat' => 'astrology', 'kw' => 'कमजोर चंद्रमा के लक्षण उपाय', 'prio' => 2 ],
 
             // Category: Sacred Items & Gemstones
-            [ 'title_hi' => 'रुद्राक्ष धारण करने के वैदिक नियम: कौन सा रुद्राक्ष आपके लिए है सबसे फलदायी?', 'cat' => 'sacred_items', 'kw' => 'rudraksha dharan karne ke niyam', 'prio' => 2 ],
-            [ 'title_hi' => 'पीला पुखराज किसे पहनना चाहिए और किसे नहीं? सावधानियां और धारण विधि', 'cat' => 'sacred_items', 'kw' => 'pukhraj kise pehanna chahiye', 'prio' => 3 ],
-            [ 'title_hi' => 'मोती रत्न पहनने के फायदे, नुकसान और सही उंगली में धारण करने की विधि', 'cat' => 'sacred_items', 'kw' => 'moti ratna pehanne ke fayde', 'prio' => 3 ],
-            [ 'title_hi' => 'घर में पारद शिवलिंग रखने के नियम और इसके आध्यात्मिक व भौतिक लाभ', 'cat' => 'sacred_items', 'kw' => 'parad shivling ke labh niyam', 'prio' => 3 ],
+            [ 'title_hi' => 'रुद्राक्ष धारण करने के वैदिक नियम: कौन सा रुद्राक्ष आपके लिए है सबसे फलदायी?', 'cat' => 'sacred_items', 'kw' => 'रुद्राक्ष धारण करने के नियम', 'prio' => 2 ],
+            [ 'title_hi' => 'पीला पुखराज किसे पहनना चाहिए और किसे नहीं? सावधानियां और धारण विधि', 'cat' => 'sacred_items', 'kw' => 'पुखराज रत्न धारण विधि', 'prio' => 3 ],
+            [ 'title_hi' => 'मोती रत्न पहनने के फायदे, नुकसान और सही उंगली में धारण करने की विधि', 'cat' => 'sacred_items', 'kw' => 'मोती रत्न पहनने के फायदे', 'prio' => 3 ],
+            [ 'title_hi' => 'घर में पारद शिवलिंग रखने के नियम और इसके आध्यात्मिक व भौतिक लाभ', 'cat' => 'sacred_items', 'kw' => 'पारद शिवलिंग रखने के नियम', 'prio' => 3 ],
 
             // Category: Mythology & Katha
-            [ 'title_hi' => 'समुद्र मंथन की कथा: 14 रत्नों की उत्पत्ति और उनका गूढ़ आध्यात्मिक रहस्य', 'cat' => 'mythology', 'kw' => 'samudra manthan 14 ratna katha', 'prio' => 3 ],
-            [ 'title_hi' => 'भगवान गणेश की एकदंत होने की कथा: महर्षि परशुराम और विघ्नहर्ता का प्रसंग', 'cat' => 'mythology', 'kw' => 'ganesh ji ekdant katha', 'prio' => 3 ],
-            [ 'title_hi' => 'माँ गंगा का पृथ्वी पर अवतरण: राजा भगीरथ की तपस्या और शिव की जटाओं का रहस्य', 'cat' => 'mythology', 'kw' => 'ganga avtaran katha bhagirath', 'prio' => 4 ],
-            [ 'title_hi' => 'माता लक्ष्मी और दरिद्रता (अलक्ष्मी) की कथा: घर में क्यों रखी जाती है नींबू-मिर्ची?', 'cat' => 'mythology', 'kw' => 'mata lakshmi aur alakshmi katha', 'prio' => 3 ],
+            [ 'title_hi' => 'समुद्र मंथन की कथा: 14 रत्नों की उत्पत्ति और उनका गूढ़ आध्यात्मिक रहस्य', 'cat' => 'mythology', 'kw' => 'समुद्र मंथन 14 रत्न कथा', 'prio' => 3 ],
+            [ 'title_hi' => 'भगवान गणेश की एकदंत होने की कथा: महर्षि परशुराम और विघ्नहर्ता का प्रसंग', 'cat' => 'mythology', 'kw' => 'गणेश जी एकदंत कथा', 'prio' => 3 ],
+            [ 'title_hi' => 'माँ गंगा का पृथ्वी पर अवतरण: राजा भगीरथ की तपस्या और शिव की जटाओं का रहस्य', 'cat' => 'mythology', 'kw' => 'गंगा अवतरण पौराणिक कथा', 'prio' => 4 ],
+            [ 'title_hi' => 'माता लक्ष्मी और दरिद्रता (अलक्ष्मी) की कथा: घर में क्यों रखी जाती है नींबू-मिर्ची?', 'cat' => 'mythology', 'kw' => 'माता लक्ष्मी और अलक्ष्मी कथा', 'prio' => 3 ],
 
             // Category: Daily Lifestyle & Sanskar
-            [ 'title_hi' => 'ब्रह्म मुहूर्त में उठने के वैज्ञानिक व आध्यात्मिक फायदे: जानें सही समय और महत्व', 'cat' => 'lifestyle', 'kw' => 'brahma muhurta me uthne ke fayde', 'prio' => 2 ],
-            [ 'title_hi' => 'संध्या वंदन का महत्व: सूर्यास्त के समय घर में क्यों नहीं सोना चाहिए?', 'cat' => 'lifestyle', 'kw' => 'sandhya samay sone ke nuksan niyam', 'prio' => 2 ],
-            [ 'title_hi' => 'अन्नपूर्णा स्तोत्र और भोजन के वैदिक नियम: भोजन से पहले क्यों किया जाता है आचमन?', 'cat' => 'lifestyle', 'kw' => 'bhojan karne ke vedic niyam', 'prio' => 3 ],
-            [ 'title_hi' => 'एकादशी व्रत के सामान्य नियम: क्या खाएं, क्या न खाएं और पारण की सही विधि', 'cat' => 'puja_basics', 'kw' => 'ekadashi vrat ke niyam parana vidhi', 'prio' => 2 ],
-            [ 'title_hi' => 'शनिवार के दिन कौन सी चीजें घर नहीं लानी चाहिए? शनि दोष से बचने के उपाय', 'cat' => 'astrology', 'kw' => 'shanivar ko kya nahi kharidna chahiye', 'prio' => 2 ],
-            [ 'title_hi' => 'घर में सुख-समृद्धि के लिए गाय को पहली रोटी खिलाने का महत्व और सही नियम', 'cat' => 'puja_basics', 'kw' => 'gai ko pehli roti khilane ka mahatva', 'prio' => 2 ],
+            [ 'title_hi' => 'ब्रह्म मुहूर्त में उठने के वैज्ञानिक व आध्यात्मिक फायदे: जानें सही समय और महत्व', 'cat' => 'lifestyle', 'kw' => 'ब्रह्म मुहूर्त में उठने के लाभ', 'prio' => 2 ],
+            [ 'title_hi' => 'संध्या वंदन का महत्व: सूर्यास्त के समय घर में क्यों नहीं सोना चाहिए?', 'cat' => 'lifestyle', 'kw' => 'संध्या समय सोने के नियम', 'prio' => 2 ],
+            [ 'title_hi' => 'अन्नपूर्णा स्तोत्र और भोजन के वैदिक नियम: भोजन से पहले क्यों किया जाता है आचमन?', 'cat' => 'lifestyle', 'kw' => 'भोजन करने के वैदिक नियम', 'prio' => 3 ],
+            [ 'title_hi' => 'एकादशी व्रत के सामान्य नियम: क्या खाएं, क्या न खाएं और पारण की सही विधि', 'cat' => 'puja_basics', 'kw' => 'एकादशी व्रत के सामान्य नियम', 'prio' => 2 ],
+            [ 'title_hi' => 'शनिवार के दिन कौन सी चीजें घर नहीं लानी चाहिए? शनि दोष से बचने के उपाय', 'cat' => 'astrology', 'kw' => 'शनिवार को क्या न खरीदें', 'prio' => 2 ],
+            [ 'title_hi' => 'घर में सुख-समृद्धि के लिए गाय को पहली रोटी खिलाने का महत्व और सही नियम', 'cat' => 'puja_basics', 'kw' => 'गाय को पहली रोटी नियम', 'prio' => 2 ],
         ];
 
         foreach ( $starter_topics as $topic ) {
@@ -585,6 +585,19 @@ class MRCB_DB_Setup {
                 $sql = "UPDATE {$t_queue} SET " . implode( ', ', $set_parts ) . " WHERE " . implode( ' OR ', $where_parts );
                 $wpdb->query( $sql );
             }
+
+            // Fix truncated keywords in queue
+            $wpdb->query( "UPDATE {$t_queue} SET focus_keyword = 'तुलसी के पौधे के नियम' WHERE focus_keyword LIKE '%भूलक%'" );
+        }
+
+        // 3. Fix truncated/latin keywords in filler bank
+        $t_filler = self::table_filler();
+        if ( $wpdb->get_var( "SHOW TABLES LIKE '{$t_filler}'" ) === $t_filler ) {
+            $wpdb->query( "UPDATE {$t_filler} SET focus_keyword = 'तुलसी के पौधे के नियम' WHERE topic_title_hi LIKE '%तुलसी%' AND (focus_keyword LIKE '%tulsi%' OR focus_keyword LIKE '%भूलक%')" );
+            $wpdb->query( "UPDATE {$t_filler} SET focus_keyword = 'दीपक जलाने के नियम' WHERE topic_title_hi LIKE '%दीपक%' AND focus_keyword LIKE '%deepak%'" );
+            $wpdb->query( "UPDATE {$t_filler} SET focus_keyword = 'शंख रखने के नियम' WHERE topic_title_hi LIKE '%शंख%' AND focus_keyword LIKE '%shankh%'" );
+            $wpdb->query( "UPDATE {$t_filler} SET focus_keyword = 'हनुमान चालीसा पाठ नियम' WHERE topic_title_hi LIKE '%हनुमान%' AND focus_keyword LIKE '%hanuman%'" );
+            $wpdb->query( "UPDATE {$t_filler} SET focus_keyword = 'शिवलिंग पर जल चढ़ाने के नियम' WHERE topic_title_hi LIKE '%शिवलिंग%' AND focus_keyword LIKE '%shivling%'" );
         }
     }
 }

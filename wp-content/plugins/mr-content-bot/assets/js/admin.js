@@ -7,7 +7,37 @@
 
     $(document).ready(function() {
 
-        // 1. Tab Switching (Preview vs Markdown Editor)
+        // Helper: Extract content from WordPress TinyMCE or fallback textarea
+        function getEditorContent() {
+            if (typeof tinyMCE !== 'undefined' && tinyMCE.get('mrcb_content_editor') && !tinyMCE.get('mrcb_content_editor').isHidden()) {
+                return tinyMCE.get('mrcb_content_editor').getContent();
+            }
+            var raw = $('#mrcb_content_editor').val();
+            return (raw !== undefined && raw !== null && raw.trim() !== '') ? raw : $('#mrcb-draft-textarea').val();
+        }
+
+        // Live Character Counters for SEO Title & Meta Description
+        function updateCharCounters() {
+            var titleLen = ($('#mrcb-meta-title').val() || '').length;
+            $('#mrcb-meta-title-count').text(titleLen);
+            if (titleLen > 60) {
+                $('#mrcb-meta-title-count').css('color', '#dc2626');
+            } else {
+                $('#mrcb-meta-title-count').css('color', '#059669');
+            }
+
+            var descLen = ($('#mrcb-meta-desc').val() || '').length;
+            $('#mrcb-meta-desc-count').text(descLen);
+            if (descLen < 120 || descLen > 154) {
+                $('#mrcb-meta-desc-count').css('color', '#d97706');
+            } else {
+                $('#mrcb-meta-desc-count').css('color', '#059669');
+            }
+        }
+        $('#mrcb-meta-title, #mrcb-meta-desc').on('input change keyup', updateCharCounters);
+        updateCharCounters();
+
+        // 1. Tab Switching (Editor vs Live Preview vs Markdown)
         $('.mrcb-tab-btn').on('click', function() {
             var tabId = $(this).data('tab');
             $('.mrcb-tab-btn').removeClass('active');
@@ -15,17 +45,74 @@
 
             $('.mrcb-tab-content').removeClass('active');
             $('#mrcb-tab-' + tabId).addClass('active');
+
+            if (tabId === 'preview') {
+                $('#mrcb-preview-title').text($('#mrcb-post-title').val() || '');
+                $('#mrcb-preview-content').html(getEditorContent());
+            } else if (tabId === 'markdown') {
+                if (!$('#mrcb-draft-textarea').val()) {
+                    $('#mrcb-draft-textarea').val(getEditorContent());
+                }
+            }
         });
 
-        // 2. Approve Draft from Review Screen
+        // 2. Save Changes (Draft Only - No Approval / No WordPress Push)
+        $('#btn-save-draft').on('click', function(e) {
+            e.preventDefault();
+            var $btn = $(this);
+            var id = $btn.data('id');
+            var title = $('#mrcb-post-title').val();
+            var content = getEditorContent();
+            var schedDate = $('#mrcb-sched-date').val();
+            var schedTime = $('#mrcb-sched-time').val();
+            var focusKw = $('#mrcb-focus-keyword').val();
+            var metaTitle = $('#mrcb-meta-title').val();
+            var metaDesc = $('#mrcb-meta-desc').val();
+            var slug = $('#mrcb-slug').val();
+            var tags = $('#mrcb-tags').val();
+
+            $btn.prop('disabled', true).text('⏳ Saving...');
+
+            $.post(mrcbConfig.ajax_url, {
+                action: 'mrcb_save_draft',
+                nonce: mrcbConfig.nonce,
+                id: id,
+                title: title,
+                content: content,
+                scheduled_date: schedDate,
+                publish_time: schedTime,
+                focus_keyword: focusKw,
+                meta_title: metaTitle,
+                meta_desc: metaDesc,
+                slug: slug,
+                tags: tags
+            }, function(res) {
+                $btn.prop('disabled', false).text('💾 Save Changes (Draft)');
+                if (res.success) {
+                    alert('✅ ' + res.data.message);
+                } else {
+                    alert('❌ ' + (res.data.message || 'Error saving draft.'));
+                }
+            }).fail(function() {
+                $btn.prop('disabled', false).text('💾 Save Changes (Draft)');
+                alert('❌ Network error while saving draft.');
+            });
+        });
+
+        // 3. Approve & Schedule Draft in WordPress
         $('#btn-save-approve').on('click', function(e) {
             e.preventDefault();
             var $btn = $(this);
             var id = $btn.data('id');
-            var content = $('#mrcb-draft-textarea').val();
+            var title = $('#mrcb-post-title').val();
+            var content = getEditorContent();
+            var schedDate = $('#mrcb-sched-date').val();
+            var schedTime = $('#mrcb-sched-time').val();
+            var focusKw = $('#mrcb-focus-keyword').val();
             var metaTitle = $('#mrcb-meta-title').val();
             var metaDesc = $('#mrcb-meta-desc').val();
             var slug = $('#mrcb-slug').val();
+            var tags = $('#mrcb-tags').val();
 
             $btn.prop('disabled', true).text('⏳ Scheduling in WordPress...');
 
@@ -33,10 +120,15 @@
                 action: 'mrcb_approve_draft',
                 nonce: mrcbConfig.nonce,
                 id: id,
+                title: title,
                 content: content,
+                scheduled_date: schedDate,
+                publish_time: schedTime,
+                focus_keyword: focusKw,
                 meta_title: metaTitle,
                 meta_desc: metaDesc,
-                slug: slug
+                slug: slug,
+                tags: tags
             }, function(res) {
                 if (res.success) {
                     alert('✅ ' + res.data.message);
@@ -45,6 +137,9 @@
                     alert('❌ ' + (res.data.message || 'Error approving draft.'));
                     $btn.prop('disabled', false).text('✅ Approve & Schedule in WordPress');
                 }
+            }).fail(function() {
+                $btn.prop('disabled', false).text('✅ Approve & Schedule in WordPress');
+                alert('❌ Network error while approving draft.');
             });
         });
 
