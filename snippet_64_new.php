@@ -1,11 +1,15 @@
 <?php
 /*
 ====================================================
-MERA RASHIFAL - PANCHANG ENGINE (V3 COMPACT DASHBOARD)
-Clean, compact 2-column layout matching Horoscope aesthetic
-- Fits in half the vertical height (zero clutter / no nested boxes)
-- Sleek 2-panel spec-sheet presentation (Core Panchang & Muhurat/Celestial)
-- Quick horizontal indicator ribbon for instant daily essentials
+MERA RASHIFAL - PANCHANG ENGINE (V3 MOBILE POLISHED)
+- Compact 2-column spec layout (half vertical height)
+- Horizontal swipeable category tabs with scroll indicator dots & swipe hint
+- Live synchronization of scroll dots & active tab auto-scroll
+- Rahukaal, Gulika & Yamakanta with FULL Start and End time
+- 2-row organized mobile controls toolbar (3-col date pills + datepicker/lang row)
+- Clean 2x2 quick indicators grid (stripped seconds)
+- Clean time formatting (no raw seconds or awkward mixed timestamps)
+- Full-width CTA for Choghadiya table on mobile
 - Full Hindi localization parity & Yoast SEO integration
 Shortcode: [dynamic_panchang]
 ====================================================
@@ -91,6 +95,64 @@ function mr_pc_format_date_localized($date_str, $is_hi = false) {
 }
 }
 
+if (!function_exists('mr_pc_clean_time_display')) {
+function mr_pc_clean_time_display($time_str, $is_hi = false, $prefix_mode = 'none') {
+    if (empty($time_str)) return '—';
+    $val = trim($time_str);
+
+    // Strip seconds like "6:31:02 AM" -> "6:31 AM"
+    $val = preg_replace('/(\d{1,2}:\d{2}):\d{2}\s*(AM|PM)?/i', '$1 $2', $val);
+    $val = preg_replace('/\s+/', ' ', trim($val));
+
+    if (!$is_hi) {
+        if (preg_match('/(\d{1,2}:\d{2})\s*(AM|PM)/i', $val, $m)) {
+            $t = $m[1] . ' ' . strtoupper($m[2]);
+            return ($prefix_mode === 'upto') ? "upto {$t}" : $t;
+        }
+        return ($prefix_mode === 'upto') ? "upto {$val}" : $val;
+    } else {
+        if (preg_match('/(सुबह|दोपहर|शाम|रात|सवेरे)?\s*(\d{1,2}:\d{2})\s*बजे/u', $val, $m)) {
+            $period = trim($m[1] ?? '');
+            $t = $m[2];
+            $res = ($period ? $period . ' ' : '') . $t . ' बजे';
+            return ($prefix_mode === 'upto') ? "{$res} तक" : $res;
+        }
+        if ($prefix_mode === 'upto' && strpos($val, 'तक') === false) {
+            return "{$val} तक";
+        }
+        return $val;
+    }
+}
+}
+
+if (!function_exists('mr_pc_format_time_range')) {
+function mr_pc_format_time_range($range_str, $is_hi = false) {
+    if (empty($range_str)) return '—';
+    $val = trim($range_str);
+
+    // Strip seconds
+    $val = preg_replace('/(\d{1,2}:\d{2}):\d{2}\s*(AM|PM)?/i', '$1 $2', $val);
+
+    if (preg_match_all('/(\d{1,2}:\d{2})\s*(AM|PM)?/i', $val, $matches, PREG_SET_ORDER)) {
+        if (count($matches) >= 2) {
+            $t1 = $matches[0][1] . (!empty($matches[0][2]) ? ' ' . strtoupper($matches[0][2]) : '');
+            $t2 = $matches[1][1] . (!empty($matches[1][2]) ? ' ' . strtoupper($matches[1][2]) : '');
+            
+            if (!$is_hi) {
+                return "{$t1} to {$t2}";
+            } else {
+                $period = '';
+                if (preg_match('/(सुबह|दोपहर|शाम|रात|सवेरे)/u', $val, $pm)) {
+                    $period = $pm[1] . ' ';
+                }
+                return "{$period}{$t1} से {$t2} बजे तक";
+            }
+        }
+    }
+    return $val;
+}
+}
+
 if (!function_exists('mr_pc_get_section_meta')) {
 function mr_pc_get_section_meta($section) {
     $meta = [
@@ -117,7 +179,7 @@ function mr_pc_get_section_meta($section) {
         ],
         'rahukaal' => [
             'icon' => '⚠️',
-            'en'   => 'Rahukaal & Inauspicious Times',
+            'en'   => 'Rahukaal & Times',
             'hi'   => 'राहुकाल एवं अशुभ समय',
             'desc_en' => 'Inauspicious hours including Rahukaal, Gulika, and Yamakanta to avoid for major tasks.',
             'desc_hi' => 'राहुकाल, गुलिक काल एवं यमकंटक समय, जिनमें महत्वपूर्ण कार्यों से बचना चाहिए।'
@@ -145,22 +207,22 @@ function mr_pc_get_section_meta($section) {
         ],
         'sun-moon-timing' => [
             'icon' => '☀️',
-            'en'   => 'Sun & Moon Timings',
-            'hi'   => 'सूर्य एवं चंद्र समय',
+            'en'   => 'Sun & Moon',
+            'hi'   => 'सूर्य एवं चंद्र',
             'desc_en' => 'Precise Sunrise, Sunset, Moonrise, and Moonset calculations for daily rituals.',
             'desc_hi' => 'सूर्योदय, सूर्यास्त, चंद्रोदय एवं चंद्रास्त का सटीक दैनिक समय एवं राशि विवरण।'
         ],
         'year-samvat' => [
             'icon' => '📜',
-            'en'   => 'Hindu Year & Samvat',
-            'hi'   => 'संवत एवं काल गणना',
+            'en'   => 'Year & Samvat',
+            'hi'   => 'संवत एवं काल',
             'desc_en' => 'Traditional Hindu calendar eras: Vikram Samvat, Shaka Samvat, and Kali Era.',
             'desc_hi' => 'सनातन काल गणना: विक्रम संवत, शक संवत, कलि संवत एवं संवत्सर नाम।'
         ],
         'choghadiya-muhurat' => [
             'icon' => '🗓️',
-            'en'   => 'Choghadiya Muhurat',
-            'hi'   => 'चौघड़िया मुहूर्त',
+            'en'   => 'Choghadiya',
+            'hi'   => 'चौघड़िया',
             'desc_en' => 'Auspicious and inauspicious time divisions across day and night for journey and work.',
             'desc_hi' => 'दिन एवं रात का चौघड़िया: शुभ, लाभ, अमृत, चर, रोग, काल एवं उद्वेग समय।'
         ]
@@ -261,13 +323,32 @@ add_shortcode('dynamic_panchang', function () {
     $en_url       = home_url('/panchang/' . $section_slug . $date_slug);
     $hi_url       = home_url('/panchang/' . $section_slug . $date_slug . 'hi/');
 
+    // Cleaned timings for Quick Ribbon & Spec Panels
+    $clean_sunrise  = mr_pc_clean_time_display($row->sun_rise ?? '', $is_hi);
+    $clean_sunset   = mr_pc_clean_time_display($row->sun_set ?? '', $is_hi);
+    $clean_moonrise = mr_pc_clean_time_display($row->moon_rise ?? '', $is_hi);
+    $clean_moonset  = mr_pc_clean_time_display($row->moon_set ?? '', $is_hi);
+    
+    // Abhijit start & end
+    $clean_abhijit_start = mr_pc_clean_time_display($row->abhijit_muhurta_start ?? '', $is_hi);
+    $clean_abhijit_end   = mr_pc_clean_time_display($row->abhijit_muhurta_end ?? '', $is_hi);
+    $clean_abhijit_range = ($clean_abhijit_start !== '—' && $clean_abhijit_end !== '—') 
+        ? "{$clean_abhijit_start} - {$clean_abhijit_end}" 
+        : '—';
+
+    // Rahukaal start & end range
+    $clean_rahukaal_range = mr_pc_format_time_range($row->rahukaal ?? '', $is_hi);
+    $clean_gulika_range   = mr_pc_format_time_range($row->gulika ?? '', $is_hi);
+    $clean_yamakanta_range = mr_pc_format_time_range($row->yamakanta ?? '', $is_hi);
+
     ob_start();
 ?>
 
 <style>
 /* ====================================================
-   MERA RASHIFAL - COMPACT PANCHANG DASHBOARD
-   Sleek 2-column tabular presentation (Zero clutter)
+   MERA RASHIFAL - DYNAMIC PANCHANG DASHBOARD
+   Harmonized with Horoscope Snippet 63
+   Mobile First, Clean & Compact
 ==================================================== */
 .mr-panchang-wrap {
     background-color: #FFFBEB !important;
@@ -275,12 +356,17 @@ add_shortcode('dynamic_panchang', function () {
     color: #1E293B;
     border-radius: 14px;
     border: 1px solid #FDE68A;
-    padding: 16px 20px;
+    padding: 14px 16px;
     box-shadow: 0 4px 16px rgba(180, 83, 9, 0.04);
     margin: 0 auto 25px auto;
     width: 100% !important;
     max-width: 100% !important;
     box-sizing: border-box;
+}
+@media (min-width: 768px) {
+    .mr-panchang-wrap {
+        padding: 20px 24px;
+    }
 }
 
 /* Header Area */
@@ -295,20 +381,26 @@ add_shortcode('dynamic_panchang', function () {
     border-bottom: 1px dashed #FCD34D;
 }
 .mr-pc-title-area h1 {
-    font-size: 22px !important;
+    font-size: 20px !important;
     font-weight: 800 !important;
     color: #B45309 !important;
     margin: 0 !important;
     line-height: 1.25 !important;
+    letter-spacing: -0.2px;
+}
+@media (min-width: 768px) {
+    .mr-pc-title-area h1 {
+        font-size: 24px !important;
+    }
 }
 .mr-pc-date-sub {
-    font-size: 13.5px;
+    font-size: 13px;
     font-weight: 600;
     color: #D97706;
-    margin-top: 2px;
+    margin-top: 3px;
 }
 .mr-pc-back-link {
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 700;
     color: #B45309 !important;
     text-decoration: none !important;
@@ -317,34 +409,58 @@ add_shortcode('dynamic_panchang', function () {
 
 /* Compact Controls Toolbar */
 .mr-pc-toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
     background: #FEF3C7;
     border: 1px solid #FDE68A;
-    border-radius: 8px;
-    padding: 6px 10px;
+    border-radius: 10px;
+    padding: 8px;
     margin-bottom: 12px;
-}
-.mr-pc-btn-group {
     display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    align-items: center;
+    flex-direction: column;
+    gap: 8px;
 }
+@media (min-width: 680px) {
+    .mr-pc-toolbar {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 6px 12px;
+    }
+}
+
+/* Nav Group: 3 Buttons Equal Grid on Mobile */
+.mr-pc-nav-group {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    width: 100%;
+}
+@media (min-width: 680px) {
+    .mr-pc-nav-group {
+        display: flex;
+        width: auto;
+    }
+}
+
 .mr-pc-pill {
-    padding: 5px 12px;
+    padding: 7px 6px;
     background: #FFFFFF;
     color: #78350F !important;
     border: 1px solid #FDE68A;
     border-radius: 6px;
-    font-size: 12.5px;
+    font-size: 12px;
     font-weight: 700;
+    text-align: center;
     text-decoration: none !important;
     transition: all 0.15s ease;
+    white-space: nowrap;
     cursor: pointer;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+}
+@media (min-width: 680px) {
+    .mr-pc-pill {
+        padding: 6px 14px;
+        font-size: 12.5px;
+    }
 }
 .mr-pc-pill:hover {
     background: #FEF3C7;
@@ -355,6 +471,22 @@ add_shortcode('dynamic_panchang', function () {
     color: #FFFFFF !important;
     border-color: #B45309;
 }
+
+/* Secondary Controls Row on Mobile: Datepicker + Lang Toggle */
+.mr-pc-controls-secondary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    width: 100%;
+}
+@media (min-width: 680px) {
+    .mr-pc-controls-secondary {
+        width: auto;
+        justify-content: flex-end;
+    }
+}
+
 .mr-pc-datepicker {
     display: inline-flex;
     align-items: center;
@@ -362,7 +494,14 @@ add_shortcode('dynamic_panchang', function () {
     background: #FFFFFF;
     border: 1px solid #FDE68A;
     border-radius: 6px;
-    padding: 2px 6px;
+    padding: 3px 6px;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+@media (min-width: 680px) {
+    .mr-pc-datepicker {
+        flex: 0 0 auto;
+    }
 }
 .mr-pc-datepicker input[type="date"] {
     border: none;
@@ -370,7 +509,9 @@ add_shortcode('dynamic_panchang', function () {
     font-size: 12px;
     color: #1E293B;
     outline: none;
-    padding: 3px 0;
+    padding: 2px 0;
+    width: 100%;
+    min-width: 0;
 }
 .mr-pc-datepicker button {
     background: #B45309;
@@ -381,18 +522,21 @@ add_shortcode('dynamic_panchang', function () {
     font-size: 11.5px;
     font-weight: 700;
     cursor: pointer;
+    flex-shrink: 0;
 }
+
 .mr-pc-lang-box {
     display: inline-flex;
     background: #FFFFFF;
     border: 1px solid #FDE68A;
     border-radius: 6px;
     padding: 2px;
+    flex-shrink: 0;
 }
 .mr-pc-lang-btn {
     border: none;
     background: transparent;
-    padding: 3px 10px;
+    padding: 4px 10px;
     font-size: 12px;
     font-weight: 700;
     color: #78350F;
@@ -404,26 +548,36 @@ add_shortcode('dynamic_panchang', function () {
     color: #FFFFFF !important;
 }
 
-/* Category Navigation Tabs */
+/* Category Navigation: Horizontal Swipeable Carousel */
+.mr-pc-tabs-wrapper {
+    position: relative;
+    margin-bottom: 12px;
+}
 .mr-pc-tabs {
     display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    margin-bottom: 14px;
-    padding-bottom: 8px;
-    border-bottom: 1px dashed #FCD34D;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 6px;
+    padding: 2px 2px 8px 2px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+}
+.mr-pc-tabs::-webkit-scrollbar {
+    display: none;
 }
 .mr-pc-tab-link {
-    padding: 4px 10px;
+    flex-shrink: 0;
+    padding: 6px 14px;
     background: #FFFFFF;
     border: 1px solid #FDE68A;
-    border-radius: 6px;
+    border-radius: 20px;
     font-size: 12px;
     font-weight: 700;
     color: #78350F !important;
     text-decoration: none !important;
     transition: all 0.15s;
     white-space: nowrap;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.03);
 }
 .mr-pc-tab-link:hover {
     background: #FEF3C7;
@@ -433,9 +587,55 @@ add_shortcode('dynamic_panchang', function () {
     background: #B45309;
     color: #FFFFFF !important;
     border-color: #B45309;
+    box-shadow: 0 2px 6px rgba(180, 83, 9, 0.25);
 }
 
-/* 4-Item Compact Quick Indicator Ribbon */
+/* Scroll Indicator below Tabs (Swipe Hint + Live Dots) */
+.mr-pc-scroll-indicator {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2px 4px 6px 4px;
+    border-bottom: 1px dashed #FCD34D;
+    margin-bottom: 12px;
+}
+.mr-pc-scroll-hint {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: #B45309;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+}
+.mr-pc-swipe-icon {
+    display: inline-block;
+    animation: mrBounceRight 1.5s infinite;
+}
+@keyframes mrBounceRight {
+    0%, 100% { transform: translateX(0); }
+    50% { transform: translateX(4px); }
+}
+
+.mr-pc-scroll-dots {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.mr-pc-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #FDE68A;
+    transition: all 0.25s ease;
+}
+.mr-pc-dot.active {
+    width: 16px;
+    border-radius: 6px;
+    background: #B45309;
+}
+
+/* 4-Item Quick Indicator Strip (2x2 Grid on Mobile, 4-Col on Desktop) */
 .mr-pc-quick-strip {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
@@ -444,36 +644,49 @@ add_shortcode('dynamic_panchang', function () {
     border: 1px solid #FDE68A;
     border-left: 4px solid #F59E0B;
     border-radius: 8px;
-    padding: 8px 12px;
+    padding: 8px 10px;
     margin-bottom: 14px;
 }
 @media (min-width: 768px) {
     .mr-pc-quick-strip {
         grid-template-columns: repeat(4, 1fr);
+        padding: 8px 14px;
     }
 }
 .mr-pc-quick-item {
-    font-size: 12.5px;
+    font-size: 11.5px;
     color: #334155;
     display: flex;
-    align-items: center;
-    gap: 6px;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
 }
-.mr-pc-quick-item strong {
-    color: #78350F;
+.mr-pc-quick-item-label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
     font-weight: 700;
+    color: #78350F;
+    font-size: 11px;
+}
+.mr-pc-quick-item-val {
+    font-weight: 700;
+    color: #1E293B;
+    font-size: 12px;
+    line-height: 1.3;
 }
 
-/* 2-Column Main Spec Grid (Half height of before) */
+/* 2-Column Main Spec Grid (Desktop 2-Col, Mobile 1-Col) */
 .mr-pc-main-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 14px;
+    gap: 12px;
     margin-bottom: 14px;
 }
 @media (min-width: 768px) {
     .mr-pc-main-grid {
         grid-template-columns: 1fr 1fr;
+        gap: 14px;
     }
 }
 
@@ -486,8 +699,8 @@ add_shortcode('dynamic_panchang', function () {
 }
 .mr-pc-panel-head {
     background: #FEF3C7;
-    padding: 8px 14px;
-    font-size: 14px;
+    padding: 8px 12px;
+    font-size: 13.5px;
     font-weight: 800;
     color: #78350F;
     border-bottom: 1px solid #FDE68A;
@@ -503,15 +716,16 @@ add_shortcode('dynamic_panchang', function () {
 }
 .mr-pc-panel-head a:hover { text-decoration: underline !important; }
 
-/* Clean Spec-Sheet Rows */
+/* Clean Spec-Sheet Rows (Balanced Left-Right Alignment on Mobile) */
 .mr-pc-list-row {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding: 8px 14px;
+    align-items: flex-start;
+    padding: 8px 12px;
     border-bottom: 1px solid #FEF3C7;
-    font-size: 13px;
+    font-size: 12.5px;
     line-height: 1.4;
+    gap: 8px;
 }
 .mr-pc-list-row:nth-child(even) {
     background: #FFFDF7;
@@ -522,14 +736,17 @@ add_shortcode('dynamic_panchang', function () {
 .mr-pc-list-label {
     color: #B45309;
     font-weight: 700;
-    min-width: 110px;
+    font-size: 12px;
+    min-width: 90px;
     flex-shrink: 0;
 }
 .mr-pc-list-val {
     color: #1E293B;
     text-align: right;
     font-weight: 600;
+    font-size: 12.5px;
     flex-grow: 1;
+    word-break: break-word;
 }
 .mr-pc-list-val strong {
     color: #78350F;
@@ -542,7 +759,7 @@ add_shortcode('dynamic_panchang', function () {
     border-radius: 4px;
     font-size: 11px;
     font-weight: 700;
-    margin-left: 5px;
+    margin-left: 4px;
     vertical-align: middle;
 }
 .mr-pc-badge-green { background: #DCFCE7; color: #166534; border: 1px solid #86EFAC; }
@@ -553,23 +770,46 @@ add_shortcode('dynamic_panchang', function () {
 .mr-pc-note {
     background: #FFFBEB;
     border-top: 1px dashed #FDE68A;
-    padding: 8px 14px;
-    font-size: 12.5px;
+    padding: 8px 12px;
+    font-size: 12px;
     color: #78350F;
     line-height: 1.5;
 }
 
-/* Choghadiya Table Compact */
+/* Choghadiya Banner Strip: Stacked Cleanly on Mobile */
 .mr-pc-chog-strip {
     display: flex;
-    align-items: center;
-    justify-content: space-between;
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+    gap: 8px;
     background: #FFFFFF;
     border: 1px solid #FDE68A;
     border-radius: 8px;
-    padding: 10px 14px;
+    padding: 10px 12px;
     margin-top: 10px;
 }
+@media (min-width: 680px) {
+    .mr-pc-chog-strip {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        text-align: left;
+    }
+}
+.mr-pc-chog-strip .mr-pc-pill {
+    padding: 8px 14px;
+    font-size: 12.5px;
+    width: 100%;
+    box-sizing: border-box;
+}
+@media (min-width: 680px) {
+    .mr-pc-chog-strip .mr-pc-pill {
+        width: auto;
+    }
+}
+
+/* Choghadiya Table Compact */
 .mr-pc-table {
     width: 100%;
     border-collapse: collapse;
@@ -579,28 +819,20 @@ add_shortcode('dynamic_panchang', function () {
     background: #FEF3C7;
     color: #78350F;
     font-weight: 800;
-    font-size: 12.5px;
-    padding: 7px 10px;
+    font-size: 12px;
+    padding: 6px 8px;
     text-align: center;
     border-bottom: 1px solid #FDE68A;
 }
 .mr-pc-table td {
-    padding: 7px 10px;
-    font-size: 12.5px;
+    padding: 6px 8px;
+    font-size: 12px;
     border-bottom: 1px solid #FEF3C7;
     text-align: center;
     color: #1E293B;
 }
 .mr-pc-table tr:hover td { background: #FFFBEB; }
 .mr-pc-table tr:last-child td { border-bottom: none; }
-
-@media (max-width: 600px) {
-    .mr-pc-header { flex-direction: column; align-items: flex-start; }
-    .mr-pc-toolbar { flex-direction: column; align-items: stretch; }
-    .mr-pc-list-row { flex-direction: column; align-items: flex-start; gap: 2px; }
-    .mr-pc-list-val { text-align: left; }
-    .mr-pc-quick-strip { grid-template-columns: 1fr; }
-}
 </style>
 
 <div class="mr-panchang-wrap">
@@ -625,9 +857,10 @@ add_shortcode('dynamic_panchang', function () {
         <?php endif; ?>
     </div>
 
-    <!-- Controls Toolbar -->
+    <!-- Controls Toolbar (2 Responsive Rows) -->
     <div class="mr-pc-toolbar">
-        <div class="mr-pc-btn-group">
+        <!-- Row 1: Yesterday, Today, Tomorrow (Equal 3-col Grid on Mobile) -->
+        <div class="mr-pc-nav-group">
             <?php 
             $y_url = home_url('/panchang/' . $section_slug . $yesterday . '/' . ($is_hi ? 'hi/' : ''));
             $t_url = home_url('/panchang/' . $section_slug . ($is_hi ? 'hi/' : ''));
@@ -645,41 +878,59 @@ add_shortcode('dynamic_panchang', function () {
             </a>
         </div>
 
-        <!-- Date Picker -->
-        <div class="mr-pc-datepicker">
-            <input type="date" id="pcDate" value="<?php echo esc_attr($selected_date); ?>"
-                <?php if($section === 'choghadiya-muhurat'): ?>
-                    min="<?php echo esc_attr($chog_min); ?>" max="<?php echo esc_attr($chog_max); ?>"
-                <?php endif; ?>
-            >
-            <button type="button" onclick="mrPcDate('<?php echo esc_js($section); ?>')">
-                <?php echo $is_hi ? 'देखें' : 'Go'; ?>
-            </button>
-        </div>
+        <!-- Row 2: Date Picker + Language Switcher -->
+        <div class="mr-pc-controls-secondary">
+            <div class="mr-pc-datepicker">
+                <input type="date" id="pcDate" value="<?php echo esc_attr($selected_date); ?>"
+                    <?php if($section === 'choghadiya-muhurat'): ?>
+                        min="<?php echo esc_attr($chog_min); ?>" max="<?php echo esc_attr($chog_max); ?>"
+                    <?php endif; ?>
+                >
+                <button type="button" onclick="mrPcDate('<?php echo esc_js($section); ?>')">
+                    <?php echo $is_hi ? 'देखें' : 'Go'; ?>
+                </button>
+            </div>
 
-        <!-- Language Switcher -->
-        <div class="mr-pc-lang-box">
-            <a href="<?php echo esc_url($en_url); ?>" class="mr-pc-lang-btn <?php echo !$is_hi ? 'active' : ''; ?>">EN</a>
-            <a href="<?php echo esc_url($hi_url); ?>" class="mr-pc-lang-btn <?php echo $is_hi ? 'active' : ''; ?>">हिन्दी</a>
+            <div class="mr-pc-lang-box">
+                <a href="<?php echo esc_url($en_url); ?>" class="mr-pc-lang-btn <?php echo !$is_hi ? 'active' : ''; ?>">EN</a>
+                <a href="<?php echo esc_url($hi_url); ?>" class="mr-pc-lang-btn <?php echo $is_hi ? 'active' : ''; ?>">हिन्दी</a>
+            </div>
         </div>
     </div>
 
-    <!-- Category Tabs Navigation -->
-    <div class="mr-pc-tabs">
-        <?php 
-        $all_sections = mr_pc_sections_fixed();
-        foreach ($all_sections as $sec_key):
-            $s_meta = mr_pc_get_section_meta($sec_key);
-            $s_title = $is_hi ? $s_meta['hi'] : $s_meta['en'];
-            $s_active = ($sec_key === $section) ? 'active' : '';
-            $s_path = ($sec_key === 'overview') ? '' : $sec_key . '/';
-            $s_date_part = ($selected_date !== $today) ? $selected_date . '/' : '';
-            $s_url = home_url('/panchang/' . $s_path . $s_date_part . ($is_hi ? 'hi/' : ''));
-        ?>
-            <a href="<?php echo esc_url($s_url); ?>" class="mr-pc-tab-link <?php echo $s_active; ?>">
-                <?php echo $s_meta['icon']; ?> <?php echo esc_html($s_title); ?>
-            </a>
-        <?php endforeach; ?>
+    <!-- Category Tabs Navigation: Smooth Horizontal Scroll Strip with Indicators -->
+    <div class="mr-pc-tabs-wrapper">
+        <div class="mr-pc-tabs" id="mrPcTabs">
+            <?php 
+            $all_sections = mr_pc_sections_fixed();
+            foreach ($all_sections as $sec_key):
+                $s_meta = mr_pc_get_section_meta($sec_key);
+                $s_title = $is_hi ? $s_meta['hi'] : $s_meta['en'];
+                $s_active = ($sec_key === $section) ? 'active' : '';
+                $s_path = ($sec_key === 'overview') ? '' : $sec_key . '/';
+                $s_date_part = ($selected_date !== $today) ? $selected_date . '/' : '';
+                $s_url = home_url('/panchang/' . $s_path . $s_date_part . ($is_hi ? 'hi/' : ''));
+            ?>
+                <a href="<?php echo esc_url($s_url); ?>" class="mr-pc-tab-link <?php echo $s_active; ?>">
+                    <?php echo $s_meta['icon']; ?> <?php echo esc_html($s_title); ?>
+                </a>
+            <?php endforeach; ?>
+        </div>
+
+        <!-- Scroll Indicator below Tabs (Swipe Hint + Live Dots) -->
+        <div class="mr-pc-scroll-indicator">
+            <div class="mr-pc-scroll-hint">
+                <span class="mr-pc-swipe-icon">👉</span>
+                <span><?php echo $is_hi ? 'अन्य अंगों के लिए स्वाइप करें' : 'Swipe for more sections'; ?></span>
+            </div>
+            <div class="mr-pc-scroll-dots" id="mrPcDots">
+                <span class="mr-pc-dot active"></span>
+                <span class="mr-pc-dot"></span>
+                <span class="mr-pc-dot"></span>
+                <span class="mr-pc-dot"></span>
+                <span class="mr-pc-dot"></span>
+            </div>
+        </div>
     </div>
 
     <?php if (!$row): ?>
@@ -692,30 +943,34 @@ add_shortcode('dynamic_panchang', function () {
 
         <?php if ($section === 'overview'): ?>
 
-            <!-- 1-Line Quick Indicator Strip -->
+            <!-- 4-Item Quick Indicator Strip (2x2 Compact Grid on Mobile) -->
             <div class="mr-pc-quick-strip">
                 <div class="mr-pc-quick-item">
-                    <span>🌅</span>
-                    <div><strong><?php echo $is_hi ? 'सूर्योदय/अस्त:' : 'Sun Rise/Set:'; ?></strong> <?php echo esc_html($row->sun_rise ?? '—'); ?> / <?php echo esc_html($row->sun_set ?? '—'); ?></div>
+                    <div class="mr-pc-quick-item-label"><span>🌅</span> <span><?php echo $is_hi ? 'सूर्योदय / अस्त' : 'Sun Rise / Set'; ?></span></div>
+                    <div class="mr-pc-quick-item-val"><?php echo esc_html($clean_sunrise); ?> • <?php echo esc_html($clean_sunset); ?></div>
                 </div>
                 <div class="mr-pc-quick-item">
-                    <span>🌙</span>
-                    <div><strong><?php echo $is_hi ? 'चंद्रोदय/अस्त:' : 'Moon Rise/Set:'; ?></strong> <?php echo esc_html($row->moon_rise ?? '—'); ?> / <?php echo esc_html($row->moon_set ?? '—'); ?></div>
+                    <div class="mr-pc-quick-item-label"><span>🌙</span> <span><?php echo $is_hi ? 'चंद्रोदय / अस्त' : 'Moon Rise / Set'; ?></span></div>
+                    <div class="mr-pc-quick-item-val"><?php echo esc_html($clean_moonrise); ?> • <?php echo esc_html($clean_moonset); ?></div>
                 </div>
                 <div class="mr-pc-quick-item">
-                    <span>🟢</span>
-                    <div><strong><?php echo $is_hi ? 'अभिजीत:' : 'Abhijit:'; ?></strong> <span class="mr-pc-badge mr-pc-badge-green"><?php echo esc_html(($row->abhijit_muhurta_start ?? '—') . ' - ' . ($row->abhijit_muhurta_end ?? '—')); ?></span></div>
+                    <div class="mr-pc-quick-item-label"><span>🟢</span> <span><?php echo $is_hi ? 'अभिजीत मुहूर्त' : 'Abhijit Muhurat'; ?></span></div>
+                    <div class="mr-pc-quick-item-val">
+                        <span class="mr-pc-badge mr-pc-badge-green" style="margin-left:0;"><?php echo esc_html($clean_abhijit_range); ?></span>
+                    </div>
                 </div>
                 <div class="mr-pc-quick-item">
-                    <span>🔴</span>
-                    <div><strong><?php echo $is_hi ? 'राहुकाल:' : 'Rahu Kaal:'; ?></strong> <span class="mr-pc-badge mr-pc-badge-red"><?php echo esc_html($row->rahukaal ?? '—'); ?></span></div>
+                    <div class="mr-pc-quick-item-label"><span>🔴</span> <span><?php echo $is_hi ? 'राहुकाल (वर्जित)' : 'Rahu Kaal'; ?></span></div>
+                    <div class="mr-pc-quick-item-val">
+                        <span class="mr-pc-badge mr-pc-badge-red" style="margin-left:0;"><?php echo esc_html($clean_rahukaal_range); ?></span>
+                    </div>
                 </div>
             </div>
 
-            <!-- 2-Panel Main Spec Layout (Saves ~60% height vs multiple boxes) -->
+            <!-- 2-Panel Main Spec Layout -->
             <div class="mr-pc-main-grid">
 
-                <!-- Panel 1: Core Panchang Elements (पंचांग के मुख्य अंग) -->
+                <!-- Panel 1: Core Panchang Elements (पंचांग के मुख्य 5 अंग) -->
                 <div class="mr-pc-panel">
                     <div class="mr-pc-panel-head">
                         <span>📜 <?php echo $is_hi ? 'पंचांग के मुख्य 5 अंग' : 'Core Panchang Elements'; ?></span>
@@ -725,54 +980,71 @@ add_shortcode('dynamic_panchang', function () {
                     </div>
                     <div class="mr-pc-panel-body">
                         <!-- Tithi -->
+                        <?php 
+                        $tithi_end_clean = mr_pc_clean_time_display($row->tithi_end ?? '', $is_hi, 'upto');
+                        ?>
                         <div class="mr-pc-list-row">
-                            <span class="mr-pc-list-label">🌙 <?php echo $is_hi ? 'तिथि (Tithi)' : 'Tithi'; ?></span>
+                            <span class="mr-pc-list-label">🌙 <?php echo $is_hi ? 'तिथि' : 'Tithi'; ?></span>
                             <span class="mr-pc-list-val">
                                 <strong><?php echo esc_html($row->tithi_name ?? '—'); ?></strong>
                                 <?php if (!empty($row->tithi_type)): ?>(<?php echo esc_html($row->tithi_type); ?>)<?php endif; ?>
-                                <?php if (!empty($row->tithi_end)): ?> • <small><?php echo esc_html($row->tithi_end); ?> तक</small><?php endif; ?>
+                                <?php if ($tithi_end_clean !== '—'): ?> • <small style="color:#64748B;"><?php echo esc_html($tithi_end_clean); ?></small><?php endif; ?>
                             </span>
                         </div>
+
                         <!-- Nakshatra -->
+                        <?php 
+                        $nakshatra_end_clean = mr_pc_clean_time_display($row->nakshatra_end ?? '', $is_hi, 'upto');
+                        ?>
                         <div class="mr-pc-list-row">
-                            <span class="mr-pc-list-label">✨ <?php echo $is_hi ? 'नक्षत्र (Nakshatra)' : 'Nakshatra'; ?></span>
+                            <span class="mr-pc-list-label">✨ <?php echo $is_hi ? 'नक्षत्र' : 'Nakshatra'; ?></span>
                             <span class="mr-pc-list-val">
                                 <strong><?php echo esc_html($row->nakshatra_name ?? '—'); ?></strong>
-                                <?php if (!empty($row->nakshatra_lord)): ?>(स्वामी: <?php echo esc_html($row->nakshatra_lord); ?>)<?php endif; ?>
-                                <?php if (!empty($row->nakshatra_end)): ?> • <small><?php echo esc_html($row->nakshatra_end); ?> तक</small><?php endif; ?>
+                                <?php if (!empty($row->nakshatra_lord)): ?>(<?php echo $is_hi ? 'स्वामी: ' : 'Lord: '; ?><?php echo esc_html($row->nakshatra_lord); ?>)<?php endif; ?>
+                                <?php if ($nakshatra_end_clean !== '—'): ?> • <small style="color:#64748B;"><?php echo esc_html($nakshatra_end_clean); ?></small><?php endif; ?>
                             </span>
                         </div>
+
                         <!-- Karana -->
+                        <?php 
+                        $karana_end_clean = mr_pc_clean_time_display($row->karana_end ?? '', $is_hi, 'upto');
+                        ?>
                         <div class="mr-pc-list-row">
-                            <span class="mr-pc-list-label">🌿 <?php echo $is_hi ? 'करण (Karana)' : 'Karana'; ?></span>
+                            <span class="mr-pc-list-label">🌿 <?php echo $is_hi ? 'करण' : 'Karana'; ?></span>
                             <span class="mr-pc-list-val">
                                 <strong><?php echo esc_html($row->karana_name ?? '—'); ?></strong>
-                                <?php if (!empty($row->karana_end)): ?>(<?php echo esc_html($row->karana_end); ?> तक)<?php endif; ?>
-                                <?php if (!empty($row->karana_next)): ?>, आगामी: <?php echo esc_html($row->karana_next); ?><?php endif; ?>
+                                <?php if ($karana_end_clean !== '—'): ?>(<?php echo esc_html($karana_end_clean); ?>)<?php endif; ?>
+                                <?php if (!empty($row->karana_next)): ?><?php echo $is_hi ? ', आगामी: ' : ', Next: '; ?><?php echo esc_html($row->karana_next); ?><?php endif; ?>
                             </span>
                         </div>
+
                         <!-- Yoga -->
+                        <?php 
+                        $yoga_end_clean = mr_pc_clean_time_display($row->yoga_end ?? '', $is_hi, 'upto');
+                        ?>
                         <div class="mr-pc-list-row">
-                            <span class="mr-pc-list-label">🕉️ <?php echo $is_hi ? 'योग (Yoga)' : 'Yoga'; ?></span>
+                            <span class="mr-pc-list-label">🕉️ <?php echo $is_hi ? 'योग' : 'Yoga'; ?></span>
                             <span class="mr-pc-list-val">
                                 <strong><?php echo esc_html($row->yoga_name ?? '—'); ?></strong>
-                                <?php if (!empty($row->yoga_end)): ?> • <small><?php echo esc_html($row->yoga_end); ?> तक</small><?php endif; ?>
+                                <?php if ($yoga_end_clean !== '—'): ?> • <small style="color:#64748B;"><?php echo esc_html($yoga_end_clean); ?></small><?php endif; ?>
                             </span>
                         </div>
+
                         <!-- Vara -->
                         <div class="mr-pc-list-row">
-                            <span class="mr-pc-list-label">📅 <?php echo $is_hi ? 'वार (Day)' : 'Day / Vara'; ?></span>
+                            <span class="mr-pc-list-label">📅 <?php echo $is_hi ? 'वार (दिन)' : 'Day / Vara'; ?></span>
                             <span class="mr-pc-list-val">
                                 <strong><?php echo esc_html($row->vaara ?? $row->day_name ?? '—'); ?></strong>
                             </span>
                         </div>
+
                         <!-- Samvat -->
                         <div class="mr-pc-list-row">
-                            <span class="mr-pc-list-label">🏛️ <?php echo $is_hi ? 'संवत (Samvat)' : 'Samvat'; ?></span>
+                            <span class="mr-pc-list-label">🏛️ <?php echo $is_hi ? 'संवत' : 'Samvat'; ?></span>
                             <span class="mr-pc-list-val">
-                                <strong>विक्रम: <?php echo esc_html($row->year_vikram ?? '—'); ?></strong>
+                                <strong><?php echo $is_hi ? 'विक्रम: ' : 'Vikram: '; ?><?php echo esc_html($row->year_vikram ?? '—'); ?></strong>
                                 <?php if (!empty($row->year_vikram_samvaat_name)): ?>(<?php echo esc_html($row->year_vikram_samvaat_name); ?>)<?php endif; ?>
-                                • शक: <?php echo esc_html($row->year_saka ?? '—'); ?>
+                                • <?php echo $is_hi ? 'शक: ' : 'Shaka: '; ?><?php echo esc_html($row->year_saka ?? '—'); ?>
                             </span>
                         </div>
                     </div>
@@ -783,65 +1055,79 @@ add_shortcode('dynamic_panchang', function () {
                     <?php endif; ?>
                 </div>
 
-                <!-- Panel 2: Muhurat & Celestial Status (शुभ-अशुभ मुहूर्त एवं ग्रह स्थिति) -->
+                <!-- Panel 2: Muhurat & Planetary Status (शुभ-अशुभ मुहूर्त एवं ग्रह स्थिति) -->
                 <div class="mr-pc-panel">
                     <div class="mr-pc-panel-head">
-                        <span>🕰️ <?php echo $is_hi ? 'शुभ-अशुभ मुहूर्त एवं ग्रह स्थिति' : 'Muhurat & Planetary Status'; ?></span>
+                        <span>🕰️ <?php echo $is_hi ? 'शुभ-अशुभ मुहूर्त एवं स्थिति' : 'Muhurat & Planetary Status'; ?></span>
                         <a href="<?php echo esc_url(home_url('/panchang/abhijit-muhurat/' . ($selected_date !== $today ? $selected_date.'/' : '') . ($is_hi ? 'hi/' : ''))); ?>">
                             <?php echo $is_hi ? 'मुहूर्त विवरण →' : 'All Muhurats →'; ?>
                         </a>
                     </div>
                     <div class="mr-pc-panel-body">
-                        <!-- Abhijit Muhurat -->
+                        <!-- Abhijit Muhurat: Full Start and End Time -->
                         <div class="mr-pc-list-row">
                             <span class="mr-pc-list-label">🟢 <?php echo $is_hi ? 'अभिजीत मुहूर्त' : 'Abhijit Muhurat'; ?></span>
                             <span class="mr-pc-list-val">
-                                <strong><?php echo esc_html(($row->abhijit_muhurta_start ?? '—') . ' - ' . ($row->abhijit_muhurta_end ?? '—')); ?></strong>
-                                <span class="mr-pc-badge mr-pc-badge-green"><?php echo $is_hi ? 'सर्वश्रेष्ठ शुभ' : 'Auspicious'; ?></span>
+                                <strong><?php echo esc_html($clean_abhijit_range); ?></strong>
+                                <span class="mr-pc-badge mr-pc-badge-green"><?php echo $is_hi ? 'शुभ' : 'Auspicious'; ?></span>
                             </span>
                         </div>
-                        <!-- Rahu Kaal -->
+
+                        <!-- Rahu Kaal: Full Start and End Time -->
                         <div class="mr-pc-list-row">
                             <span class="mr-pc-list-label">🔴 <?php echo $is_hi ? 'राहुकाल (वर्जित)' : 'Rahu Kaal'; ?></span>
                             <span class="mr-pc-list-val">
-                                <strong><?php echo esc_html($row->rahukaal ?? '—'); ?></strong>
-                                <span class="mr-pc-badge mr-pc-badge-red"><?php echo $is_hi ? 'अशुभ समय' : 'Inauspicious'; ?></span>
+                                <strong><?php echo esc_html($clean_rahukaal_range); ?></strong>
+                                <span class="mr-pc-badge mr-pc-badge-red"><?php echo $is_hi ? 'अशुभ' : 'Inauspicious'; ?></span>
                             </span>
                         </div>
-                        <!-- Gulika & Yamakanta -->
+
+                        <!-- Gulika & Yamakanta: Full Start and End Time -->
                         <div class="mr-pc-list-row">
-                            <span class="mr-pc-list-label">⏳ <?php echo $is_hi ? 'गुलिक / यमकंटक' : 'Gulika / Yama'; ?></span>
+                            <span class="mr-pc-list-label">⏳ <?php echo $is_hi ? 'गुलिक / यम' : 'Gulika / Yama'; ?></span>
                             <span class="mr-pc-list-val">
-                                गुलिक: <?php echo esc_html($row->gulika ?? '—'); ?> • यम: <?php echo esc_html($row->yamakanta ?? '—'); ?>
+                                <?php echo $is_hi ? 'गुलिक: ' : 'Gulika: '; ?><?php echo esc_html($clean_gulika_range); ?><br><?php echo $is_hi ? 'यम: ' : 'Yama: '; ?><?php echo esc_html($clean_yamakanta_range); ?>
                             </span>
                         </div>
+
                         <!-- Disha Shool -->
                         <div class="mr-pc-list-row">
                             <span class="mr-pc-list-label">🧭 <?php echo $is_hi ? 'दिशा शूल' : 'Disha Shool'; ?></span>
                             <span class="mr-pc-list-val">
                                 <strong><?php echo esc_html($row->disha_shool ?? '—'); ?></strong>
                                 <?php if (!empty($row->nakshatra_auspicious_disha)): ?>
-                                    (शुभ दिशा: <?php echo esc_html(trim($row->nakshatra_auspicious_disha, '[]"\' ')); ?>)
+                                    (<?php echo $is_hi ? 'शुभ दिशा: ' : 'Auspicious: '; ?><?php echo esc_html(trim($row->nakshatra_auspicious_disha, '[]"\' ')); ?>)
                                 <?php endif; ?>
                             </span>
                         </div>
+
                         <!-- Sun & Moon Zodiac -->
                         <div class="mr-pc-list-row">
                             <span class="mr-pc-list-label">☀️🌙 <?php echo $is_hi ? 'सूर्य / चंद्र राशि' : 'Sun / Moon Sign'; ?></span>
                             <span class="mr-pc-list-val">
-                                सूर्य राशि: <strong><?php echo esc_html($row->sun_zodiac ?? '—'); ?></strong> • चंद्र राशि: <strong><?php echo esc_html($row->rasi_name ?? '—'); ?></strong>
+                                सूर्य: <strong><?php echo esc_html($row->sun_zodiac ?? '—'); ?></strong> • चंद्र: <strong><?php echo esc_html($row->rasi_name ?? '—'); ?></strong>
                             </span>
                         </div>
+
                         <!-- Full/New Moon -->
+                        <?php 
+                        $fn_clean = '';
+                        if (!empty($row->next_full_moon)) {
+                            $fn_clean .= ($is_hi ? 'पूर्णिमा: ' : 'Full Moon: ') . date('M j', strtotime($row->next_full_moon));
+                        }
+                        if (!empty($row->next_new_moon)) {
+                            $fn_clean .= ' • ' . ($is_hi ? 'अमावस्या: ' : 'New Moon: ') . date('M j', strtotime($row->next_new_moon));
+                        }
+                        ?>
                         <div class="mr-pc-list-row">
                             <span class="mr-pc-list-label">🌕🌑 <?php echo $is_hi ? 'पूर्णिमा / अमावस्या' : 'Full / New Moon'; ?></span>
                             <span class="mr-pc-list-val">
-                                पूर्णिमा: <?php echo esc_html($row->next_full_moon ?? '—'); ?> • अमावस्या: <?php echo esc_html($row->next_new_moon ?? '—'); ?>
+                                <?php echo esc_html($fn_clean ?: '—'); ?>
                             </span>
                         </div>
                     </div>
                     <div class="mr-pc-note" style="background:#FFF9F9; border-top-color:#FECDD3; color:#9F1239;">
-                        ⚠️ <strong><?php echo $is_hi ? 'ज्योतिषीय नियम:' : 'Notice:'; ?></strong> <?php echo $is_hi ? 'राहुकाल में शुभ कार्य या यात्रा आरंभ न करें। नए कार्यों के लिए अभिजीत मुहूर्त का उपयोग करें।' : 'Avoid starting new ventures or travel during Rahukaal. Use Abhijit Muhurat for success.'; ?>
+                        ⚠️ <strong><?php echo $is_hi ? 'परामर्श:' : 'Notice:'; ?></strong> <?php echo $is_hi ? 'राहुकाल में शुभ कार्य या यात्रा आरंभ न करें। नए कार्यों के लिए अभिजीत मुहूर्त का उपयोग करें।' : 'Avoid starting new ventures or travel during Rahukaal. Use Abhijit Muhurat for success.'; ?>
                     </div>
                 </div>
 
@@ -850,8 +1136,8 @@ add_shortcode('dynamic_panchang', function () {
             <!-- Compact Choghadiya Banner Strip -->
             <div class="mr-pc-chog-strip">
                 <div>
-                    <strong style="color:#78350F; font-size:14px;">🗓️ <?php echo $is_hi ? 'आज का चौघड़िया मुहूर्त (दिन व रात)' : 'Today\'s Day & Night Choghadiya Timings'; ?></strong>
-                    <div style="font-size:12px; color:#475569; margin-top:2px;">
+                    <strong style="color:#78350F; font-size:13.5px;">🗓️ <?php echo $is_hi ? 'आज का चौघड़िया मुहूर्त (दिन व रात)' : 'Today\'s Day & Night Choghadiya Timings'; ?></strong>
+                    <div style="font-size:11.5px; color:#475569; margin-top:2px;">
                         <?php echo $is_hi ? 'शुभ, लाभ, अमृत, चर, रोग, काल और उद्वेग मुहूर्त समय सारणी' : 'Shubh, Labh, Amrit, Char, Rog, Kaal and Udveg time table'; ?>
                     </div>
                 </div>
@@ -866,7 +1152,7 @@ add_shortcode('dynamic_panchang', function () {
             <div class="mr-pc-panel" style="margin-bottom:15px;">
                 <div class="mr-pc-panel-head">
                     <span>☀️ <?php echo $is_hi ? 'दिन का चौघड़िया (Day Choghadiya)' : 'Day Choghadiya Timings'; ?></span>
-                    <span style="font-size:12.5px; color:#B45309;"><?php echo esc_html($formatted_date); ?></span>
+                    <span style="font-size:12px; color:#B45309;"><?php echo esc_html($formatted_date); ?></span>
                 </div>
                 <table class="mr-pc-table">
                     <thead>
@@ -879,14 +1165,16 @@ add_shortcode('dynamic_panchang', function () {
                     <tbody>
                         <?php for($i=1; $i<=8; $i++): 
                             $s_key="day_{$i}_start"; $e_key="day_{$i}_end"; $m_key="day_{$i}_muhurat"; $t_key="day_{$i}_type";
-                            $s_val = $row->$s_key ?? ''; $e_val = $row->$e_key ?? ''; $m_val = $row->$m_key ?? ''; $t_val = trim($row->$t_key ?? '');
-                            if (empty($s_val)) continue;
+                            $s_val = mr_pc_clean_time_display($row->$s_key ?? '', $is_hi);
+                            $e_val = mr_pc_clean_time_display($row->$e_key ?? '', $is_hi);
+                            $m_val = $row->$m_key ?? ''; $t_val = trim($row->$t_key ?? '');
+                            if (empty($s_val) || $s_val === '—') continue;
                             $b_class = 'mr-pc-badge-gold';
                             if (in_array($t_val, ['शुभ', 'Shubh', 'Good', 'अमृत', 'लाभ'])) $b_class = 'mr-pc-badge-green';
                             elseif (in_array($t_val, ['अशुभ', 'Ashubh', 'Bad', 'रोग', 'काल', 'उद्वेग'])) $b_class = 'mr-pc-badge-red';
                         ?>
                         <tr>
-                            <td><strong style="color:#78350F; font-size:13.5px;"><?php echo esc_html($m_val); ?></strong></td>
+                            <td><strong style="color:#78350F; font-size:13px;"><?php echo esc_html($m_val); ?></strong></td>
                             <td><?php echo esc_html($s_val); ?> — <?php echo esc_html($e_val); ?></td>
                             <td><span class="mr-pc-badge <?php echo $b_class; ?>"><?php echo esc_html($t_val); ?></span></td>
                         </tr>
@@ -898,7 +1186,7 @@ add_shortcode('dynamic_panchang', function () {
             <div class="mr-pc-panel">
                 <div class="mr-pc-panel-head">
                     <span>🌙 <?php echo $is_hi ? 'रात का चौघड़िया (Night Choghadiya)' : 'Night Choghadiya Timings'; ?></span>
-                    <span style="font-size:12.5px; color:#B45309;"><?php echo esc_html($formatted_date); ?></span>
+                    <span style="font-size:12px; color:#B45309;"><?php echo esc_html($formatted_date); ?></span>
                 </div>
                 <table class="mr-pc-table">
                     <thead>
@@ -911,14 +1199,16 @@ add_shortcode('dynamic_panchang', function () {
                     <tbody>
                         <?php for($i=1; $i<=8; $i++): 
                             $s_key="night_{$i}_start"; $e_key="night_{$i}_end"; $m_key="night_{$i}_muhurat"; $t_key="night_{$i}_type";
-                            $s_val = $row->$s_key ?? ''; $e_val = $row->$e_key ?? ''; $m_val = $row->$m_key ?? ''; $t_val = trim($row->$t_key ?? '');
-                            if (empty($s_val)) continue;
+                            $s_val = mr_pc_clean_time_display($row->$s_key ?? '', $is_hi);
+                            $e_val = mr_pc_clean_time_display($row->$e_key ?? '', $is_hi);
+                            $m_val = $row->$m_key ?? ''; $t_val = trim($row->$t_key ?? '');
+                            if (empty($s_val) || $s_val === '—') continue;
                             $b_class = 'mr-pc-badge-gold';
                             if (in_array($t_val, ['शुभ', 'Shubh', 'Good', 'अमृत', 'लाभ'])) $b_class = 'mr-pc-badge-green';
                             elseif (in_array($t_val, ['अशुभ', 'Ashubh', 'Bad', 'रोग', 'काल', 'उद्वेग'])) $b_class = 'mr-pc-badge-red';
                         ?>
                         <tr>
-                            <td><strong style="color:#78350F; font-size:13.5px;"><?php echo esc_html($m_val); ?></strong></td>
+                            <td><strong style="color:#78350F; font-size:13px;"><?php echo esc_html($m_val); ?></strong></td>
                             <td><?php echo esc_html($s_val); ?> — <?php echo esc_html($e_val); ?></td>
                             <td><span class="mr-pc-badge <?php echo $b_class; ?>"><?php echo esc_html($t_val); ?></span></td>
                         </tr>
@@ -929,11 +1219,11 @@ add_shortcode('dynamic_panchang', function () {
 
         <?php else: ?>
 
-            <!-- SUB-SECTION FOCUSED COMPACT VIEW -->
+            <!-- SUB-SECTION FOCUSED VIEW -->
             <div class="mr-pc-panel">
                 <div class="mr-pc-panel-head">
                     <span><?php echo $active_meta['icon']; ?> <?php echo esc_html($active_title); ?></span>
-                    <span style="font-size:12.5px; color:#B45309;"><?php echo esc_html($formatted_date); ?></span>
+                    <span style="font-size:12px; color:#B45309;"><?php echo esc_html($formatted_date); ?></span>
                 </div>
                 <div class="mr-pc-panel-body">
                     <?php switch ($section):
@@ -941,27 +1231,29 @@ add_shortcode('dynamic_panchang', function () {
                         case 'tithi': ?>
                             <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'तिथि' : 'Tithi'; ?></span><span class="mr-pc-list-val"><strong><?php echo esc_html($row->tithi_name ?? '—'); ?></strong></span></div>
                             <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'पक्ष' : 'Paksha'; ?></span><span class="mr-pc-list-val"><?php echo esc_html($row->tithi_type ?? '—'); ?></span></div>
-                            <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'तिथि संख्या' : 'Number'; ?></span><span class="mr-pc-list-val"><?php echo esc_html($row->tithi_number ?? '—'); ?></span></div>
+                            <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'संख्या' : 'Number'; ?></span><span class="mr-pc-list-val"><?php echo esc_html($row->tithi_number ?? '—'); ?></span></div>
                             <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'देवता' : 'Deity'; ?></span><span class="mr-pc-list-val"><?php echo esc_html($row->tithi_diety ?? '—'); ?></span></div>
-                            <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'प्रारंभ - समाप्ति' : 'Start - End'; ?></span><span class="mr-pc-list-val"><?php echo esc_html($row->tithi_start ?? '—'); ?> से <?php echo esc_html($row->tithi_end ?? '—'); ?></span></div>
+                            <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'प्रारंभ - समाप्ति' : 'Start - End'; ?></span><span class="mr-pc-list-val"><?php echo esc_html(mr_pc_clean_time_display($row->tithi_start ?? '', $is_hi)); ?> से <?php echo esc_html(mr_pc_clean_time_display($row->tithi_end ?? '', $is_hi)); ?></span></div>
                             <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'विशेष' : 'Special'; ?></span><span class="mr-pc-list-val"><?php echo esc_html($row->tithi_special ?? '—'); ?></span></div>
-                            <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'आगामी तिथि' : 'Next Tithi'; ?></span><span class="mr-pc-list-val"><?php echo esc_html($row->tithi_next ?? '—'); ?></span></div>
+                            <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'आगामी' : 'Next Tithi'; ?></span><span class="mr-pc-list-val"><?php echo esc_html($row->tithi_next ?? '—'); ?></span></div>
                             <?php if (!empty($row->tithi_meaning)): ?>
                                 <div class="mr-pc-note">💡 <strong><?php echo $is_hi ? 'महत्व:' : 'Significance:'; ?></strong> <?php echo esc_html($row->tithi_meaning); ?></div>
                             <?php endif; ?>
                         <?php break; ?>
 
                         <?php case 'rahukaal': ?>
-                            <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'राहुकाल समय' : 'Rahukaal'; ?></span><span class="mr-pc-list-val"><strong style="color:#DC2626;"><?php echo esc_html($row->rahukaal ?? '—'); ?></strong> <span class="mr-pc-badge mr-pc-badge-red"><?php echo $is_hi ? 'अशुभ' : 'Inauspicious'; ?></span></span></div>
-                            <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'गुलिक काल' : 'Gulika'; ?></span><span class="mr-pc-list-val"><?php echo esc_html($row->gulika ?? '—'); ?></span></div>
-                            <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'यमकंटक' : 'Yamakanta'; ?></span><span class="mr-pc-list-val"><?php echo esc_html($row->yamakanta ?? '—'); ?></span></div>
+                            <!-- Rahukaal Detailed View with Start & End Time -->
+                            <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'राहुकाल समय' : 'Rahukaal'; ?></span><span class="mr-pc-list-val"><strong style="color:#DC2626;"><?php echo esc_html($clean_rahukaal_range); ?></strong> <span class="mr-pc-badge mr-pc-badge-red"><?php echo $is_hi ? 'अशुभ' : 'Inauspicious'; ?></span></span></div>
+                            <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'गुलिक काल' : 'Gulika'; ?></span><span class="mr-pc-list-val"><?php echo esc_html($clean_gulika_range); ?></span></div>
+                            <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'यमकंटक' : 'Yamakanta'; ?></span><span class="mr-pc-list-val"><?php echo esc_html($clean_yamakanta_range); ?></span></div>
                             <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'वार (दिन)' : 'Vara'; ?></span><span class="mr-pc-list-val"><?php echo esc_html($row->vaara ?? '—'); ?></span></div>
                             <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'दिशा शूल' : 'Disha Shool'; ?></span><span class="mr-pc-list-val"><?php echo esc_html($row->disha_shool ?? '—'); ?></span></div>
                             <div class="mr-pc-note" style="background:#FFF9F9; border-top-color:#FECDD3; color:#9F1239;">🚫 <strong><?php echo $is_hi ? 'परामर्श:' : 'Advisory:'; ?></strong> <?php echo $is_hi ? 'राहुकाल में नवीन खरीदारी, अनुबंध या यात्रा प्रारंभ करने से बचें।' : 'Avoid starting important tasks or travels during Rahukaal.'; ?></div>
                         <?php break; ?>
 
                         <?php case 'abhijit-muhurat': ?>
-                            <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'अभिजीत मुहूर्त' : 'Abhijit Muhurat'; ?></span><span class="mr-pc-list-val"><strong style="color:#16A34A;"><?php echo esc_html(($row->abhijit_muhurta_start ?? '') . ' - ' . ($row->abhijit_muhurta_end ?? '')); ?></strong> <span class="mr-pc-badge mr-pc-badge-green"><?php echo $is_hi ? 'सर्वोत्तम शुभ' : 'Auspicious'; ?></span></span></div>
+                            <!-- Abhijit Detailed View with Start & End Time -->
+                            <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'अभिजीत मुहूर्त' : 'Abhijit Muhurat'; ?></span><span class="mr-pc-list-val"><strong style="color:#16A34A;"><?php echo esc_html($clean_abhijit_range); ?></strong> <span class="mr-pc-badge mr-pc-badge-green"><?php echo $is_hi ? 'सर्वोत्तम शुभ' : 'Auspicious'; ?></span></span></div>
                             <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'वार (दिन)' : 'Vara'; ?></span><span class="mr-pc-list-val"><?php echo esc_html($row->vaara ?? '—'); ?></span></div>
                             <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'दिशा शूल' : 'Disha Shool'; ?></span><span class="mr-pc-list-val"><?php echo esc_html($row->disha_shool ?? '—'); ?></span></div>
                             <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'अगली पूर्णिमा' : 'Full Moon'; ?></span><span class="mr-pc-list-val"><?php echo esc_html($row->next_full_moon ?? '—'); ?></span></div>
@@ -973,9 +1265,9 @@ add_shortcode('dynamic_panchang', function () {
                             <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'नक्षत्र' : 'Nakshatra'; ?></span><span class="mr-pc-list-val"><strong><?php echo esc_html($row->nakshatra_name ?? '—'); ?></strong> (सं. <?php echo esc_html($row->nakshatra_number ?? '—'); ?>)</span></div>
                             <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'स्वामी ग्रह' : 'Lord'; ?></span><span class="mr-pc-list-val"><?php echo esc_html($row->nakshatra_lord ?? '—'); ?></span></div>
                             <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'देवता' : 'Deity'; ?></span><span class="mr-pc-list-val"><?php echo esc_html($row->nakshatra_diety ?? '—'); ?></span></div>
-                            <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'प्रारंभ - समाप्ति' : 'Start - End'; ?></span><span class="mr-pc-list-val"><?php echo esc_html($row->nakshatra_start ?? '—'); ?> से <?php echo esc_html($row->nakshatra_end ?? '—'); ?></span></div>
+                            <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'प्रारंभ - समाप्ति' : 'Start - End'; ?></span><span class="mr-pc-list-val"><?php echo esc_html(mr_pc_clean_time_display($row->nakshatra_start ?? '', $is_hi)); ?> से <?php echo esc_html(mr_pc_clean_time_display($row->nakshatra_end ?? '', $is_hi)); ?></span></div>
                             <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'शुभ दिशा' : 'Disha'; ?></span><span class="mr-pc-list-val"><?php echo esc_html(trim($row->nakshatra_auspicious_disha ?? '', '[]"\' ')); ?></span></div>
-                            <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'आगामी नक्षत्र' : 'Next'; ?></span><span class="mr-pc-list-val"><?php echo esc_html($row->nakshatra_next ?? '—'); ?></span></div>
+                            <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'आगामी' : 'Next'; ?></span><span class="mr-pc-list-val"><?php echo esc_html($row->nakshatra_next ?? '—'); ?></span></div>
                             <?php if (!empty($row->nakshatra_summary) || !empty($row->nakshatra_meaning)): ?>
                                 <div class="mr-pc-note">🌟 <strong><?php echo $is_hi ? 'नक्षत्र फल:' : 'Insights:'; ?></strong> <?php echo esc_html($row->nakshatra_summary ?? $row->nakshatra_meaning); ?></div>
                             <?php endif; ?>
@@ -984,14 +1276,14 @@ add_shortcode('dynamic_panchang', function () {
                         <?php case 'karana': ?>
                             <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'करण' : 'Karana'; ?></span><span class="mr-pc-list-val"><strong><?php echo esc_html($row->karana_name ?? '—'); ?></strong> (सं. <?php echo esc_html($row->karana_number ?? '—'); ?>)</span></div>
                             <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'प्रकार / स्वभाव' : 'Type'; ?></span><span class="mr-pc-list-val"><?php echo esc_html($row->karana_type ?? '—'); ?></span></div>
-                            <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'स्वामी ग्रह / देवता' : 'Lord / Deity'; ?></span><span class="mr-pc-list-val"><?php echo esc_html($row->karana_lord ?? '—'); ?> / <?php echo esc_html($row->karana_diety ?? '—'); ?></span></div>
-                            <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'प्रारंभ - समाप्ति' : 'Start - End'; ?></span><span class="mr-pc-list-val"><?php echo esc_html($row->karana_start ?? '—'); ?> से <?php echo esc_html($row->karana_end ?? '—'); ?></span></div>
-                            <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'आगामी करण' : 'Next'; ?></span><span class="mr-pc-list-val"><?php echo esc_html($row->karana_next ?? '—'); ?></span></div>
+                            <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'स्वामी / देवता' : 'Lord / Deity'; ?></span><span class="mr-pc-list-val"><?php echo esc_html($row->karana_lord ?? '—'); ?> / <?php echo esc_html($row->karana_diety ?? '—'); ?></span></div>
+                            <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'प्रारंभ - समाप्ति' : 'Start - End'; ?></span><span class="mr-pc-list-val"><?php echo esc_html(mr_pc_clean_time_display($row->karana_start ?? '', $is_hi)); ?> से <?php echo esc_html(mr_pc_clean_time_display($row->karana_end ?? '', $is_hi)); ?></span></div>
+                            <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'आगामी' : 'Next'; ?></span><span class="mr-pc-list-val"><?php echo esc_html($row->karana_next ?? '—'); ?></span></div>
                         <?php break; ?>
 
                         <?php case 'yoga': ?>
                             <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'योग' : 'Yoga'; ?></span><span class="mr-pc-list-val"><strong><?php echo esc_html($row->yoga_name ?? '—'); ?></strong> (सं. <?php echo esc_html($row->yoga_number ?? '—'); ?>)</span></div>
-                            <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'प्रारंभ - समाप्ति' : 'Start - End'; ?></span><span class="mr-pc-list-val"><?php echo esc_html($row->yoga_start ?? '—'); ?> से <?php echo esc_html($row->yoga_end ?? '—'); ?></span></div>
+                            <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'प्रारंभ - समाप्ति' : 'Start - End'; ?></span><span class="mr-pc-list-val"><?php echo esc_html(mr_pc_clean_time_display($row->yoga_start ?? '', $is_hi)); ?> से <?php echo esc_html(mr_pc_clean_time_display($row->yoga_end ?? '', $is_hi)); ?></span></div>
                             <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'आगामी योग' : 'Next'; ?></span><span class="mr-pc-list-val"><?php echo esc_html($row->yoga_next ?? '—'); ?></span></div>
                             <?php if (!empty($row->yoga_meaning)): ?>
                                 <div class="mr-pc-note">🕉️ <strong><?php echo $is_hi ? 'योग फल:' : 'Significance:'; ?></strong> <?php echo esc_html($row->yoga_meaning); ?></div>
@@ -999,8 +1291,8 @@ add_shortcode('dynamic_panchang', function () {
                         <?php break; ?>
 
                         <?php case 'sun-moon-timing': ?>
-                            <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'सूर्योदय / सूर्यास्त' : 'Sunrise / Sunset'; ?></span><span class="mr-pc-list-val"><?php echo esc_html($row->sun_rise ?? '—'); ?> / <?php echo esc_html($row->sun_set ?? '—'); ?></span></div>
-                            <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'चंद्रोदय / चंद्रास्त' : 'Moonrise / Moonset'; ?></span><span class="mr-pc-list-val"><?php echo esc_html($row->moon_rise ?? '—'); ?> / <?php echo esc_html($row->moon_set ?? '—'); ?></span></div>
+                            <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'सूर्योदय / अस्त' : 'Sunrise / Set'; ?></span><span class="mr-pc-list-val"><?php echo esc_html($clean_sunrise); ?> / <?php echo esc_html($clean_sunset); ?></span></div>
+                            <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'चंद्रोदय / अस्त' : 'Moonrise / Set'; ?></span><span class="mr-pc-list-val"><?php echo esc_html($clean_moonrise); ?> / <?php echo esc_html($clean_moonset); ?></span></div>
                             <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'सूर्य राशि / नक्षत्र' : 'Sun Zodiac'; ?></span><span class="mr-pc-list-val">राशि: <?php echo esc_html($row->sun_zodiac ?? '—'); ?> • नक्षत्र: <?php echo esc_html($row->sun_nakshatra ?? '—'); ?></span></div>
                             <div class="mr-pc-list-row"><span class="mr-pc-list-label"><?php echo $is_hi ? 'चंद्र राशि' : 'Moon Sign'; ?></span><span class="mr-pc-list-val"><strong><?php echo esc_html($row->rasi_name ?? '—'); ?></strong></span></div>
                         <?php break; ?>
@@ -1069,6 +1361,34 @@ document.addEventListener("DOMContentLoaded", function() {
         var tM = String(tomorrowDate.getMonth() + 1).padStart(2, '0');
         var tD = String(tomorrowDate.getDate()).padStart(2, '0');
         btnTomorrow.href = basePath + tomorrowDate.getFullYear() + "-" + tM + "-" + tD + (langSuffix ? '/' + langSuffix : '');
+    }
+
+    // Horizontal scroll indicator & active tab auto-scroll
+    var tabsEl = document.getElementById('mrPcTabs');
+    var dotsEl = document.getElementById('mrPcDots');
+    if (tabsEl && dotsEl) {
+        var dots = dotsEl.querySelectorAll('.mr-pc-dot');
+        
+        // Auto-scroll active tab into view on load
+        var activeTab = tabsEl.querySelector('.mr-pc-tab-link.active');
+        if (activeTab) {
+            var scrollLeftPos = activeTab.offsetLeft - (tabsEl.clientWidth / 2) + (activeTab.clientWidth / 2);
+            tabsEl.scrollTo({ left: Math.max(0, scrollLeftPos), behavior: 'smooth' });
+        }
+
+        function updateDots() {
+            var maxScroll = tabsEl.scrollWidth - tabsEl.clientWidth;
+            if (maxScroll > 0) {
+                var scrollFrac = tabsEl.scrollLeft / maxScroll;
+                var activeIdx = Math.min(dots.length - 1, Math.round(scrollFrac * (dots.length - 1)));
+                dots.forEach(function(dot, idx) {
+                    dot.classList.toggle('active', idx === activeIdx);
+                });
+            }
+        }
+
+        tabsEl.addEventListener('scroll', updateDots, { passive: true });
+        updateDots();
     }
 });
 
