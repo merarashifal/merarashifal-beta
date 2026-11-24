@@ -335,7 +335,7 @@ $authorized = $is_admin || $token_valid;
                 $snip28_code = file_get_contents($snip28_file);
                 $snip28_code = preg_replace('/^<\?php\s*/', '', $snip28_code);
                 $snip28_code = preg_replace('/\?>\s*$/', '', $snip28_code);
-                $res28 = $wpdb->update($snippets_table, ['name' => 'Zodiac Compatibility Engine (V2 Bilingual)', 'code' => $snip28_code, 'status' => 1], ['id' => 28]);
+                $res28 = $wpdb->update($snippets_table, ['name' => 'Zodiac Compatibility Engine (V2 Bilingual)', 'code' => $snip28_code, 'active' => 1, 'scope' => 'global'], ['id' => 28]);
                 if ($res28 !== false) {
                     echo "<div class='log-success'><strong>[SNIPPET 28]:</strong> Upgraded Zodiac Compatibility Engine shortcode and REST lookup.</div>\n";
                 }

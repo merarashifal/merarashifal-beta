@@ -704,7 +704,8 @@ global $wpdb;
         $res28 = $wpdb->update($snippets_table, [
             'name'   => 'Zodiac Compatibility Engine (V2 Bilingual)',
             'code'   => $snip28_code,
-            'status' => 1
+            'active' => 1,
+            'scope'  => 'global'
         ], ['id' => 28]);
         if ($res28 !== false) {
             echo "<div class='log-success'>✅ [SNIPPET 28]: Upgraded Zodiac Compatibility Engine shortcode and REST lookup.</div>\n";

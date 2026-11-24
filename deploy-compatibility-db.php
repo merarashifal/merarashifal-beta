@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * Automated Database Migration & Data Population for Zodiac Compatibility
  * Usage: https://merarashifal.com/deploy-compatibility-db.php?token=mr_deploy_2026
@@ -217,17 +217,22 @@ global $wpdb;
                 $up28 = $wpdb->update($snippets_table, [
                     'name'   => 'Zodiac Compatibility Engine (V2 Bilingual)',
                     'code'   => $code28,
-                    'status' => 1
+                    'active' => 1,
+                    'scope'  => 'global'
                 ], ['id' => 28]);
-                echo "<div class='log-success'>✅ Snippet #28 updated in `{$snippets_table}` and activated.</div>\n";
+                echo "<div class='log-success'>✅ Snippet #28 updated in `{$snippets_table}` and activated. Result: " . var_export($up28, true) . "</div>\n";
             } else {
                 $ins28 = $wpdb->insert($snippets_table, [
                     'id'     => 28,
                     'name'   => 'Zodiac Compatibility Engine (V2 Bilingual)',
                     'code'   => $code28,
-                    'status' => 1
+                    'active' => 1,
+                    'scope'  => 'global'
                 ]);
-                echo "<div class='log-success'>✅ Snippet #28 inserted into `{$snippets_table}` and activated.</div>\n";
+                echo "<div class='log-success'>✅ Snippet #28 inserted into `{$snippets_table}` and activated. Result: " . var_export($ins28, true) . "</div>\n";
+            }
+            if (function_exists('wp_cache_flush')) {
+                wp_cache_flush();
             }
         } else {
             echo "<div class='log-warn'>⚠️ Snippet 28 source file not found.</div>\n";
