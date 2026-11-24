@@ -292,6 +292,18 @@ $authorized = $is_admin || $token_valid;
             if ($maps_updated > 0) {
                 echo "<div class='log-success'><strong>[MAPS SNIPPETS]:</strong> Updated {$maps_updated} snippets (13, 14, 30, 46, 69, 70, 73, 74, 84) to use GOOGLE_MAPS_API_KEY.</div>\n";
             }
+
+            // Snippet 63: MR Horoscope Programmatic Engine
+            $snip63_file = __DIR__ . '/snippet_63_new.php';
+            if (file_exists($snip63_file)) {
+                $snip63_code = file_get_contents($snip63_file);
+                $snip63_code = preg_replace('/^<\?php\s*/', '', $snip63_code);
+                $snip63_code = preg_replace('/\?>\s*$/', '', $snip63_code);
+                $res63 = $wpdb->update($snippets_table, ['code' => $snip63_code], ['id' => 63]);
+                if ($res63 !== false) {
+                    echo "<div class='log-success'><strong>[SNIPPET 63]:</strong> Upgraded MR Horoscope Programmatic Engine with compact layout, #FFFBEB background, full Hindi parity & centered traits.</div>\n";
+                }
+            }
         }
 
         $sync_targets = [
@@ -304,6 +316,7 @@ $authorized = $is_admin || $token_valid;
             'sync-homepage-db.php',
             'create_2027_muhurat_pages.php',
             'snippet_47_new.php',
+            'snippet_63_new.php',
             'update_page_2538.php',
             'purge-cache.php',
             'check-integrity.php',
