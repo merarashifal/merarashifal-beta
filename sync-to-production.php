@@ -328,6 +328,18 @@ $authorized = $is_admin || $token_valid;
                     echo "<div class='log-success'><strong>[SNIPPET 73]:</strong> Upgraded Kundali Engine with warm amber #FFFBEB layout, compact cards, and mobile-friendly controls.</div>\n";
                 }
             }
+
+            // Snippet 28: Zodiac Compatibility Engine ([zodiac_compatibility_engine], [compatibility_results])
+            $snip28_file = __DIR__ . '/snippet_28_new.php';
+            if (file_exists($snip28_file)) {
+                $snip28_code = file_get_contents($snip28_file);
+                $snip28_code = preg_replace('/^<\?php\s*/', '', $snip28_code);
+                $snip28_code = preg_replace('/\?>\s*$/', '', $snip28_code);
+                $res28 = $wpdb->update($snippets_table, ['name' => 'Zodiac Compatibility Engine (V2 Bilingual)', 'code' => $snip28_code, 'status' => 1], ['id' => 28]);
+                if ($res28 !== false) {
+                    echo "<div class='log-success'><strong>[SNIPPET 28]:</strong> Upgraded Zodiac Compatibility Engine shortcode and REST lookup.</div>\n";
+                }
+            }
         }
 
         $sync_targets = [
@@ -338,11 +350,16 @@ $authorized = $is_admin || $token_valid;
             'merarashifal-logo.png',
             'fix-pending-order.php',
             'sync-homepage-db.php',
+            'deploy-compatibility-db.php',
             'create_2027_muhurat_pages.php',
+            'snippet_28_new.php',
             'snippet_47_new.php',
             'snippet_63_new.php',
             'snippet_64_new.php',
             'snippet_73_new.php',
+            'migrations/001_upgrade_zodiac_compatibility.sql',
+            'output/populate_zodiac_compatibility.sql',
+            'output/compatibility_preview.json',
             'update_page_2538.php',
             'purge-cache.php',
             'check-integrity.php',
