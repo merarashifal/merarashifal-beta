@@ -320,11 +320,15 @@ class Niyati_Storage {
 
         $now = time();
         if (!empty($user_message)) {
-            $data['messages'][] = [
+            $user_turn = [
                 'role'      => 'user',
                 'text'      => $user_message,
                 'timestamp' => $now
             ];
+            if (!empty($extra_meta['is_voice'])) {
+                $user_turn['is_voice'] = true;
+            }
+            $data['messages'][] = $user_turn;
         }
 
         if (!empty($bot_reply)) {
@@ -335,6 +339,11 @@ class Niyati_Storage {
             ];
             if (!empty($extra_meta['order_btn'])) {
                 $model_turn['order_btn'] = $extra_meta['order_btn'];
+            }
+            if (!empty($extra_meta['is_voice'])) {
+                $model_turn['is_voice']       = true;
+                $model_turn['audio_url']      = $extra_meta['audio_url'] ?? '';
+                $model_turn['audio_duration'] = $extra_meta['audio_duration'] ?? 10;
             }
             $data['messages'][] = $model_turn;
         }

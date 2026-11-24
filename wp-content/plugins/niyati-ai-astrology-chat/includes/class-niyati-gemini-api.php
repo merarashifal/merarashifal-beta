@@ -14,10 +14,9 @@ class Niyati_Gemini_API {
 
     /**
      * Detect automated search bots, crawlers, and scrapers
-     * to protect Gemini API quota and server resources.
      */
     public static function is_crawler_or_bot() {
-        if (defined('WP_CLI') && WP_CLI) {
+        if ((defined('WP_CLI') && WP_CLI) || php_sapi_name() === 'cli') {
             return false;
         }
 
@@ -1074,26 +1073,31 @@ PROMPT;
             $clean_mime = 'audio/webm';
         }
 
-        // Fast 50-55 word Voice Consultation directive for <8s turnaround with full Vedic depth
-        $voice_directive = 
-            "\n\nCRITICAL SPEED & VEDIC EXCELLENCE DIRECTIVE (STRICT TARGET: 50 TO 55 WORDS):\n" .
-            "1. AUTOMATIC SPOKEN LANGUAGE MATCHING:\n" .
-            "   - If seeker speaks in HINDI or HINGLISH: Respond entirely in pure, serene, affectionate HINDI (Devanagari script).\n" .
-            "   - If seeker speaks in ENGLISH: Respond in serene Indian English.\n" .
-            "2. HIGH-IMPACT VEDIC DEPTH (STRICTLY 50 TO 55 WORDS MAXIMUM - CRITICAL FOR <8S AUDIO SPEED):\n" .
-            "   - Pack EVERY critical detail concisely without conversational filler:\n" .
-            "     * Presumption opening: 'यदि हम यह मानकर चलें कि आप...'\n" .
-            "     * Governing House & Planet from chart: e.g. 'आपकी कुंडली में 7वें भाव और शुक्र देव की शुभ स्थिति...'\n" .
-            "     * Concrete Calendar Window: e.g. 'आगामी 4 से 6 महीनों में अनुकूल योग बन सकते हैं।'\n" .
-            "     * Specific Day + Deity + Mantra remedy: e.g. 'प्रत्येक शुक्रवार को मां लक्ष्मी को सफेद पुष्प अर्पित कर ॐ शुं शुक्राय नमः का जाप करें, शुभ फल मिलेंगे।'\n" .
-            "   - NO markdown (*, #, bullets), only crisp, flowing spoken sentences.\n" .
-            "   - STRICT LIMIT: Do NOT exceed 55 words!\n" .
-            "   - Output JSON format: {\"transcription\": \"...\", \"reply\": \"...\"}";
+        $chart_desc = '';
+        if (!empty($kundli_profile['name'])) {
+            $chart_desc .= 'Seeker Name: ' . $kundli_profile['name'] . '. ';
+        }
+        if (!empty($kundli_profile['ascendant'])) {
+            $chart_desc .= 'Lagna/Ascendant: ' . $kundli_profile['ascendant'] . '. ';
+        }
+        if (!empty($kundli_profile['moon_sign'])) {
+            $chart_desc .= 'Moon Sign/Rashi: ' . $kundli_profile['moon_sign'] . '. ';
+        }
+
+        $voice_user_prompt = "You are Niyati, a compassionate, wise Vedic Astrologer on MeraRashifal.com.\n"
+            . (!empty($chart_desc) ? "Seeker Astrology Profile: {$chart_desc}\n" : '')
+            . "Preferred Language: {$resolved_lang}\n\n"
+            . "Listen carefully to this audio voice query.\n"
+            . "CRITICAL INSTRUCTIONS (STRICT SPEED & LENGTH TARGET: 20 TO 25 WORDS MAXIMUM - EXACTLY 10 SECONDS OF SPEECH):\n"
+            . "1. If seeker speaks Hindi or Hinglish, formulate your spoken reply in pure, serene, affectionate Hindi (Devanagari script). If English, reply in serene Indian English.\n"
+            . "2. Formulate a crisp 20-25 word spoken Vedic answer highlighting governing Lagna/house, a 3-4 month calendar window, and one specific day+deity remedy.\n"
+            . "3. NO asterisks (*), NO hashes (#), NO bullet points, NO markdown - only 2-3 natural flowing spoken sentences.\n"
+            . "4. STRICT WORD LIMIT: Do NOT exceed 25 words!\n\n"
+            . "Return your response in this exact format:\n"
+            . "TRANSCRIPTION: <exact spoken words heard>\n"
+            . "REPLY: <crisp 20-25 word spoken guidance>";
 
         $payload = [
-            'system_instruction' => [
-                'parts' => [['text' => $system_instruction . $voice_directive]]
-            ],
             'contents' => [
                 [
                     'role'  => 'user',
@@ -1105,21 +1109,20 @@ PROMPT;
                             ]
                         ],
                         [
-                            'text' => 'Listen carefully to this audio voice query, detect language, transcribe accurately, and formulate Niyati\'s crisp 50-55 word Vedic answer with house, planet, timeline window, and specific day/deity remedy. Return JSON with "transcription" and "reply".'
+                            'text' => $voice_user_prompt
                         ]
                     ]
                 ]
             ],
             'generationConfig' => [
-                'temperature'       => 0.2,
-                'topP'              => 0.9,
-                'maxOutputTokens'   => 250,
-                'responseMimeType'  => 'application/json'
+                'temperature'     => 0.1,
+                'topP'            => 0.9,
+                'maxOutputTokens' => 150
             ]
         ];
 
         // Models that support multimodal audio input - fastest first!
-        $candidate_models = ['gemini-3.1-flash-lite', 'gemini-3.5-flash-lite', 'gemini-flash-lite-latest'];
+        $candidate_models = ['gemini-flash-lite-latest', 'gemini-3.5-flash-lite', 'gemini-3.1-flash-lite'];
         $last_error = '';
 
         foreach ($candidate_models as $cand_model) {
@@ -1131,7 +1134,7 @@ PROMPT;
                     'x-goog-api-key' => $api_key
                 ],
                 'body'    => wp_json_encode($payload),
-                'timeout' => 8
+                'timeout' => 20
             ]);
 
             if (is_wp_error($response)) {
@@ -1151,25 +1154,36 @@ PROMPT;
                     }
                 }
                 $clean_raw = trim($raw_text);
-                // Strip markdown code fences if wrapped in ```json ... ```
-                if (preg_match('/```(?:json)?\s*([\s\S]*?)\s*```/', $clean_raw, $m_json)) {
-                    $clean_raw = trim($m_json[1]);
-                }
-                $parsed = json_decode($clean_raw, true);
 
-                if (!is_array($parsed) || empty($parsed['reply'])) {
-                    // Direct text fallback if model replied in plain text instead of JSON
-                    if (!empty($clean_raw)) {
-                        $parsed = [
-                            'transcription' => ($resolved_lang === 'hi' ? 'वॉयस संदेश' : 'Voice Query'),
-                            'reply'         => $clean_raw
-                        ];
+                $transcription = '';
+                $reply = '';
+
+                if (preg_match('/TRANSCRIPTION:\s*(.*?)(?:\n\s*REPLY:|$)/is', $clean_raw, $m_t)) {
+                    $transcription = trim($m_t[1]);
+                }
+                if (preg_match('/REPLY:\s*(.*)/is', $clean_raw, $m_r)) {
+                    $reply = trim($m_r[1]);
+                }
+
+                // If JSON format was returned instead
+                if (empty($reply)) {
+                    $parsed_json = json_decode($clean_raw, true);
+                    if (is_array($parsed_json) && !empty($parsed_json['reply'])) {
+                        $transcription = trim($parsed_json['transcription'] ?? '');
+                        $reply = trim($parsed_json['reply']);
                     }
                 }
 
-                if (is_array($parsed) && !empty($parsed['reply'])) {
-                    $transcription = trim($parsed['transcription'] ?? '');
-                    $reply = trim($parsed['reply']);
+                // Fallback: entire clean text is the reply
+                if (empty($reply)) {
+                    $reply = $clean_raw;
+                    $transcription = ($resolved_lang === 'hi' ? 'वॉयस संदेश' : 'Voice Query');
+                }
+
+                // Clean out any lingering asterisks or markdown formatting
+                $reply = trim(preg_replace('/[*_#`\[\]]/', '', $reply));
+
+                if (!empty($reply)) {
 
                     $detected_lang = preg_match('/[\x{0900}-\x{097F}]/u', $reply) ? 'hi' : $resolved_lang;
 
@@ -1223,8 +1237,8 @@ PROMPT;
 
         $overall_start = microtime(true);
         foreach ($tts_models as $tts_model) {
-            // Hard circuit breaker: If we've already spent 6 seconds attempting TTS, stop immediately!
-            if (microtime(true) - $overall_start > 6.0) {
+            // Circuit breaker: allow realistic TTS generation time (up to 12 seconds)
+            if (microtime(true) - $overall_start > 12.0) {
                 break;
             }
 
@@ -1257,7 +1271,7 @@ PROMPT;
                     'x-goog-api-key' => $api_key
                 ],
                 'body'    => wp_json_encode($payload),
-                'timeout' => 6 // Fast 6-second timeout per model
+                'timeout' => 12 // 12-second timeout per model
             ]);
 
             $code = wp_remote_retrieve_response_code($response);

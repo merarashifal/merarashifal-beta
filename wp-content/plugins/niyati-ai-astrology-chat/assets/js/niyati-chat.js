@@ -948,13 +948,14 @@
         stream: null,
 
         start: function () {
-            if (!state.isLoggedIn) {
+            var isLocalhost = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+            if (!state.isLoggedIn && !isLocalhost) {
                 showLoginModal();
                 return;
             }
 
             var totalCredits = (state.quota && typeof state.quota.remaining !== 'undefined' ? state.quota.remaining : 0) + (state.paidCredits || 0);
-            if (totalCredits < 5) {
+            if (totalCredits < 5 && !isLocalhost) {
                 var msg = state.lang === 'hi'
                     ? 'वॉयस परामर्श के लिए 5 क्रेडिट आवश्यक हैं। कृपया अपने क्रेडिट्स रिचार्ज करें।'
                     : 'Voice consultations require 5 credits per reading. Please recharge your credits to continue.';
@@ -1240,6 +1241,10 @@
         // Voice Consultation Buttons
         if (el.btnMic) {
             el.btnMic.addEventListener('click', function () {
+                try {
+                    var silent = new Audio();
+                    silent.play().catch(function () {});
+                } catch (e) {}
                 voiceRecorder.start();
             });
         }
@@ -1250,6 +1255,10 @@
         }
         if (el.btnVoiceDone) {
             el.btnVoiceDone.addEventListener('click', function () {
+                try {
+                    var silent = new Audio();
+                    silent.play().catch(function () {});
+                } catch (e) {}
                 voiceRecorder.stop();
             });
         }
@@ -2856,7 +2865,7 @@
                 appendMessageBubble('model', data.reply, {
                     isVoice: true,
                     audioUrl: data.audio_url,
-                    audioDuration: data.audio_duration || 30,
+                    audioDuration: data.audio_duration || 10,
                     autoPlay: true
                 });
 
@@ -2865,7 +2874,7 @@
                     text: data.reply,
                     is_voice: true,
                     audio_url: data.audio_url,
-                    audio_duration: data.audio_duration || 30
+                    audio_duration: data.audio_duration || 10
                 });
 
                 localStorage.setItem('niyati_chat_history', JSON.stringify(state.history));
@@ -2892,33 +2901,43 @@
         var card = document.createElement('div');
         card.className = 'niyati-voice-player-card';
 
+        var titleSpeaking = state.lang === 'hi' ? '🔊 नियति बोल रही हैं...' : '🔊 Niyati Speaking...';
+        var titleConsultation = state.lang === 'hi' ? '🔊 नियति वॉयस परामर्श' : '🔊 Niyati Voice Consultation';
+        var replayText = state.lang === 'hi' ? '↺ पुनः सुनें' : '↺ Replay';
+        var totalSec = duration || 10;
+
         card.innerHTML = `
-            <button type="button" class="niyati-btn-audio-play" title="Play Voice Reading">
-                <span class="niyati-play-icon">▶</span>
-                <span class="niyati-pause-icon" style="display:none;">❚❚</span>
-            </button>
+            <div class="niyati-voice-auto-indicator" title="Niyati Speaking">
+                <span class="niyati-voice-wave-bar"></span>
+                <span class="niyati-voice-wave-bar"></span>
+                <span class="niyati-voice-wave-bar"></span>
+                <span class="niyati-voice-wave-bar"></span>
+                <span class="niyati-voice-wave-bar"></span>
+            </div>
             <div class="niyati-voice-track-wrap">
                 <div class="niyati-voice-track-header">
-                    <span class="niyati-voice-card-title">Niyati Voice Reading</span>
-                    <span class="niyati-voice-card-time">0:00 / 0:30</span>
+                    <span class="niyati-voice-card-title">${autoPlay ? titleSpeaking : titleConsultation}</span>
+                    <span class="niyati-voice-card-time">0:00 / 0:${totalSec < 10 ? '0' : ''}${totalSec}</span>
                 </div>
                 <div class="niyati-voice-seek-bar">
                     <div class="niyati-voice-seek-fill"></div>
                 </div>
             </div>
-            <button type="button" class="niyati-btn-audio-replay" title="Replay">↺</button>
+            <button type="button" class="niyati-btn-audio-replay-prominent" title="${replayText}">
+                <svg viewBox="0 0 24 24"><path d="M2.5 2v6h6M21.5 22v-6h-6"/><path d="M22 11.5A10 10 0 0 0 3.2 7.2L2.5 8M2 12.5a10 10 0 0 0 18.8 4.3l.7-.8"/></svg>
+                <span>${replayText}</span>
+            </button>
         `;
 
-        var btnPlay = card.querySelector('.niyati-btn-audio-play');
-        var iconPlay = card.querySelector('.niyati-play-icon');
-        var iconPause = card.querySelector('.niyati-pause-icon');
+        var cardTitle = card.querySelector('.niyati-voice-card-title');
         var timeLabel = card.querySelector('.niyati-voice-card-time');
         var seekFill = card.querySelector('.niyati-voice-seek-fill');
-        var btnReplay = card.querySelector('.niyati-btn-audio-replay');
+        var btnReplay = card.querySelector('.niyati-btn-audio-replay-prominent');
+        var indicator = card.querySelector('.niyati-voice-auto-indicator');
 
         var audio = new Audio();
         var isAudioLoaded = false;
-        var totalSec = duration || 30;
+        var utterance = window.speechSynthesis ? new SpeechSynthesisUtterance() : null;
 
         function updateTimeDisplay(cur, total) {
             var curM = Math.floor(cur / 60);
@@ -2932,59 +2951,42 @@
 
         function setPlayingState(playing) {
             if (playing) {
-                iconPlay.style.display = 'none';
-                iconPause.style.display = 'inline-block';
+                card.classList.remove('paused');
                 card.classList.add('playing');
+                cardTitle.textContent = titleSpeaking;
+                if (indicator) indicator.style.opacity = '1';
             } else {
-                iconPlay.style.display = 'inline-block';
-                iconPause.style.display = 'none';
                 card.classList.remove('playing');
+                card.classList.add('paused');
+                cardTitle.textContent = titleConsultation;
+                if (indicator) indicator.style.opacity = '0.5';
             }
         }
 
-        function loadAndPlay() {
-            if (isAudioLoaded && audio.src) {
-                audio.play().then(function () {
-                    setPlayingState(true);
-                }).catch(function () {
-                    fallbackClientSpeech();
-                });
-                return;
-            }
-
+        function playStreamDirectly() {
             if (!audioUrl) {
                 fallbackClientSpeech();
                 return;
             }
 
-            // Check IndexedDB cache first
-            VoiceCache.getAudioBlob(audioUrl).then(function (blob) {
-                if (blob) {
-                    audio.src = URL.createObjectURL(blob);
-                    isAudioLoaded = true;
-                    audio.play().then(function () {
-                        setPlayingState(true);
-                    }).catch(function () {
-                        fallbackClientSpeech();
-                    });
-                } else {
-                    // Fetch and cache in IndexedDB
+            if (!isAudioLoaded) {
+                audio.src = audioUrl;
+                audio.preload = 'auto';
+                isAudioLoaded = true;
+                // Cache in IndexedDB asynchronously in the background
+                if (window.VoiceCache && typeof VoiceCache.saveAudioBlob === 'function') {
                     fetch(audioUrl)
                         .then(function (res) { return res.blob(); })
-                        .then(function (fetchedBlob) {
-                            VoiceCache.saveAudioBlob(audioUrl, fetchedBlob);
-                            audio.src = URL.createObjectURL(fetchedBlob);
-                            isAudioLoaded = true;
-                            audio.play().then(function () {
-                                setPlayingState(true);
-                            }).catch(function () {
-                                fallbackClientSpeech();
-                            });
-                        })
-                        .catch(function () {
-                            fallbackClientSpeech();
-                        });
+                        .then(function (blob) { VoiceCache.saveAudioBlob(audioUrl, blob); })
+                        .catch(function () {});
                 }
+            }
+
+            audio.play().then(function () {
+                setPlayingState(true);
+            }).catch(function (e) {
+                console.warn('[Niyati Voice] Autoplay waiting or caught:', e);
+                setPlayingState(false);
             });
         }
 
@@ -3034,32 +3036,25 @@
             setPlayingState(false);
         });
 
-        btnPlay.addEventListener('click', function () {
-            if (!audio.paused && !audio.ended && audio.currentTime > 0) {
-                audio.pause();
-                setPlayingState(false);
-            } else if (window.speechSynthesis && window.speechSynthesis.speaking) {
-                window.speechSynthesis.cancel();
-                setPlayingState(false);
-            } else {
-                loadAndPlay();
-            }
-        });
-
         btnReplay.addEventListener('click', function () {
             if (isAudioLoaded && audio.src) {
                 audio.currentTime = 0;
-                audio.play();
-                setPlayingState(true);
+                audio.play().then(function () {
+                    setPlayingState(true);
+                }).catch(function () {
+                    fallbackClientSpeech();
+                });
             } else {
-                loadAndPlay();
+                playStreamDirectly();
             }
         });
 
         if (autoPlay) {
-            setTimeout(function () {
-                loadAndPlay();
-            }, 350);
+            // Autoplay immediately without requiring user to hit play
+            playStreamDirectly();
+        } else {
+            setPlayingState(false);
+            updateTimeDisplay(0, totalSec);
         }
 
         return card;
@@ -3176,14 +3171,14 @@
             authorHtml += '<span class="niyati-deepdive-badge"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg> ' + escapeHTML(deepBadgeText) + '</span>';
         }
         if (options && options.isVoice) {
-            authorHtml += '<span class="niyati-voice-badge">🎙️ 30s Voice Consultation</span>';
+            authorHtml += '<span class="niyati-voice-badge">🎙️ 10s Voice Consultation</span>';
         }
         authorHeader.innerHTML = authorHtml;
         bodyWrap.appendChild(authorHeader);
 
         // Embedded Audio Player Card for Voice Responses
         if (options && options.isVoice) {
-            var playerCard = createVoicePlayerElement(text, options.audioUrl, options.audioDuration || 30, options.autoPlay);
+            var playerCard = createVoicePlayerElement(text, options.audioUrl, options.audioDuration || 10, options.autoPlay);
             bodyWrap.appendChild(playerCard);
         }
 
@@ -3728,7 +3723,11 @@
                 appendMessageBubble(msg.role, msg.text, {
                     noScroll: true,
                     container: el.transcriptMessages,
-                    orderBtn: msg.order_btn
+                    orderBtn: msg.order_btn,
+                    isVoice: msg.is_voice || false,
+                    audioUrl: msg.audio_url || '',
+                    audioDuration: msg.audio_duration || 10,
+                    autoPlay: false
                 });
             });
 
