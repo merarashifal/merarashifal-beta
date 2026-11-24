@@ -316,6 +316,18 @@ $authorized = $is_admin || $token_valid;
                     echo "<div class='log-success'><strong>[SNIPPET 64]:</strong> Upgraded MR Panchang Engine with compact 2-column layout, #FFFBEB background, full Hindi parity & centered traits.</div>\n";
                 }
             }
+
+            // Snippet 73: Kundali Engine ([kundali_calc_engine])
+            $snip73_file = __DIR__ . '/snippet_73_new.php';
+            if (file_exists($snip73_file)) {
+                $snip73_code = file_get_contents($snip73_file);
+                $snip73_code = preg_replace('/^<\?php\s*/', '', $snip73_code);
+                $snip73_code = preg_replace('/\?>\s*$/', '', $snip73_code);
+                $res73 = $wpdb->update($snippets_table, ['code' => $snip73_code], ['id' => 73]);
+                if ($res73 !== false) {
+                    echo "<div class='log-success'><strong>[SNIPPET 73]:</strong> Upgraded Kundali Engine with warm amber #FFFBEB layout, compact cards, and mobile-friendly controls.</div>\n";
+                }
+            }
         }
 
         $sync_targets = [
@@ -330,6 +342,7 @@ $authorized = $is_admin || $token_valid;
             'snippet_47_new.php',
             'snippet_63_new.php',
             'snippet_64_new.php',
+            'snippet_73_new.php',
             'update_page_2538.php',
             'purge-cache.php',
             'check-integrity.php',

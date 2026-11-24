@@ -681,6 +681,20 @@ global $wpdb;
         }
     }
 
+    // UPGRADE SNIPPET 73 (Kundali Engine - [kundali_calc_engine])
+    $snip73_file = __DIR__ . '/snippet_73_new.php';
+    if (file_exists($snip73_file)) {
+        $snip73_code = file_get_contents($snip73_file);
+        $snip73_code = preg_replace('/^<\?php\s*/', '', $snip73_code);
+        $snip73_code = preg_replace('/\?>\s*$/', '', $snip73_code);
+        $res73 = $wpdb->update($snippets_table, ['code' => $snip73_code], ['id' => 73]);
+        if ($res73 !== false) {
+            echo "<div class='log-success'>✅ [SNIPPET 73]: Upgraded Kundali Engine with warm amber #FFFBEB layout, compact cards, and mobile-friendly controls.</div>\n";
+        } else {
+            echo "<div class='log-warn'>⚠️ [SNIPPET 73]: Could not update Snippet 73 (already up-to-date or error).</div>\n";
+        }
+    }
+
     // Flush OPcache
     if (function_exists('opcache_reset')) {
         @opcache_reset();
