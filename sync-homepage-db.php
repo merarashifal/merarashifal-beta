@@ -667,6 +667,20 @@ global $wpdb;
         }
     }
 
+    // UPGRADE SNIPPET 64 (MR Panchang Engine - [dynamic_panchang])
+    $snip64_file = __DIR__ . '/snippet_64_new.php';
+    if (file_exists($snip64_file)) {
+        $snip64_code = file_get_contents($snip64_file);
+        $snip64_code = preg_replace('/^<\?php\s*/', '', $snip64_code);
+        $snip64_code = preg_replace('/\?>\s*$/', '', $snip64_code);
+        $res64 = $wpdb->update($snippets_table, ['code' => $snip64_code], ['id' => 64]);
+        if ($res64 !== false) {
+            echo "<div class='log-success'>✅ [SNIPPET 64]: Upgraded MR Panchang Engine with compact 2-column layout, #FFFBEB background, full Hindi parity & centered traits.</div>\n";
+        } else {
+            echo "<div class='log-warn'>⚠️ [SNIPPET 64]: Could not update Snippet 64 (already up-to-date or error).</div>\n";
+        }
+    }
+
     // Flush OPcache
     if (function_exists('opcache_reset')) {
         @opcache_reset();

@@ -233,10 +233,25 @@ function mr_render_zodiac_detail($sign) {
             transform: translateY(-1px);
         }
         @media (max-width: 600px) {
-            .mr-z-header { flex-direction: column; text-align: center; }
+            .mr-z-header { flex-direction: column; text-align: center; gap: 12px; }
             .mr-z-img-large { width: 75px; height: 75px; }
             .mr-z-title-wrap h1 { font-size: 22px; }
-            .mr-horoscope-wrap { padding: 16px 12px; }
+            .mr-horoscope-wrap { padding: 14px 10px !important; border-radius: 12px; }
+            .mr-zodiac-details-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 6px !important;
+            }
+            .mr-zodiac-item {
+                padding: 8px 6px !important;
+                min-width: 0;
+                box-sizing: border-box;
+            }
+            .mr-zodiac-details-grid .mr-zodiac-item:last-child:nth-child(odd) {
+                grid-column: 1 / -1;
+            }
+            .mr-z-label { font-size: 10px; margin-bottom: 2px; }
+            .mr-z-value { font-size: 12px; line-height: 1.35; }
+            .mr-btn-action { width: 100%; box-sizing: border-box; padding: 12px 16px; font-size: 14px; text-align: center; }
         }
     </style>
 
@@ -446,8 +461,13 @@ add_shortcode('dynamic_horoscope', function () {
     }
 
     $today = current_time('Y-m-d');
-    $yesterday_link = date('Y-m-d', strtotime($selected_date.' -1 day'));
-    $tomorrow_link  = date('Y-m-d', strtotime($selected_date.' +1 day'));
+    $yesterday_date = date('Y-m-d', strtotime($today . ' -1 day'));
+    $tomorrow_date  = date('Y-m-d', strtotime($today . ' +1 day'));
+
+    $is_today_active     = ($mode !== 'weekly' && ($selected_date === $today || empty($parts[1])));
+    $is_yesterday_active = ($mode !== 'weekly' && $selected_date === $yesterday_date);
+    $is_tomorrow_active  = ($mode !== 'weekly' && $selected_date === $tomorrow_date);
+    $is_weekly_active    = ($mode === 'weekly');
 
     // --- DATA FETCHING WITH CACHE & GRACEFUL FALLBACK ---
     // 1. Base Details (EN & HI)
@@ -645,19 +665,29 @@ add_shortcode('dynamic_horoscope', function () {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 8px;
+    justify-content: space-between;
+    gap: 10px;
     background: #FEF3C7;
     padding: 8px 12px;
     border-radius: 12px;
     border: 1px solid #FDE68A;
     margin-bottom: 18px;
+    box-sizing: border-box;
 }
 
 .mr-nav-group {
     display: flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: 6px;
     flex: 1 1 auto;
+}
+
+.mr-controls-secondary {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
 }
 
 .mr-pill-btn {
@@ -676,6 +706,7 @@ add_shortcode('dynamic_horoscope', function () {
     white-space: nowrap;
     cursor: pointer;
     box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    box-sizing: border-box;
 }
 .mr-pill-btn:hover {
     background: #FEF3C7;
@@ -697,6 +728,7 @@ add_shortcode('dynamic_horoscope', function () {
     border: 1px solid #FDE68A;
     border-radius: 8px;
     padding: 3px 6px 3px 8px;
+    box-sizing: border-box;
 }
 .mr-date-picker-wrap input[type="date"] {
     border: none;
@@ -717,6 +749,7 @@ add_shortcode('dynamic_horoscope', function () {
     font-weight: 700;
     cursor: pointer;
     transition: background 0.2s;
+    white-space: nowrap;
 }
 .mr-date-picker-wrap button:hover {
     background: #78350F;
@@ -729,7 +762,7 @@ add_shortcode('dynamic_horoscope', function () {
     border: 1px solid #FDE68A;
     border-radius: 8px;
     padding: 3px;
-    margin-left: auto;
+    flex-shrink: 0;
 }
 .mr-lang-toggle-btn {
     border: none;
@@ -741,10 +774,61 @@ add_shortcode('dynamic_horoscope', function () {
     border-radius: 6px;
     cursor: pointer;
     transition: all 0.2s;
+    white-space: nowrap;
 }
 .mr-lang-toggle-btn.active {
     background: #B45309;
     color: #FFFFFF;
+}
+
+@media (max-width: 680px) {
+    .mr-controls-bar {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 8px;
+        gap: 8px;
+    }
+    .mr-nav-group {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+        width: 100%;
+    }
+    .mr-pill-btn {
+        width: 100%;
+        padding: 9px 4px;
+        font-size: 12.5px;
+        text-align: center;
+    }
+    .mr-controls-secondary {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        width: 100%;
+        margin-left: 0;
+        justify-content: space-between;
+    }
+    .mr-date-picker-wrap {
+        flex: 1 1 auto;
+        min-width: 0;
+        padding: 4px 6px;
+    }
+    .mr-date-picker-wrap input[type="date"] {
+        width: 100%;
+        min-width: 0;
+        font-size: 12px;
+    }
+    .mr-date-picker-wrap button {
+        padding: 5px 10px;
+        font-size: 11.5px;
+    }
+    .mr-lang-switcher {
+        flex-shrink: 0;
+    }
+    .mr-lang-toggle-btn {
+        padding: 5px 10px;
+        font-size: 12px;
+    }
 }
 
 /* Lucky Indicators Ribbon (Compact Horizontal Bar) */
@@ -905,6 +989,7 @@ add_shortcode('dynamic_horoscope', function () {
     border-radius: 12px;
     padding: 18px 20px;
     margin-top: 10px;
+    box-sizing: border-box;
 }
 .mr-about-header {
     font-size: 18px;
@@ -944,6 +1029,8 @@ add_shortcode('dynamic_horoscope', function () {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    box-sizing: border-box;
+    min-width: 0;
 }
 .mr-trait-key {
     font-weight: 700;
@@ -954,12 +1041,85 @@ add_shortcode('dynamic_horoscope', function () {
     letter-spacing: 0.4px;
     margin-bottom: 4px;
     text-align: center;
+    word-break: break-word;
+    overflow-wrap: break-word;
 }
 .mr-trait-val {
     color: #1E293B;
     font-weight: 600;
     display: block;
     text-align: center;
+    word-break: break-word;
+    overflow-wrap: break-word;
+}
+
+/* Mobile Responsiveness for Wrap & Bottom-Most Section */
+@media (max-width: 680px) {
+    .mr-horoscope-wrap {
+        padding: 12px 10px !important;
+        border-radius: 12px;
+    }
+    .mr-about-section {
+        padding: 12px 10px !important;
+        border-radius: 10px;
+    }
+    .mr-about-header {
+        font-size: 16px;
+        margin-bottom: 8px;
+        text-align: center;
+    }
+    .mr-about-desc {
+        font-size: 13px;
+        line-height: 1.6;
+        margin-bottom: 10px;
+    }
+    .mr-traits-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 6px !important;
+    }
+    .mr-trait-chip {
+        padding: 8px 6px;
+    }
+    .mr-traits-grid .mr-trait-chip:last-child:nth-child(odd) {
+        grid-column: 1 / -1;
+    }
+    .mr-trait-key {
+        font-size: 10px;
+        margin-bottom: 2px;
+    }
+    .mr-trait-val {
+        font-size: 12px;
+        line-height: 1.35;
+    }
+    .mr-top-bar {
+        gap: 8px;
+        margin-bottom: 12px;
+        padding-bottom: 12px;
+    }
+    .mr-title-block h1 {
+        font-size: 21px !important;
+    }
+    .mr-zodiac-dates {
+        font-size: 13.5px !important;
+        display: block;
+        margin-left: 0;
+        margin-top: 2px;
+    }
+    .mr-lucky-ribbon {
+        padding: 8px 10px;
+        gap: 8px;
+        margin-bottom: 14px;
+    }
+    .mr-lucky-item {
+        font-size: 12.5px;
+    }
+    .mr-summary-box {
+        padding: 12px 12px;
+        margin-bottom: 16px;
+    }
+    .mr-summary-text {
+        font-size: 13.5px;
+    }
 }
 
 /* Visibility Control for Language Switching */
@@ -1009,41 +1169,43 @@ body.mr-active-lang-hi .mr-lang-en {
     <div class="mr-controls-bar">
         <div class="mr-nav-group">
             <!-- Yesterday -->
-            <a class="mr-pill-btn" id="mr-btn-yesterday" href="/horoscope/<?php echo esc_attr($sign); ?>/<?php echo esc_attr($yesterday_link); ?>">
+            <a class="mr-pill-btn <?php echo $is_yesterday_active ? 'active' : ''; ?>" id="mr-btn-yesterday" href="/horoscope/<?php echo esc_attr($sign); ?>/<?php echo esc_attr($yesterday_date); ?>">
                 <span class="mr-lang-en">Yesterday</span>
                 <span class="mr-lang-hi mr-inline">कल (बीता)</span>
             </a>
             <!-- Today -->
-            <a class="mr-pill-btn <?php echo ($mode !== 'weekly' && empty($parts[1])) ? 'active' : ''; ?>" id="mr-btn-today" href="/horoscope/<?php echo esc_attr($sign); ?>">
+            <a class="mr-pill-btn <?php echo $is_today_active ? 'active' : ''; ?>" id="mr-btn-today" href="/horoscope/<?php echo esc_attr($sign); ?>">
                 <span class="mr-lang-en">Today</span>
                 <span class="mr-lang-hi mr-inline">आज</span>
             </a>
             <!-- Tomorrow -->
-            <a class="mr-pill-btn" id="mr-btn-tomorrow" href="/horoscope/<?php echo esc_attr($sign); ?>/<?php echo esc_attr($tomorrow_link); ?>">
+            <a class="mr-pill-btn <?php echo $is_tomorrow_active ? 'active' : ''; ?>" id="mr-btn-tomorrow" href="/horoscope/<?php echo esc_attr($sign); ?>/<?php echo esc_attr($tomorrow_date); ?>">
                 <span class="mr-lang-en">Tomorrow</span>
                 <span class="mr-lang-hi mr-inline">कल (आने वाला)</span>
             </a>
             <!-- This Week -->
-            <a class="mr-pill-btn <?php echo ($mode === 'weekly') ? 'active' : ''; ?>" href="/horoscope/<?php echo esc_attr($sign); ?>/weekly-horoscope">
+            <a class="mr-pill-btn <?php echo $is_weekly_active ? 'active' : ''; ?>" href="/horoscope/<?php echo esc_attr($sign); ?>/weekly-horoscope">
                 <span class="mr-lang-en">This Week</span>
                 <span class="mr-lang-hi mr-inline">इस सप्ताह</span>
             </a>
         </div>
 
-        <?php if ($mode !== 'weekly'): ?>
-        <div class="mr-date-picker-wrap">
-            <input type="date" id="mrDate" value="<?php echo esc_attr($selected_date); ?>">
-            <button type="button" onclick="mrLoadDate('<?php echo esc_js($sign); ?>')">
-                <span class="mr-lang-en">Check</span>
-                <span class="mr-lang-hi mr-inline">देखें</span>
-            </button>
-        </div>
-        <?php endif; ?>
+        <div class="mr-controls-secondary">
+            <?php if ($mode !== 'weekly'): ?>
+            <div class="mr-date-picker-wrap">
+                <input type="date" id="mrDate" value="<?php echo esc_attr($selected_date); ?>">
+                <button type="button" onclick="mrLoadDate('<?php echo esc_js($sign); ?>')">
+                    <span class="mr-lang-en">Check</span>
+                    <span class="mr-lang-hi mr-inline">देखें</span>
+                </button>
+            </div>
+            <?php endif; ?>
 
-        <!-- Language Switcher -->
-        <div class="mr-lang-switcher">
-            <button type="button" class="mr-lang-toggle-btn active" data-lang="en">EN</button>
-            <button type="button" class="mr-lang-toggle-btn" data-lang="hi">हिन्दी</button>
+            <!-- Language Switcher -->
+            <div class="mr-lang-switcher">
+                <button type="button" class="mr-lang-toggle-btn active" data-lang="en">EN</button>
+                <button type="button" class="mr-lang-toggle-btn" data-lang="hi">हिन्दी</button>
+            </div>
         </div>
     </div>
 
@@ -1305,7 +1467,7 @@ document.addEventListener("DOMContentLoaded", function() {
     var langSuffix = (initLang === 'hi' ? '?lang=hi' : '');
     
     if (btnToday) {
-        btnToday.href = "/horoscope/" + sign + "/" + localDate + langSuffix;
+        btnToday.href = "/horoscope/" + sign + langSuffix;
     }
     
     var yesterdayDate = new Date(d);

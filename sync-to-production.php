@@ -304,6 +304,18 @@ $authorized = $is_admin || $token_valid;
                     echo "<div class='log-success'><strong>[SNIPPET 63]:</strong> Upgraded MR Horoscope Programmatic Engine with compact layout, #FFFBEB background, full Hindi parity & centered traits.</div>\n";
                 }
             }
+
+            // Snippet 64: MR Panchang Engine ([dynamic_panchang])
+            $snip64_file = __DIR__ . '/snippet_64_new.php';
+            if (file_exists($snip64_file)) {
+                $snip64_code = file_get_contents($snip64_file);
+                $snip64_code = preg_replace('/^<\?php\s*/', '', $snip64_code);
+                $snip64_code = preg_replace('/\?>\s*$/', '', $snip64_code);
+                $res64 = $wpdb->update($snippets_table, ['code' => $snip64_code], ['id' => 64]);
+                if ($res64 !== false) {
+                    echo "<div class='log-success'><strong>[SNIPPET 64]:</strong> Upgraded MR Panchang Engine with compact 2-column layout, #FFFBEB background, full Hindi parity & centered traits.</div>\n";
+                }
+            }
         }
 
         $sync_targets = [
@@ -317,6 +329,7 @@ $authorized = $is_admin || $token_valid;
             'create_2027_muhurat_pages.php',
             'snippet_47_new.php',
             'snippet_63_new.php',
+            'snippet_64_new.php',
             'update_page_2538.php',
             'purge-cache.php',
             'check-integrity.php',
