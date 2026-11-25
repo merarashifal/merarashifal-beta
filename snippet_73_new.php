@@ -1238,6 +1238,9 @@ function kundali_display_landing_page($is_main_page = true) {
 ==================================================== */
 if (!function_exists('kundali_display_cross_sell')) {
 function kundali_display_cross_sell() {
+    if (function_exists('mr_ku_print_styles')) {
+        mr_ku_print_styles();
+    }
     $products = [
         [
             'title'     => 'Master Janma Kundali & Harmonics Report',
