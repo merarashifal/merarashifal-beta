@@ -340,6 +340,18 @@ $authorized = $is_admin || $token_valid;
                     echo "<div class='log-success'><strong>[SNIPPET 28]:</strong> Upgraded Zodiac Compatibility Engine shortcode and REST lookup.</div>\n";
                 }
             }
+
+            // Snippet 33: Remedies Engine ([remedy_selector])
+            $snip33_file = __DIR__ . '/snippet_33_new.php';
+            if (file_exists($snip33_file)) {
+                $snip33_code = file_get_contents($snip33_file);
+                $snip33_code = preg_replace('/^<\?php\s*/', '', $snip33_code);
+                $snip33_code = preg_replace('/\?>\s*$/', '', $snip33_code);
+                $res33 = $wpdb->update($snippets_table, ['name' => 'Remedy Viewer Handler', 'code' => $snip33_code, 'active' => 1, 'scope' => 'global'], ['id' => 33]);
+                if ($res33 !== false) {
+                    echo "<div class='log-success'><strong>[SNIPPET 33]:</strong> Upgraded Remedies Engine shortcode ([remedy_selector]) with 20 issues, interactive filters, localized modal & cross-sell.</div>\n";
+                }
+            }
         }
 
         $sync_targets = [
@@ -351,15 +363,22 @@ $authorized = $is_admin || $token_valid;
             'fix-pending-order.php',
             'sync-homepage-db.php',
             'deploy-compatibility-db.php',
+            'deploy-remedies-db.php',
             'create_2027_muhurat_pages.php',
             'snippet_28_new.php',
+            'snippet_33_new.php',
             'snippet_47_new.php',
             'snippet_63_new.php',
             'snippet_64_new.php',
             'snippet_73_new.php',
             'migrations/001_upgrade_zodiac_compatibility.sql',
+            'migrations/002_upgrade_af_remedies.sql',
             'output/populate_zodiac_compatibility.sql',
             'output/compatibility_preview.json',
+            'output/update_af_remedies.sql',
+            'output/update_snippet_33.sql',
+            'output/update_snippet_73.sql',
+            'output/af_remedies_preview.json',
             'update_page_2538.php',
             'purge-cache.php',
             'check-integrity.php',
