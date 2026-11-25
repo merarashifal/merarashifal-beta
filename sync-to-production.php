@@ -352,6 +352,18 @@ $authorized = $is_admin || $token_valid;
                     echo "<div class='log-success'><strong>[SNIPPET 33]:</strong> Upgraded Remedies Engine shortcode ([remedy_selector]) with 20 issues, interactive filters, localized modal & cross-sell.</div>\n";
                 }
             }
+
+            // Snippet 47: Muhurat Engine ([muhurat_viewer])
+            $snip47_file = __DIR__ . '/snippet_47_new.php';
+            if (file_exists($snip47_file)) {
+                $snip47_code = file_get_contents($snip47_file);
+                $snip47_code = preg_replace('/^<\?php\s*/', '', $snip47_code);
+                $snip47_code = preg_replace('/\?>\s*$/', '', $snip47_code);
+                $res47 = $wpdb->update($snippets_table, ['name' => 'Muhurat Code', 'code' => $snip47_code, 'active' => 1, 'scope' => 'global'], ['id' => 47]);
+                if ($res47 !== false) {
+                    echo "<div class='log-success'><strong>[SNIPPET 47]:</strong> Upgraded Muhurat Engine shortcode ([muhurat_viewer]) with Vedic cards, mobile layout & cross-sell.</div>\n";
+                }
+            }
         }
 
         $sync_targets = [
@@ -377,6 +389,7 @@ $authorized = $is_admin || $token_valid;
             'output/compatibility_preview.json',
             'output/update_af_remedies.sql',
             'output/update_snippet_33.sql',
+            'output/update_snippet_47.sql',
             'output/update_snippet_73.sql',
             'output/af_remedies_preview.json',
             'update_page_2538.php',

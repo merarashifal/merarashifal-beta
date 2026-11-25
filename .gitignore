@@ -14,10 +14,12 @@ find_snippet.php
 print_snippet_87.php
 sitemap_snippet_production_ready.php
 snippet_59_backup_original.php
+snippet_*backup*.php
 
 # Large uploads and logs
 wp-content/uploads/
 *.log
+output/backup_*.sql
 
 # Local festive themes in testing (do not push to beta/production)
 wp-content/themes/astra-child/inc/christmas-theme/
