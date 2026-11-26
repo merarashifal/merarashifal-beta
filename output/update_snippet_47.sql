@@ -548,30 +548,30 @@ if (!function_exists(''mr_final_muhurat_viewer_theme'')) {
     height: 30px;
     cursor: pointer;
     outline: none;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
-.mru-year-pills {
-    display: inline-flex;
-    gap: 2px;
-    background: #FEF3C7;
-    padding: 2px;
-    border-radius: 6px;
-    border: 1px solid #FDE68A;
+.mru-select:hover,
+.mru-select:focus {
+    border-color: #8C2514;
+    box-shadow: 0 0 0 2px rgba(140, 37, 20, 0.08);
 }
-.mru-year-pill {
-    padding: 3px 8px;
-    border-radius: 4px;
-    font-size: 11.5px;
+.mru-select-year {
+    min-width: 82px;
     font-weight: 800;
-    background: transparent;
-    border: none;
-    color: #78350F;
-    text-decoration: none !important;
-    transition: all 0.15s ease;
-    cursor: pointer;
 }
-.mru-year-pill.active {
-    background: #8C2514;
-    color: #FFFFFF !important;
+.mru-select-month {
+    min-width: 140px;
+}
+.mru-year-wrap,
+.mru-month-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.mru-nav-btns {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
 }
 .mru-btn {
     padding: 4px 10px;
@@ -587,6 +587,7 @@ if (!function_exists(''mr_final_muhurat_viewer_theme'')) {
     display: inline-flex;
     align-items: center;
     justify-content: center;
+    transition: all 0.15s ease;
 }
 .mru-btn:hover {
     background: #FEF3C7;
@@ -602,9 +603,43 @@ if (!function_exists(''mr_final_muhurat_viewer_theme'')) {
     border-color: #8C2514;
 }
 @media (max-width: 600px) {
-    .mru-controls { flex-direction: column; align-items: stretch; gap: 8px; }
-    .mru-ctrl-group { justify-content: space-between; }
-    .mru-select { flex: 1; }
+    .mru-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 8px;
+        padding: 8px 10px;
+    }
+    .mru-ctrl-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        gap: 8px;
+    }
+    .mru-ctrl-bottom {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        gap: 6px;
+    }
+    .mru-month-wrap {
+        width: 100%;
+    }
+    .mru-select-month {
+        flex: 1;
+        width: 100%;
+    }
+    .mru-nav-btns {
+        display: flex;
+        width: 100%;
+        gap: 4px;
+    }
+    .mru-nav-btns .mru-btn {
+        flex: 1;
+        font-size: 11px;
+        padding: 4px 6px;
+        text-align: center;
+    }
 }
 
 /* MONTH HEADER */
@@ -1210,56 +1245,66 @@ if (!function_exists(''mr_final_muhurat_viewer_theme'')) {
 
     <!-- SLEEK CONTROLS BAR -->
     <div class="mru-controls">
-        <!-- Language & Year Group -->
-        <div class="mru-ctrl-group">
+        <!-- Top Row: Language Toggle & Year Dropdown -->
+        <div class="mru-ctrl-group mru-ctrl-top">
             <div class="mru-lang-box">
                 <a href="<?php echo $build_url([''lang'' => ''en'']); ?>" class="mru-lang-btn <?php echo ($lang === ''en'') ? ''active'' : ''''; ?>">English</a>
                 <a href="<?php echo $build_url([''lang'' => ''hi'']); ?>" class="mru-lang-btn <?php echo ($lang === ''hi'') ? ''active'' : ''''; ?>">हिन्दी</a>
             </div>
 
-            <span style="color:#FCD34D;">•</span>
-
-            <span class="mru-ctrl-label">📅 <?php echo ($lang === ''hi'') ? ''वर्ष:'' : ''Year:''; ?></span>
-            <div class="mru-year-pills">
-                <?php foreach ($available_years as $yr): 
-                    // Pick first month of that year
-                    $yr_months = array_filter($months, function($m) use ($yr) { return strpos($m, $yr . ''-'') === 0; });
-                    $target_ym = !empty($yr_months) ? reset($yr_months) : $selected_ym;
-                ?>
-                    <a href="<?php echo $build_url([''ym'' => $target_ym]); ?>" 
-                       class="mru-year-pill <?php echo ($active_year === $yr) ? ''active'' : ''''; ?>">
-                        <?php echo esc_html($yr); ?>
-                    </a>
-                <?php endforeach; ?>
+            <div class="mru-year-wrap">
+                <label for="mruYear" class="mru-ctrl-label">📅 <?php echo ($lang === ''hi'') ? ''वर्ष:'' : ''Year:''; ?></label>
+                <select id="mruYear" class="mru-select mru-select-year">
+                    <?php foreach ($available_years as $yr): 
+                        $yr_months = array_filter($months, function($m) use ($yr) { return strpos($m, $yr . ''-'') === 0; });
+                        $default_target_ym = !empty($yr_months) ? reset($yr_months) : ($yr . ''-01'');
+                    ?>
+                        <option value="<?php echo esc_attr($yr); ?>" 
+                                data-default-ym="<?php echo esc_attr($default_target_ym); ?>" 
+                                <?php selected($active_year, $yr); ?>>
+                            <?php echo esc_html($yr); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
             </div>
         </div>
 
-        <!-- Month Navigation Group -->
-        <div class="mru-ctrl-group">
-            <select id="mruMonth" class="mru-select" style="min-width: 140px;">
-                <?php foreach ($months as $m): 
-                    $m_time   = strtotime($m . ''-01'');
-                    $eng_name = date(''F Y'', $m_time);
-                    $eng_m    = date(''F'', $m_time);
-                    $y_str    = date(''Y'', $m_time);
-                    $hi_name  = (isset($hi_months[$eng_m]) ? $hi_months[$eng_m] : $eng_m) . '' '' . $y_str;
-                    $label    = ($lang === ''hi'') ? $hi_name : $eng_name;
-                ?>
-                    <option value="<?php echo esc_attr($m); ?>" <?php selected($selected_ym, $m); ?>>
-                        <?php echo esc_html($label); ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
+        <!-- Bottom Row: Month Dropdown & Prev/Current/Next Navigation -->
+        <div class="mru-ctrl-group mru-ctrl-bottom">
+            <div class="mru-month-wrap">
+                <label for="mruMonth" class="mru-ctrl-label">🗓️ <?php echo ($lang === ''hi'') ? ''माह:'' : ''Month:''; ?></label>
+                <select id="mruMonth" class="mru-select mru-select-month">
+                    <?php 
+                    $active_year_months = array_filter($months, function($m) use ($active_year) { 
+                        return strpos($m, $active_year . ''-'') === 0; 
+                    });
+                    $dropdown_months = !empty($active_year_months) ? $active_year_months : $months;
+                    foreach ($dropdown_months as $m): 
+                        $m_time   = strtotime($m . ''-01'');
+                        $eng_name = date(''F Y'', $m_time);
+                        $eng_m    = date(''F'', $m_time);
+                        $y_str    = date(''Y'', $m_time);
+                        $hi_name  = (isset($hi_months[$eng_m]) ? $hi_months[$eng_m] : $eng_m) . '' '' . $y_str;
+                        $label    = ($lang === ''hi'') ? $hi_name : $eng_name;
+                    ?>
+                        <option value="<?php echo esc_attr($m); ?>" <?php selected($selected_ym, $m); ?>>
+                            <?php echo esc_html($label); ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
 
-            <a class="mru-btn" href="<?php echo $build_url([''ym'' => $prev_ym]); ?>" <?php if ($idx === 0) echo "disabled"; ?>>
-                &larr; <?php echo ($lang === ''hi'') ? ''पिछला'' : ''Prev''; ?>
-            </a>
-            <a class="mru-btn <?php echo ($selected_ym === $current_ym) ? ''mru-btn-gold'' : ''''; ?>" href="<?php echo $build_url([''ym'' => $current_ym]); ?>">
-                <?php echo ($lang === ''hi'') ? ''वर्तमान माह'' : ''Current Month''; ?>
-            </a>
-            <a class="mru-btn" href="<?php echo $build_url([''ym'' => $next_ym]); ?>" <?php if ($idx >= count($months) - 1) echo "disabled"; ?>>
-                <?php echo ($lang === ''hi'') ? ''अगला'' : ''Next''; ?> &rarr;
-            </a>
+            <div class="mru-nav-btns">
+                <a class="mru-btn" href="<?php echo $build_url([''ym'' => $prev_ym]); ?>" <?php if ($idx === 0) echo "disabled"; ?>>
+                    &larr; <?php echo ($lang === ''hi'') ? ''पिछला'' : ''Prev''; ?>
+                </a>
+                <a class="mru-btn <?php echo ($selected_ym === $current_ym) ? ''mru-btn-gold'' : ''''; ?>" href="<?php echo $build_url([''ym'' => $current_ym]); ?>">
+                    <?php echo ($lang === ''hi'') ? ''वर्तमान माह'' : ''Current Month''; ?>
+                </a>
+                <a class="mru-btn" href="<?php echo $build_url([''ym'' => $next_ym]); ?>" <?php if ($idx >= count($months) - 1) echo "disabled"; ?>>
+                    <?php echo ($lang === ''hi'') ? ''अगला'' : ''Next''; ?> &rarr;
+                </a>
+            </div>
         </div>
     </div>
 
@@ -1390,6 +1435,38 @@ if (!function_exists(''mr_final_muhurat_viewer_theme'')) {
 </div>
 
 <script>
+// Year dropdown change
+document.getElementById("mruYear") && document.getElementById("mruYear").addEventListener("change", function() {
+    let p = new URLSearchParams(window.location.search);
+    let selectedYear = this.value;
+    let currentYm = p.get("ym") || "";
+    let targetMonthNum = currentYm ? currentYm.substring(5, 7) : "";
+    
+    let targetYm = "";
+    // 1. Try to stay on the same month in the new year if it exists in month dropdown
+    if (targetMonthNum) {
+        let candidateYm = selectedYear + "-" + targetMonthNum;
+        let monthOption = document.querySelector(''#mruMonth option[value="'' + candidateYm + ''"]'');
+        if (monthOption) {
+            targetYm = candidateYm;
+        }
+    }
+    // 2. Otherwise find the first available month for this year
+    if (!targetYm) {
+        let firstMonthOption = document.querySelector(''#mruMonth option[value^="'' + selectedYear + ''-"]'');
+        if (firstMonthOption) {
+            targetYm = firstMonthOption.value;
+        } else {
+            let opt = this.options[this.selectedIndex];
+            targetYm = (opt && opt.getAttribute("data-default-ym")) || (selectedYear + "-01");
+        }
+    }
+    p.set("ym", targetYm);
+    p.delete("year");
+    sessionStorage.setItem("mru_focus", "mru-results");
+    window.location.search = p.toString();
+});
+
 // Month dropdown change
 document.getElementById("mruMonth") && document.getElementById("mruMonth").addEventListener("change", function() {
     let p = new URLSearchParams(window.location.search);
@@ -1398,8 +1475,8 @@ document.getElementById("mruMonth") && document.getElementById("mruMonth").addEv
     window.location.search = p.toString();
 });
 
-// Smooth scroll retention on language & filter buttons
-document.querySelectorAll(".mru-lang-btn, .mru-year-pill").forEach(function(el) {
+// Smooth scroll retention on language buttons
+document.querySelectorAll(".mru-lang-btn").forEach(function(el) {
     el.addEventListener("click", function() {
         sessionStorage.setItem("mru_focus", "mr-muhurat-container");
     });
