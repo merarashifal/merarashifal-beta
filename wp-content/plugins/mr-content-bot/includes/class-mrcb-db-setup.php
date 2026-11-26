@@ -574,7 +574,7 @@ class MRCB_DB_Setup {
 
         // 2. Scrub existing drafts in mr_content_queue
         if ( $wpdb->get_var( "SHOW TABLES LIKE '{$t_queue}'" ) === $t_queue ) {
-            $fields = [ 'ai_draft', 'ai_draft_humanized', 'ai_draft_tagged', 'admin_draft', 'draft_markdown', 'draft_html' ];
+            $fields = [ 'ai_draft', 'ai_draft_humanized', 'ai_draft_tagged', 'admin_draft' ];
             foreach ( $bad_patterns as $bad ) {
                 $set_parts   = [];
                 $where_parts = [];
