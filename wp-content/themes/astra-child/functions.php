@@ -71,6 +71,15 @@ add_action('template_redirect', function() {
     }
 });
 
+// Suppress default WordPress "Set your password" registration email for frontend/social customer signups
+add_filter('wp_new_user_notification_email', function($email, $user, $blogname) {
+    if (!is_admin() || ($user && in_array('subscriber', (array) $user->roles, true))) {
+        return false;
+    }
+    return $email;
+}, 99, 3);
+remove_action('register_new_user', 'wp_send_new_user_notifications');
+
 /* ==============================================================================
    PERFORMANCE: PRECONNECT, DEFER SCRIPTS, DEQUEUE UNUSED ASSETS & ADSENSE LOADER
    ============================================================================== */

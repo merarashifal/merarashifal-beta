@@ -42,6 +42,10 @@ class MR_Account_UI {
         add_action('login_init', [__CLASS__, 'prevent_wp_login_display'], 1);
         add_action('wp_logout', [__CLASS__, 'on_user_logout']);
 
+        // Suppress default WordPress "Set your password" email for customer and social login signups
+        add_filter('wp_new_user_notification_email', [__CLASS__, 'disable_customer_new_user_email'], 99, 3);
+        remove_action('register_new_user', 'wp_send_new_user_notifications');
+
         // Nextend Social Login redirect filters to preserve and prioritize customer origin service page
         add_filter('google_login_redirect_url', [__CLASS__, 'filter_nsl_redirect'], 99, 2);
         add_filter('google_register_redirect_url', [__CLASS__, 'filter_nsl_redirect'], 99, 2);
@@ -679,6 +683,19 @@ class MR_Account_UI {
     }
 
     /**
+     * Suppress default WordPress "Set your password" registration email for customers and social login users
+     * Customers authenticate via 1-Click Google OAuth and do not use or need a WordPress password.
+     */
+    public static function disable_customer_new_user_email($wp_new_user_notification_email, $user, $blogname) {
+        // Allow notifications if an administrator explicitly creates an editor/admin inside /wp-admin/
+        if (is_admin() && $user && (user_can($user, 'manage_options') || user_can($user, 'edit_posts'))) {
+            return $wp_new_user_notification_email;
+        }
+        // Suppress completely for all customers, social signups, and frontend registrations
+        return false;
+    }
+
+    /**
      * Prevent WordPress Default Login Page from Displaying for Customers
      * Customers are routed to Google OAuth or Account Page, while administrators can access wp-admin
      */
@@ -691,6 +708,26 @@ class MR_Account_UI {
         // 2. CRITICAL: Allow standard WordPress actions (logout, postpass, lostpassword, resetpass, rp, etc.)
         // Must be checked BEFORE any logged-in check because the user is still authenticated when clicking "Log Out"
         $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
+
+        // If a customer/subscriber hits the reset password screen (action=rp, resetpass, lostpassword), redirect them to /my-account/
+        if (in_array($action, ['resetpass', 'rp', 'lostpassword', 'retrievepassword'], true)) {
+            $user_login = isset($_GET['login']) ? sanitize_user($_GET['login']) : '';
+            if (!empty($user_login)) {
+                $check_user = get_user_by('login', $user_login);
+                if ($check_user && !user_can($check_user, 'manage_options') && !user_can($check_user, 'edit_posts')) {
+                    wp_safe_redirect(self::get_account_page_url());
+                    exit;
+                }
+            } elseif (is_user_logged_in() && !current_user_can('manage_options') && !current_user_can('edit_posts')) {
+                wp_safe_redirect(self::get_account_page_url());
+                exit;
+            } elseif (!is_user_logged_in() && empty($user_login)) {
+                // If not an admin trying to reset, bounce to account login
+                wp_safe_redirect(self::get_account_page_url());
+                exit;
+            }
+        }
+
         if (in_array($action, ['logout', 'postpass', 'lostpassword', 'retrievepassword', 'resetpass', 'rp', 'confirmaction'], true)) {
             return;
         }
