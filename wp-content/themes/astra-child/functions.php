@@ -503,7 +503,7 @@ function mr_optimize_seo_titles($title) {
     $title_map = [
         'horoscope' => 'Aaj Ka Rashifal: Today Horoscope (दैनिक राशिफल) - MeraRashifal',
         'dasha' => 'Dasha Calculator: Accurate Vedic Timing | MeraRashifal',
-        'matchmaking-compatibility-check' => 'Kundali Matchmaking: Sun Sign Matching - MeraRashifal',
+        'compatibility-check' => 'Kundali Matchmaking: Sun Sign Matching - MeraRashifal',
         'daily-choghadiya-muhurat' => 'Aaj Ka Choghadiya: Daily Shubh Muhurat - MeraRashifal',
         'year-horoscope' => 'Yearly Horoscope: Accurate Annual Forecast - MeraRashifal',
         'yearly-horoscope-prediction' => 'Yearly Horoscope Predictions (वार्षिक राशिफल) - MeraRashifal',
@@ -562,9 +562,9 @@ add_action('template_redirect', function() {
         exit;
     }
 
-    // 3. Consolidate compatibility: /compatibility-check/ -> /matchmaking-compatibility-check/
-    if ($trimmed_path === '/compatibility-check') {
-        wp_safe_redirect(home_url('/matchmaking-compatibility-check/'), 301);
+    // 3. Consolidate compatibility: /matchmaking-compatibility-check/ -> /compatibility-check/
+    if ($trimmed_path === '/matchmaking-compatibility-check') {
+        wp_safe_redirect(home_url('/compatibility-check/'), 301);
         exit;
     }
 
