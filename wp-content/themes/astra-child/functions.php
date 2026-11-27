@@ -42,6 +42,7 @@ if (!class_exists('MR_Reports_Showcase') && file_exists(WP_PLUGIN_DIR . '/mr-sub
     add_action('init', ['MR_Reports_Showcase', 'init']);
 }
 
+
 /* ==============================================================================
    SECURITY HARDENING: REST API USER ENUMERATION & VERSION CONCEALMENT
    ============================================================================== */
@@ -372,6 +373,16 @@ function mr_sanitize_canonical_url($canonical) {
     if (empty($canonical)) {
         return $canonical;
     }
+
+    $req_uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : '';
+    $req_path = parse_url($req_uri, PHP_URL_PATH) ?: '/';
+
+    // If request is a clean baby names religion or gender route (e.g. /baby-names/hindu/), enforce self-referential canonical
+    if (preg_match('#^/baby-names/(hindu|muslim|christian|sikh)(?:/.*)?$#i', $req_path)) {
+        $clean_canonical = 'https://merarashifal.com' . rtrim($req_path, '/') . '/';
+        return $clean_canonical;
+    }
+
     // Strip query string completely
     $parsed = parse_url($canonical);
     $path = $parsed['path'] ?? '/';
@@ -458,35 +469,156 @@ add_action('wp_head', function() {
     }
 }, 20);
 
-// 5. Dynamic Horoscope & Panchang Metadata Freshness (Never show outdated date)
-add_filter('wpseo_title', function($title) {
+// 5. Dynamic Horoscope, Panchang & Core Page Title Optimization (Strictly Under 60 Chars)
+add_filter('wpseo_title', 'mr_optimize_seo_titles', 999);
+add_filter('pre_get_document_title', 'mr_optimize_seo_titles', 999);
+
+function mr_optimize_seo_titles($title) {
     if (is_admin()) return $title;
 
     $uri = $_SERVER['REQUEST_URI'] ?? '';
+    $path = trim(parse_url($uri, PHP_URL_PATH) ?: '', '/');
     $dt = new DateTime('now', new DateTimeZone('Asia/Kolkata'));
-    $today_en = $dt->format('d F Y');
+    $today_en = $dt->format('d M Y');
 
     if (is_front_page()) {
-        return "आज का राशिफल ({$today_en}) | दैनिक राशिफल, आज का पंचांग & कुंडली | MeraRashifal";
+        return "आज का राशिफल ({$today_en}) | पंचांग & कुंडली - MeraRashifal";
     }
 
     if (strpos($uri, '/panchang') !== false) {
         if (strpos($uri, '/tithi') !== false) {
-            return "आज की तिथि ({$today_en}) | Today Tithi & Shubh Muhurat - MeraRashifal";
+            return "आज की तिथि ({$today_en}) | Shubh Muhurat - MeraRashifal";
         } elseif (strpos($uri, '/rahukaal') !== false) {
-            return "आज का राहुकाल समय ({$today_en}) | Today Rahu Kaal Timing - MeraRashifal";
+            return "आज का राहुकाल समय ({$today_en}) | Timing - MeraRashifal";
         } elseif (strpos($uri, '/nakshatra') !== false) {
-            return "आज का नक्षत्र ({$today_en}) | Today Nakshatra & Charan - MeraRashifal";
+            return "आज का नक्षत्र ({$today_en}) | Nakshatra - MeraRashifal";
         } elseif (strpos($uri, '/choghadiya') !== false) {
-            return "आज का चौघड़िया ({$today_en}) | Day & Night Choghadiya Muhurat - MeraRashifal";
+            return "आज का चौघड़िया ({$today_en}) | Shubh Muhurat - MeraRashifal";
         } elseif (strpos($uri, '/abhijit') !== false) {
-            return "आज का अभिजीत मुहूर्त ({$today_en}) | Abhijit Muhurat Timing - MeraRashifal";
+            return "आज का अभिजीत मुहूर्त ({$today_en}) | Timing - MeraRashifal";
         }
-        return "आज का पंचांग ({$today_en}) | Today Panchang, Tithi, Shubh Muhurat - MeraRashifal";
+        return "आज का पंचांग ({$today_en}) | Daily Tithi & Muhurat - MeraRashifal";
+    }
+
+    $title_map = [
+        'horoscope' => 'Aaj Ka Rashifal: Today Horoscope (दैनिक राशिफल) - MeraRashifal',
+        'dasha' => 'Dasha Calculator: Accurate Vedic Timing | MeraRashifal',
+        'matchmaking-compatibility-check' => 'Kundali Matchmaking: Sun Sign Matching - MeraRashifal',
+        'daily-choghadiya-muhurat' => 'Aaj Ka Choghadiya: Daily Shubh Muhurat - MeraRashifal',
+        'year-horoscope' => 'Yearly Horoscope: Accurate Annual Forecast - MeraRashifal',
+        'yearly-horoscope-prediction' => 'Yearly Horoscope Predictions (वार्षिक राशिफल) - MeraRashifal',
+        'cookie-policy' => 'Cookie Policy | MeraRashifal',
+        'refund-policy' => 'Cancellation & Refund Policy | MeraRashifal',
+        'terms-and-conditions' => 'Terms & Conditions | MeraRashifal',
+        'privacy-policy' => 'Privacy Policy | MeraRashifal',
+    ];
+
+    if (isset($title_map[$path])) {
+        return $title_map[$path];
     }
 
     return $title;
-}, 999);
+}
+
+// 6. Meta Description Overrides for Legal & Static Pages (130-155 Chars)
+add_filter('wpseo_metadesc', 'mr_optimize_seo_descriptions', 999);
+
+function mr_optimize_seo_descriptions($desc) {
+    if (is_admin()) return $desc;
+
+    $path = trim(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?: '', '/');
+
+    $desc_map = [
+        'cookie-policy' => 'Learn how MeraRashifal uses cookies and similar technologies to enhance your browsing experience, analyze site traffic, and personalize astrology services.',
+        'refund-policy' => 'Review the official cancellation and refund policy for personalized horoscope dossiers, astrology reports, and digital consultations on MeraRashifal.',
+        'terms-and-conditions' => 'Read the terms and conditions governing the use of MeraRashifal.com services, astrological consultations, horoscope reports, and online tools.',
+        'privacy-policy' => 'Discover how MeraRashifal collects, protects, and handles your personal information, birth details, and astrological data under the DPDP Act.',
+    ];
+
+    if (isset($desc_map[$path])) {
+        return $desc_map[$path];
+    }
+
+    return $desc;
+}
+
+// 7. 301 Permanent Redirects for Zombie, Draft & Duplicate URLs (Consolidates Link Equity)
+add_action('template_redirect', function() {
+    if (is_admin()) return;
+
+    $uri = $_SERVER['REQUEST_URI'] ?? '';
+    $path = parse_url($uri, PHP_URL_PATH) ?: '';
+    $trimmed_path = rtrim($path, '/');
+
+    // 1. Redirect /newhomepage/ to main homepage
+    if ($trimmed_path === '/newhomepage') {
+        wp_safe_redirect(home_url('/'), 301);
+        exit;
+    }
+
+    // 2. Redirect /reports/landingpage/ to /reports/yearly-horoscope-report/
+    if ($trimmed_path === '/reports/landingpage') {
+        wp_safe_redirect(home_url('/reports/yearly-horoscope-report/'), 301);
+        exit;
+    }
+
+    // 3. Consolidate compatibility: /compatibility-check/ -> /matchmaking-compatibility-check/
+    if ($trimmed_path === '/compatibility-check') {
+        wp_safe_redirect(home_url('/matchmaking-compatibility-check/'), 301);
+        exit;
+    }
+
+    // 4. Consolidate refund policy: /cancellation-and-refund/ -> /refund-policy/
+    if ($trimmed_path === '/cancellation-and-refund') {
+        wp_safe_redirect(home_url('/refund-policy/'), 301);
+        exit;
+    }
+
+    // 5. Consolidate yearly horoscope snapshot report: /yearly-horoscope-short-report/ -> /reports/yearly-horoscope-snapshot-report/
+    if ($trimmed_path === '/yearly-horoscope-short-report') {
+        wp_safe_redirect(home_url('/reports/yearly-horoscope-snapshot-report/'), 301);
+        exit;
+    }
+}, 1);
+
+// 8. Semantic Heading Normalizer: Guarantees Exactly One H1 Tag per Page
+add_filter('the_content', 'mr_normalize_page_headings', 100);
+add_filter('elementor/frontend/the_content', 'mr_normalize_page_headings', 100);
+
+function mr_normalize_page_headings($content) {
+    if (is_admin() || empty($content)) return $content;
+
+    $path = trim(parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH) ?: '', '/');
+
+    // On /panchang/, convert secondary H1 ('📅 Daily Panchang') to H2
+    if ($path === 'panchang') {
+        $content = preg_replace('/<h1\b([^>]*)>(\s*(?:📅\s*)?Daily\s+Panchang\s*)<\/h1>/iu', '<h2$1>$2</h2>', $content);
+    }
+
+    // On /dasha/, convert secondary H1 ('Kundali Dasha Check') to H2
+    if ($path === 'dasha') {
+        $content = preg_replace('/<h1\b([^>]*)>(\s*Kundali\s+Dasha\s+Check\s*)<\/h1>/iu', '<h2$1>$2</h2>', $content);
+    }
+
+    // On remedies page, convert secondary Hindi H1 to H2
+    if (strpos($path, 'remedies') !== false) {
+        $content = preg_replace('/<h1\b([^>]*)>(\s*समस्त\s+जीवन\s+समस्याओं\s+के\s+अचूक\s+समाधान\s*)<\/h1>/iu', '<h2$1>$2</h2>', $content);
+    }
+
+    // On policy pages with duplicate H1s, convert second H1 to H2
+    if ($path === 'refund-policy' || $path === 'cookie-policy') {
+        $count = 0;
+        $content = preg_replace_callback('/<h1\b([^>]*)>(.*?)<\/h1>/is', function($m) use (&$count) {
+            $count++;
+            if ($count > 1) {
+                return '<h2' . $m[1] . '>' . $m[2] . '</h2>';
+            }
+            return $m[0];
+        }, $content);
+    }
+
+    return $content;
+}
 
 /* ==============================================================================
    SOCIAL MEDIA OPEN GRAPH & TWITTER CARD PREVIEW ENGINE

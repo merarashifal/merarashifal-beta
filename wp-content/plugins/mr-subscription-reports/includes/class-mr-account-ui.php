@@ -126,7 +126,7 @@ class MR_Account_UI {
         $page_url = self::get_account_page_url();
         $title    = 'My Astro Account & Vedic Reports Archive | MeraRashifal';
         $desc     = 'Access your personalized Vedic birth chart, 20+ page horoscope PDF reports, saved birth details, and transaction passbook on MeraRashifal.';
-        $img_url  = content_url('/uploads/2025/11/loader.webp');
+        $img_url  = 'https://merarashifal.com/wp-content/themes/astra-child/assets/og-images/og-default-main.jpg';
         ?>
         <!-- MeraRashifal SEO & OpenGraph Meta Parameters -->
         <meta name="description" content="<?php echo esc_attr($desc); ?>" />
@@ -270,98 +270,100 @@ class MR_Account_UI {
             );
         }
 
-        $css_file = dirname(dirname(__FILE__)) . '/assets/css/mr-account.css';
-        $js_file  = dirname(dirname(__FILE__)) . '/assets/js/mr-account.js';
+        if (self::is_account_page()) {
+            $css_file = dirname(dirname(__FILE__)) . '/assets/css/mr-account.css';
+            $js_file  = dirname(dirname(__FILE__)) . '/assets/js/mr-account.js';
 
-        $css_ver = file_exists($css_file) ? filemtime($css_file) : '1.0.0';
-        $js_ver  = file_exists($js_file) ? filemtime($js_file) : '1.0.0';
+            $css_ver = file_exists($css_file) ? filemtime($css_file) : '1.0.0';
+            $js_ver  = file_exists($js_file) ? filemtime($js_file) : '1.0.0';
 
-        wp_enqueue_style(
-            'mr-account-css',
-            plugins_url('assets/css/mr-account.css', dirname(__FILE__)),
-            ['mr-font-awesome', 'mr-brand-fonts'],
-            $css_ver
-        );
+            wp_enqueue_style(
+                'mr-account-css',
+                plugins_url('assets/css/mr-account.css', dirname(__FILE__)),
+                ['mr-font-awesome', 'mr-brand-fonts'],
+                $css_ver
+            );
 
-        $bg_custom_css = "
-            body.mr-account-page-active,
-            body.page-id-7235,
-            body:has(.mr-account-dashboard),
-            .mr-account-page-active #page,
-            .mr-account-page-active .site,
-            .mr-account-page-active .site-content,
-            .mr-account-page-active #primary,
-            .mr-account-page-active #main,
-            .mr-account-page-active .ast-container,
-            .mr-account-page-active .entry-content,
-            .mr-account-page-active .ast-separate-container,
-            .mr-account-page-active .ast-separate-container .ast-article-single,
-            .mr-account-page-active .ast-separate-container .ast-article-post,
-            .mr-account-page-wrapper,
-            .mr-account-dashboard {
-                background-color: #FDF8F1 !important;
-                background: #FDF8F1 !important;
-            }
+            $bg_custom_css = "
+                body.mr-account-page-active,
+                body.page-id-7235,
+                body:has(.mr-account-dashboard),
+                .mr-account-page-active #page,
+                .mr-account-page-active .site,
+                .mr-account-page-active .site-content,
+                .mr-account-page-active #primary,
+                .mr-account-page-active #main,
+                .mr-account-page-active .ast-container,
+                .mr-account-page-active .entry-content,
+                .mr-account-page-active .ast-separate-container,
+                .mr-account-page-active .ast-separate-container .ast-article-single,
+                .mr-account-page-active .ast-separate-container .ast-article-post,
+                .mr-account-page-wrapper,
+                .mr-account-dashboard {
+                    background-color: #FDF8F1 !important;
+                    background: #FDF8F1 !important;
+                }
 
-            /* Prevent theme container horizontal offset & ensure 100% centering on mobile */
-            html, body.mr-account-page-active {
-                overflow-x: hidden !important;
-                max-width: 100% !important;
-            }
-            body.mr-account-page-active #page,
-            body.mr-account-page-active .site-content,
-            body.mr-account-page-active #primary,
-            body.mr-account-page-active #main {
-                width: 100% !important;
-                max-width: 100% !important;
-                padding-left: 0 !important;
-                padding-right: 0 !important;
-                margin-left: 0 !important;
-                margin-right: 0 !important;
-                box-sizing: border-box !important;
-                overflow-x: hidden !important;
-            }
-            body.mr-account-page-active .ast-container,
-            body.mr-account-page-active .entry-content,
-            body.mr-account-page-active .ast-separate-container .ast-article-single,
-            body.mr-account-page-active .elementor-7235,
-            body.mr-account-page-active .elementor-element-aa14421 {
-                padding-left: 0 !important;
-                padding-right: 0 !important;
-                margin-left: auto !important;
-                margin-right: auto !important;
-                width: 100% !important;
-                max-width: 100% !important;
-                box-sizing: border-box !important;
-            }
-        ";
-        wp_add_inline_style('mr-account-css', $bg_custom_css);
+                /* Prevent theme container horizontal offset & ensure 100% centering on mobile */
+                html, body.mr-account-page-active {
+                    overflow-x: hidden !important;
+                    max-width: 100% !important;
+                }
+                body.mr-account-page-active #page,
+                body.mr-account-page-active .site-content,
+                body.mr-account-page-active #primary,
+                body.mr-account-page-active #main {
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    padding-left: 0 !important;
+                    padding-right: 0 !important;
+                    margin-left: 0 !important;
+                    margin-right: 0 !important;
+                    box-sizing: border-box !important;
+                    overflow-x: hidden !important;
+                }
+                body.mr-account-page-active .ast-container,
+                body.mr-account-page-active .entry-content,
+                body.mr-account-page-active .ast-separate-container .ast-article-single,
+                body.mr-account-page-active .elementor-7235,
+                body.mr-account-page-active .elementor-element-aa14421 {
+                    padding-left: 0 !important;
+                    padding-right: 0 !important;
+                    margin-left: auto !important;
+                    margin-right: auto !important;
+                    width: 100% !important;
+                    max-width: 100% !important;
+                    box-sizing: border-box !important;
+                }
+            ";
+            wp_add_inline_style('mr-account-css', $bg_custom_css);
 
-        wp_enqueue_script(
-            'mr-account-js',
-            plugins_url('assets/js/mr-account.js', dirname(__FILE__)),
-            ['jquery'],
-            $js_ver,
-            true
-        );
+            wp_enqueue_script(
+                'mr-account-js',
+                plugins_url('assets/js/mr-account.js', dirname(__FILE__)),
+                ['jquery'],
+                $js_ver,
+                true
+            );
 
-        // Google Maps Places API is loaded on-demand via Snippet #13 when city field is interacted with.
-        // Static enqueue removed to eliminate 394 KB JS overhead on page loads.
+            // Google Maps Places API is loaded on-demand via Snippet #13 when city field is interacted with.
+            // Static enqueue removed to eliminate 394 KB JS overhead on page loads.
 
-        $user_id = get_current_user_id();
-        $account_url = self::get_account_page_url();
-        $loader_url = content_url('/uploads/2025/11/loader.webp');
+            $user_id = get_current_user_id();
+            $account_url = self::get_account_page_url();
+            $loader_url = content_url('/uploads/2025/11/loader.webp');
 
-        wp_localize_script('mr-account-js', 'mr_account_vars', [
-            'ajax_url'     => admin_url('admin-ajax.php'),
-            'nonce'        => wp_create_nonce('mr_account_nonce'),
-            'is_logged_in' => is_user_logged_in(),
-            'account_url'  => $account_url,
-            'loader_url'   => $loader_url,
-            'login_url'    => wp_login_url($account_url),
-            'logout_url'   => wp_logout_url($account_url),
-            'user_id'      => $user_id,
-        ]);
+            wp_localize_script('mr-account-js', 'mr_account_vars', [
+                'ajax_url'     => admin_url('admin-ajax.php'),
+                'nonce'        => wp_create_nonce('mr_account_nonce'),
+                'is_logged_in' => is_user_logged_in(),
+                'account_url'  => $account_url,
+                'loader_url'   => $loader_url,
+                'login_url'    => wp_login_url($account_url),
+                'logout_url'   => wp_logout_url($account_url),
+                'user_id'      => $user_id,
+            ]);
+        }
     }
 
     /**

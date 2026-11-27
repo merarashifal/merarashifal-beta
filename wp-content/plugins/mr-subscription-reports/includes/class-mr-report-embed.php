@@ -47,14 +47,23 @@ class MR_Report_Embed {
             );
         }
 
-        // Enqueue Razorpay Checkout script
-        wp_enqueue_script(
-            'mr-razorpay-checkout',
-            'https://checkout.razorpay.com/v1/checkout.js',
-            [],
-            null,
-            true
-        );
+        // Enqueue Razorpay Checkout script only on report / pricing / embed pages
+        $is_report_context = false;
+        if (!empty($_SERVER['REQUEST_URI']) && (strpos($_SERVER['REQUEST_URI'], '/reports/') !== false || strpos($_SERVER['REQUEST_URI'], '/pricing') !== false)) {
+            $is_report_context = true;
+        } elseif (!empty($GLOBALS['post']) && (has_shortcode($GLOBALS['post']->post_content, 'mr_report_embed') || has_shortcode($GLOBALS['post']->post_content, 'mr_report_form') || has_shortcode($GLOBALS['post']->post_content, 'mr_embed_report'))) {
+            $is_report_context = true;
+        }
+
+        if ($is_report_context) {
+            wp_enqueue_script(
+                'mr-razorpay-checkout',
+                'https://checkout.razorpay.com/v1/checkout.js',
+                [],
+                null,
+                true
+            );
+        }
 
         // Google Maps Places API is loaded on-demand via Snippet #13 when city field is interacted with.
         // Static enqueue removed to eliminate 394 KB JS overhead on page loads.

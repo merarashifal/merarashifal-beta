@@ -148,6 +148,17 @@ class MR_Baby_SEO_Rewrites
         $char     = strtolower(trim((string)get_query_var('alphabet')));
         $name     = strtolower(trim((string)get_query_var('baby_name')));
 
+        if (empty($religion) && !empty($_SERVER['REQUEST_URI'])) {
+            if (preg_match('#/baby-names/(hindu|muslim|christian|sikh)(?:/|$)#i', $_SERVER['REQUEST_URI'], $rm)) {
+                $religion = strtolower($rm[1]);
+            }
+        }
+        if (empty($gender) && !empty($_SERVER['REQUEST_URI'])) {
+            if (preg_match('#/(boy|girl)(?:/|$)#i', $_SERVER['REQUEST_URI'], $gm)) {
+                $gender = strtolower($gm[1]);
+            }
+        }
+
         // Detail Page: /baby-names/{char}/{gender}/{name}/
         if (!empty($name) && !empty($gender) && !empty($char)) {
             return home_url("/baby-names/{$char}/{$gender}/{$name}/");
@@ -197,6 +208,17 @@ class MR_Baby_SEO_Rewrites
         $gender   = strtolower(trim((string)get_query_var('gender')));
         $char     = strtoupper(trim((string)get_query_var('alphabet')));
 
+        if (empty($religion) && !empty($_SERVER['REQUEST_URI'])) {
+            if (preg_match('#/baby-names/(hindu|muslim|christian|sikh)(?:/|$)#i', $_SERVER['REQUEST_URI'], $rm)) {
+                $religion = strtolower($rm[1]);
+            }
+        }
+        if (empty($gender) && !empty($_SERVER['REQUEST_URI'])) {
+            if (preg_match('#/(boy|girl)(?:/|$)#i', $_SERVER['REQUEST_URI'], $gm)) {
+                $gender = strtolower($gm[1]);
+            }
+        }
+
         if (!empty($religion) && in_array($religion, $this->religions)) {
             $rel_uc = ucfirst($religion);
             $gen_uc = !empty($gender) ? ucfirst($gender) : '';
@@ -207,7 +229,7 @@ class MR_Baby_SEO_Rewrites
             if (!empty($gen_uc)) {
                 return "{$rel_uc} Baby {$gen_uc} Names (A-Z) | Modern & Traditional - MeraRashifal";
             }
-            return "{$rel_uc} Baby Names (Boy & Girl) | Vedic, Modern & Classic - MeraRashifal";
+            return "{$rel_uc} Baby Names (Boy & Girl) | Auspicious Vedic & Modern - MeraRashifal";
         }
 
         return $title;
@@ -224,6 +246,17 @@ class MR_Baby_SEO_Rewrites
 
         $religion = strtolower(trim((string)get_query_var('religion')));
         $gender   = strtolower(trim((string)get_query_var('gender')));
+
+        if (empty($religion) && !empty($_SERVER['REQUEST_URI'])) {
+            if (preg_match('#/baby-names/(hindu|muslim|christian|sikh)(?:/|$)#i', $_SERVER['REQUEST_URI'], $rm)) {
+                $religion = strtolower($rm[1]);
+            }
+        }
+        if (empty($gender) && !empty($_SERVER['REQUEST_URI'])) {
+            if (preg_match('#/(boy|girl)(?:/|$)#i', $_SERVER['REQUEST_URI'], $gm)) {
+                $gender = strtolower($gm[1]);
+            }
+        }
 
         if (!empty($religion) && in_array($religion, $this->religions)) {
             $rel_uc = ucfirst($religion);
