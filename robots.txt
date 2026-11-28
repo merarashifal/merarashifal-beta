@@ -1,3 +1,9 @@
+# ==============================================================================
+# MERARASHIFAL.COM - ROBOTS.TXT
+# Optimized for Web Indexing, Crawl Budget Protection & AI Search Visibility
+# ==============================================================================
+
+# Standard Web Crawlers (Googlebot, Bingbot, DuckDuckBot, etc.)
 User-agent: *
 Disallow: /wp-admin/
 Allow: /wp-admin/admin-ajax.php
@@ -10,12 +16,12 @@ Allow: /*.jpeg*
 Allow: /*.webp*
 Allow: /*.svg*
 
-# Block Internal Search & Dynamic Query Search
+# Block Internal Search Queries
 Disallow: /?s=
 Disallow: /search/
 Disallow: /baby-names/search/
 
-# Block Crawl Waste from Parameter URLs (Fixes 274k+ Crawled Not Indexed URLs)
+# Block Crawl Waste from Parameter URLs (Crawl Budget Protection)
 Disallow: /*?*religion=*
 Disallow: /*?*f_year=*
 Disallow: /*?*f_month=*
@@ -28,5 +34,52 @@ Disallow: /*?*gender=*
 Disallow: /*?*order=*
 Disallow: /*?*orderby=*
 
-# XML Sitemap Index
+# ==============================================================================
+# AI SEARCH ENGINES & CONVERSATIONAL CITATION BOTS (ALLOWED)
+# Allows ChatGPT, Perplexity, Claude, and Apple to cite MeraRashifal
+# ==============================================================================
+
+# OpenAI Search & Realtime Browsing (ChatGPT Search)
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+Allow: /
+Disallow: /wp-admin/
+Disallow: /*?*religion=*
+Disallow: /*?*gender=*
+
+# Perplexity AI (Direct Answers & Citations)
+User-agent: PerplexityBot
+Allow: /
+Disallow: /wp-admin/
+Disallow: /*?*religion=*
+Disallow: /*?*gender=*
+
+# Anthropic Claude Search
+User-agent: ClaudeBot
+User-agent: anthropic-ai
+Allow: /
+Disallow: /wp-admin/
+Disallow: /*?*religion=*
+Disallow: /*?*gender=*
+
+# Apple Intelligence & Siri Suggestions
+User-agent: Applebot
+User-agent: Applebot-Extended
+Allow: /
+Disallow: /wp-admin/
+
+# ==============================================================================
+# AGGRESSIVE SCRAPERS & MODEL TRAINING HARVESTERS (BLOCKED)
+# Blocks resource-draining bots that don't provide search citations
+# ==============================================================================
+User-agent: Bytespider
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+# ==============================================================================
+# XML SITEMAPS
+# ==============================================================================
+Sitemap: https://merarashifal.com/sitemap_index.xml
 Sitemap: https://merarashifal.com/sitemap.xml
