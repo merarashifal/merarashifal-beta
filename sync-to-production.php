@@ -399,6 +399,7 @@ $authorized = $is_admin || $token_valid;
             'check-integrity.php',
             'audit-google-hits.php',
             'robots.txt',
+            'llms.txt',
         ];
 
         $ignored_patterns = [
